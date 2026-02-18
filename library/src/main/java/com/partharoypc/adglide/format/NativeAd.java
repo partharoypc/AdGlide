@@ -530,7 +530,9 @@ public class NativeAd {
                                     NativeAdDetails nativeAd = ads.get(0);
                                     startappNativeTitle.setText(nativeAd.getTitle());
                                     startappNativeDescription.setText(nativeAd.getDescription());
-                                    if (nativeAd.getImageBitmap() != null) {
+                                    if (nativeAd.getSecondaryImageBitmap() != null) {
+                                        startappNativeIcon.setImageBitmap(nativeAd.getSecondaryImageBitmap());
+                                    } else if (nativeAd.getImageBitmap() != null) {
                                         startappNativeIcon.setImageBitmap(nativeAd.getImageBitmap());
                                     }
                                     if (nativeAd.getImageBitmap() != null) {
@@ -590,8 +592,12 @@ public class NativeAd {
                                             ((TextView) nativeAdView.getBodyView()).setText(googleNativeAd.getBody());
                                             ((Button) nativeAdView.getCallToActionView())
                                                     .setText(googleNativeAd.getCallToAction());
-                                            ((ImageView) nativeAdView.getIconView())
-                                                    .setImageDrawable(googleNativeAd.getIcon().getDrawable());
+                                            if (googleNativeAd.getIcon() != null) {
+                                                ((ImageView) nativeAdView.getIconView())
+                                                        .setImageDrawable(googleNativeAd.getIcon().getDrawable());
+                                            } else {
+                                                nativeAdView.getIconView().setVisibility(View.GONE);
+                                            }
 
                                             wortiseNativeAd.addView(nativeAdView);
                                             wortiseNativeAd.setVisibility(View.VISIBLE);
@@ -878,6 +884,8 @@ public class NativeAd {
 
                                 @Override
                                 public void onNativeAdLoadFailed(String adUnitId, MaxError error) {
+                                    applovinNativeAd.setVisibility(View.GONE);
+                                    nativeAdViewContainer.setVisibility(View.GONE);
                                 }
 
                                 @Override
@@ -934,7 +942,9 @@ public class NativeAd {
                                     NativeAdDetails nativeAd = ads.get(0);
                                     startappNativeTitle.setText(nativeAd.getTitle());
                                     startappNativeDescription.setText(nativeAd.getDescription());
-                                    if (nativeAd.getImageBitmap() != null) {
+                                    if (nativeAd.getSecondaryImageBitmap() != null) {
+                                        startappNativeIcon.setImageBitmap(nativeAd.getSecondaryImageBitmap());
+                                    } else if (nativeAd.getImageBitmap() != null) {
                                         startappNativeIcon.setImageBitmap(nativeAd.getImageBitmap());
                                     }
                                     if (nativeAd.getImageBitmap() != null) {
@@ -949,6 +959,8 @@ public class NativeAd {
 
                             @Override
                             public void onFailedToReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
+                                startappNativeAd.setVisibility(View.GONE);
+                                nativeAdViewContainer.setVisibility(View.GONE);
                             }
                         });
                         break;
@@ -991,8 +1003,12 @@ public class NativeAd {
                                             ((TextView) nativeAdView.getBodyView()).setText(googleNativeAd.getBody());
                                             ((Button) nativeAdView.getCallToActionView())
                                                     .setText(googleNativeAd.getCallToAction());
-                                            ((ImageView) nativeAdView.getIconView())
-                                                    .setImageDrawable(googleNativeAd.getIcon().getDrawable());
+                                            if (googleNativeAd.getIcon() != null) {
+                                                ((ImageView) nativeAdView.getIconView())
+                                                        .setImageDrawable(googleNativeAd.getIcon().getDrawable());
+                                            } else {
+                                                nativeAdView.getIconView().setVisibility(View.GONE);
+                                            }
                                             wortiseNativeAd.addView(nativeAdView);
                                             wortiseNativeAd.setVisibility(View.VISIBLE);
                                             nativeAdViewContainer.setVisibility(View.VISIBLE);
@@ -1001,6 +1017,8 @@ public class NativeAd {
                                         @Override
                                         public void onNativeFailed(@NonNull GoogleNativeAd googleNativeAd,
                                                 @NonNull com.wortise.ads.AdError adError) {
+                                            wortiseNativeAd.setVisibility(View.GONE);
+                                            nativeAdViewContainer.setVisibility(View.GONE);
                                         }
                                     });
                             googleNativeAd.load();

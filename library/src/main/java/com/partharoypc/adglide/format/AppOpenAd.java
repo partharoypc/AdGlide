@@ -6,6 +6,7 @@ import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_ADMOB;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_AD_MANAGER;
+import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.GOOGLE_AD_MANAGER;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
@@ -119,8 +120,11 @@ public class AppOpenAd {
     public void onStartLifecycleObserver() {
         if (placementStatus) {
             if (adStatus) {
+                if (currentActivity == null)
+                    return;
                 switch (adNetwork) {
                     case ADMOB:
+                    case FAN_BIDDING_ADMOB:
                         if (!adMobAppOpenId.equals("0")) {
                             if (!currentActivity.getIntent().hasExtra("unique_id")) {
                                 appOpenAdMob.showAdIfAvailable(currentActivity, adMobAppOpenId);
@@ -128,6 +132,7 @@ public class AppOpenAd {
                         }
                         break;
                     case GOOGLE_AD_MANAGER:
+                    case FAN_BIDDING_AD_MANAGER:
                         if (!adManagerAppOpenId.equals("0")) {
                             if (!currentActivity.getIntent().hasExtra("unique_id")) {
                                 appOpenAdManager.showAdIfAvailable(currentActivity, adManagerAppOpenId);
@@ -136,6 +141,7 @@ public class AppOpenAd {
                         break;
                     case APPLOVIN:
                     case APPLOVIN_MAX:
+                    case FAN_BIDDING_APPLOVIN_MAX:
                         if (!applovinAppOpenId.equals("0")) {
                             if (!currentActivity.getIntent().hasExtra("unique_id")) {
                                 appOpenAdAppLovin.showAdIfAvailable(currentActivity, applovinAppOpenId);
@@ -160,6 +166,7 @@ public class AppOpenAd {
             if (adStatus) {
                 switch (adNetwork) {
                     case ADMOB:
+                    case FAN_BIDDING_ADMOB:
                         if (!adMobAppOpenId.equals("0")) {
                             if (!appOpenAdMob.isShowingAd()) {
                                 currentActivity = activity;
@@ -167,6 +174,7 @@ public class AppOpenAd {
                         }
                         break;
                     case GOOGLE_AD_MANAGER:
+                    case FAN_BIDDING_AD_MANAGER:
                         if (!adManagerAppOpenId.equals("0")) {
                             if (!appOpenAdManager.isShowingAd()) {
                                 currentActivity = activity;
@@ -175,6 +183,7 @@ public class AppOpenAd {
                         break;
                     case APPLOVIN:
                     case APPLOVIN_MAX:
+                    case FAN_BIDDING_APPLOVIN_MAX:
                         if (!applovinAppOpenId.equals("0")) {
                             if (!appOpenAdAppLovin.isShowingAd()) {
                                 currentActivity = activity;
@@ -197,6 +206,7 @@ public class AppOpenAd {
         if (adStatus && placementStatus) {
             switch (adNetwork) {
                 case ADMOB:
+                case FAN_BIDDING_ADMOB:
                     if (!adMobAppOpenId.equals("0")) {
                         showAdIfAvailable(activity, onShowAdCompleteListener);
                     } else {
@@ -204,6 +214,7 @@ public class AppOpenAd {
                     }
                     break;
                 case GOOGLE_AD_MANAGER:
+                case FAN_BIDDING_AD_MANAGER:
                     if (!adManagerAppOpenId.equals("0")) {
                         showAdIfAvailable(activity, onShowAdCompleteListener);
                     } else {
@@ -212,6 +223,7 @@ public class AppOpenAd {
                     break;
                 case APPLOVIN:
                 case APPLOVIN_MAX:
+                case FAN_BIDDING_APPLOVIN_MAX:
                     if (!applovinAppOpenId.equals("0")) {
                         showAdIfAvailable(activity, onShowAdCompleteListener);
                     } else {
@@ -241,17 +253,20 @@ public class AppOpenAd {
             if (adStatus) {
                 switch (adNetwork) {
                     case ADMOB:
+                    case FAN_BIDDING_ADMOB:
                         if (!adMobAppOpenId.equals("0")) {
                             appOpenAdMob.showAdIfAvailable(activity, adMobAppOpenId, onShowAdCompleteListener);
                         }
                         break;
                     case GOOGLE_AD_MANAGER:
+                    case FAN_BIDDING_AD_MANAGER:
                         if (!adManagerAppOpenId.equals("0")) {
                             appOpenAdManager.showAdIfAvailable(activity, adManagerAppOpenId, onShowAdCompleteListener);
                         }
                         break;
                     case APPLOVIN:
                     case APPLOVIN_MAX:
+                    case FAN_BIDDING_APPLOVIN_MAX:
                         if (!applovinAppOpenId.equals("0")) {
                             appOpenAdAppLovin.showAdIfAvailable(activity, applovinAppOpenId, onShowAdCompleteListener);
                         }
@@ -571,7 +586,7 @@ public class AppOpenAd {
                                     @Override
                                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                                         appOpenAd = null;
-                                        showBackupAppOpenAd(onShowAdCompleteListener);
+                                        onShowAdCompleteListener.onShowAdComplete();
                                         Log.d(TAG,
                                                 "[" + backupAdNetwork + "] "
                                                         + "[on start] [backup] failed to load app open ad: "
@@ -598,7 +613,7 @@ public class AppOpenAd {
                                     @Override
                                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                                         appOpenAd = null;
-                                        showBackupAppOpenAd(onShowAdCompleteListener);
+                                        onShowAdCompleteListener.onShowAdComplete();
                                         Log.d(TAG,
                                                 "[" + backupAdNetwork + "] "
                                                         + "[on start] [backup] failed to load app open ad: "
@@ -676,7 +691,6 @@ public class AppOpenAd {
                                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                                         appOpenAd = null;
                                         isAppOpenAdLoaded = false;
-                                        loadBackupAppOpenAd();
                                         Log.d(TAG,
                                                 "[" + backupAdNetwork + "] "
                                                         + "[on resume] [backup] failed to load app open ad : "
@@ -704,7 +718,6 @@ public class AppOpenAd {
                                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                                         appOpenAd = null;
                                         isAppOpenAdLoaded = false;
-                                        loadBackupAppOpenAd();
                                         Log.d(TAG,
                                                 "[" + backupAdNetwork + "] "
                                                         + "[on resume] [backup] failed to load app open ad : "
