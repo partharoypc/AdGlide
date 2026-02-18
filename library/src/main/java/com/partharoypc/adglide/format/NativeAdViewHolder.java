@@ -121,7 +121,7 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
 
     public void loadNativeAd(Context context, String adStatus, int placementStatus, String adNetwork,
             String backupAdNetwork, String adMobNativeId, String adManagerNativeId, String fanNativeId,
-            String appLovinNativeId, String appLovinDiscMrecZoneId, String wortiseNativeId, String alienAdsNativeId,
+            String appLovinNativeId, String appLovinDiscMrecZoneId, String wortiseNativeId,
             boolean darkTheme, boolean legacyGDPR, String nativeAdStyle, int nativeBackgroundLight,
             int nativeBackgroundDark) {
         if (adStatus.equals(AD_STATUS_ON)) {
@@ -362,7 +362,7 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
 
     public void loadBackupNativeAd(Context context, String adStatus, int placementStatus, String backupAdNetwork,
             String adMobNativeId, String adManagerNativeId, String fanNativeId, String appLovinNativeId,
-            String appLovinDiscMrecZoneId, String wortiseNativeId, String alienAdsNativeId, boolean darkTheme,
+            String appLovinDiscMrecZoneId, String wortiseNativeId, boolean darkTheme,
             boolean legacyGDPR, String nativeAdStyle, int nativeBackgroundLight, int nativeBackgroundDark) {
         if (adStatus.equals(AD_STATUS_ON)) {
             if (placementStatus != 0) {

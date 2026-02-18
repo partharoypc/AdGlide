@@ -2,11 +2,20 @@ package com.partharoypc.adglide.format;
 
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
+import static com.partharoypc.adglide.util.Constant.APPLOVIN;
+import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
+import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.FACEBOOK;
 import static com.partharoypc.adglide.util.Constant.FAN;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_ADMOB;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_AD_MANAGER;
 import static com.partharoypc.adglide.util.Constant.GOOGLE_AD_MANAGER;
+import static com.partharoypc.adglide.util.Constant.IRONSOURCE;
+import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_IRONSOURCE;
+import static com.partharoypc.adglide.util.Constant.NONE;
+import static com.partharoypc.adglide.util.Constant.STARTAPP;
+import static com.partharoypc.adglide.util.Constant.UNITY;
+import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import android.app.Activity;
 import android.graphics.drawable.ColorDrawable;
@@ -39,13 +48,22 @@ import com.partharoypc.adglide.util.NativeTemplateStyle;
 import com.partharoypc.adglide.util.TemplateView;
 import com.partharoypc.adglide.util.Tools;
 
+import com.applovin.mediation.MaxAd;
+import com.applovin.mediation.MaxError;
+import com.applovin.mediation.nativeAds.MaxNativeAdListener;
+import com.applovin.mediation.nativeAds.MaxNativeAdLoader;
+import com.applovin.mediation.nativeAds.MaxNativeAdView;
+import com.applovin.mediation.nativeAds.MaxNativeAdViewBinder;
+import com.applovin.sdk.AppLovinSdkUtils;
+import com.startapp.sdk.ads.nativead.NativeAdDetails;
+import com.startapp.sdk.ads.nativead.NativeAdPreferences;
+import com.startapp.sdk.ads.nativead.StartAppNativeAd;
+import com.startapp.sdk.adsbase.adlisteners.AdEventListener;
+import com.wortise.ads.nativead.GoogleNativeAd;
+
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Handles loading and displaying native ads from multiple ad networks.
- * Uses a Builder pattern for configuration.
- */
 public class NativeAd {
 
     public static class Builder {
@@ -74,9 +92,14 @@ public class NativeAd {
         private LinearLayout startappNativeBackground;
 
         private FrameLayout applovinNativeAd;
+        private MaxNativeAdLoader nativeAdLoader;
+        private MaxAd maxNativeAd;
 
         private LinearLayout appLovinDiscoveryMrecAd;
         private FrameLayout wortiseNativeAd;
+        private GoogleNativeAd googleNativeAd;
+
+        private StartAppNativeAd startAppNativeAdObject;
 
         private String adStatus = "";
         private String adNetwork = "";
@@ -87,7 +110,6 @@ public class NativeAd {
         private String appLovinNativeId = "";
         private String appLovinDiscMrecZoneId = "";
         private String wortiseNativeId = "";
-        private String alienAdsNativeId = "";
         private int placementStatus = 1;
         private boolean darkTheme = false;
         private boolean legacyGDPR = false;
@@ -162,11 +184,6 @@ public class NativeAd {
 
         public Builder setWortiseNativeId(String wortiseNativeId) {
             this.wortiseNativeId = wortiseNativeId;
-            return this;
-        }
-
-        public Builder setAlienAdsNativeId(String alienAdsNativeId) {
-            this.alienAdsNativeId = alienAdsNativeId;
             return this;
         }
 
@@ -325,8 +342,6 @@ public class NativeAd {
                                 if (fanNativeAd != ad) {
                                     return;
                                 }
-                                // Inflate Native Ad into Container
-                                // inflateAd(nativeAd);
                                 fanNativeAd.unregisterView();
                                 // Add the Ad view into the ad container.
                                 LayoutInflater inflater = LayoutInflater.from(activity);
@@ -433,6 +448,166 @@ public class NativeAd {
                         com.facebook.ads.NativeAd.NativeLoadAdConfig loadAdConfig = fanNativeAd.buildLoadAdConfig()
                                 .withAdListener(nativeAdListener).build();
                         fanNativeAd.loadAd(loadAdConfig);
+                        break;
+
+                    case APPLOVIN:
+                    case APPLOVIN_MAX:
+                    case FAN_BIDDING_APPLOVIN_MAX:
+                        if (applovinNativeAd.getVisibility() != View.VISIBLE) {
+                            nativeAdLoader = new MaxNativeAdLoader(appLovinNativeId, activity);
+                            nativeAdLoader.setNativeAdListener(new MaxNativeAdListener() {
+                                @Override
+                                public void onNativeAdLoaded(MaxNativeAdView nativeAdView, MaxAd ad) {
+                                    if (maxNativeAd != null) {
+                                        nativeAdLoader.destroy(maxNativeAd);
+                                    }
+                                    maxNativeAd = ad;
+                                    applovinNativeAd.removeAllViews();
+                                    applovinNativeAd.addView(nativeAdView);
+                                    applovinNativeAd.setVisibility(View.VISIBLE);
+                                    nativeAdViewContainer.setVisibility(View.VISIBLE);
+                                }
+
+                                @Override
+                                public void onNativeAdLoadFailed(String adUnitId, MaxError error) {
+                                    loadBackupNativeAd();
+                                }
+
+                                @Override
+                                public void onNativeAdClicked(MaxAd ad) {
+                                }
+
+                                @Override
+                                public void onNativeAdExpired(MaxAd ad) {
+                                    nativeAdLoader.loadAd();
+                                }
+                            });
+
+                            int layoutId = R.layout.gnt_applovin_medium_template_view;
+                            switch (nativeAdStyle) {
+                                case Constant.STYLE_NEWS:
+                                    layoutId = R.layout.gnt_applovin_news_template_view;
+                                    break;
+                                case Constant.STYLE_VIDEO_SMALL:
+                                    layoutId = R.layout.gnt_applovin_video_small_template_view;
+                                    break;
+                                case Constant.STYLE_VIDEO_LARGE:
+                                    layoutId = R.layout.gnt_applovin_video_large_template_view;
+                                    break;
+                                case Constant.STYLE_RADIO:
+                                case Constant.STYLE_SMALL:
+                                    layoutId = R.layout.gnt_applovin_radio_template_view;
+                                    break;
+                            }
+
+                            MaxNativeAdViewBinder binder = new MaxNativeAdViewBinder.Builder(layoutId)
+                                    .setTitleTextViewId(R.id.native_ad_title)
+                                    .setBodyTextViewId(R.id.native_ad_body)
+                                    .setAdvertiserTextViewId(R.id.native_ad_sponsored_label)
+                                    .setIconImageViewId(R.id.native_ad_icon)
+                                    .setMediaContentViewGroupId(R.id.native_ad_media)
+                                    .setOptionsContentViewGroupId(R.id.ad_choices_container)
+                                    .setCallToActionButtonId(R.id.native_ad_call_to_action)
+                                    .build();
+                            nativeAdLoader.setNativeAdViewBinder(binder);
+                            nativeAdLoader.loadAd();
+                        } else {
+                            Log.d(TAG, "AppLovin Native Ad has been loaded");
+                        }
+                        break;
+
+                    case STARTAPP:
+                        startAppNativeAdObject = new StartAppNativeAd(activity);
+                        StartAppNativeAd.NativeAdPreferences nativePrefs = new StartAppNativeAd.NativeAdPreferences()
+                                .setAdsNumber(1)
+                                .setAutoBitmapDownload(true)
+                                .setPrimaryImageSize(2);
+                        startAppNativeAdObject.loadAd(nativePrefs, new AdEventListener() {
+                            @Override
+                            public void onReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
+                                ArrayList<NativeAdDetails> ads = startAppNativeAdObject.getNativeAds();
+                                if (ads.size() > 0) {
+                                    NativeAdDetails nativeAd = ads.get(0);
+                                    startappNativeTitle.setText(nativeAd.getTitle());
+                                    startappNativeDescription.setText(nativeAd.getDescription());
+                                    if (nativeAd.getImageBitmap() != null) {
+                                        startappNativeIcon.setImageBitmap(nativeAd.getImageBitmap());
+                                    }
+                                    if (nativeAd.getImageBitmap() != null) {
+                                        startappNativeImage.setImageBitmap(nativeAd.getImageBitmap());
+                                    }
+                                    startappNativeButton.setText(nativeAd.isApp() ? "Install" : "Open");
+                                    nativeAd.registerViewForInteraction(startappNativeAd);
+
+                                    startappNativeAd.setVisibility(View.VISIBLE);
+                                    nativeAdViewContainer.setVisibility(View.VISIBLE);
+                                }
+                            }
+
+                            @Override
+                            public void onFailedToReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
+                                loadBackupNativeAd();
+                            }
+                        });
+                        break;
+
+                    case WORTISE:
+                        if (wortiseNativeAd.getVisibility() != View.VISIBLE) {
+                            googleNativeAd = new GoogleNativeAd(activity, wortiseNativeId,
+                                    new GoogleNativeAd.Listener() {
+                                        @Override
+                                        public void onNativeClicked(@NonNull GoogleNativeAd googleNativeAd) {
+                                        }
+
+                                        @Override
+                                        public void onNativeImpression(@NonNull GoogleNativeAd googleNativeAd) {
+                                        }
+
+                                        @Override
+                                        public void onNativeLoaded(@NonNull GoogleNativeAd googleNativeAd) {
+                                            wortiseNativeAd.removeAllViews();
+                                            int layoutId = R.layout.gnt_wortise_medium_template_view;
+                                            switch (nativeAdStyle) {
+                                                case Constant.STYLE_NEWS:
+                                                    layoutId = R.layout.gnt_wortise_news_template_view;
+                                                    break;
+                                                case Constant.STYLE_VIDEO_SMALL:
+                                                    layoutId = R.layout.gnt_wortise_video_small_template_view;
+                                                    break;
+                                                case Constant.STYLE_VIDEO_LARGE:
+                                                    layoutId = R.layout.gnt_wortise_video_large_template_view;
+                                                    break;
+                                                case Constant.STYLE_RADIO:
+                                                case Constant.STYLE_SMALL:
+                                                    layoutId = R.layout.gnt_wortise_radio_template_view;
+                                                    break;
+                                            }
+                                            com.google.android.gms.ads.nativead.NativeAdView nativeAdView = (com.google.android.gms.ads.nativead.NativeAdView) LayoutInflater
+                                                    .from(activity).inflate(layoutId, null);
+
+                                            ((TextView) nativeAdView.getHeadlineView())
+                                                    .setText(googleNativeAd.getHeadline());
+                                            ((TextView) nativeAdView.getBodyView()).setText(googleNativeAd.getBody());
+                                            ((Button) nativeAdView.getCallToActionView())
+                                                    .setText(googleNativeAd.getCallToAction());
+                                            ((ImageView) nativeAdView.getIconView())
+                                                    .setImageDrawable(googleNativeAd.getIcon().getDrawable());
+
+                                            wortiseNativeAd.addView(nativeAdView);
+                                            wortiseNativeAd.setVisibility(View.VISIBLE);
+                                            nativeAdViewContainer.setVisibility(View.VISIBLE);
+                                        }
+
+                                        @Override
+                                        public void onNativeFailed(@NonNull GoogleNativeAd googleNativeAd,
+                                                @NonNull com.wortise.ads.AdError adError) {
+                                            loadBackupNativeAd();
+                                        }
+                                    });
+                            googleNativeAd.load();
+                        } else {
+                            Log.d(TAG, "Wortise Native Ad has been loaded");
+                        }
                         break;
 
                     default:
@@ -683,6 +858,155 @@ public class NativeAd {
                         fanNativeAd.loadAd(loadAdConfig);
                         break;
 
+                    case APPLOVIN:
+                    case APPLOVIN_MAX:
+                    case FAN_BIDDING_APPLOVIN_MAX:
+                        if (applovinNativeAd.getVisibility() != View.VISIBLE) {
+                            nativeAdLoader = new MaxNativeAdLoader(appLovinNativeId, activity);
+                            nativeAdLoader.setNativeAdListener(new MaxNativeAdListener() {
+                                @Override
+                                public void onNativeAdLoaded(MaxNativeAdView nativeAdView, MaxAd ad) {
+                                    if (maxNativeAd != null) {
+                                        nativeAdLoader.destroy(maxNativeAd);
+                                    }
+                                    maxNativeAd = ad;
+                                    applovinNativeAd.removeAllViews();
+                                    applovinNativeAd.addView(nativeAdView);
+                                    applovinNativeAd.setVisibility(View.VISIBLE);
+                                    nativeAdViewContainer.setVisibility(View.VISIBLE);
+                                }
+
+                                @Override
+                                public void onNativeAdLoadFailed(String adUnitId, MaxError error) {
+                                }
+
+                                @Override
+                                public void onNativeAdClicked(MaxAd ad) {
+                                }
+
+                                @Override
+                                public void onNativeAdExpired(MaxAd ad) {
+                                    nativeAdLoader.loadAd();
+                                }
+                            });
+
+                            int layoutId = R.layout.gnt_applovin_medium_template_view;
+                            switch (nativeAdStyle) {
+                                case Constant.STYLE_NEWS:
+                                    layoutId = R.layout.gnt_applovin_news_template_view;
+                                    break;
+                                case Constant.STYLE_VIDEO_SMALL:
+                                    layoutId = R.layout.gnt_applovin_video_small_template_view;
+                                    break;
+                                case Constant.STYLE_VIDEO_LARGE:
+                                    layoutId = R.layout.gnt_applovin_video_large_template_view;
+                                    break;
+                                case Constant.STYLE_RADIO:
+                                case Constant.STYLE_SMALL:
+                                    layoutId = R.layout.gnt_applovin_radio_template_view;
+                                    break;
+                            }
+                            MaxNativeAdViewBinder binder = new MaxNativeAdViewBinder.Builder(layoutId)
+                                    .setTitleTextViewId(R.id.native_ad_title)
+                                    .setBodyTextViewId(R.id.native_ad_body)
+                                    .setAdvertiserTextViewId(R.id.native_ad_sponsored_label)
+                                    .setIconImageViewId(R.id.native_ad_icon)
+                                    .setMediaContentViewGroupId(R.id.native_ad_media)
+                                    .setOptionsContentViewGroupId(R.id.ad_choices_container)
+                                    .setCallToActionButtonId(R.id.native_ad_call_to_action)
+                                    .build();
+                            nativeAdLoader.setNativeAdViewBinder(binder);
+                            nativeAdLoader.loadAd();
+                        }
+                        break;
+
+                    case STARTAPP:
+                        startAppNativeAdObject = new StartAppNativeAd(activity);
+                        StartAppNativeAd.NativeAdPreferences nativePrefs = new StartAppNativeAd.NativeAdPreferences()
+                                .setAdsNumber(1)
+                                .setAutoBitmapDownload(true)
+                                .setPrimaryImageSize(2);
+                        startAppNativeAdObject.loadAd(nativePrefs, new AdEventListener() {
+                            @Override
+                            public void onReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
+                                ArrayList<NativeAdDetails> ads = startAppNativeAdObject.getNativeAds();
+                                if (ads.size() > 0) {
+                                    NativeAdDetails nativeAd = ads.get(0);
+                                    startappNativeTitle.setText(nativeAd.getTitle());
+                                    startappNativeDescription.setText(nativeAd.getDescription());
+                                    if (nativeAd.getImageBitmap() != null) {
+                                        startappNativeIcon.setImageBitmap(nativeAd.getImageBitmap());
+                                    }
+                                    if (nativeAd.getImageBitmap() != null) {
+                                        startappNativeImage.setImageBitmap(nativeAd.getImageBitmap());
+                                    }
+                                    startappNativeButton.setText(nativeAd.isApp() ? "Install" : "Open");
+                                    nativeAd.registerViewForInteraction(startappNativeAd);
+                                    startappNativeAd.setVisibility(View.VISIBLE);
+                                    nativeAdViewContainer.setVisibility(View.VISIBLE);
+                                }
+                            }
+
+                            @Override
+                            public void onFailedToReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
+                            }
+                        });
+                        break;
+
+                    case WORTISE:
+                        if (wortiseNativeAd.getVisibility() != View.VISIBLE) {
+                            googleNativeAd = new GoogleNativeAd(activity, wortiseNativeId,
+                                    new GoogleNativeAd.Listener() {
+                                        @Override
+                                        public void onNativeClicked(@NonNull GoogleNativeAd googleNativeAd) {
+                                        }
+
+                                        @Override
+                                        public void onNativeImpression(@NonNull GoogleNativeAd googleNativeAd) {
+                                        }
+
+                                        @Override
+                                        public void onNativeLoaded(@NonNull GoogleNativeAd googleNativeAd) {
+                                            wortiseNativeAd.removeAllViews();
+                                            int layoutId = R.layout.gnt_wortise_medium_template_view;
+                                            switch (nativeAdStyle) {
+                                                case Constant.STYLE_NEWS:
+                                                    layoutId = R.layout.gnt_wortise_news_template_view;
+                                                    break;
+                                                case Constant.STYLE_VIDEO_SMALL:
+                                                    layoutId = R.layout.gnt_wortise_video_small_template_view;
+                                                    break;
+                                                case Constant.STYLE_VIDEO_LARGE:
+                                                    layoutId = R.layout.gnt_wortise_video_large_template_view;
+                                                    break;
+                                                case Constant.STYLE_RADIO:
+                                                case Constant.STYLE_SMALL:
+                                                    layoutId = R.layout.gnt_wortise_radio_template_view;
+                                                    break;
+                                            }
+                                            com.google.android.gms.ads.nativead.NativeAdView nativeAdView = (com.google.android.gms.ads.nativead.NativeAdView) LayoutInflater
+                                                    .from(activity).inflate(layoutId, null);
+                                            ((TextView) nativeAdView.getHeadlineView())
+                                                    .setText(googleNativeAd.getHeadline());
+                                            ((TextView) nativeAdView.getBodyView()).setText(googleNativeAd.getBody());
+                                            ((Button) nativeAdView.getCallToActionView())
+                                                    .setText(googleNativeAd.getCallToAction());
+                                            ((ImageView) nativeAdView.getIconView())
+                                                    .setImageDrawable(googleNativeAd.getIcon().getDrawable());
+                                            wortiseNativeAd.addView(nativeAdView);
+                                            wortiseNativeAd.setVisibility(View.VISIBLE);
+                                            nativeAdViewContainer.setVisibility(View.VISIBLE);
+                                        }
+
+                                        @Override
+                                        public void onNativeFailed(@NonNull GoogleNativeAd googleNativeAd,
+                                                @NonNull com.wortise.ads.AdError adError) {
+                                        }
+                                    });
+                            googleNativeAd.load();
+                        }
+                        break;
+
                     default:
                         nativeAdViewContainer.setVisibility(View.GONE);
                         break;
@@ -779,6 +1103,17 @@ public class NativeAd {
             if (fanNativeAd != null) {
                 fanNativeAd.destroy();
                 fanNativeAd = null;
+            }
+            if (nativeAdLoader != null && maxNativeAd != null) {
+                nativeAdLoader.destroy(maxNativeAd);
+                maxNativeAd = null;
+            }
+            if (googleNativeAd != null) {
+                googleNativeAd.destroy();
+                googleNativeAd = null;
+            }
+            if (startAppNativeAdObject != null) {
+                startAppNativeAdObject = null;
             }
         }
 

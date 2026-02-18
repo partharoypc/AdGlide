@@ -10,9 +10,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven {
-            url 'https://jitpack.io'
-        }
+        maven { url 'https://jitpack.io' }
+        maven { url 'https://artifacts.applovin.com/android' }
+        maven { url 'https://maven.wortise.com/artifactory/public' }
+        maven { url 'https://android-sdk.is.com/' }
     }
 }
 rootProject.name = "AdGlideSdk"

@@ -2,25 +2,39 @@ package com.partharoypc.adglide.format;
 
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
+import static com.partharoypc.adglide.util.Constant.APPLOVIN;
+import static com.partharoypc.adglide.util.Constant.APPLOVIN_DISCOVERY;
+import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.FACEBOOK;
 import static com.partharoypc.adglide.util.Constant.FAN;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_ADMOB;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_AD_MANAGER;
+import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_APPLOVIN_MAX;
+import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_IRONSOURCE;
 import static com.partharoypc.adglide.util.Constant.GOOGLE_AD_MANAGER;
+import static com.partharoypc.adglide.util.Constant.IRONSOURCE;
+import static com.partharoypc.adglide.util.Constant.NONE;
+import static com.partharoypc.adglide.util.Constant.STARTAPP;
+import static com.partharoypc.adglide.util.Constant.UNITY;
+import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import android.app.Activity;
 import android.util.Log;
 
+import com.applovin.sdk.AppLovinMediationProvider;
+import com.applovin.sdk.AppLovinSdk;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.initialization.AdapterStatus;
+import com.ironsource.mediationsdk.IronSource;
 import com.partharoypc.adglide.helper.AudienceNetworkInitializeHelper;
+import com.startapp.sdk.adsbase.StartAppAd;
+import com.startapp.sdk.adsbase.StartAppSDK;
+import com.unity3d.ads.IUnityAdsInitializationListener;
+import com.unity3d.ads.UnityAds;
+import com.wortise.ads.WortiseSdk;
 
 import java.util.Map;
 
-/**
- * Handles initialization of primary and backup ad network SDKs.
- * Supports AdMob, Google Ad Manager, FAN (Meta Audience Network), and others.
- */
 public class AdNetwork {
 
     public static class Initialize {
@@ -34,7 +48,6 @@ public class AdNetwork {
         private String startappAppId = "0";
         private String unityGameId = "";
         private String appLovinSdkKey = "";
-        private String mopubBannerId = "";
         private String ironSourceAppKey = "";
         private String wortiseAppId = "";
         private boolean debug = true;
@@ -84,11 +97,6 @@ public class AdNetwork {
             return this;
         }
 
-        public Initialize setMopubBannerId(String mopubBannerId) {
-            this.mopubBannerId = mopubBannerId;
-            return this;
-        }
-
         public Initialize setIronSourceAppKey(String ironSourceAppKey) {
             this.ironSourceAppKey = ironSourceAppKey;
             return this;
@@ -127,7 +135,49 @@ public class AdNetwork {
                     case FACEBOOK:
                         AudienceNetworkInitializeHelper.initializeAd(activity, debug);
                         break;
+                    case UNITY:
+                        UnityAds.initialize(activity, unityGameId, debug, new IUnityAdsInitializationListener() {
+                            @Override
+                            public void onInitializationComplete() {
+                                Log.d(TAG, "Unity Ads Initialization Complete");
+                            }
 
+                            @Override
+                            public void onInitializationFailed(UnityAds.UnityAdsInitializationError error,
+                                    String message) {
+                                Log.d(TAG, "Unity Ads Initialization Failed: " + error + " - " + message);
+                            }
+                        });
+                        break;
+                    case APPLOVIN:
+                    case APPLOVIN_MAX:
+                    case FAN_BIDDING_APPLOVIN_MAX:
+                        AppLovinSdk.getInstance(activity).setMediationProvider(AppLovinMediationProvider.MAX);
+                        AppLovinSdk.getInstance(activity).initializeSdk(config -> {
+                        });
+                        AudienceNetworkInitializeHelper.initializeAd(activity, debug);
+                        break;
+                    case APPLOVIN_DISCOVERY:
+                        AppLovinSdk.initializeSdk(activity);
+                        break;
+                    case IRONSOURCE:
+                    case FAN_BIDDING_IRONSOURCE:
+                        IronSource.init(activity, ironSourceAppKey, IronSource.AD_UNIT.REWARDED_VIDEO,
+                                IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.BANNER);
+                        AudienceNetworkInitializeHelper.initializeAd(activity, debug);
+                        break;
+                    case STARTAPP:
+                        StartAppSDK.init(activity, startappAppId, true);
+                        StartAppSDK.setTestAdsEnabled(debug);
+                        StartAppAd.disableSplash();
+                        StartAppSDK.enableReturnAds(false);
+                        break;
+                    case WORTISE:
+                        WortiseSdk.initialize(activity, wortiseAppId);
+                        break;
+                    case NONE:
+                        // do nothing
+                        break;
                     default:
                         break;
                 }
@@ -146,9 +196,12 @@ public class AdNetwork {
                             Map<String, AdapterStatus> statusMap = initializationStatus.getAdapterStatusMap();
                             for (String adapterClass : statusMap.keySet()) {
                                 AdapterStatus adapterStatus = statusMap.get(adapterClass);
-                                assert adapterStatus != null;
-                                Log.d(TAG, String.format("Adapter name: %s, Description: %s, Latency: %d", adapterClass,
-                                        adapterStatus.getDescription(), adapterStatus.getLatency()));
+                                if (adapterStatus != null) {
+                                    Log.d(TAG,
+                                            String.format("Adapter name: %s, Description: %s, Latency: %d",
+                                                    adapterClass,
+                                                    adapterStatus.getDescription(), adapterStatus.getLatency()));
+                                }
                             }
                         });
                         AudienceNetworkInitializeHelper.initialize(activity);
@@ -157,7 +210,49 @@ public class AdNetwork {
                     case FACEBOOK:
                         AudienceNetworkInitializeHelper.initializeAd(activity, debug);
                         break;
+                    case UNITY:
+                        UnityAds.initialize(activity, unityGameId, debug, new IUnityAdsInitializationListener() {
+                            @Override
+                            public void onInitializationComplete() {
+                                Log.d(TAG, "Unity Ads Initialization Complete");
+                            }
 
+                            @Override
+                            public void onInitializationFailed(UnityAds.UnityAdsInitializationError error,
+                                    String message) {
+                                Log.d(TAG, "Unity Ads Initialization Failed: " + error + " - " + message);
+                            }
+                        });
+                        break;
+                    case APPLOVIN:
+                    case APPLOVIN_MAX:
+                    case FAN_BIDDING_APPLOVIN_MAX:
+                        AppLovinSdk.getInstance(activity).setMediationProvider(AppLovinMediationProvider.MAX);
+                        AppLovinSdk.getInstance(activity).initializeSdk(config -> {
+                        });
+                        AudienceNetworkInitializeHelper.initializeAd(activity, debug);
+                        break;
+                    case APPLOVIN_DISCOVERY:
+                        AppLovinSdk.initializeSdk(activity);
+                        break;
+                    case IRONSOURCE:
+                    case FAN_BIDDING_IRONSOURCE:
+                        IronSource.init(activity, ironSourceAppKey, IronSource.AD_UNIT.REWARDED_VIDEO,
+                                IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.BANNER);
+                        AudienceNetworkInitializeHelper.initializeAd(activity, debug);
+                        break;
+                    case STARTAPP:
+                        StartAppSDK.init(activity, startappAppId, true);
+                        StartAppSDK.setTestAdsEnabled(debug);
+                        StartAppAd.disableSplash();
+                        StartAppSDK.enableReturnAds(false);
+                        break;
+                    case WORTISE:
+                        WortiseSdk.initialize(activity, wortiseAppId);
+                        break;
+                    case NONE:
+                        // do nothing
+                        break;
                     default:
                         break;
                 }

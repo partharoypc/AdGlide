@@ -43,13 +43,21 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'com.google.android.material:material:1.13.0'
 
+
     //Primary Ad Networks
-    implementation 'com.google.android.gms:play-services-ads:25.0.0'
-    implementation 'com.facebook.android:audience-network-sdk:6.21.0'
-    implementation 'com.google.ads.mediation:facebook:6.21.0.1'
+    implementation 'com.google.android.gms:play-services-ads:23.6.0'
+    implementation 'com.facebook.android:audience-network-sdk:6.18.0'
+    implementation 'com.google.ads.mediation:facebook:6.18.0.0'
+
+    // Secondary Ad Networks
+    implementation 'com.unity3d.ads:unity-ads:4.12.5'
+    implementation 'com.applovin:applovin-sdk:13.0.1'
+    implementation 'com.ironsource.sdk:mediationsdk:8.4.0'
+    implementation 'com.startapp:inapp-sdk:5.1.0'
+    implementation 'com.wortise:android-sdk:1.7.0'
 
     //GDPR
-    implementation 'com.google.android.ump:user-messaging-platform:4.0.0'
+    implementation 'com.google.android.ump:user-messaging-platform:3.1.0'
 
 }
 

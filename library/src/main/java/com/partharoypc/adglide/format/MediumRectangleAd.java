@@ -50,7 +50,6 @@ public class MediumRectangleAd {
         private String unityBannerId = "";
         private String appLovinBannerId = "";
         private String appLovinBannerZoneId = "";
-        private String mopubBannerId = "";
         private String ironSourceBannerId = "";
         private int placementStatus = 1;
         private boolean darkTheme = false;
@@ -107,11 +106,6 @@ public class MediumRectangleAd {
 
         public Builder setAppLovinBannerZoneId(String appLovinBannerZoneId) {
             this.appLovinBannerZoneId = appLovinBannerZoneId;
-            return this;
-        }
-
-        public Builder setMopubBannerId(String mopubBannerId) {
-            this.mopubBannerId = mopubBannerId;
             return this;
         }
 

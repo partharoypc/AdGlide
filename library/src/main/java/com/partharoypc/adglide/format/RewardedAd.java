@@ -51,7 +51,6 @@ public class RewardedAd {
         private String applovinDiscRewardedZoneId = "";
         private String ironSourceRewardedId = "";
         private String wortiseRewardedId = "";
-        private String alienAdsRewardedId = "";
         private int placementStatus = 1;
         private boolean legacyGDPR = false;
 
@@ -128,11 +127,6 @@ public class RewardedAd {
 
         public Builder setWortiseRewardedId(String wortiseRewardedId) {
             this.wortiseRewardedId = wortiseRewardedId;
-            return this;
-        }
-
-        public Builder setAlienAdsRewardedId(String alienAdsRewardedId) {
-            this.alienAdsRewardedId = alienAdsRewardedId;
             return this;
         }
 
