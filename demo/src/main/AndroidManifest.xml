@@ -37,7 +37,10 @@
             android:name="com.partharoypc.adglidedemo.activity.MainActivity"
             android:exported="true" />
 
-        <activity android:name="com.partharoypc.adglidedemo.activity.SecondActivity" />
+        <activity android:name=".activity.SecondActivity" />
+        <activity android:name=".activity.ActivityMediumRectangle" />
+        <activity android:name=".activity.ActivityNativeFragment" />
+        <activity android:name=".activity.ActivityNativeViewPager" />
 
     </application>
 

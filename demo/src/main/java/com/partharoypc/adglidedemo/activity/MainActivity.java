@@ -119,6 +119,13 @@ public class MainActivity extends AppCompatActivity {
         btnRewarded2 = findViewById(R.id.btn_rewarded2);
         btnRewarded2.setOnClickListener(view -> loadAndShowRewardedAd());
 
+        findViewById(R.id.btn_medium_rectangle).setOnClickListener(
+                v -> startActivity(new Intent(getApplicationContext(), ActivityMediumRectangle.class)));
+        findViewById(R.id.btn_native_fragment).setOnClickListener(
+                v -> startActivity(new Intent(getApplicationContext(), ActivityNativeFragment.class)));
+        findViewById(R.id.btn_native_view_pager).setOnClickListener(
+                v -> startActivity(new Intent(getApplicationContext(), ActivityNativeViewPager.class)));
+
         btnSelectAds = findViewById(R.id.btn_select_ads);
         btnSelectAds.setOnClickListener(v -> showAdChooser());
 
@@ -245,13 +252,13 @@ public class MainActivity extends AppCompatActivity {
                 .build(new OnRewardedAdCompleteListener() {
                     @Override
                     public void onRewardedAdComplete() {
-                        //complete
+                        // complete
                         Toast.makeText(getApplicationContext(), "Rewarded complete", Toast.LENGTH_SHORT).show();
                     }
                 }, new OnRewardedAdDismissedListener() {
                     @Override
                     public void onRewardedAdDismissed() {
-                        //dismiss
+                        // dismiss
                     }
                 });
     }
@@ -289,16 +296,16 @@ public class MainActivity extends AppCompatActivity {
                 .setIronSourceRewardedId(Constant.IRONSOURCE_REWARDED_ID)
                 .setWortiseRewardedId(Constant.WORTISE_REWARDED_ID)
                 .build(() -> {
-                    //onRewardedAdLoaded
+                    // onRewardedAdLoaded
                     Toast.makeText(getApplicationContext(), "Rewarded loaded, show ad", Toast.LENGTH_SHORT).show();
                 }, () -> {
-                    //onRewardedAdError
+                    // onRewardedAdError
                     Toast.makeText(getApplicationContext(), "Rewarded error", Toast.LENGTH_SHORT).show();
                 }, () -> {
-                    //onRewardedAdDismissed
+                    // onRewardedAdDismissed
                     Toast.makeText(getApplicationContext(), "Rewarded dismissed", Toast.LENGTH_SHORT).show();
                 }, () -> {
-                    //onRewardedAdComplete
+                    // onRewardedAdComplete
                     Toast.makeText(getApplicationContext(), "Complete, user earn rewards", Toast.LENGTH_SHORT).show();
                 });
     }
@@ -387,7 +394,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showAdChooser() {
-        final String[] ads = {"AdMob", "Google Ad Manager", "Start.io", "AppLovin MAX", "AppLovin Discovery", "Unity Ads", "ironSource", "FAN (Waterfall)", "Wortise"};
+        final String[] ads = { "AdMob", "Google Ad Manager", "Start.io", "AppLovin MAX", "AppLovin Discovery",
+                "Unity Ads", "ironSource", "FAN (Waterfall)", "Wortise" };
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Select Ad");
         builder.setItems(ads, (dialog, which) -> {
@@ -438,10 +446,12 @@ public class MainActivity extends AppCompatActivity {
                 nativeAdView.addView(View.inflate(this, com.partharoypc.adglide.R.layout.view_native_ad_radio, null));
                 break;
             case "video_small":
-                nativeAdView.addView(View.inflate(this, com.partharoypc.adglide.R.layout.view_native_ad_video_small, null));
+                nativeAdView
+                        .addView(View.inflate(this, com.partharoypc.adglide.R.layout.view_native_ad_video_small, null));
                 break;
             case "video_large":
-                nativeAdView.addView(View.inflate(this, com.partharoypc.adglide.R.layout.view_native_ad_video_large, null));
+                nativeAdView
+                        .addView(View.inflate(this, com.partharoypc.adglide.R.layout.view_native_ad_video_large, null));
                 break;
             default:
                 nativeAdView.addView(View.inflate(this, com.partharoypc.adglide.R.layout.view_native_ad_medium, null));
@@ -450,7 +460,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void changeNativeAdStyle() {
-        final String[] styles = {"Default", "News", "Radio", "Video Small", "Video Large"};
+        final String[] styles = { "Default", "News", "Radio", "Video Small", "Video Large" };
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Select Native Style");
         builder.setItems(styles, (dialog, which) -> {

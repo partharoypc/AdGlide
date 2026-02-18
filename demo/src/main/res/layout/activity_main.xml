@@ -81,6 +81,30 @@
                 android:textColor="@color/gnt_white" />
 
             <Button
+                android:id="@+id/btn_medium_rectangle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Medium Rectangle Ad"
+                android:textAllCaps="false"
+                android:textColor="@color/gnt_white" />
+
+            <Button
+                android:id="@+id/btn_native_fragment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Native Ad (Fragment)"
+                android:textAllCaps="false"
+                android:textColor="@color/gnt_white" />
+
+            <Button
+                android:id="@+id/btn_native_view_pager"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Native Ad (ViewPager)"
+                android:textAllCaps="false"
+                android:textColor="@color/gnt_white" />
+
+            <Button
                 android:id="@+id/btn_select_ads"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
