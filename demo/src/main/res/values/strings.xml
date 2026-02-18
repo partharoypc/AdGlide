@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">AdGlide Demo</string>
+    <string name="btn_show_interstitial_ad">Show Interstitial Ad</string>
+    <string name="btn_show_rewarded_ad">Show Rewarded Ad</string>
+    <string name="btn_load_show_rewarded_ad">Load &amp; Show Rewarded Ad</string>
+</resources>

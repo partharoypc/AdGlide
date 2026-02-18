@@ -1,0 +1,49 @@
+# General
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Specific caches and artifacts
+/caches/
+/daemon/
+/native/
+/wrapper/
+/.tmp/
+/android/
+
+# IDE files
+/.idea/
+/.vscode/
+
+# Built variants
+*.apk
+*.aar
+*.ap_
+*.aab
+
+# Output of the build
+build/
+
+# Android Studio
+/captures/
+.externalNativeBuild/
+.cxx/
+
+# Log files
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db

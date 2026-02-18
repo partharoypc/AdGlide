@@ -1,0 +1,73 @@
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'
+}
+
+android {
+    namespace 'com.partharoypc.adglide'
+    compileSdk 35
+    defaultConfig {
+        minSdk 21
+        targetSdk 35
+        versionCode 1
+        versionName "1.0.0"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+        encoding 'UTF-8'
+    }
+    buildFeatures {
+        buildConfig = true
+    }
+    lint {
+        disable 'GradleDependency'
+    }
+
+    publishing {
+        singleVariant('release')
+    }
+}
+
+dependencies {
+
+    implementation fileTree(dir: 'libs', include: ['*.aar', '*.jar'], exclude: [])
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'com.google.android.material:material:1.13.0'
+
+    //Primary Ad Networks
+    implementation 'com.google.android.gms:play-services-ads:25.0.0'
+    implementation 'com.facebook.android:audience-network-sdk:6.21.0'
+    implementation 'com.google.ads.mediation:facebook:6.21.0.1'
+
+    //GDPR
+    implementation 'com.google.android.ump:user-messaging-platform:4.0.0'
+
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId = "com.github.partharoypc"
+                artifactId = "adglide"
+                version = "1.0.0"
+
+                pom {
+                    name = "AdGlide"
+                    description = "Simple ad library for Android with multiple ad networks"
+                    url = "https://github.com/partharoypc/AdGlide"
+                }
+            }
+        }
+    }
+}
