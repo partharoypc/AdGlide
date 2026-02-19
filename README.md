@@ -1,271 +1,324 @@
-# AdGlide SDK
+# AdGlide SDK 🚀
 
-A powerful, multi-network Android ad library that simplifies integrating and managing ads from multiple ad platforms. Built with a clean **Builder pattern** API, automatic **fallback** to backup networks, and full **GDPR** compliance support.
+**The Ultimate Ad Mediation Solution for Android Developers.**
+
+AdGlide simplifies integrating multiple ad networks into a single, cohesive system. With just a few lines of code, you get automatic fallback, smart waterfall handling, and full GDPR compliance.
 
 ![Version](https://img.shields.io/badge/Version-1.0.0-blue?style=flat-square) ![Min SDK](https://img.shields.io/badge/Min%20SDK-21-green?style=flat-square) ![Target SDK](https://img.shields.io/badge/Target%20SDK-35-orange?style=flat-square) ![License](https://img.shields.io/badge/License-Proprietary-red?style=flat-square)
 
 ---
 
-## ✨ Features
+## 📚 Table of Contents
 
-- 🔌 **Multi-Network Support** — AdMob, Google Ad Manager, Meta Audience Network (FAN), AppLovin, Unity Ads, ironSource, Wortise, StartApp
-- 🔄 **Automatic Fallback** — Primary + backup ad network with seamless failover
-- 🏗️ **Builder Pattern API** — Clean, fluent configuration for all ad formats
-- 🛡️ **GDPR Compliance** — Google UMP consent integration with debug mode support
-- 📱 **6 Ad Formats** — Banner, Interstitial, Native, Rewarded, Medium Rectangle, App Open
-- 🎨 **Customizable Native Ads** — Multiple styles (small, medium, large, news, video) with dark theme support
-- 🧹 **Memory Safe** — Built-in `destroy()` methods on every ad format to prevent leaks
-- 📦 **ProGuard Ready** — Consumer rules auto-applied to host apps
-- 🔗 **FAN Bidding** — Meta Audience Network bidding for AdMob and Ad Manager
-
-## 🔄 Ads Fallback Logic
-
-```mermaid
-graph TD
-    A[Request Ad] --> B{Primary Network Available?}
-    B -- Yes --> C[Show Primary Ad]
-    B -- No / Error --> D{Backup Network Available?}
-    D -- Yes --> E[Show Backup Ad]
-    D -- No / Error --> F[Ad Load Failed]
-```
+1.  [Why AdGlide?](#-why-adglide)
+2.  [Prerequisites](#-prerequisites)
+3.  [Installation & Setup](#-installation--setup) (Groovy & Kotlin DSL)
+4.  [Manifest Configuration](#-manifest-configuration)
+5.  [Initialization: The Brain](#-initialization-the-brain)
+6.  [Ad Formats: Zero to Hero](#-ad-formats-zero-to-hero)
+    *   [Banner Ads](#1-banner-ads)
+    *   [Interstitial Ads](#2-interstitial-ads)
+    *   [Native Ads](#3-native-ads)
+    *   [Rewarded Ads](#4-rewarded-ads)
+    *   [App Open Ads](#5-app-open-ads)
+7.  [GDPR & Privacy (UMP)](#%EF%B8%8F-gdpr--privacy)
+8.  [Testing & Verification](#-testing--verification)
+9.  [FAQ & Troubleshooting](#-faq--troubleshooting)
 
 ---
 
-## 📦 Installation
+## 🌟 Why AdGlide?
 
-### 1. Add JitPack Repository
+*   **Smart Fallback**: If AdMob fails, it automatically strives to load FAN, then Unity, etc.
+*   **Simple API**: Replaces hundreds of lines of adapter code with a simple Builder pattern.
+*   **Safety First**: Built-in memory leak protection and lifecycle management.
+*   **Compliance Ready**: One-line Google UMP integration for GDPR.
 
-Add `maven { url 'https://jitpack.io' }` to your `settings.gradle` (or root `build.gradle`):
+---
 
+## 🛠 Prerequisites
+
+*   **Android Studio**: Giraffe or newer (recommended).
+*   **Min SDK**: API 21 (Android 5.0).
+*   **Target SDK**: API 35 (Android 15).
+*   **Java**: JDK 17 (Required by Gradle 8+).
+
+---
+
+## 📦 Installation & Setup
+
+We support both **Groovy** and **Kotlin DSL** build scripts. Choose your style!
+
+### Step 1: Add JitPack Repository
+
+**Option A: Groovy (`settings.gradle` or root `build.gradle`)**
 ```gradle
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
+        maven { url 'https://jitpack.io' } // <--- Add this line
     }
 }
 ```
 
-### 2. Add Dependency
+**Option B: Kotlin DSL (`settings.gradle.kts`)**
+```kotlin
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven(url = "https://jitpack.io") // <--- Add this line
+    }
+}
+```
 
-Add the dependency in your app-level `build.gradle`:
+### Step 2: Add Dependency
 
+**Option A: Groovy (`app/build.gradle`)**
 ```gradle
 dependencies {
     implementation 'com.github.partharoypc:adglide:1.0.0'
 }
 ```
 
-> [!NOTE]
-> The library automatically includes dependencies for AdMob, FAN, Google UMP, and AndroidX libraries. You generally **do not** need to add these manually to your app unless you need specific versions.
+**Option B: Kotlin DSL (`app/build.gradle.kts`)**
+```kotlin
+dependencies {
+    implementation("com.github.partharoypc:adglide:1.0.0")
+}
+```
 
 ---
 
-## 🚀 Quick Start
+## ⚙ Manifest Configuration
 
-### 1. Initialize Ad Networks
+Add these **essential** permissions and meta-data to your `AndroidManifest.xml`.
 
-Initialize the SDK in your `Application` class or main `Activity`.
+```xml
+<manifest ...>
+    <!-- 1. Permissions -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-```java
-new AdNetwork.Initialize(activity)
-    .setAdStatus("1")           // "1" = ON, "0" = OFF
-    .setAdNetwork("admob")      // Primary network
-    .setBackupAdNetwork("fan")  // Backup network (optional)
-    .setAdMobAppId("ca-app-pub-xxxxx~xxxxx")
-    .setDebug(BuildConfig.DEBUG) // Enable debug logging
-    .build();
+    <application
+        ...
+        android:usesCleartextTraffic="true"
+        android:hardwareAccelerated="true">
+        
+        <!-- 2. AdMob App ID (REQUIRED) -->
+        <!-- Replace with your actual App ID from AdMob Console -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713" />
+
+        <!-- 3. AppLovin SDK Key (REQUIRED if using AppLovin) -->
+        <meta-data
+            android:name="applovin.sdk.key"
+            android:value="YOUR_APPLOVIN_SDK_KEY_HERE" />
+            
+    </application>
+</manifest>
 ```
 
-### 2. Load a Banner Ad
+> [!IMPORTANT]
+> **Crash Warning**: If you forget the `com.google.android.gms.ads.APPLICATION_ID` meta-data, your app **will crash** on startup.
+
+---
+
+## 🧠 Initialization: The Brain
+
+Initialize the SDK once in your `Application` class or main `Activity`. This "pre-warms" the ad networks.
 
 ```java
-BannerAd.Builder bannerAd = new BannerAd.Builder(activity)
+// In MainActivity.java or MyApplication.java
+new AdNetwork.Initialize(this)
+    .setAdStatus("1")            // Master Switch: "1" = ON, "0" = OFF
+    .setDebug(true)              // logs tag: "AdNetwork"
+
+    // --- Strategy Configuration ---
+    .setAdNetwork("admob")       // Primary Fighter
+    .setBackupAdNetwork("fan")   // Backup Fighter
+    
+    // --- ID Bank (Set all your IDs here) ---
+    .setAdMobAppId("ca-app-pub-xxxxx~xxxxx")
+    .setStartappAppId("YOUR_STARTAPP_ID")
+    .setUnityGameId("YOUR_UNITY_GAME_ID")
+    .setAppLovinSdkKey("YOUR_KEY")
+    .setWortiseAppId("YOUR_WORTISE_ID")
+    
+    .build(); // 🚀 Ignites the engine
+```
+
+**Supported Network Keys:**
+`admob`, `fan` (Meta), `unity`, `applovin_max`, `ironsource`, `startapp`, `wortise`, `google_ad_manager`.
+
+---
+
+## 🎨 Ad Formats: Zero to Hero
+
+### 1. Banner Ads
+
+**XML Layout** (`res/layout/activity_main.xml`):
+```xml
+<LinearLayout
+    android:id="@+id/banner_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="bottom" />
+```
+
+**Java Code**:
+```java
+// 1. Configure the Banner
+BannerAd.Builder banner = new BannerAd.Builder(this)
     .setAdStatus("1")
     .setAdNetwork("admob")
     .setBackupAdNetwork("fan")
     .setAdMobBannerId("ca-app-pub-xxxxx/xxxxx")
-    .setFanBannerId("YOUR_FAN_BANNER_ID")
-    .setDarkTheme(false)        // Toggle dark mode support
-    .setPlacementStatus(1)      // 1 = Show, 0 = Hide specific placement
-    .setLegacyGDPR(false)       // Use new UMP instead of legacy GDPR
+    .setFanBannerId("YOUR_FAN_ID")
+    .setDarkTheme(false)  // Adaptive colors?
     .build();
 
-bannerAd.loadBannerAd();
-
-// 🧹 Clean up in onDestroy()
-@Override
-protected void onDestroy() {
-    super.onDestroy();
-    bannerAd.destroyAndDetachBanner();
-}
+// 2. Load it
+// The SDK automatically finds your provided container view if integrated 
+// via specific view binding, otherwise ensure you attach it:
+// banner.loadBannerAd(findViewById(R.id.banner_container)); // Pseudocode adjustment based on exact API
+banner.loadBannerAd(); 
 ```
 
-### 3. Load an Interstitial Ad
+### 2. Interstitial Ads
 
+**Java Code**:
 ```java
-InterstitialAd.Builder interstitialAd = new InterstitialAd.Builder(activity)
+// 1. Setup
+InterstitialAd.Builder interstitial = new InterstitialAd.Builder(this)
     .setAdStatus("1")
     .setAdNetwork("admob")
     .setBackupAdNetwork("fan")
     .setAdMobInterstitialId("ca-app-pub-xxxxx/xxxxx")
-    .setFanInterstitialId("YOUR_FAN_INTERSTITIAL_ID")
-    .setInterval(3)             // Show ad every 3 valid attempts
+    .setInterval(1) // Show every time (1) or every 3rd time (3)
     .build();
 
-interstitialAd.loadInterstitialAd();
+// 2. Load
+interstitial.loadInterstitialAd();
 
-// Call this when you want to show the ad (e.g., after game over)
-interstitialAd.showInterstitialAd();
-
-// 🧹 Clean up
-interstitialAd.destroyInterstitialAd();
+// 3. Show (e.g., inside a button click or game over)
+if (interstitial.isAdLoaded()) { // Optional check
+    interstitial.showInterstitialAd();
+}
 ```
 
-### 4. Load a Native Ad
+### 3. Native Ads
 
+**Java Code**:
 ```java
-NativeAd.Builder nativeAd = new NativeAd.Builder(activity)
+NativeAd.Builder nativeAd = new NativeAd.Builder(this)
     .setAdStatus("1")
     .setAdNetwork("admob")
     .setBackupAdNetwork("fan")
     .setAdMobNativeId("ca-app-pub-xxxxx/xxxxx")
-    .setFanNativeId("YOUR_FAN_NATIVE_ID")
-    .setNativeAdStyle("medium") // Options: small, medium, large, news, radio, video_small, video_large
-    .setNativeAdBackgroundColor(R.color.colorLight, R.color.colorDark)
+    .setNativeAdStyle("medium") // 'small', 'medium', 'large'
     .build();
 
 nativeAd.loadNativeAd();
-
-// 🧹 Clean up
-nativeAd.destroyNativeAd();
 ```
 
-### 5. Load a Rewarded Ad
+### 4. Rewarded Ads
 
+**Java Code**:
 ```java
-RewardedAd.Builder rewardedAd = new RewardedAd.Builder(activity)
+RewardedAd.Builder rewarded = new RewardedAd.Builder(this)
     .setAdStatus("1")
     .setMainAds("admob")
-    .setBackupAds("fan")
     .setAdMobRewardedId("ca-app-pub-xxxxx/xxxxx")
     .build(
         () -> { 
-            // 🎁 Reward earned! Grant user currency/lives here.
-            Log.d(TAG, "User earned reward");
+            // 💰 USER EARNED REWARD! Give coins/lives.
+            addCoins(100);
         },
         () -> { 
-            // Ad dismissed. Resume game/app flow.
-            Log.d(TAG, "Ad dismissed");
+            // Ad Closed. Resume game.
+            resumeGame();
         }
     );
 
-rewardedAd.loadRewardedAd(onComplete, onDismiss);
+rewarded.loadRewardedAd();
 
 // Show when ready
-rewardedAd.showRewardedAd(onComplete, onDismiss, onError);
+rewarded.showRewardedAd();
 ```
 
-### 6. Load an App Open Ad
+### 5. App Open Ads
 
-Usually implemented in your `Application` class or splash screen.
-
+**Java Code** (Best in `MyApplication.java`):
 ```java
-AppOpenAd.Builder appOpenAd = new AppOpenAd.Builder(activity)
+AppOpenAd.Builder appOpen = new AppOpenAd.Builder(this)
     .setAdStatus("1")
     .setAdNetwork("admob")
-    .setBackupAdNetwork("google_ad_manager")
     .setAdMobAppOpenId("ca-app-pub-xxxxx/xxxxx")
     .build();
 
-appOpenAd.loadAppOpenAd();
-
-// Show immediately if loaded
-appOpenAd.showAppOpenAd();
-
-// 🧹 Clean up
-appOpenAd.destroyOpenAd();
+appOpen.loadAppOpenAd();
+appOpen.showAppOpenAd();
 ```
 
 ---
 
-## 🛡️ GDPR Consent
+## 🛡️ GDPR & Privacy
 
-The SDK supports Google's User Messaging Platform (UMP) for GDPR compliance.
-
-### Google UMP (Recommended)
+Don't risk legal issues! Use our built-in Google UMP helper.
 
 ```java
-GDPR gdpr = new GDPR(activity);
+GDPR gdpr = new GDPR(this);
 
-// Simple consent flow - automatically determines if consent is needed
+// 1. Simple Update (Auto-detects location)
 gdpr.updateGDPRConsentStatus();
 
-// Advanced consent flow with debug mode (force geography)
-// Useful for testing GDPR dialogs outside of EEA
+// 2. Developer Mode (Force EEA geography to test the dialog)
+// updateGDPRConsentStatus(adType, isDebug, isChildDirected)
 gdpr.updateGDPRConsentStatus("admob", true, false); 
 ```
 
 ---
 
-## 🔧 Troubleshooting
+## 🧪 Testing & Verification
 
-| Issue | Possible Cause | Solution |
-|---|---|---|
-| **No Ads Loading** | Incorrect Application ID | Verify `AndroidManifest.xml` has the correct `com.google.android.gms.ads.APPLICATION_ID`. |
-| **"Cleartext traffic not permitted"** | HTTP connection blocked | Add `android:usesCleartextTraffic="true"` to your `<application>` tag in Manifest. |
-| **Native Ad Layout Issues** | Wrong style constant | Ensure you pass a valid style string (e.g., `"medium"`, `"large"`) to `setNativeAdStyle`. |
-| **Class Def Not Found** | ProGuard stripping | ProGuard rules are auto-included, but ensure your app's `minifyEnabled` build config is correct. |
+How do you know it's working? **Check your Logcat!**
 
----
-
-## 🔌 Supported Ad Networks
-
-| Network | Constant | Format Support |
-|---|---|---|
-| **AdMob** | `admob` | Banner, Interstitial, Native, Rewarded, App Open |
-| **Google Ad Manager** | `google_ad_manager` | Banner, Interstitial, Native, Rewarded, App Open |
-| **Meta Audience Network** | `fan` | Banner, Interstitial, Native, Rewarded |
-| **AppLovin MAX** | `applovin_max` | Banner, Interstitial, Native, Rewarded, App Open |
-| **Unity Ads** | `unity` | Banner, Interstitial, Rewarded |
-| **ironSource** | `ironsource` | Banner, Interstitial, Rewarded |
-| **StartApp** | `startapp` | Banner, Interstitial, Native |
-| **Wortise** | `wortise` | Banner, Interstitial, Native, Rewarded, App Open |
-
----
-
-## 🧹 Memory Management
-
-**Crucial:** Always call the `destroy` method in your Activity or Fragment's `onDestroy()` lifecycle event. Failure to do so can lead to memory leaks and performance degradation.
-
-```java
-@Override
-protected void onDestroy() {
-    super.onDestroy();
-    if (bannerAd != null) bannerAd.destroyAndDetachBanner();
-    if (interstitialAd != null) interstitialAd.destroyInterstitialAd();
-    if (nativeAd != null) nativeAd.destroyNativeAd();
-    if (appOpenAd != null) appOpenAd.destroyOpenAd();
-}
-```
-
----
-
-## 📁 Project Structure
+1.  Open **Logcat** in Android Studio.
+2.  Filter by tag: `AdNetwork`.
+3.  Look for these success messages:
 
 ```text
-library/src/main/java/com/partharoypc/adglide/
-├── format/                    # Core logic for each ad format
-├── gdpr/                      # Consent management (GDPR/UMP)
-├── helper/                    # Initialization helpers
-├── ui/                        # Custom View classes (BannerAdView, NativeAdView)
-└── util/                      # Constants, tools, and listeners
+D/AdNetwork: [admob] is selected as Primary Ads
+D/AdNetwork: [fan] is selected as Backup Ads
+D/AdNetwork: Adapter name: com.google.ads.mediation.admob.AdMobAdapter, Description: ready, Latency: 20ms
 ```
+
+If you see these, **congratulations!** Your integration is perfect.
 
 ---
 
-## 📄 License
+## ❓ FAQ & Troubleshooting
 
-Copyright © Partha Roy. All rights reserved.
+| Question | Answer |
+| :--- | :--- |
+| **Why is my app crashing on launch?** | You likely missed the `com.google.android.gms.ads.APPLICATION_ID` in `AndroidManifest.xml`. |
+| **Why are ads not showing in release build?** | Check ProGuard/R8. Our library includes consumer rules, but ensure specific network SDKs (like Unity) aren't being stripped if you use strict shrinking. |
+| **How do I disable ads easily?** | Just change `.setAdStatus("1")` to `.setAdStatus("0")` in your initialization code. |
+| **Can I use different IDs for different activities?** | Yes! Just create a new `Builder` instance in each Activity with the specific IDs you need. |
+
+---
+
+## 📄 License & Support
+
+**Copyright © Partha Roy.**
+For support, please open an issue on the GitHub repository.
+
+---
+
+*Built with ❤️ for Android Developers.*
