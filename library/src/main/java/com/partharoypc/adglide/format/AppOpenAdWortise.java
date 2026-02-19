@@ -7,6 +7,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.partharoypc.adglide.util.OnShowAdCompleteListener;
+import com.wortise.ads.AdError;
+import com.wortise.ads.appopen.AppOpenAd;
 
 import java.util.Date;
 
@@ -15,21 +17,14 @@ import java.util.Date;
  * functionality.
  * Ads are cached for up to 4 hours before requiring a reload.
  */
-public class AppOpenAdWortise {
+public class AppOpenAdWortise implements AppOpenAd.Listener {
 
     private static final String LOG_TAG = "AppOpenAd";
+    private AppOpenAd appOpenAd;
     private boolean isLoadingAd = false;
     private boolean isShowingAd = false;
     private long loadTime = 0;
-
-    /**
-     * Returns whether an app open ad is currently being shown.
-     *
-     * @return {@code true} if an ad is currently showing
-     */
-    public boolean isShowingAd() {
-        return isShowingAd;
-    }
+    private OnShowAdCompleteListener onShowAdCompleteListener;
 
     public AppOpenAdWortise() {
     }
@@ -39,6 +34,9 @@ public class AppOpenAdWortise {
             return;
         }
         isLoadingAd = true;
+        appOpenAd = new AppOpenAd(context, wortiseAppOpenId);
+        appOpenAd.setListener(this);
+        appOpenAd.loadAd();
     }
 
     public boolean wasLoadTimeLessThanNHoursAgo(long numHours) {
@@ -48,7 +46,7 @@ public class AppOpenAdWortise {
     }
 
     public boolean isAdAvailable() {
-        return false;
+        return appOpenAd != null && appOpenAd.isAvailable() && wasLoadTimeLessThanNHoursAgo(4);
     }
 
     public void showAdIfAvailable(@NonNull final Activity activity, String appOpenAdUnitId) {
@@ -58,6 +56,8 @@ public class AppOpenAdWortise {
 
     public void showAdIfAvailable(@NonNull final Activity activity, String wortiseAppOpenAdUnitId,
             @NonNull OnShowAdCompleteListener onShowAdCompleteListener) {
+        this.onShowAdCompleteListener = onShowAdCompleteListener;
+
         if (isShowingAd) {
             Log.d(LOG_TAG, "The app open ad is already showing.");
             return;
@@ -70,7 +70,54 @@ public class AppOpenAdWortise {
             return;
         }
 
-        isShowingAd = true;
+        Log.d(LOG_TAG, "Will show ad.");
+        appOpenAd.showAd();
     }
 
+    @Override
+    public void onAppOpenLoaded(@NonNull AppOpenAd ad) {
+        Log.d(LOG_TAG, "Wortise App Open ad loaded.");
+        loadTime = (new Date()).getTime();
+        isLoadingAd = false;
+    }
+
+    @Override
+    public void onAppOpenFailedToLoad(@NonNull AppOpenAd ad, @NonNull AdError error) {
+        Log.d(LOG_TAG, "Wortise App Open ad failed to load: " + error.getMessage());
+        isLoadingAd = false;
+    }
+
+    @Override
+    public void onAppOpenClicked(@NonNull AppOpenAd ad) {
+    }
+
+    @Override
+    public void onAppOpenDismissed(@NonNull AppOpenAd ad) {
+        Log.d(LOG_TAG, "Wortise App Open ad dismissed.");
+        isShowingAd = false;
+        if (onShowAdCompleteListener != null) {
+            onShowAdCompleteListener.onShowAdComplete();
+        }
+        // Prefetch
+        ad.loadAd();
+    }
+
+    @Override
+    public void onAppOpenFailedToShow(@NonNull AppOpenAd ad, @NonNull AdError error) {
+        Log.d(LOG_TAG, "Wortise App Open ad failed to show: " + error.getMessage());
+        isShowingAd = false;
+        if (onShowAdCompleteListener != null) {
+            onShowAdCompleteListener.onShowAdComplete();
+        }
+    }
+
+    @Override
+    public void onAppOpenImpression(@NonNull AppOpenAd ad) {
+    }
+
+    @Override
+    public void onAppOpenShown(@NonNull AppOpenAd ad) {
+        Log.d(LOG_TAG, "Wortise App Open ad shown.");
+        isShowingAd = true;
+    }
 }
