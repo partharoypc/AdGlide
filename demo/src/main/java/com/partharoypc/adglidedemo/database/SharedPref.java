@@ -48,4 +48,31 @@ public class SharedPref {
         editor.apply();
     }
 
+    public String getAdNetwork() {
+        return sharedPreferences.getString("ad_network", "admob");
+    }
+
+    public void setAdNetwork(String adNetwork) {
+        editor.putString("ad_network", adNetwork);
+        editor.apply();
+    }
+
+    public String getBackupAdNetwork() {
+        return sharedPreferences.getString("backup_ad_network", "none");
+    }
+
+    public void setBackupAdNetwork(String backupAdNetwork) {
+        editor.putString("backup_ad_network", backupAdNetwork);
+        editor.apply();
+    }
+
+    public Boolean getIsAppOpenAdEnabled() {
+        return sharedPreferences.getBoolean("app_open_ad_enabled", true);
+    }
+
+    public void setIsAppOpenAdEnabled(Boolean isEnabled) {
+        editor.putBoolean("app_open_ad_enabled", isEnabled);
+        editor.apply();
+    }
+
 }

@@ -133,4 +133,10 @@ public class GDPR {
         return "";
     }
 
+    public void resetConsent() {
+        consentInformation = UserMessagingPlatform.getConsentInformation(activity);
+        consentInformation.reset();
+        updateGDPRConsentStatus();
+    }
+
 }

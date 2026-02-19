@@ -5,7 +5,7 @@ public class Constant {
     public static final String AD_STATUS = "1";
 
     public static String AD_NETWORK = "admob";
-    public static final String BACKUP_AD_NETWORK = "none";
+    public static String BACKUP_AD_NETWORK = "none";
 
     public static final String ADMOB_BANNER_ID = "ca-app-pub-3940256099942544/6300978111";
     public static final String ADMOB_INTERSTITIAL_ID = "ca-app-pub-3940256099942544/1033173712";
@@ -64,9 +64,9 @@ public class Constant {
 
     public static boolean isAppOpen = false;
 
-    public static final boolean FORCE_TO_SHOW_APP_OPEN_AD_ON_START = true;
-    public static final boolean OPEN_ADS_ON_START = true;
-    public static final boolean OPEN_ADS_ON_RESUME = true;
+    public static boolean FORCE_TO_SHOW_APP_OPEN_AD_ON_START = true;
+    public static boolean OPEN_ADS_ON_START = true;
+    public static boolean OPEN_ADS_ON_RESUME = true;
 
     public static final int INTERSTITIAL_AD_INTERVAL = 1;
     public static final int NATIVE_AD_INDEX = 2;

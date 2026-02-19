@@ -9,23 +9,13 @@ import static com.partharoypc.adglide.util.Constant.IRONSOURCE;
 import static com.partharoypc.adglide.util.Constant.STARTAPP;
 import static com.partharoypc.adglide.util.Constant.UNITY;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
-import static com.partharoypc.adglidedemo.data.Constant.STYLE_DEFAULT;
-import static com.partharoypc.adglidedemo.data.Constant.STYLE_NEWS;
-import static com.partharoypc.adglidedemo.data.Constant.STYLE_RADIO;
-import static com.partharoypc.adglidedemo.data.Constant.STYLE_VIDEO_LARGE;
-import static com.partharoypc.adglidedemo.data.Constant.STYLE_VIDEO_SMALL;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.Toast;
-
+import android.view.Menu;
+import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,110 +24,104 @@ import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ProcessLifecycleOwner;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.partharoypc.adglide.format.AdNetwork;
 import com.partharoypc.adglide.format.AppOpenAd;
-import com.partharoypc.adglide.format.BannerAd;
-import com.partharoypc.adglide.format.InterstitialAd;
-import com.partharoypc.adglide.format.MediumRectangleAd;
-import com.partharoypc.adglide.format.NativeAd;
-import com.partharoypc.adglide.format.NativeAdView;
-import com.partharoypc.adglide.format.RewardedAd;
 import com.partharoypc.adglide.gdpr.GDPR;
-import com.partharoypc.adglide.util.OnRewardedAdCompleteListener;
-import com.partharoypc.adglide.util.OnRewardedAdDismissedListener;
-import com.partharoypc.adglide.util.OnRewardedAdErrorListener;
-import com.partharoypc.adglide.util.OnRewardedAdLoadedListener;
 import com.partharoypc.adglidedemo.BuildConfig;
 import com.partharoypc.adglidedemo.R;
+import com.partharoypc.adglidedemo.activity.ads.ActivityBanner;
+import com.partharoypc.adglidedemo.activity.ads.ActivityInterstitial;
+import com.partharoypc.adglidedemo.activity.ads.ActivityNative;
+import com.partharoypc.adglidedemo.activity.ads.ActivityRewarded;
+import com.partharoypc.adglidedemo.adapter.DashboardAdapter;
 import com.partharoypc.adglidedemo.data.Constant;
 import com.partharoypc.adglidedemo.database.SharedPref;
+import com.partharoypc.adglidedemo.model.DashboardItem;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
-    Toolbar toolbar;
-    AdNetwork.Initialize adNetwork;
-    GDPR gdpr;
-    BannerAd.Builder bannerAd;
-    MediumRectangleAd.Builder mediumRectangleAd;
-    InterstitialAd.Builder interstitialAd;
-    RewardedAd.Builder rewardedAd;
-    NativeAd.Builder nativeAd;
-    NativeAdView.Builder nativeAdView;
-    SwitchMaterial switchMaterial;
-    SharedPref sharedPref;
-    Button btnInterstitial;
-    Button btnRewarded;
-    Button btnRewarded2;
-    Button btnSelectAds;
-    Button btnNativeAdStyle;
-    LinearLayout nativeAdViewContainer;
-    LinearLayout bannerAdView;
-    AppOpenAd.Builder appOpenAdBuilder;
+    private Toolbar toolbar;
+    private SharedPref sharedPref;
+    private RecyclerView recyclerView;
+    private DashboardAdapter adapter;
+    private AppOpenAd.Builder appOpenAdBuilder;
+    private GDPR gdpr;
+    private LifecycleObserver lifecycleObserver = new DefaultLifecycleObserver() {
+        @Override
+        public void onStart(@NonNull LifecycleOwner owner) {
+            DefaultLifecycleObserver.super.onStart(owner);
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                if (Constant.OPEN_ADS_ON_RESUME) {
+                    if (AppOpenAd.isAppOpenAdLoaded) {
+                        if (appOpenAdBuilder != null) {
+                            appOpenAdBuilder.show();
+                        }
+                    }
+                }
+            }, 100);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedPref = new SharedPref(this);
         getAppTheme();
+        initAppConfig();
         setContentView(R.layout.activity_main);
+
+        setupToolbar();
+        initAds();
+        loadGdpr();
+        loadOpenAds();
 
         if (Constant.FORCE_TO_SHOW_APP_OPEN_AD_ON_START) {
             ProcessLifecycleOwner.get().getLifecycle().addObserver(lifecycleObserver);
         }
 
+        setupDashboard();
+    }
+
+    private void initAppConfig() {
+        Constant.AD_NETWORK = sharedPref.getAdNetwork();
+        Constant.BACKUP_AD_NETWORK = sharedPref.getBackupAdNetwork();
+        Constant.OPEN_ADS_ON_RESUME = sharedPref.getIsAppOpenAdEnabled();
+    }
+
+    private void setupToolbar() {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.app_name);
+        }
+    }
 
-        bannerAdView = findViewById(R.id.banner_ad_view);
-        bannerAdView.addView(View.inflate(this, com.partharoypc.adglide.R.layout.view_banner_ad, null));
+    private void setupDashboard() {
+        recyclerView = findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        initAds();
-        loadGdpr();
-        loadOpenAds();
-        loadBannerAd();
-        loadInterstitialAd();
-        loadRewardedAd();
+        List<DashboardItem> items = new ArrayList<>();
+        items.add(new DashboardItem("Banner Ads", "Standard and Collapsible Banner Ads", R.mipmap.ic_launcher,
+                ActivityBanner.class));
+        items.add(new DashboardItem("Interstitial Ads", "Full screen ads", R.mipmap.ic_launcher,
+                ActivityInterstitial.class));
+        items.add(new DashboardItem("Rewarded Ads", "Reward users for watching ads", R.mipmap.ic_launcher,
+                ActivityRewarded.class));
+        items.add(new DashboardItem("Native Ads", "Ads that blend into content", R.mipmap.ic_launcher,
+                ActivityNative.class));
 
-        nativeAdViewContainer = findViewById(R.id.native_ad);
-        setNativeAdStyle(nativeAdViewContainer);
-        loadNativeAd();
-
-        btnInterstitial = findViewById(R.id.btn_interstitial);
-        btnInterstitial.setOnClickListener(v -> {
-            startActivity(new Intent(getApplicationContext(), SecondActivity.class));
-            showInterstitialAd();
-            destroyBannerAd();
-        });
-
-        btnRewarded = findViewById(R.id.btn_rewarded);
-        btnRewarded.setOnClickListener(view -> showRewardedAd());
-
-        btnRewarded2 = findViewById(R.id.btn_rewarded2);
-        btnRewarded2.setOnClickListener(view -> loadAndShowRewardedAd());
-
-        findViewById(R.id.btn_medium_rectangle).setOnClickListener(
-                v -> startActivity(new Intent(getApplicationContext(), ActivityMediumRectangle.class)));
-        findViewById(R.id.btn_native_fragment).setOnClickListener(
-                v -> startActivity(new Intent(getApplicationContext(), ActivityNativeFragment.class)));
-        findViewById(R.id.btn_native_view_pager).setOnClickListener(
-                v -> startActivity(new Intent(getApplicationContext(), ActivityNativeViewPager.class)));
-
-        btnSelectAds = findViewById(R.id.btn_select_ads);
-        btnSelectAds.setOnClickListener(v -> showAdChooser());
-
-        btnNativeAdStyle = findViewById(R.id.btn_native_ad_style);
-        btnNativeAdStyle.setOnClickListener(v -> changeNativeAdStyle());
-
-        switchAppTheme();
-
+        adapter = new DashboardAdapter(this, items);
+        recyclerView.setAdapter(adapter);
     }
 
     private void initAds() {
-        adNetwork = new AdNetwork.Initialize(this)
+        new AdNetwork.Initialize(this)
                 .setAdStatus(Constant.AD_STATUS)
                 .setAdNetwork(Constant.AD_NETWORK)
                 .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
@@ -170,210 +154,28 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    LifecycleObserver lifecycleObserver = new DefaultLifecycleObserver() {
-        @Override
-        public void onStart(@NonNull LifecycleOwner owner) {
-            DefaultLifecycleObserver.super.onStart(owner);
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                if (Constant.OPEN_ADS_ON_RESUME) {
-                    if (AppOpenAd.isAppOpenAdLoaded) {
-                        appOpenAdBuilder.show();
-                    }
-                }
-            }, 100);
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            startActivity(new Intent(getApplicationContext(), ActivitySettings.class));
+            return true;
+        } else if (id == R.id.action_theme) {
+            toggleTheme();
+            return true;
         }
-    };
-
-    private void loadBannerAd() {
-        bannerAd = new BannerAd.Builder(this)
-                .setAdStatus(Constant.AD_STATUS)
-                .setAdNetwork(Constant.AD_NETWORK)
-                .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
-                .setAdMobBannerId(Constant.ADMOB_BANNER_ID)
-                .setGoogleAdManagerBannerId(Constant.GOOGLE_AD_MANAGER_BANNER_ID)
-                .setFanBannerId(Constant.FAN_BANNER_ID)
-                .setUnityBannerId(Constant.UNITY_BANNER_ID)
-                .setAppLovinBannerId(Constant.APPLOVIN_BANNER_ID)
-                .setAppLovinBannerZoneId(Constant.APPLOVIN_BANNER_ZONE_ID)
-                .setIronSourceBannerId(Constant.IRONSOURCE_BANNER_ID)
-                .setWortiseBannerId(Constant.WORTISE_BANNER_ID)
-                .setDarkTheme(sharedPref.getIsDarkTheme())
-                .build();
+        return super.onOptionsItemSelected(item);
     }
 
-    private void loadMediumRectangleAd() {
-        mediumRectangleAd = new MediumRectangleAd.Builder(this)
-                .setAdStatus(Constant.AD_STATUS)
-                .setAdNetwork(Constant.AD_NETWORK)
-                .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
-                .setAdMobBannerId(Constant.ADMOB_BANNER_ID)
-                .setGoogleAdManagerBannerId(Constant.GOOGLE_AD_MANAGER_BANNER_ID)
-                .setFanBannerId(Constant.FAN_BANNER_ID)
-                .setUnityBannerId(Constant.UNITY_BANNER_ID)
-                .setAppLovinBannerId(Constant.APPLOVIN_BANNER_ID)
-                .setAppLovinBannerZoneId(Constant.APPLOVIN_BANNER_ZONE_ID)
-                .setIronSourceBannerId(Constant.IRONSOURCE_BANNER_ID)
-                .setDarkTheme(sharedPref.getIsDarkTheme())
-                .build();
-    }
-
-    private void loadInterstitialAd() {
-        interstitialAd = new InterstitialAd.Builder(this)
-                .setAdStatus(Constant.AD_STATUS)
-                .setAdNetwork(Constant.AD_NETWORK)
-                .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
-                .setAdMobInterstitialId(Constant.ADMOB_INTERSTITIAL_ID)
-                .setGoogleAdManagerInterstitialId(Constant.GOOGLE_AD_MANAGER_INTERSTITIAL_ID)
-                .setFanInterstitialId(Constant.FAN_INTERSTITIAL_ID)
-                .setUnityInterstitialId(Constant.UNITY_INTERSTITIAL_ID)
-                .setAppLovinInterstitialId(Constant.APPLOVIN_INTERSTITIAL_ID)
-                .setAppLovinInterstitialZoneId(Constant.APPLOVIN_INTERSTITIAL_ZONE_ID)
-                .setIronSourceInterstitialId(Constant.IRONSOURCE_INTERSTITIAL_ID)
-                .setWortiseInterstitialId(Constant.WORTISE_INTERSTITIAL_ID)
-                .setInterval(Constant.INTERSTITIAL_AD_INTERVAL)
-                .build(() -> {
-                    Log.d(TAG, "onAdDismissed");
-                });
-    }
-
-    private void loadRewardedAd() {
-        rewardedAd = new RewardedAd.Builder(this)
-                .setAdStatus(Constant.AD_STATUS)
-                .setMainAds(Constant.AD_NETWORK)
-                .setBackupAds(Constant.BACKUP_AD_NETWORK)
-                .setAdMobRewardedId(Constant.ADMOB_REWARDED_ID)
-                .setAdManagerRewardedId(Constant.GOOGLE_AD_MANAGER_REWARDED_ID)
-                .setFanRewardedId(Constant.FAN_REWARDED_ID)
-                .setUnityRewardedId(Constant.UNITY_REWARDED_ID)
-                .setApplovinMaxRewardedId(Constant.APPLOVIN_MAX_REWARDED_ID)
-                .setApplovinDiscRewardedZoneId(Constant.APPLOVIN_DISC_REWARDED_ZONE_ID)
-                .setIronSourceRewardedId(Constant.IRONSOURCE_REWARDED_ID)
-                .setWortiseRewardedId(Constant.WORTISE_REWARDED_ID)
-                .build(new OnRewardedAdCompleteListener() {
-                    @Override
-                    public void onRewardedAdComplete() {
-                        // complete
-                        Toast.makeText(getApplicationContext(), "Rewarded complete", Toast.LENGTH_SHORT).show();
-                    }
-                }, new OnRewardedAdDismissedListener() {
-                    @Override
-                    public void onRewardedAdDismissed() {
-                        // dismiss
-                    }
-                });
-    }
-
-    private void showRewardedAd() {
-        rewardedAd.show(new OnRewardedAdCompleteListener() {
-            @Override
-            public void onRewardedAdComplete() {
-                Toast.makeText(getApplicationContext(), "Rewarded complete", Toast.LENGTH_SHORT).show();
-            }
-        }, new OnRewardedAdDismissedListener() {
-            @Override
-            public void onRewardedAdDismissed() {
-
-            }
-        }, new OnRewardedAdErrorListener() {
-            @Override
-            public void onRewardedAdError() {
-                Toast.makeText(getApplicationContext(), "Rewarded error", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void loadAndShowRewardedAd() {
-        rewardedAd = new RewardedAd.Builder(this)
-                .setAdStatus(Constant.AD_STATUS)
-                .setMainAds(Constant.AD_NETWORK)
-                .setBackupAds(Constant.BACKUP_AD_NETWORK)
-                .setAdMobRewardedId(Constant.ADMOB_REWARDED_ID)
-                .setAdManagerRewardedId(Constant.GOOGLE_AD_MANAGER_REWARDED_ID)
-                .setFanRewardedId(Constant.FAN_REWARDED_ID)
-                .setUnityRewardedId(Constant.UNITY_REWARDED_ID)
-                .setApplovinMaxRewardedId(Constant.APPLOVIN_MAX_REWARDED_ID)
-                .setApplovinDiscRewardedZoneId(Constant.APPLOVIN_DISC_REWARDED_ZONE_ID)
-                .setIronSourceRewardedId(Constant.IRONSOURCE_REWARDED_ID)
-                .setWortiseRewardedId(Constant.WORTISE_REWARDED_ID)
-                .build(() -> {
-                    // onRewardedAdLoaded
-                    Toast.makeText(getApplicationContext(), "Rewarded loaded, show ad", Toast.LENGTH_SHORT).show();
-                }, () -> {
-                    // onRewardedAdError
-                    Toast.makeText(getApplicationContext(), "Rewarded error", Toast.LENGTH_SHORT).show();
-                }, () -> {
-                    // onRewardedAdDismissed
-                    Toast.makeText(getApplicationContext(), "Rewarded dismissed", Toast.LENGTH_SHORT).show();
-                }, () -> {
-                    // onRewardedAdComplete
-                    Toast.makeText(getApplicationContext(), "Complete, user earn rewards", Toast.LENGTH_SHORT).show();
-                });
-    }
-
-    private void showInterstitialAd() {
-        interstitialAd.show(() -> {
-            Log.d(TAG, "onAdShowed");
-        }, () -> {
-            Log.d(TAG, "onAdDismissed");
-        });
-
-    }
-
-    private void loadNativeAd() {
-        nativeAd = new NativeAd.Builder(this)
-                .setAdStatus(Constant.AD_STATUS)
-                .setAdNetwork(Constant.AD_NETWORK)
-                .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
-                .setAdMobNativeId(Constant.ADMOB_NATIVE_ID)
-                .setAdManagerNativeId(Constant.GOOGLE_AD_MANAGER_NATIVE_ID)
-                .setFanNativeId(Constant.FAN_NATIVE_ID)
-                .setAppLovinNativeId(Constant.APPLOVIN_NATIVE_MANUAL_ID)
-                .setAppLovinDiscoveryMrecZoneId(Constant.APPLOVIN_BANNER_MREC_ZONE_ID)
-                .setWortiseNativeId(Constant.WORTISE_NATIVE_ID)
-                .setNativeAdStyle(Constant.NATIVE_STYLE)
-                .setNativeAdBackgroundColor(R.color.colorNativeBackgroundLight, R.color.colorNativeBackgroundDark)
-                .setPadding(0, 0, 0, 0)
-                .setDarkTheme(sharedPref.getIsDarkTheme())
-                .build();
-    }
-
-    private void loadNativeAdView(View view) {
-        nativeAdView = new NativeAdView.Builder(this)
-                .setAdStatus(Constant.AD_STATUS)
-                .setAdNetwork(Constant.AD_NETWORK)
-                .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
-                .setAdMobNativeId(Constant.ADMOB_NATIVE_ID)
-                .setAdManagerNativeId(Constant.GOOGLE_AD_MANAGER_NATIVE_ID)
-                .setFanNativeId(Constant.FAN_NATIVE_ID)
-                .setAppLovinNativeId(Constant.APPLOVIN_NATIVE_MANUAL_ID)
-                .setAppLovinDiscoveryMrecZoneId(Constant.APPLOVIN_BANNER_MREC_ZONE_ID)
-                .setWortiseNativeId(Constant.WORTISE_NATIVE_ID)
-                .setNativeAdStyle(Constant.NATIVE_STYLE)
-                .setNativeAdBackgroundColor(R.color.colorNativeBackgroundLight, R.color.colorNativeBackgroundDark)
-                .setDarkTheme(sharedPref.getIsDarkTheme())
-                .setView(view)
-                .build();
-
-        nativeAdView.setPadding(0, 0, 0, 0);
-    }
-
-    @Override
-    public void onBackPressed() {
-        showExitDialog();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        destroyBannerAd();
-        destroyAppOpenAd();
-        Constant.isAppOpen = false;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        bannerAd.loadBannerAd();
+    private void toggleTheme() {
+        sharedPref.setIsDarkTheme(!sharedPref.getIsDarkTheme());
+        recreate();
     }
 
     public void getAppTheme() {
@@ -384,142 +186,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void switchAppTheme() {
-        switchMaterial = findViewById(R.id.switch_theme);
-        switchMaterial.setChecked(sharedPref.getIsDarkTheme());
-        switchMaterial.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            sharedPref.setIsDarkTheme(isChecked);
-            recreate();
-        });
-    }
-
-    private void showAdChooser() {
-        final String[] ads = { "AdMob", "Google Ad Manager", "Start.io", "AppLovin MAX", "AppLovin Discovery",
-                "Unity Ads", "ironSource", "FAN (Waterfall)", "Wortise" };
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Select Ad");
-        builder.setItems(ads, (dialog, which) -> {
-            String selectedItem = ads[which];
-            switch (selectedItem) {
-                case "AdMob":
-                    Constant.AD_NETWORK = ADMOB;
-                    break;
-                case "Google Ad Manager":
-                    Constant.AD_NETWORK = GOOGLE_AD_MANAGER;
-                    break;
-                case "Start.io":
-                    Constant.AD_NETWORK = STARTAPP;
-                    break;
-                case "AppLovin MAX":
-                    Constant.AD_NETWORK = APPLOVIN_MAX;
-                    break;
-                case "AppLovin Discovery":
-                    Constant.AD_NETWORK = APPLOVIN_DISCOVERY;
-                    break;
-                case "Unity Ads":
-                    Constant.AD_NETWORK = UNITY;
-                    break;
-                case "ironSource":
-                    Constant.AD_NETWORK = IRONSOURCE;
-                    break;
-                case "FAN (Waterfall)":
-                    Constant.AD_NETWORK = FAN;
-                    break;
-                case "Wortise":
-                    Constant.AD_NETWORK = WORTISE;
-                    break;
-                default:
-                    Constant.AD_NETWORK = ADMOB;
-                    break;
-            }
-            recreate();
-        });
-        builder.show();
-    }
-
-    private void setNativeAdStyle(LinearLayout nativeAdView) {
-        switch (Constant.NATIVE_STYLE) {
-            case "news":
-                nativeAdView.addView(View.inflate(this, com.partharoypc.adglide.R.layout.view_native_ad_news, null));
-                break;
-            case "radio":
-                nativeAdView.addView(View.inflate(this, com.partharoypc.adglide.R.layout.view_native_ad_radio, null));
-                break;
-            case "video_small":
-                nativeAdView
-                        .addView(View.inflate(this, com.partharoypc.adglide.R.layout.view_native_ad_video_small, null));
-                break;
-            case "video_large":
-                nativeAdView
-                        .addView(View.inflate(this, com.partharoypc.adglide.R.layout.view_native_ad_video_large, null));
-                break;
-            default:
-                nativeAdView.addView(View.inflate(this, com.partharoypc.adglide.R.layout.view_native_ad_medium, null));
-                break;
-        }
-    }
-
-    private void changeNativeAdStyle() {
-        final String[] styles = { "Default", "News", "Radio", "Video Small", "Video Large" };
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Select Native Style");
-        builder.setItems(styles, (dialog, which) -> {
-            String selectedItem = styles[which];
-            switch (selectedItem) {
-                case "Default":
-                    Constant.NATIVE_STYLE = STYLE_DEFAULT;
-                    break;
-                case "News":
-                    Constant.NATIVE_STYLE = STYLE_NEWS;
-                    break;
-                case "Radio":
-                    Constant.NATIVE_STYLE = STYLE_RADIO;
-                    break;
-                case "Video Small":
-                    Constant.NATIVE_STYLE = STYLE_VIDEO_SMALL;
-                    break;
-                case "Video Large":
-                    Constant.NATIVE_STYLE = STYLE_VIDEO_LARGE;
-                    break;
-                default:
-                    Constant.NATIVE_STYLE = STYLE_DEFAULT;
-                    break;
-            }
-            recreate();
-        });
-        builder.show();
-    }
-
-    private void showExitDialog() {
-        LayoutInflater inflater = LayoutInflater.from(this);
-        View view = inflater.inflate(R.layout.dialog_exit, null);
-
-        LinearLayout nativeAdViewContainer = view.findViewById(R.id.native_ad_view);
-        setNativeAdStyle(nativeAdViewContainer);
-        loadNativeAdView(view);
-
-        AlertDialog.Builder dialog = new MaterialAlertDialogBuilder(this);
-        dialog.setView(view);
-        dialog.setCancelable(false);
-        dialog.setPositiveButton("Exit", (dialogInterface, i) -> {
-            super.onBackPressed();
-            destroyBannerAd();
-            destroyAppOpenAd();
-            Constant.isAppOpen = false;
-        });
-        dialog.setNegativeButton("Cancel", null);
-        dialog.show();
-    }
-
-    private void destroyBannerAd() {
-        bannerAd.destroyAndDetachBanner();
-    }
-
-    private void destroyAppOpenAd() {
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
         if (Constant.FORCE_TO_SHOW_APP_OPEN_AD_ON_START) {
-            appOpenAdBuilder.destroyOpenAd();
+            if (appOpenAdBuilder != null) {
+                appOpenAdBuilder.destroyOpenAd();
+            }
             ProcessLifecycleOwner.get().getLifecycle().removeObserver(lifecycleObserver);
         }
     }
-
 }

@@ -1,22 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="colorPrimary">#6200EE</color> <!-- Material Deep Purple -->
+    <color name="colorPrimaryVariant">#3700B3</color>
+    <color name="colorOnPrimary">#FFFFFF</color>
+    <color name="colorSecondary">#03DAC6</color> <!-- Material Teal -->
+    <color name="colorSecondaryVariant">#018786</color>
+    <color name="colorOnSecondary">#000000</color>
+    <color name="colorBackground">#F5F5F5</color>
+    <color name="colorSurface">#FFFFFF</color>
+    <color name="colorError">#B00020</color>
+    <color name="colorOnBackground">#000000</color>
+    <color name="colorOnSurface">#000000</color>
+    <color name="colorOnError">#FFFFFF</color>
 
-    <color name="colorPrimary">#4CAD4E</color>
-    <color name="colorPrimaryDark">#47A149</color>
-    <color name="colorAccent">#56C359</color>
-    <color name="colorLight">#FFFFFF</color>
+    <!-- Dark Theme Colors -->
+    <color name="colorPrimaryDark">#BB86FC</color>
+    <color name="colorOnPrimaryDark">#000000</color>
+    <color name="colorSecondaryDark">#03DAC6</color>
+    <color name="colorOnSecondaryDark">#000000</color>
+    <color name="colorBackgroundDark">#121212</color>
+    <color name="colorSurfaceDark">#121212</color>
+    <color name="colorErrorDark">#CF6679</color>
+    <color name="colorOnBackgroundDark">#FFFFFF</color>
+    <color name="colorOnSurfaceDark">#FFFFFF</color>
+    <color name="colorOnErrorDark">#000000</color>
 
-    <!--dark theme color-->
-    <color name="colorStatusBarDark">#101D24</color>
-    <color name="colorToolbarDark">#222D36</color>
-    <color name="colorAccentDark">#56C359</color>
-    <color name="colorBackgroundDark">#101D24</color>
+    <color name="colorNativeBackgroundLight">#FFFFFF</color>
+    <color name="colorNativeBackgroundDark">#2d2d2d</color>
 
-    <color name="colorBlue">#2196F3</color>
-    <color name="colorGreen">#4CAF50</color>
-    <color name="colorPurple">#9c27b0</color>
-
-    <color name="colorNativeBackgroundLight">#EAEAEA</color>
-    <color name="colorNativeBackgroundDark">#424242</color>
-
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="grey_200">#EEEEEE</color>
+    <color name="grey_600">#757575</color>
 </resources>
