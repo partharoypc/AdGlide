@@ -11,9 +11,16 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
-        maven { url 'https://artifacts.applovin.com/android' }
+        maven {
+            url 'https://artifacts.applovin.com/android'
+            content {
+                includeGroup "com.applovin"
+            }
+        }
+        maven { url 'https://artifact.bytedance.com/repository/pangle' }
         maven { url 'https://maven.wortise.com/artifactory/public' }
         maven { url 'https://android-sdk.is.com/' }
+        maven { url 'https://cboost.jfrog.io/artifactory/chartboost-ads/' }
     }
 }
 rootProject.name = "AdGlideSdk"

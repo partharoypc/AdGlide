@@ -39,7 +39,7 @@ import com.google.android.gms.ads.admanager.AdManagerInterstitialAdLoadCallback;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.ironsource.mediationsdk.IronSource;
 import com.ironsource.mediationsdk.logger.IronSourceError;
-import com.ironsource.mediationsdk.sdk.InterstitialListener;
+import com.ironsource.mediationsdk.sdk.LevelPlayInterstitialListener;
 import com.partharoypc.adglide.util.OnInterstitialAdDismissedListener;
 import com.partharoypc.adglide.util.OnInterstitialAdShowedListener;
 import com.partharoypc.adglide.util.Tools;
@@ -49,7 +49,7 @@ import com.startapp.sdk.adsbase.adlisteners.AdEventListener;
 import com.unity3d.ads.IUnityAdsLoadListener;
 import com.unity3d.ads.IUnityAdsShowListener;
 import com.unity3d.ads.UnityAds;
-import com.wortise.ads.interstitial.InterstitialAd;
+// import com.wortise.ads.interstitial.InterstitialAd; // Removed to avoid collision
 
 public class InterstitialAd {
 
@@ -362,58 +362,64 @@ public class InterstitialAd {
                         break;
 
                     case APPLOVIN_DISCOVERY:
-                        appLovinDiscoveryInterstitialAd = com.applovin.adview.AppLovinInterstitialAd
-                                .create(AppLovinSdkUtils.getZone(activity.getApplicationContext(),
-                                        appLovinInterstitialZoneId, activity), activity);
-                        appLovinDiscoveryInterstitialAd.setAdLoadListener(new AppLovinAdLoadListener() {
-                            @Override
-                            public void adReceived(AppLovinAd ad) {
-                                Log.d(TAG, "AppLovin Discovery Interstitial Ad loaded");
-                            }
-
-                            @Override
-                            public void failedToReceiveAd(int errorCode) {
-                                loadBackupInterstitialAd();
-                                Log.d(TAG, "AppLovin Discovery Interstitial Ad failed to load");
-                            }
-                        });
-                        appLovinDiscoveryInterstitialAd.loadNextAd();
+                        /*
+                         * appLovinDiscoveryInterstitialAd = com.applovin.adview.AppLovinInterstitialAd
+                         * .create(AppLovinSdkUtils.getZone(activity.getApplicationContext(),
+                         * appLovinInterstitialZoneId, activity), activity);
+                         * appLovinDiscoveryInterstitialAd.setAdLoadListener(new
+                         * AppLovinAdLoadListener() {
+                         * 
+                         * @Override
+                         * public void adReceived(AppLovinAd ad) {
+                         * Log.d(TAG, "AppLovin Discovery Interstitial Ad loaded");
+                         * }
+                         * 
+                         * @Override
+                         * public void failedToReceiveAd(int errorCode) {
+                         * loadBackupInterstitialAd();
+                         * Log.d(TAG, "AppLovin Discovery Interstitial Ad failed to load");
+                         * }
+                         * });
+                         * appLovinDiscoveryInterstitialAd.loadNextAd();
+                         */
                         break;
 
                     case IRONSOURCE:
                     case FAN_BIDDING_IRONSOURCE:
-                        IronSource.setLevelPlayInterstitialListener(new InterstitialListener() {
+                        IronSource.setLevelPlayInterstitialListener(new LevelPlayInterstitialListener() {
                             @Override
-                            public void onInterstitialAdReady() {
+                            public void onAdReady(com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                                 Log.d(TAG, "IronSource Interstitial Ad loaded");
                             }
 
                             @Override
-                            public void onInterstitialAdLoadFailed(IronSourceError ironSourceError) {
+                            public void onAdLoadFailed(IronSourceError ironSourceError) {
                                 loadBackupInterstitialAd();
                                 Log.d(TAG, "IronSource Interstitial Ad failed to load: "
                                         + ironSourceError.getErrorMessage());
                             }
 
                             @Override
-                            public void onInterstitialAdOpened() {
+                            public void onAdOpened(com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                             }
 
                             @Override
-                            public void onInterstitialAdClosed() {
+                            public void onAdClosed(com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                                 loadInterstitialAd();
                             }
 
                             @Override
-                            public void onInterstitialAdShowSucceeded() {
+                            public void onAdShowSucceeded(
+                                    com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                             }
 
                             @Override
-                            public void onInterstitialAdShowFailed(IronSourceError ironSourceError) {
+                            public void onAdShowFailed(IronSourceError ironSourceError,
+                                    com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                             }
 
                             @Override
-                            public void onInterstitialAdClicked() {
+                            public void onAdClicked(com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                             }
                         });
                         IronSource.loadInterstitial();
@@ -478,6 +484,12 @@ public class InterstitialAd {
                             @Override
                             public void onInterstitialShown(
                                     @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
+                            }
+
+                            @Override
+                            public void onInterstitialRevenuePaid(
+                                    @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd,
+                                    @NonNull com.wortise.ads.RevenueData revenueData) {
                             }
                         });
                         wortiseInterstitialAd.loadAd();
@@ -672,56 +684,62 @@ public class InterstitialAd {
                         break;
 
                     case APPLOVIN_DISCOVERY:
-                        appLovinDiscoveryInterstitialAd = com.applovin.adview.AppLovinInterstitialAd
-                                .create(AppLovinSdkUtils.getZone(activity.getApplicationContext(),
-                                        appLovinInterstitialZoneId, activity), activity);
-                        appLovinDiscoveryInterstitialAd.setAdLoadListener(new AppLovinAdLoadListener() {
-                            @Override
-                            public void adReceived(AppLovinAd ad) {
-                                Log.d(TAG, "AppLovin Discovery Interstitial Ad loaded");
-                            }
-
-                            @Override
-                            public void failedToReceiveAd(int errorCode) {
-                                Log.d(TAG, "AppLovin Discovery Interstitial Ad failed to load");
-                            }
-                        });
-                        appLovinDiscoveryInterstitialAd.loadNextAd();
+                        /*
+                         * appLovinDiscoveryInterstitialAd = com.applovin.adview.AppLovinInterstitialAd
+                         * .create(AppLovinSdkUtils.getZone(activity.getApplicationContext(),
+                         * appLovinInterstitialZoneId, activity), activity);
+                         * appLovinDiscoveryInterstitialAd.setAdLoadListener(new
+                         * AppLovinAdLoadListener() {
+                         * 
+                         * @Override
+                         * public void adReceived(AppLovinAd ad) {
+                         * Log.d(TAG, "AppLovin Discovery Interstitial Ad loaded");
+                         * }
+                         * 
+                         * @Override
+                         * public void failedToReceiveAd(int errorCode) {
+                         * Log.d(TAG, "AppLovin Discovery Interstitial Ad failed to load");
+                         * }
+                         * });
+                         * appLovinDiscoveryInterstitialAd.loadNextAd();
+                         */
                         break;
 
                     case IRONSOURCE:
                     case FAN_BIDDING_IRONSOURCE:
-                        IronSource.setLevelPlayInterstitialListener(new InterstitialListener() {
+                        IronSource.setLevelPlayInterstitialListener(new LevelPlayInterstitialListener() {
                             @Override
-                            public void onInterstitialAdReady() {
+                            public void onAdReady(com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                                 Log.d(TAG, "IronSource Interstitial Ad loaded");
                             }
 
                             @Override
-                            public void onInterstitialAdLoadFailed(IronSourceError ironSourceError) {
+                            public void onAdLoadFailed(IronSourceError ironSourceError) {
                                 Log.d(TAG, "IronSource Interstitial Ad failed to load: "
                                         + ironSourceError.getErrorMessage());
                             }
 
                             @Override
-                            public void onInterstitialAdOpened() {
+                            public void onAdOpened(com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                             }
 
                             @Override
-                            public void onInterstitialAdClosed() {
+                            public void onAdClosed(com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                                 loadInterstitialAd();
                             }
 
                             @Override
-                            public void onInterstitialAdShowSucceeded() {
+                            public void onAdShowSucceeded(
+                                    com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                             }
 
                             @Override
-                            public void onInterstitialAdShowFailed(IronSourceError ironSourceError) {
+                            public void onAdShowFailed(IronSourceError ironSourceError,
+                                    com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                             }
 
                             @Override
-                            public void onInterstitialAdClicked() {
+                            public void onAdClicked(com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                             }
                         });
                         IronSource.loadInterstitial();
@@ -784,6 +802,12 @@ public class InterstitialAd {
                             @Override
                             public void onInterstitialShown(
                                     @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
+                            }
+
+                            @Override
+                            public void onInterstitialRevenuePaid(
+                                    @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd,
+                                    @NonNull com.wortise.ads.RevenueData revenueData) {
                             }
                         });
                         wortiseInterstitialAd.loadAd();
@@ -871,12 +895,14 @@ public class InterstitialAd {
                             break;
 
                         case APPLOVIN_DISCOVERY:
-                            if (appLovinDiscoveryInterstitialAd != null
-                                    && appLovinDiscoveryInterstitialAd.isAdReadyToDisplay()) {
-                                appLovinDiscoveryInterstitialAd.show();
-                            } else {
-                                showBackupInterstitialAd();
-                            }
+                            /*
+                             * if (appLovinDiscoveryInterstitialAd != null
+                             * && appLovinDiscoveryInterstitialAd.isAdReadyToDisplay()) {
+                             * appLovinDiscoveryInterstitialAd.show();
+                             * } else {
+                             * showBackupInterstitialAd();
+                             * }
+                             */
                             break;
 
                         case IRONSOURCE:
@@ -955,10 +981,12 @@ public class InterstitialAd {
                         break;
 
                     case APPLOVIN_DISCOVERY:
-                        if (appLovinDiscoveryInterstitialAd != null
-                                && appLovinDiscoveryInterstitialAd.isAdReadyToDisplay()) {
-                            appLovinDiscoveryInterstitialAd.show();
-                        }
+                        /*
+                         * if (appLovinDiscoveryInterstitialAd != null
+                         * && appLovinDiscoveryInterstitialAd.isAdReadyToDisplay()) {
+                         * appLovinDiscoveryInterstitialAd.show();
+                         * }
+                         */
                         break;
 
                     case IRONSOURCE:
@@ -1177,59 +1205,65 @@ public class InterstitialAd {
                         break;
 
                     case APPLOVIN_DISCOVERY:
-                        appLovinDiscoveryInterstitialAd = com.applovin.adview.AppLovinInterstitialAd
-                                .create(AppLovinSdkUtils.getZone(activity.getApplicationContext(),
-                                        appLovinInterstitialZoneId, activity), activity);
-                        appLovinDiscoveryInterstitialAd.setAdLoadListener(new AppLovinAdLoadListener() {
-                            @Override
-                            public void adReceived(AppLovinAd ad) {
-                                Log.d(TAG, "AppLovin Discovery Interstitial Ad loaded");
-                            }
-
-                            @Override
-                            public void failedToReceiveAd(int errorCode) {
-                                loadBackupInterstitialAd(onInterstitialAdDismissedListener);
-                                Log.d(TAG, "AppLovin Discovery Interstitial Ad failed to load");
-                            }
-                        });
-                        appLovinDiscoveryInterstitialAd.loadNextAd();
+                        /*
+                         * appLovinDiscoveryInterstitialAd = com.applovin.adview.AppLovinInterstitialAd
+                         * .create(AppLovinSdkUtils.getZone(activity.getApplicationContext(),
+                         * appLovinInterstitialZoneId, activity), activity);
+                         * appLovinDiscoveryInterstitialAd.setAdLoadListener(new
+                         * AppLovinAdLoadListener() {
+                         * 
+                         * @Override
+                         * public void adReceived(AppLovinAd ad) {
+                         * Log.d(TAG, "AppLovin Discovery Interstitial Ad loaded");
+                         * }
+                         * 
+                         * @Override
+                         * public void failedToReceiveAd(int errorCode) {
+                         * loadBackupInterstitialAd(onInterstitialAdDismissedListener);
+                         * Log.d(TAG, "AppLovin Discovery Interstitial Ad failed to load");
+                         * }
+                         * });
+                         * appLovinDiscoveryInterstitialAd.loadNextAd();
+                         */
                         break;
 
                     case IRONSOURCE:
                     case FAN_BIDDING_IRONSOURCE:
-                        IronSource.setLevelPlayInterstitialListener(new InterstitialListener() {
+                        IronSource.setLevelPlayInterstitialListener(new LevelPlayInterstitialListener() {
                             @Override
-                            public void onInterstitialAdReady() {
+                            public void onAdReady(com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                                 Log.d(TAG, "IronSource Interstitial Ad loaded");
                             }
 
                             @Override
-                            public void onInterstitialAdLoadFailed(IronSourceError ironSourceError) {
+                            public void onAdLoadFailed(IronSourceError ironSourceError) {
                                 loadBackupInterstitialAd(onInterstitialAdDismissedListener);
                                 Log.d(TAG, "IronSource Interstitial Ad failed to load: "
                                         + ironSourceError.getErrorMessage());
                             }
 
                             @Override
-                            public void onInterstitialAdOpened() {
+                            public void onAdOpened(com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                             }
 
                             @Override
-                            public void onInterstitialAdClosed() {
+                            public void onAdClosed(com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                                 loadInterstitialAd(onInterstitialAdDismissedListener);
                                 onInterstitialAdDismissedListener.onInterstitialAdDismissed();
                             }
 
                             @Override
-                            public void onInterstitialAdShowSucceeded() {
+                            public void onAdShowSucceeded(
+                                    com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                             }
 
                             @Override
-                            public void onInterstitialAdShowFailed(IronSourceError ironSourceError) {
+                            public void onAdShowFailed(IronSourceError ironSourceError,
+                                    com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                             }
 
                             @Override
-                            public void onInterstitialAdClicked() {
+                            public void onAdClicked(com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                             }
                         });
                         IronSource.loadInterstitial();
@@ -1295,6 +1329,12 @@ public class InterstitialAd {
                             @Override
                             public void onInterstitialShown(
                                     @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
+                            }
+
+                            @Override
+                            public void onInterstitialRevenuePaid(
+                                    @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd,
+                                    @NonNull com.wortise.ads.RevenueData revenueData) {
                             }
                         });
                         wortiseInterstitialAd.loadAd();
@@ -1493,57 +1533,63 @@ public class InterstitialAd {
                         break;
 
                     case APPLOVIN_DISCOVERY:
-                        appLovinDiscoveryInterstitialAd = com.applovin.adview.AppLovinInterstitialAd
-                                .create(AppLovinSdkUtils.getZone(activity.getApplicationContext(),
-                                        appLovinInterstitialZoneId, activity), activity);
-                        appLovinDiscoveryInterstitialAd.setAdLoadListener(new AppLovinAdLoadListener() {
-                            @Override
-                            public void adReceived(AppLovinAd ad) {
-                                Log.d(TAG, "AppLovin Discovery Interstitial Ad loaded");
-                            }
-
-                            @Override
-                            public void failedToReceiveAd(int errorCode) {
-                                Log.d(TAG, "AppLovin Discovery Interstitial Ad failed to load");
-                            }
-                        });
-                        appLovinDiscoveryInterstitialAd.loadNextAd();
+                        /*
+                         * appLovinDiscoveryInterstitialAd = com.applovin.adview.AppLovinInterstitialAd
+                         * .create(AppLovinSdkUtils.getZone(activity.getApplicationContext(),
+                         * appLovinInterstitialZoneId, activity), activity);
+                         * appLovinDiscoveryInterstitialAd.setAdLoadListener(new
+                         * AppLovinAdLoadListener() {
+                         * 
+                         * @Override
+                         * public void adReceived(AppLovinAd ad) {
+                         * Log.d(TAG, "AppLovin Discovery Interstitial Ad loaded");
+                         * }
+                         * 
+                         * @Override
+                         * public void failedToReceiveAd(int errorCode) {
+                         * Log.d(TAG, "AppLovin Discovery Interstitial Ad failed to load");
+                         * }
+                         * });
+                         * appLovinDiscoveryInterstitialAd.loadNextAd();
+                         */
                         break;
 
                     case IRONSOURCE:
                     case FAN_BIDDING_IRONSOURCE:
-                        IronSource.setLevelPlayInterstitialListener(new InterstitialListener() {
+                        IronSource.setLevelPlayInterstitialListener(new LevelPlayInterstitialListener() {
                             @Override
-                            public void onInterstitialAdReady() {
+                            public void onAdReady(com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                                 Log.d(TAG, "IronSource Interstitial Ad loaded");
                             }
 
                             @Override
-                            public void onInterstitialAdLoadFailed(IronSourceError ironSourceError) {
+                            public void onAdLoadFailed(IronSourceError ironSourceError) {
                                 Log.d(TAG, "IronSource Interstitial Ad failed to load: "
                                         + ironSourceError.getErrorMessage());
                             }
 
                             @Override
-                            public void onInterstitialAdOpened() {
+                            public void onAdOpened(com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                             }
 
                             @Override
-                            public void onInterstitialAdClosed() {
+                            public void onAdClosed(com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                                 loadInterstitialAd(onInterstitialAdDismissedListener);
                                 onInterstitialAdDismissedListener.onInterstitialAdDismissed();
                             }
 
                             @Override
-                            public void onInterstitialAdShowSucceeded() {
+                            public void onAdShowSucceeded(
+                                    com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                             }
 
                             @Override
-                            public void onInterstitialAdShowFailed(IronSourceError ironSourceError) {
+                            public void onAdShowFailed(IronSourceError ironSourceError,
+                                    com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                             }
 
                             @Override
-                            public void onInterstitialAdClicked() {
+                            public void onAdClicked(com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
                             }
                         });
                         IronSource.loadInterstitial();
@@ -1607,6 +1653,12 @@ public class InterstitialAd {
                             @Override
                             public void onInterstitialShown(
                                     @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
+                            }
+
+                            @Override
+                            public void onInterstitialRevenuePaid(
+                                    @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd,
+                                    @NonNull com.wortise.ads.RevenueData revenueData) {
                             }
                         });
                         wortiseInterstitialAd.loadAd();
@@ -1705,14 +1757,16 @@ public class InterstitialAd {
                             break;
 
                         case APPLOVIN_DISCOVERY:
-                            if (appLovinDiscoveryInterstitialAd != null
-                                    && appLovinDiscoveryInterstitialAd.isAdReadyToDisplay()) {
-                                appLovinDiscoveryInterstitialAd.show();
-                                onInterstitialAdShowedListener.onInterstitialAdShowed();
-                            } else {
-                                showBackupInterstitialAd(onInterstitialAdShowedListener,
-                                        onInterstitialAdDismissedListener);
-                            }
+                            /*
+                             * if (appLovinDiscoveryInterstitialAd != null
+                             * && appLovinDiscoveryInterstitialAd.isAdReadyToDisplay()) {
+                             * appLovinDiscoveryInterstitialAd.show();
+                             * onInterstitialAdShowedListener.onInterstitialAdShowed();
+                             * } else {
+                             * showBackupInterstitialAd(onInterstitialAdShowedListener,
+                             * onInterstitialAdDismissedListener);
+                             * }
+                             */
                             break;
 
                         case IRONSOURCE:
@@ -1824,11 +1878,13 @@ public class InterstitialAd {
                         break;
 
                     case APPLOVIN_DISCOVERY:
-                        if (appLovinDiscoveryInterstitialAd != null
-                                && appLovinDiscoveryInterstitialAd.isAdReadyToDisplay()) {
-                            appLovinDiscoveryInterstitialAd.show();
-                            onInterstitialAdShowedListener.onInterstitialAdShowed();
-                        }
+                        /*
+                         * if (appLovinDiscoveryInterstitialAd != null
+                         * && appLovinDiscoveryInterstitialAd.isAdReadyToDisplay()) {
+                         * appLovinDiscoveryInterstitialAd.show();
+                         * onInterstitialAdShowedListener.onInterstitialAdShowed();
+                         * }
+                         */
                         break;
 
                     case IRONSOURCE:

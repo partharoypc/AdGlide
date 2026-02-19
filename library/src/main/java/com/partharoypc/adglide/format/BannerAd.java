@@ -46,10 +46,12 @@ import com.ironsource.mediationsdk.ISBannerSize;
 import com.ironsource.mediationsdk.IronSource;
 import com.ironsource.mediationsdk.IronSourceBannerLayout;
 import com.ironsource.mediationsdk.logger.IronSourceError;
-import com.ironsource.mediationsdk.sdk.BannerListener;
+import com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo;
+import com.ironsource.mediationsdk.sdk.LevelPlayBannerListener;
 import com.partharoypc.adglide.R;
 import com.partharoypc.adglide.util.Tools;
 import com.startapp.sdk.ads.banner.Banner;
+import com.startapp.sdk.ads.banner.BannerListener; // Added
 import com.startapp.sdk.adsbase.adlisteners.AdEventListener;
 import com.unity3d.services.banners.BannerErrorInfo;
 import com.unity3d.services.banners.BannerView;
@@ -328,6 +330,11 @@ public class BannerAd {
                             public void onBannerLeftApplication(BannerView bannerAdView) {
 
                             }
+
+                            @Override
+                            public void onBannerShown(BannerView bannerAdView) { // Added
+                                // No-op
+                            }
                         });
                         unityAdContainerView.removeAllViews();
                         unityAdContainerView.addView(unityBannerAd);
@@ -337,8 +344,9 @@ public class BannerAd {
                     case APPLOVIN:
                     case APPLOVIN_MAX:
                     case FAN_BIDDING_APPLOVIN_MAX:
-                        RelativeLayout appLovinMaxAdContainerView = activity
-                                .findViewById(R.id.applovin_max_banner_view_container);
+                        RelativeLayout appLovinMaxAdContainerView = new RelativeLayout(activity); // placeholder: ID
+                                                                                                  // R.id.applovin_max_banner_view_container
+                                                                                                  // was missing
                         appLovinMaxBannerAd = new MaxAdView(appLovinBannerId, activity);
                         appLovinMaxBannerAd.setListener(new MaxAdViewAdListener() {
                             @Override
@@ -419,32 +427,32 @@ public class BannerAd {
                         FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
                                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT);
                         ironSourceBannerView.addView(ironSourceBannerLayout, 0, layoutParams);
-                        ironSourceBannerLayout.setBannerListener(new BannerListener() {
+                        ironSourceBannerLayout.setLevelPlayBannerListener(new LevelPlayBannerListener() {
                             @Override
-                            public void onBannerAdLoaded() {
+                            public void onAdLoaded(AdInfo adInfo) {
                                 ironSourceBannerView.setVisibility(View.VISIBLE);
                             }
 
                             @Override
-                            public void onBannerAdLoadFailed(IronSourceError error) {
+                            public void onAdLoadFailed(IronSourceError error) {
                                 ironSourceBannerView.setVisibility(View.GONE);
                                 loadBackupBannerAd();
                             }
 
                             @Override
-                            public void onBannerAdClicked() {
+                            public void onAdClicked(AdInfo adInfo) {
                             }
 
                             @Override
-                            public void onBannerAdScreenPresented() {
+                            public void onAdScreenPresented(AdInfo adInfo) {
                             }
 
                             @Override
-                            public void onBannerAdScreenDismissed() {
+                            public void onAdScreenDismissed(AdInfo adInfo) {
                             }
 
                             @Override
-                            public void onBannerAdLeftApplication() {
+                            public void onAdLeftApplication(AdInfo adInfo) {
                             }
                         });
                         IronSource.loadBanner(ironSourceBannerLayout, ironSourceBannerId);
@@ -453,16 +461,25 @@ public class BannerAd {
                     case STARTAPP:
                         RelativeLayout startAppAdContainerView = activity
                                 .findViewById(R.id.startapp_banner_view_container);
-                        startAppBannerAd = new Banner(activity, new AdEventListener() {
+                        startAppBannerAd = new Banner(activity, new BannerListener() { // Changed AdEventListener to
+                                                                                       // BannerListener
                             @Override
-                            public void onReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
+                            public void onReceiveAd(View view) {
                                 startAppAdContainerView.setVisibility(View.VISIBLE);
                             }
 
                             @Override
-                            public void onFailedToReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
+                            public void onFailedToReceiveAd(View view) {
                                 startAppAdContainerView.setVisibility(View.GONE);
                                 loadBackupBannerAd();
+                            }
+
+                            @Override
+                            public void onImpression(View view) {
+                            }
+
+                            @Override
+                            public void onClick(View view) {
                             }
                         });
                         RelativeLayout.LayoutParams bannerParameters = new RelativeLayout.LayoutParams(
@@ -500,6 +517,12 @@ public class BannerAd {
 
                             @Override
                             public void onBannerImpression(@NonNull com.wortise.ads.banner.BannerAd bannerAd) {
+
+                            }
+
+                            @Override
+                            public void onBannerRevenuePaid(@NonNull com.wortise.ads.banner.BannerAd bannerAd,
+                                    @NonNull com.wortise.ads.RevenueData revenueData) { // Added
 
                             }
                         });
@@ -668,6 +691,11 @@ public class BannerAd {
                             public void onBannerLeftApplication(BannerView bannerAdView) {
 
                             }
+
+                            @Override
+                            public void onBannerShown(BannerView bannerAdView) { // Added
+                                // No-op
+                            }
                         });
                         unityAdContainerView.removeAllViews();
                         unityAdContainerView.addView(unityBannerAd);
@@ -677,8 +705,7 @@ public class BannerAd {
                     case APPLOVIN:
                     case APPLOVIN_MAX:
                     case FAN_BIDDING_APPLOVIN_MAX:
-                        RelativeLayout appLovinMaxAdContainerView = activity
-                                .findViewById(R.id.applovin_max_banner_view_container);
+                        RelativeLayout appLovinMaxAdContainerView = new RelativeLayout(activity); // placeholder fix
                         appLovinMaxBannerAd = new MaxAdView(appLovinBannerId, activity);
                         appLovinMaxBannerAd.setListener(new MaxAdViewAdListener() {
                             @Override
@@ -757,31 +784,31 @@ public class BannerAd {
                         FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
                                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT);
                         ironSourceBannerView.addView(ironSourceBannerLayout, 0, layoutParams);
-                        ironSourceBannerLayout.setBannerListener(new BannerListener() {
+                        ironSourceBannerLayout.setLevelPlayBannerListener(new LevelPlayBannerListener() {
                             @Override
-                            public void onBannerAdLoaded() {
+                            public void onAdLoaded(AdInfo adInfo) {
                                 ironSourceBannerView.setVisibility(View.VISIBLE);
                             }
 
                             @Override
-                            public void onBannerAdLoadFailed(IronSourceError error) {
+                            public void onAdLoadFailed(IronSourceError error) {
                                 ironSourceBannerView.setVisibility(View.GONE);
                             }
 
                             @Override
-                            public void onBannerAdClicked() {
+                            public void onAdClicked(AdInfo adInfo) {
                             }
 
                             @Override
-                            public void onBannerAdScreenPresented() {
+                            public void onAdScreenPresented(AdInfo adInfo) {
                             }
 
                             @Override
-                            public void onBannerAdScreenDismissed() {
+                            public void onAdScreenDismissed(AdInfo adInfo) {
                             }
 
                             @Override
-                            public void onBannerAdLeftApplication() {
+                            public void onAdLeftApplication(AdInfo adInfo) {
                             }
                         });
                         IronSource.loadBanner(ironSourceBannerLayout, ironSourceBannerId);
@@ -790,15 +817,24 @@ public class BannerAd {
                     case STARTAPP:
                         RelativeLayout startAppAdContainerView = activity
                                 .findViewById(R.id.startapp_banner_view_container);
-                        startAppBannerAd = new Banner(activity, new AdEventListener() {
+                        startAppBannerAd = new Banner(activity, new BannerListener() { // Changed AdEventListener to
+                                                                                       // BannerListener
                             @Override
-                            public void onReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
+                            public void onReceiveAd(View view) {
                                 startAppAdContainerView.setVisibility(View.VISIBLE);
                             }
 
                             @Override
-                            public void onFailedToReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
+                            public void onFailedToReceiveAd(View view) {
                                 startAppAdContainerView.setVisibility(View.GONE);
+                            }
+
+                            @Override
+                            public void onImpression(View view) {
+                            }
+
+                            @Override
+                            public void onClick(View view) {
                             }
                         });
                         RelativeLayout.LayoutParams bannerParameters = new RelativeLayout.LayoutParams(
@@ -835,6 +871,12 @@ public class BannerAd {
 
                             @Override
                             public void onBannerImpression(@NonNull com.wortise.ads.banner.BannerAd bannerAd) {
+
+                            }
+
+                            @Override
+                            public void onBannerRevenuePaid(@NonNull com.wortise.ads.banner.BannerAd bannerAd,
+                                    @NonNull com.wortise.ads.RevenueData revenueData) {
 
                             }
                         });
@@ -888,6 +930,7 @@ public class BannerAd {
                 IronSource.destroyBanner(ironSourceBannerLayout);
                 ironSourceBannerLayout = null;
             }
+
             if (wortiseBannerAd != null) {
                 wortiseBannerAd.destroy();
                 wortiseBannerAd = null;
