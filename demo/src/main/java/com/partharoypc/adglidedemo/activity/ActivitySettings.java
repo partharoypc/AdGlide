@@ -92,7 +92,7 @@ public class ActivitySettings extends AppCompatActivity {
         adapterPrimary = new AdapterNetwork(this, primaryNetworks, sharedPref.getAdNetwork(), item -> {
             sharedPref.setAdNetwork(item.adNetworkId);
             Constant.AD_NETWORK = item.adNetworkId;
-            initAds(); // Re-initialize immediately
+            initAds();
         });
         recyclerViewPrimary.setAdapter(adapterPrimary);
 
@@ -119,19 +119,8 @@ public class ActivitySettings extends AppCompatActivity {
         switchAppOpenAd.setChecked(sharedPref.getIsAppOpenAdEnabled());
         switchAppOpenAd.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sharedPref.setIsAppOpenAdEnabled(isChecked);
-            // Update constant if needed? Constant.OPEN_ADS_ON_RESUME seems static/final in
-            // Constant.java
-            // Actually Constant.OPEN_ADS_ON_RESUME is 'public static final boolean' in
-            // original Constant.java
-            // I should override it or handle it dynamically.
-            // Wait, Constant.OPEN_ADS_ON_RESUME is final in original file?
-            // "public static final boolean OPEN_ADS_ON_RESUME = true;"
-            // I need to change 'final' to non-final in Constant.java if I want to toggle it
-            // at runtime.
-            // Or better, update MyApplication to check SharedPref directly.
         });
 
-        // GDPR Button
         Button btnGdpr = findViewById(R.id.btn_gdpr);
         btnGdpr.setOnClickListener(v -> {
             new GDPR(this).resetConsent();

@@ -118,4 +118,12 @@ public class ActivityNative extends AppCompatActivity {
         });
         builder.show();
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (nativeAd != null) {
+            nativeAd.destroyNativeAd();
+        }
+    }
 }

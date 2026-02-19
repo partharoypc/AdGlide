@@ -94,4 +94,12 @@ public class ActivityRewarded extends AppCompatActivity {
     private void appendLog(String text) {
         logTextView.append(text + "\n");
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (rewardedAd != null) {
+            rewardedAd.destroyRewardedAd();
+        }
+    }
 }

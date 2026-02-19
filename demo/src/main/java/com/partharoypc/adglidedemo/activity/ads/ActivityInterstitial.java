@@ -84,4 +84,12 @@ public class ActivityInterstitial extends AppCompatActivity {
     private void appendLog(String text) {
         logTextView.append(text + "\n");
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (interstitialAd != null) {
+            interstitialAd.destroyInterstitialAd();
+        }
+    }
 }

@@ -210,6 +210,15 @@ interstitial.loadInterstitialAd();
 if (interstitial.isAdLoaded()) { // Optional check
     interstitial.showInterstitialAd();
 }
+
+// 4. Cleanup (IMPORTANT)
+@Override
+protected void onDestroy() {
+    super.onDestroy();
+    if (interstitial != null) {
+        interstitial.destroyInterstitialAd();
+    }
+}
 ```
 
 ### 3. Native Ads
@@ -225,6 +234,15 @@ NativeAd.Builder nativeAd = new NativeAd.Builder(this)
     .build();
 
 nativeAd.loadNativeAd();
+
+// Cleanup (IMPORTANT)
+@Override
+protected void onDestroy() {
+    super.onDestroy();
+    if (nativeAd != null) {
+        nativeAd.destroyNativeAd();
+    }
+}
 ```
 
 ### 4. Rewarded Ads
@@ -250,6 +268,15 @@ rewarded.loadRewardedAd();
 
 // Show when ready
 rewarded.showRewardedAd();
+
+// Cleanup (IMPORTANT)
+@Override
+protected void onDestroy() {
+    super.onDestroy();
+    if (rewarded != null) {
+        rewarded.destroyRewardedAd();
+    }
+}
 ```
 
 ### 5. App Open Ads
