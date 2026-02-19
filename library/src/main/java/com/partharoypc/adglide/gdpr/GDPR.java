@@ -3,7 +3,7 @@ package com.partharoypc.adglide.gdpr;
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_DISCOVERY;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
-import static com.partharoypc.adglide.util.Constant.GOOGLE_AD_MANAGER;
+
 import static com.partharoypc.adglide.util.Constant.STARTAPP;
 
 import android.annotation.SuppressLint;
@@ -58,7 +58,6 @@ public class GDPR {
     public void updateGDPRConsentStatus(String adType, boolean isDebug, boolean childDirected) {
         switch (adType) {
             case ADMOB:
-            case GOOGLE_AD_MANAGER:
                 if (isDebug) {
                     String androidId = Settings.Secure.getString(activity.getContentResolver(),
                             Settings.Secure.ANDROID_ID);
@@ -137,6 +136,14 @@ public class GDPR {
         consentInformation = UserMessagingPlatform.getConsentInformation(activity);
         consentInformation.reset();
         updateGDPRConsentStatus();
+    }
+
+    public void showPrivacyOptionsForm() {
+        UserMessagingPlatform.showPrivacyOptionsForm(activity, formError -> {
+            if (formError != null) {
+                Log.d("GDPR", "showPrivacyOptionsForm error: " + formError.getMessage());
+            }
+        });
     }
 
 }

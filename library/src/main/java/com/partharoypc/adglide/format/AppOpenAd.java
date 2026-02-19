@@ -5,9 +5,6 @@ import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_ADMOB;
-import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_AD_MANAGER;
-import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_APPLOVIN_MAX;
-import static com.partharoypc.adglide.util.Constant.GOOGLE_AD_MANAGER;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import android.annotation.SuppressLint;
@@ -21,12 +18,11 @@ import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.admanager.AdManagerAdRequest;
 import com.partharoypc.adglide.util.OnShowAdCompleteListener;
 
 /**
  * Manages app open ads with primary and backup network support.
- * Supports AdMob, Google Ad Manager, AppLovin, and Wortise networks.
+ * Supports AdMob, AppLovin, and Wortise networks.
  */
 @SuppressLint("StaticFieldLeak")
 public class AppOpenAd {
@@ -34,7 +30,6 @@ public class AppOpenAd {
     public static com.google.android.gms.ads.appopen.AppOpenAd appOpenAd = null;
     public static boolean isAppOpenAdLoaded = false;
     private AppOpenAdMob appOpenAdMob;
-    private AppOpenAdManager appOpenAdManager;
     private AppOpenAdAppLovin appOpenAdAppLovin;
     private AppOpenAdWortise appOpenAdWortise;
     private boolean adStatus;
@@ -42,18 +37,12 @@ public class AppOpenAd {
     private String adNetwork = "";
     private String backupAdNetwork = "";
     private String adMobAppOpenId = "";
-    private String adManagerAppOpenId = "";
     private String applovinAppOpenId = "";
     private String wortiseAppOpenId = "";
     private Activity currentActivity;
 
     public AppOpenAd initAppOpenAdMob(AppOpenAdMob appOpenAdMob) {
         this.appOpenAdMob = appOpenAdMob;
-        return this;
-    }
-
-    public AppOpenAd initAppOpenAdManager(AppOpenAdManager appOpenAdManager) {
-        this.appOpenAdManager = appOpenAdManager;
         return this;
     }
 
@@ -92,11 +81,6 @@ public class AppOpenAd {
         return this;
     }
 
-    public AppOpenAd setAdManagerAppOpenId(String adManagerAppOpenId) {
-        this.adManagerAppOpenId = adManagerAppOpenId;
-        return this;
-    }
-
     public AppOpenAd setApplovinAppOpenId(String applovinAppOpenId) {
         this.applovinAppOpenId = applovinAppOpenId;
         return this;
@@ -118,130 +102,119 @@ public class AppOpenAd {
     }
 
     public void onStartLifecycleObserver() {
-        if (placementStatus) {
-            if (adStatus) {
-                if (currentActivity == null)
-                    return;
-                switch (adNetwork) {
-                    case ADMOB:
-                    case FAN_BIDDING_ADMOB:
-                        if (!adMobAppOpenId.equals("0")) {
-                            if (!currentActivity.getIntent().hasExtra("unique_id")) {
-                                appOpenAdMob.showAdIfAvailable(currentActivity, adMobAppOpenId);
+        try {
+            if (placementStatus) {
+                if (adStatus) {
+                    if (currentActivity == null)
+                        return;
+                    switch (adNetwork) {
+                        case ADMOB:
+                        case FAN_BIDDING_ADMOB:
+                            if (!adMobAppOpenId.equals("0")) {
+                                if (!currentActivity.getIntent().hasExtra("unique_id")) {
+                                    appOpenAdMob.showAdIfAvailable(currentActivity, adMobAppOpenId);
+                                }
                             }
-                        }
-                        break;
-                    case GOOGLE_AD_MANAGER:
-                    case FAN_BIDDING_AD_MANAGER:
-                        if (!adManagerAppOpenId.equals("0")) {
-                            if (!currentActivity.getIntent().hasExtra("unique_id")) {
-                                appOpenAdManager.showAdIfAvailable(currentActivity, adManagerAppOpenId);
+                            break;
+                        case APPLOVIN:
+                        case APPLOVIN_MAX:
+                        case FAN_BIDDING_APPLOVIN_MAX:
+                            if (!applovinAppOpenId.equals("0")) {
+                                if (!currentActivity.getIntent().hasExtra("unique_id")) {
+                                    appOpenAdAppLovin.showAdIfAvailable(currentActivity, applovinAppOpenId);
+                                }
                             }
-                        }
-                        break;
-                    case APPLOVIN:
-                    case APPLOVIN_MAX:
-                    case FAN_BIDDING_APPLOVIN_MAX:
-                        if (!applovinAppOpenId.equals("0")) {
-                            if (!currentActivity.getIntent().hasExtra("unique_id")) {
-                                appOpenAdAppLovin.showAdIfAvailable(currentActivity, applovinAppOpenId);
-                            }
-                        }
-                        break;
+                            break;
 
-                    case WORTISE:
-                        if (!wortiseAppOpenId.equals("0")) {
-                            if (!currentActivity.getIntent().hasExtra("unique_id")) {
-                                appOpenAdWortise.showAdIfAvailable(currentActivity, wortiseAppOpenId);
+                        case WORTISE:
+                            if (!wortiseAppOpenId.equals("0")) {
+                                if (!currentActivity.getIntent().hasExtra("unique_id")) {
+                                    appOpenAdWortise.showAdIfAvailable(currentActivity, wortiseAppOpenId);
+                                }
                             }
-                        }
-                        break;
+                            break;
+                    }
                 }
             }
+        } catch (Exception e) {
+            Log.e("AppOpenAd", "Error in onStartLifecycleObserver: " + e.getMessage());
         }
     }
 
     public void onStartActivityLifecycleCallbacks(Activity activity) {
-        if (placementStatus) {
-            if (adStatus) {
+        try {
+            if (placementStatus) {
+                if (adStatus) {
+                    switch (adNetwork) {
+                        case ADMOB:
+                        case FAN_BIDDING_ADMOB:
+                            if (!adMobAppOpenId.equals("0")) {
+                                if (!appOpenAdMob.isShowingAd()) {
+                                    currentActivity = activity;
+                                }
+                            }
+                            break;
+                        case APPLOVIN:
+                        case APPLOVIN_MAX:
+                        case FAN_BIDDING_APPLOVIN_MAX:
+                            if (!applovinAppOpenId.equals("0")) {
+                                if (!appOpenAdAppLovin.isShowingAd()) {
+                                    currentActivity = activity;
+                                }
+                            }
+                            break;
+                        case WORTISE:
+                            if (!wortiseAppOpenId.equals("0")) {
+                                if (!appOpenAdWortise.isShowingAd()) {
+                                    currentActivity = activity;
+                                }
+                            }
+                            break;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e("AppOpenAd", "Error in onStartActivityLifecycleCallbacks: " + e.getMessage());
+        }
+    }
+
+    public AppOpenAd showAppOpenAdIfAvailable(Activity activity, OnShowAdCompleteListener onShowAdCompleteListener) {
+        try {
+            if (adStatus && placementStatus) {
                 switch (adNetwork) {
                     case ADMOB:
                     case FAN_BIDDING_ADMOB:
                         if (!adMobAppOpenId.equals("0")) {
-                            if (!appOpenAdMob.isShowingAd()) {
-                                currentActivity = activity;
-                            }
-                        }
-                        break;
-                    case GOOGLE_AD_MANAGER:
-                    case FAN_BIDDING_AD_MANAGER:
-                        if (!adManagerAppOpenId.equals("0")) {
-                            if (!appOpenAdManager.isShowingAd()) {
-                                currentActivity = activity;
-                            }
+                            showAdIfAvailable(activity, onShowAdCompleteListener);
+                        } else {
+                            onShowAdCompleteListener.onShowAdComplete();
                         }
                         break;
                     case APPLOVIN:
                     case APPLOVIN_MAX:
                     case FAN_BIDDING_APPLOVIN_MAX:
                         if (!applovinAppOpenId.equals("0")) {
-                            if (!appOpenAdAppLovin.isShowingAd()) {
-                                currentActivity = activity;
-                            }
+                            showAdIfAvailable(activity, onShowAdCompleteListener);
+                        } else {
+                            onShowAdCompleteListener.onShowAdComplete();
                         }
                         break;
                     case WORTISE:
                         if (!wortiseAppOpenId.equals("0")) {
-                            if (!appOpenAdWortise.isShowingAd()) {
-                                currentActivity = activity;
-                            }
+                            showAdIfAvailable(activity, onShowAdCompleteListener);
+                        } else {
+                            onShowAdCompleteListener.onShowAdComplete();
                         }
                         break;
+                    default:
+                        onShowAdCompleteListener.onShowAdComplete();
+                        break;
                 }
+            } else {
+                onShowAdCompleteListener.onShowAdComplete();
             }
-        }
-    }
-
-    public AppOpenAd showAppOpenAdIfAvailable(Activity activity, OnShowAdCompleteListener onShowAdCompleteListener) {
-        if (adStatus && placementStatus) {
-            switch (adNetwork) {
-                case ADMOB:
-                case FAN_BIDDING_ADMOB:
-                    if (!adMobAppOpenId.equals("0")) {
-                        showAdIfAvailable(activity, onShowAdCompleteListener);
-                    } else {
-                        onShowAdCompleteListener.onShowAdComplete();
-                    }
-                    break;
-                case GOOGLE_AD_MANAGER:
-                case FAN_BIDDING_AD_MANAGER:
-                    if (!adManagerAppOpenId.equals("0")) {
-                        showAdIfAvailable(activity, onShowAdCompleteListener);
-                    } else {
-                        onShowAdCompleteListener.onShowAdComplete();
-                    }
-                    break;
-                case APPLOVIN:
-                case APPLOVIN_MAX:
-                case FAN_BIDDING_APPLOVIN_MAX:
-                    if (!applovinAppOpenId.equals("0")) {
-                        showAdIfAvailable(activity, onShowAdCompleteListener);
-                    } else {
-                        onShowAdCompleteListener.onShowAdComplete();
-                    }
-                    break;
-                case WORTISE:
-                    if (!wortiseAppOpenId.equals("0")) {
-                        showAdIfAvailable(activity, onShowAdCompleteListener);
-                    } else {
-                        onShowAdCompleteListener.onShowAdComplete();
-                    }
-                    break;
-                default:
-                    onShowAdCompleteListener.onShowAdComplete();
-                    break;
-            }
-        } else {
+        } catch (Exception e) {
+            Log.e("AppOpenAd", "Error in showAppOpenAdIfAvailable: " + e.getMessage());
             onShowAdCompleteListener.onShowAdComplete();
         }
         return this;
@@ -249,35 +222,36 @@ public class AppOpenAd {
 
     public void showAdIfAvailable(@NonNull Activity activity,
             @NonNull OnShowAdCompleteListener onShowAdCompleteListener) {
-        if (placementStatus) {
-            if (adStatus) {
-                switch (adNetwork) {
-                    case ADMOB:
-                    case FAN_BIDDING_ADMOB:
-                        if (!adMobAppOpenId.equals("0")) {
-                            appOpenAdMob.showAdIfAvailable(activity, adMobAppOpenId, onShowAdCompleteListener);
-                        }
-                        break;
-                    case GOOGLE_AD_MANAGER:
-                    case FAN_BIDDING_AD_MANAGER:
-                        if (!adManagerAppOpenId.equals("0")) {
-                            appOpenAdManager.showAdIfAvailable(activity, adManagerAppOpenId, onShowAdCompleteListener);
-                        }
-                        break;
-                    case APPLOVIN:
-                    case APPLOVIN_MAX:
-                    case FAN_BIDDING_APPLOVIN_MAX:
-                        if (!applovinAppOpenId.equals("0")) {
-                            appOpenAdAppLovin.showAdIfAvailable(activity, applovinAppOpenId, onShowAdCompleteListener);
-                        }
-                        break;
-                    case WORTISE:
-                        if (!wortiseAppOpenId.equals("0")) {
-                            appOpenAdWortise.showAdIfAvailable(activity, wortiseAppOpenId, onShowAdCompleteListener);
-                        }
-                        break;
+        try {
+            if (placementStatus) {
+                if (adStatus) {
+                    switch (adNetwork) {
+                        case ADMOB:
+                        case FAN_BIDDING_ADMOB:
+                            if (!adMobAppOpenId.equals("0")) {
+                                appOpenAdMob.showAdIfAvailable(activity, adMobAppOpenId, onShowAdCompleteListener);
+                            }
+                            break;
+                        case APPLOVIN:
+                        case APPLOVIN_MAX:
+                        case FAN_BIDDING_APPLOVIN_MAX:
+                            if (!applovinAppOpenId.equals("0")) {
+                                appOpenAdAppLovin.showAdIfAvailable(activity, applovinAppOpenId,
+                                        onShowAdCompleteListener);
+                            }
+                            break;
+                        case WORTISE:
+                            if (!wortiseAppOpenId.equals("0")) {
+                                appOpenAdWortise.showAdIfAvailable(activity, wortiseAppOpenId,
+                                        onShowAdCompleteListener);
+                            }
+                            break;
+                    }
                 }
             }
+        } catch (Exception e) {
+            Log.e("AppOpenAd", "Error in showAdIfAvailable: " + e.getMessage());
+            onShowAdCompleteListener.onShowAdComplete();
         }
     }
 
@@ -289,7 +263,6 @@ public class AppOpenAd {
         private String adNetwork = "";
         private String backupAdNetwork = "";
         private String adMobAppOpenId = "";
-        private String adManagerAppOpenId = "";
         private String applovinAppOpenId = "";
         private String wortiseAppOpenId = "";
 
@@ -337,11 +310,6 @@ public class AppOpenAd {
             return this;
         }
 
-        public Builder setAdManagerAppOpenId(String adManagerAppOpenId) {
-            this.adManagerAppOpenId = adManagerAppOpenId;
-            return this;
-        }
-
         public Builder setApplovinAppOpenId(String applovinAppOpenId) {
             this.applovinAppOpenId = applovinAppOpenId;
             return this;
@@ -358,8 +326,6 @@ public class AppOpenAd {
                 switch (adNetwork) {
                     case ADMOB:
                     case FAN_BIDDING_ADMOB:
-                    case GOOGLE_AD_MANAGER:
-                    case FAN_BIDDING_AD_MANAGER:
                         if (appOpenAd != null) {
                             appOpenAd = null;
                         }
@@ -373,399 +339,334 @@ public class AppOpenAd {
 
         // main ads
         public void loadAppOpenAd(OnShowAdCompleteListener onShowAdCompleteListener) {
-            if (adStatus.equals(AD_STATUS_ON)) {
-                switch (adNetwork) {
-                    case ADMOB:
-                    case FAN_BIDDING_ADMOB:
-                        AdRequest adRequest = new AdRequest.Builder().build();
-                        com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
-                                new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
-                                    @Override
-                                    public void onAdLoaded(@NonNull com.google.android.gms.ads.appopen.AppOpenAd ad) {
-                                        appOpenAd = ad;
-                                        showAppOpenAd(onShowAdCompleteListener);
-                                        Log.d(TAG, "[" + adNetwork + "] " + "[on start] app open ad loaded");
-                                    }
+            try {
+                if (adStatus.equals(AD_STATUS_ON)) {
+                    switch (adNetwork) {
+                        case ADMOB:
+                        case FAN_BIDDING_ADMOB:
+                            AdRequest adRequest = new AdRequest.Builder().build();
+                            com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
+                                    new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
+                                        @Override
+                                        public void onAdLoaded(
+                                                @NonNull com.google.android.gms.ads.appopen.AppOpenAd ad) {
+                                            appOpenAd = ad;
+                                            showAppOpenAd(onShowAdCompleteListener);
+                                            Log.d(TAG, "[" + adNetwork + "] " + "[on start] app open ad loaded");
+                                        }
 
-                                    @Override
-                                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                        appOpenAd = null;
-                                        loadBackupAppOpenAd(onShowAdCompleteListener);
-                                        Log.d(TAG, "[" + adNetwork + "] " + "[on start] failed to load app open ad: "
-                                                + loadAdError.getMessage());
-                                    }
-                                });
-                        break;
+                                        @Override
+                                        public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                                            appOpenAd = null;
+                                            loadBackupAppOpenAd(onShowAdCompleteListener);
+                                            Log.d(TAG,
+                                                    "[" + adNetwork + "] " + "[on start] failed to load app open ad: "
+                                                            + loadAdError.getMessage());
+                                        }
+                                    });
+                            break;
 
-                    case GOOGLE_AD_MANAGER:
-                    case FAN_BIDDING_AD_MANAGER:
-                        @SuppressLint("VisibleForTests")
-                        AdManagerAdRequest adManagerAdRequest = new AdManagerAdRequest.Builder().build();
-                        com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adManagerAppOpenId,
-                                adManagerAdRequest,
-                                new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
-                                    @Override
-                                    public void onAdLoaded(@NonNull com.google.android.gms.ads.appopen.AppOpenAd ad) {
-                                        appOpenAd = ad;
-                                        showAppOpenAd(onShowAdCompleteListener);
-                                        Log.d(TAG, "[" + adNetwork + "] " + "[on start] app open ad loaded");
-                                    }
-
-                                    @Override
-                                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                        appOpenAd = null;
-                                        loadBackupAppOpenAd(onShowAdCompleteListener);
-                                        Log.d(TAG, "[" + adNetwork + "] " + "[on start] failed to load app open ad: "
-                                                + loadAdError.getMessage());
-                                    }
-                                });
-                        break;
-
-                    default:
-                        onShowAdCompleteListener.onShowAdComplete();
-                        break;
+                        default:
+                            onShowAdCompleteListener.onShowAdComplete();
+                            break;
+                    }
+                } else {
+                    onShowAdCompleteListener.onShowAdComplete();
                 }
-            } else {
+            } catch (Exception e) {
+                Log.e(TAG, "Error in loadAppOpenAd: " + e.getMessage());
                 onShowAdCompleteListener.onShowAdComplete();
             }
         }
 
         public void showAppOpenAd(OnShowAdCompleteListener onShowAdCompleteListener) {
-            switch (adNetwork) {
-                case ADMOB:
-                case FAN_BIDDING_ADMOB:
-                case GOOGLE_AD_MANAGER:
-                case FAN_BIDDING_AD_MANAGER:
-                    if (appOpenAd != null) {
-                        appOpenAd.setFullScreenContentCallback(new FullScreenContentCallback() {
-                            @Override
-                            public void onAdDismissedFullScreenContent() {
-                                appOpenAd = null;
-                                onShowAdCompleteListener.onShowAdComplete();
-                                Log.d(TAG, "[" + adNetwork + "] " + "[on start] close app open ad");
-                            }
+            try {
+                switch (adNetwork) {
+                    case ADMOB:
+                    case FAN_BIDDING_ADMOB:
+                        if (appOpenAd != null) {
+                            appOpenAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                                @Override
+                                public void onAdDismissedFullScreenContent() {
+                                    appOpenAd = null;
+                                    onShowAdCompleteListener.onShowAdComplete();
+                                    Log.d(TAG, "[" + adNetwork + "] " + "[on start] close app open ad");
+                                }
 
-                            @Override
-                            public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
-                                appOpenAd = null;
-                                onShowAdCompleteListener.onShowAdComplete();
-                                Log.d(TAG, "[" + adNetwork + "] " + "[on start] failed to show app open ad: "
-                                        + adError.getMessage());
-                            }
+                                @Override
+                                public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
+                                    appOpenAd = null;
+                                    onShowAdCompleteListener.onShowAdComplete();
+                                    Log.d(TAG, "[" + adNetwork + "] " + "[on start] failed to show app open ad: "
+                                            + adError.getMessage());
+                                }
 
-                            @Override
-                            public void onAdShowedFullScreenContent() {
-                                Log.d(TAG, "[" + adNetwork + "] " + "[on start] show app open ad");
-                            }
-                        });
-                        appOpenAd.show(activity);
-                    } else {
+                                @Override
+                                public void onAdShowedFullScreenContent() {
+                                    Log.d(TAG, "[" + adNetwork + "] " + "[on start] show app open ad");
+                                }
+                            });
+                            appOpenAd.show(activity);
+                        } else {
+                            onShowAdCompleteListener.onShowAdComplete();
+                        }
+                        break;
+
+                    default:
                         onShowAdCompleteListener.onShowAdComplete();
-                    }
-                    break;
-
-                default:
-                    onShowAdCompleteListener.onShowAdComplete();
-                    break;
+                        break;
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error in showAppOpenAd: " + e.getMessage());
+                onShowAdCompleteListener.onShowAdComplete();
             }
         }
 
         public void loadAppOpenAd() {
-            if (adStatus.equals(AD_STATUS_ON)) {
+            try {
+                if (adStatus.equals(AD_STATUS_ON)) {
+                    switch (adNetwork) {
+                        case ADMOB:
+                        case FAN_BIDDING_ADMOB:
+                            AdRequest adRequest = new AdRequest.Builder().build();
+                            com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
+                                    new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
+                                        @Override
+                                        public void onAdLoaded(
+                                                @NonNull com.google.android.gms.ads.appopen.AppOpenAd ad) {
+                                            appOpenAd = ad;
+                                            isAppOpenAdLoaded = true;
+                                            Log.d(TAG, "[" + adNetwork + "] " + "[on resume] app open ad loaded");
+                                        }
+
+                                        @Override
+                                        public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                                            appOpenAd = null;
+                                            isAppOpenAdLoaded = false;
+                                            loadBackupAppOpenAd();
+                                            Log.d(TAG,
+                                                    "[" + adNetwork + "] " + "[on resume] failed to load app open ad : "
+                                                            + loadAdError.getMessage());
+                                        }
+                                    });
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error in loadAppOpenAd: " + e.getMessage());
+            }
+        }
+
+        public void showAppOpenAd() {
+            try {
                 switch (adNetwork) {
                     case ADMOB:
                     case FAN_BIDDING_ADMOB:
-                        AdRequest adRequest = new AdRequest.Builder().build();
-                        com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
-                                new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
-                                    @Override
-                                    public void onAdLoaded(@NonNull com.google.android.gms.ads.appopen.AppOpenAd ad) {
-                                        appOpenAd = ad;
-                                        isAppOpenAdLoaded = true;
-                                        Log.d(TAG, "[" + adNetwork + "] " + "[on resume] app open ad loaded");
-                                    }
+                        if (appOpenAd != null) {
+                            appOpenAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                                @Override
+                                public void onAdDismissedFullScreenContent() {
+                                    appOpenAd = null;
+                                    loadAppOpenAd();
+                                    Log.d(TAG, "[" + adNetwork + "] " + "[on resume] close app open ad");
+                                }
 
-                                    @Override
-                                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                        appOpenAd = null;
-                                        isAppOpenAdLoaded = false;
-                                        loadBackupAppOpenAd();
-                                        Log.d(TAG, "[" + adNetwork + "] " + "[on resume] failed to load app open ad : "
-                                                + loadAdError.getMessage());
-                                    }
-                                });
-                        break;
+                                @Override
+                                public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
+                                    appOpenAd = null;
+                                    loadAppOpenAd();
+                                    Log.d(TAG, "[" + adNetwork + "] " + "[on resume] failed to show app open ad: "
+                                            + adError.getMessage());
+                                }
 
-                    case GOOGLE_AD_MANAGER:
-                    case FAN_BIDDING_AD_MANAGER:
-                        @SuppressLint("VisibleForTests")
-                        AdManagerAdRequest adManagerAdRequest = new AdManagerAdRequest.Builder().build();
-                        com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adManagerAppOpenId,
-                                adManagerAdRequest,
-                                new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
-                                    @Override
-                                    public void onAdLoaded(@NonNull com.google.android.gms.ads.appopen.AppOpenAd ad) {
-                                        appOpenAd = ad;
-                                        isAppOpenAdLoaded = true;
-                                        Log.d(TAG, "[" + adNetwork + "] " + "[on resume] app open ad loaded");
-                                    }
-
-                                    @Override
-                                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                        appOpenAd = null;
-                                        isAppOpenAdLoaded = false;
-                                        loadBackupAppOpenAd();
-                                        Log.d(TAG, "[" + adNetwork + "] " + "[on resume] failed to load app open ad : "
-                                                + loadAdError.getMessage());
-                                    }
-                                });
+                                @Override
+                                public void onAdShowedFullScreenContent() {
+                                    Log.d(TAG, "[" + adNetwork + "] " + "[on resume] show app open ad");
+                                }
+                            });
+                            appOpenAd.show(activity);
+                        } else {
+                            showBackupAppOpenAd();
+                        }
                         break;
 
                     default:
                         break;
                 }
-            }
-        }
-
-        public void showAppOpenAd() {
-            switch (adNetwork) {
-                case ADMOB:
-                case FAN_BIDDING_ADMOB:
-                case GOOGLE_AD_MANAGER:
-                case FAN_BIDDING_AD_MANAGER:
-                    if (appOpenAd != null) {
-                        appOpenAd.setFullScreenContentCallback(new FullScreenContentCallback() {
-                            @Override
-                            public void onAdDismissedFullScreenContent() {
-                                appOpenAd = null;
-                                loadAppOpenAd();
-                                Log.d(TAG, "[" + adNetwork + "] " + "[on resume] close app open ad");
-                            }
-
-                            @Override
-                            public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
-                                appOpenAd = null;
-                                loadAppOpenAd();
-                                Log.d(TAG, "[" + adNetwork + "] " + "[on resume] failed to show app open ad: "
-                                        + adError.getMessage());
-                            }
-
-                            @Override
-                            public void onAdShowedFullScreenContent() {
-                                Log.d(TAG, "[" + adNetwork + "] " + "[on resume] show app open ad");
-                            }
-                        });
-                        appOpenAd.show(activity);
-                    } else {
-                        showBackupAppOpenAd();
-                    }
-                    break;
-
-                default:
-                    break;
+            } catch (Exception e) {
+                Log.e(TAG, "Error in showAppOpenAd: " + e.getMessage());
+                showBackupAppOpenAd();
             }
         }
 
         // backup ads
         public void loadBackupAppOpenAd(OnShowAdCompleteListener onShowAdCompleteListener) {
-            if (adStatus.equals(AD_STATUS_ON)) {
-                switch (backupAdNetwork) {
-                    case ADMOB:
-                    case FAN_BIDDING_ADMOB:
-                        AdRequest adRequest = new AdRequest.Builder().build();
-                        com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
-                                new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
-                                    @Override
-                                    public void onAdLoaded(@NonNull com.google.android.gms.ads.appopen.AppOpenAd ad) {
-                                        appOpenAd = ad;
-                                        showBackupAppOpenAd(onShowAdCompleteListener);
-                                        Log.d(TAG, "[" + backupAdNetwork + "] "
-                                                + "[on start] [backup] app open ad loaded");
-                                    }
+            try {
+                if (adStatus.equals(AD_STATUS_ON)) {
+                    switch (backupAdNetwork) {
+                        case ADMOB:
+                        case FAN_BIDDING_ADMOB:
+                            AdRequest adRequest = new AdRequest.Builder().build();
+                            com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
+                                    new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
+                                        @Override
+                                        public void onAdLoaded(
+                                                @NonNull com.google.android.gms.ads.appopen.AppOpenAd ad) {
+                                            appOpenAd = ad;
+                                            showBackupAppOpenAd(onShowAdCompleteListener);
+                                            Log.d(TAG, "[" + backupAdNetwork + "] "
+                                                    + "[on start] [backup] app open ad loaded");
+                                        }
 
-                                    @Override
-                                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                        appOpenAd = null;
-                                        onShowAdCompleteListener.onShowAdComplete();
-                                        Log.d(TAG,
-                                                "[" + backupAdNetwork + "] "
-                                                        + "[on start] [backup] failed to load app open ad: "
-                                                        + loadAdError.getMessage());
-                                    }
-                                });
-                        break;
+                                        @Override
+                                        public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                                            appOpenAd = null;
+                                            onShowAdCompleteListener.onShowAdComplete();
+                                            Log.d(TAG,
+                                                    "[" + backupAdNetwork + "] "
+                                                            + "[on start] [backup] failed to load app open ad: "
+                                                            + loadAdError.getMessage());
+                                        }
+                                    });
+                            break;
 
-                    case GOOGLE_AD_MANAGER:
-                    case FAN_BIDDING_AD_MANAGER:
-                        @SuppressLint("VisibleForTests")
-                        AdManagerAdRequest adManagerAdRequest = new AdManagerAdRequest.Builder().build();
-                        com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adManagerAppOpenId,
-                                adManagerAdRequest,
-                                new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
-                                    @Override
-                                    public void onAdLoaded(@NonNull com.google.android.gms.ads.appopen.AppOpenAd ad) {
-                                        appOpenAd = ad;
-                                        showBackupAppOpenAd(onShowAdCompleteListener);
-                                        Log.d(TAG, "[" + backupAdNetwork + "] "
-                                                + "[on start] [backup] app open ad loaded");
-                                    }
-
-                                    @Override
-                                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                        appOpenAd = null;
-                                        onShowAdCompleteListener.onShowAdComplete();
-                                        Log.d(TAG,
-                                                "[" + backupAdNetwork + "] "
-                                                        + "[on start] [backup] failed to load app open ad: "
-                                                        + loadAdError.getMessage());
-                                    }
-                                });
-                        break;
-
-                    default:
-                        onShowAdCompleteListener.onShowAdComplete();
-                        break;
+                        default:
+                            onShowAdCompleteListener.onShowAdComplete();
+                            break;
+                    }
+                } else {
+                    onShowAdCompleteListener.onShowAdComplete();
                 }
-            } else {
+            } catch (Exception e) {
+                Log.e(TAG, "Error in loadBackupAppOpenAd: " + e.getMessage());
                 onShowAdCompleteListener.onShowAdComplete();
             }
         }
 
         public void showBackupAppOpenAd(OnShowAdCompleteListener onShowAdCompleteListener) {
-            switch (backupAdNetwork) {
-                case ADMOB:
-                case FAN_BIDDING_ADMOB:
-                case GOOGLE_AD_MANAGER:
-                case FAN_BIDDING_AD_MANAGER:
-                    if (appOpenAd != null) {
-                        appOpenAd.setFullScreenContentCallback(new FullScreenContentCallback() {
-                            @Override
-                            public void onAdDismissedFullScreenContent() {
-                                appOpenAd = null;
-                                onShowAdCompleteListener.onShowAdComplete();
-                                Log.d(TAG, "[" + backupAdNetwork + "] " + "[on start] [backup] close app open ad");
-                            }
+            try {
+                switch (backupAdNetwork) {
+                    case ADMOB:
+                    case FAN_BIDDING_ADMOB:
+                        if (appOpenAd != null) {
+                            appOpenAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                                @Override
+                                public void onAdDismissedFullScreenContent() {
+                                    appOpenAd = null;
+                                    onShowAdCompleteListener.onShowAdComplete();
+                                    Log.d(TAG, "[" + backupAdNetwork + "] " + "[on start] [backup] close app open ad");
+                                }
 
-                            @Override
-                            public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
-                                appOpenAd = null;
-                                onShowAdCompleteListener.onShowAdComplete();
-                                Log.d(TAG, "[" + backupAdNetwork + "] "
-                                        + "[on start] [backup] failed to show app open ad: " + adError.getMessage());
-                            }
+                                @Override
+                                public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
+                                    appOpenAd = null;
+                                    onShowAdCompleteListener.onShowAdComplete();
+                                    Log.d(TAG, "[" + backupAdNetwork + "] "
+                                            + "[on start] [backup] failed to show app open ad: "
+                                            + adError.getMessage());
+                                }
 
-                            @Override
-                            public void onAdShowedFullScreenContent() {
-                                Log.d(TAG, "[" + backupAdNetwork + "] " + "[on start] [backup] show app open ad");
-                            }
-                        });
-                        appOpenAd.show(activity);
-                    } else {
+                                @Override
+                                public void onAdShowedFullScreenContent() {
+                                    Log.d(TAG, "[" + backupAdNetwork + "] " + "[on start] [backup] show app open ad");
+                                }
+                            });
+                            appOpenAd.show(activity);
+                        } else {
+                            onShowAdCompleteListener.onShowAdComplete();
+                        }
+                        break;
+
+                    default:
                         onShowAdCompleteListener.onShowAdComplete();
-                    }
-                    break;
-
-                default:
-                    onShowAdCompleteListener.onShowAdComplete();
-                    break;
+                        break;
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error in showBackupAppOpenAd: " + e.getMessage());
+                onShowAdCompleteListener.onShowAdComplete();
             }
         }
 
         public void loadBackupAppOpenAd() {
-            if (adStatus.equals(AD_STATUS_ON)) {
+            try {
+                if (adStatus.equals(AD_STATUS_ON)) {
+                    switch (backupAdNetwork) {
+                        case ADMOB:
+                        case FAN_BIDDING_ADMOB:
+                            AdRequest adRequest = new AdRequest.Builder().build();
+                            com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
+                                    new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
+                                        @Override
+                                        public void onAdLoaded(
+                                                @NonNull com.google.android.gms.ads.appopen.AppOpenAd ad) {
+                                            appOpenAd = ad;
+                                            isAppOpenAdLoaded = true;
+                                            Log.d(TAG, "[" + backupAdNetwork + "] "
+                                                    + "[on resume] [backup] app open ad loaded");
+                                        }
+
+                                        @Override
+                                        public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                                            appOpenAd = null;
+                                            isAppOpenAdLoaded = false;
+                                            Log.d(TAG,
+                                                    "[" + backupAdNetwork + "] "
+                                                            + "[on resume] [backup] failed to load app open ad : "
+                                                            + loadAdError.getMessage());
+                                        }
+                                    });
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error in loadBackupAppOpenAd: " + e.getMessage());
+            }
+        }
+
+        public void showBackupAppOpenAd() {
+            try {
                 switch (backupAdNetwork) {
                     case ADMOB:
                     case FAN_BIDDING_ADMOB:
-                        AdRequest adRequest = new AdRequest.Builder().build();
-                        com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
-                                new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
-                                    @Override
-                                    public void onAdLoaded(@NonNull com.google.android.gms.ads.appopen.AppOpenAd ad) {
-                                        appOpenAd = ad;
-                                        isAppOpenAdLoaded = true;
-                                        Log.d(TAG, "[" + backupAdNetwork + "] "
-                                                + "[on resume] [backup] app open ad loaded");
-                                    }
+                        if (appOpenAd != null) {
+                            appOpenAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                                @Override
+                                public void onAdDismissedFullScreenContent() {
+                                    appOpenAd = null;
+                                    loadBackupAppOpenAd();
+                                    Log.d(TAG, "[" + backupAdNetwork + "] " + "[on resume] [backup] close app open ad");
+                                }
 
-                                    @Override
-                                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                        appOpenAd = null;
-                                        isAppOpenAdLoaded = false;
-                                        Log.d(TAG,
-                                                "[" + backupAdNetwork + "] "
-                                                        + "[on resume] [backup] failed to load app open ad : "
-                                                        + loadAdError.getMessage());
-                                    }
-                                });
-                        break;
+                                @Override
+                                public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
+                                    appOpenAd = null;
+                                    loadBackupAppOpenAd();
+                                    Log.d(TAG, "[" + backupAdNetwork + "] "
+                                            + "[on resume] [backup] failed to show app open ad: "
+                                            + adError.getMessage());
+                                }
 
-                    case GOOGLE_AD_MANAGER:
-                    case FAN_BIDDING_AD_MANAGER:
-                        @SuppressLint("VisibleForTests")
-                        AdManagerAdRequest adManagerAdRequest = new AdManagerAdRequest.Builder().build();
-                        com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adManagerAppOpenId,
-                                adManagerAdRequest,
-                                new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
-                                    @Override
-                                    public void onAdLoaded(@NonNull com.google.android.gms.ads.appopen.AppOpenAd ad) {
-                                        appOpenAd = ad;
-                                        isAppOpenAdLoaded = true;
-                                        Log.d(TAG, "[" + backupAdNetwork + "] "
-                                                + "[on resume] [backup] app open ad loaded");
-                                    }
-
-                                    @Override
-                                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                        appOpenAd = null;
-                                        isAppOpenAdLoaded = false;
-                                        Log.d(TAG,
-                                                "[" + backupAdNetwork + "] "
-                                                        + "[on resume] [backup] failed to load app open ad : "
-                                                        + loadAdError.getMessage());
-                                    }
-                                });
+                                @Override
+                                public void onAdShowedFullScreenContent() {
+                                    Log.d(TAG, "[" + backupAdNetwork + "] " + "[on resume] [backup] show app open ad");
+                                }
+                            });
+                            appOpenAd.show(activity);
+                        }
                         break;
 
                     default:
                         break;
                 }
-            }
-        }
-
-        public void showBackupAppOpenAd() {
-            switch (backupAdNetwork) {
-                case ADMOB:
-                case FAN_BIDDING_ADMOB:
-                case GOOGLE_AD_MANAGER:
-                case FAN_BIDDING_AD_MANAGER:
-                    if (appOpenAd != null) {
-                        appOpenAd.setFullScreenContentCallback(new FullScreenContentCallback() {
-                            @Override
-                            public void onAdDismissedFullScreenContent() {
-                                appOpenAd = null;
-                                loadBackupAppOpenAd();
-                                Log.d(TAG, "[" + backupAdNetwork + "] " + "[on resume] [backup] close app open ad");
-                            }
-
-                            @Override
-                            public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
-                                appOpenAd = null;
-                                loadBackupAppOpenAd();
-                                Log.d(TAG, "[" + backupAdNetwork + "] "
-                                        + "[on resume] [backup] failed to show app open ad: " + adError.getMessage());
-                            }
-
-                            @Override
-                            public void onAdShowedFullScreenContent() {
-                                Log.d(TAG, "[" + backupAdNetwork + "] " + "[on resume] [backup] show app open ad");
-                            }
-                        });
-                        appOpenAd.show(activity);
-                    }
-                    break;
-
-                default:
-                    break;
+            } catch (Exception e) {
+                Log.e(TAG, "Error in showBackupAppOpenAd: " + e.getMessage());
+                loadBackupAppOpenAd();
             }
         }
 

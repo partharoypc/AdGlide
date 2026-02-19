@@ -5,8 +5,6 @@ import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.FACEBOOK;
 import static com.partharoypc.adglide.util.Constant.FAN;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_ADMOB;
-import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_AD_MANAGER;
-import static com.partharoypc.adglide.util.Constant.GOOGLE_AD_MANAGER;
 
 import android.app.Activity;
 import android.util.Log;
@@ -21,14 +19,13 @@ import com.facebook.ads.AdSize;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.admanager.AdManagerAdView;
 import com.partharoypc.adglide.R;
 import com.partharoypc.adglide.util.Tools;
 
 /**
  * Handles loading and displaying medium rectangle (300x250) ads from multiple
  * ad networks.
- * Supports AdMob, Google Ad Manager, and Facebook Audience Network.
+ * Supports AdMob, and Facebook Audience Network.
  */
 public class MediumRectangleAd {
 
@@ -37,7 +34,6 @@ public class MediumRectangleAd {
         private static final String TAG = "AdNetwork";
         private final Activity activity;
         private AdView adView;
-        private AdManagerAdView adManagerAdView;
         private com.facebook.ads.AdView fanAdView;
         private FrameLayout ironSourceBannerView;
 
@@ -45,7 +41,6 @@ public class MediumRectangleAd {
         private String adNetwork = "";
         private String backupAdNetwork = "";
         private String adMobBannerId = "";
-        private String googleAdManagerBannerId = "";
         private String fanBannerId = "";
         private String unityBannerId = "";
         private String appLovinBannerId = "";
@@ -81,11 +76,6 @@ public class MediumRectangleAd {
 
         public Builder setAdMobBannerId(String adMobBannerId) {
             this.adMobBannerId = adMobBannerId;
-            return this;
-        }
-
-        public Builder setGoogleAdManagerBannerId(String googleAdManagerBannerId) {
-            this.googleAdManagerBannerId = googleAdManagerBannerId;
             return this;
         }
 
@@ -130,273 +120,198 @@ public class MediumRectangleAd {
         }
 
         public void loadBannerAd() {
-            if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
-                switch (adNetwork) {
-                    case ADMOB:
-                    case FAN_BIDDING_ADMOB:
-                        FrameLayout adContainerView = activity.findViewById(R.id.admob_banner_view_container);
-                        adContainerView.post(() -> {
-                            adView = new AdView(activity);
-                            adView.setAdUnitId(adMobBannerId);
-                            adContainerView.removeAllViews();
-                            adContainerView.addView(adView);
-                            adView.setAdSize(Tools.getAdSizeMREC());
-                            adView.loadAd(Tools.getAdRequest(activity, legacyGDPR));
-                            adView.setAdListener(new AdListener() {
-                                @Override
-                                public void onAdLoaded() {
-                                    // Code to be executed when an ad finishes loading.
-                                    adContainerView.setVisibility(View.VISIBLE);
-                                }
+            try {
+                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
+                    switch (adNetwork) {
+                        case ADMOB:
+                        case FAN_BIDDING_ADMOB:
+                            FrameLayout adContainerView = activity.findViewById(R.id.admob_banner_view_container);
+                            adContainerView.post(() -> {
+                                try {
+                                    adView = new AdView(activity);
+                                    adView.setAdUnitId(adMobBannerId);
+                                    adContainerView.removeAllViews();
+                                    adContainerView.addView(adView);
+                                    adView.setAdSize(Tools.getAdSizeMREC());
+                                    adView.loadAd(Tools.getAdRequest(activity, legacyGDPR));
+                                    adView.setAdListener(new AdListener() {
+                                        @Override
+                                        public void onAdLoaded() {
+                                            // Code to be executed when an ad finishes loading.
+                                            adContainerView.setVisibility(View.VISIBLE);
+                                        }
 
-                                @Override
-                                public void onAdFailedToLoad(@NonNull LoadAdError adError) {
-                                    // Code to be executed when an ad request fails.
-                                    adContainerView.setVisibility(View.GONE);
+                                        @Override
+                                        public void onAdFailedToLoad(@NonNull LoadAdError adError) {
+                                            // Code to be executed when an ad request fails.
+                                            adContainerView.setVisibility(View.GONE);
+                                            loadBackupBannerAd();
+                                        }
+
+                                        @Override
+                                        public void onAdOpened() {
+                                            // Code to be executed when an ad opens an overlay that
+                                            // covers the screen.
+                                        }
+
+                                        @Override
+                                        public void onAdClicked() {
+                                            // Code to be executed when the user clicks on an ad.
+                                        }
+
+                                        @Override
+                                        public void onAdClosed() {
+                                            // Code to be executed when the user is about to return
+                                            // to the app after tapping on an ad.
+                                        }
+                                    });
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Error inside adContainerView.post: " + e.getMessage());
                                     loadBackupBannerAd();
                                 }
-
-                                @Override
-                                public void onAdOpened() {
-                                    // Code to be executed when an ad opens an overlay that
-                                    // covers the screen.
-                                }
-
-                                @Override
-                                public void onAdClicked() {
-                                    // Code to be executed when the user clicks on an ad.
-                                }
-
-                                @Override
-                                public void onAdClosed() {
-                                    // Code to be executed when the user is about to return
-                                    // to the app after tapping on an ad.
-                                }
                             });
-                        });
-                        Log.d(TAG, adNetwork + " Banner Ad unit Id : " + adMobBannerId);
-                        break;
+                            Log.d(TAG, adNetwork + " Banner Ad unit Id : " + adMobBannerId);
+                            break;
 
-                    case GOOGLE_AD_MANAGER:
-                    case FAN_BIDDING_AD_MANAGER:
-                        FrameLayout googleAdContainerView = activity.findViewById(R.id.google_ad_banner_view_container);
-                        googleAdContainerView.post(() -> {
-                            adManagerAdView = new AdManagerAdView(activity);
-                            adManagerAdView.setAdUnitId(googleAdManagerBannerId);
-                            googleAdContainerView.removeAllViews();
-                            googleAdContainerView.addView(adManagerAdView);
-                            adManagerAdView.setAdSize(Tools.getAdSizeMREC());
-                            adManagerAdView.loadAd(Tools.getGoogleAdManagerRequest());
-                            adManagerAdView.setAdListener(new AdListener() {
+                        case FAN:
+                        case FACEBOOK:
+                            fanAdView = new com.facebook.ads.AdView(activity, fanBannerId, AdSize.RECTANGLE_HEIGHT_250);
+                            RelativeLayout fanAdViewContainer = activity.findViewById(R.id.fan_banner_view_container);
+                            fanAdViewContainer.addView(fanAdView);
+                            com.facebook.ads.AdListener adListener = new com.facebook.ads.AdListener() {
                                 @Override
-                                public void onAdClicked() {
-                                    super.onAdClicked();
-                                }
-
-                                @Override
-                                public void onAdClosed() {
-                                    super.onAdClosed();
-                                }
-
-                                @Override
-                                public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                    super.onAdFailedToLoad(loadAdError);
-                                    googleAdContainerView.setVisibility(View.GONE);
+                                public void onError(Ad ad, com.facebook.ads.AdError adError) {
+                                    fanAdViewContainer.setVisibility(View.GONE);
                                     loadBackupBannerAd();
+                                    Log.d(TAG, "Error load FAN : " + adError.getErrorMessage());
                                 }
 
                                 @Override
-                                public void onAdImpression() {
-                                    super.onAdImpression();
+                                public void onAdLoaded(Ad ad) {
+                                    fanAdViewContainer.setVisibility(View.VISIBLE);
                                 }
 
                                 @Override
-                                public void onAdLoaded() {
-                                    super.onAdLoaded();
-                                    googleAdContainerView.setVisibility(View.VISIBLE);
+                                public void onAdClicked(Ad ad) {
+
                                 }
 
                                 @Override
-                                public void onAdOpened() {
-                                    super.onAdOpened();
+                                public void onLoggingImpression(Ad ad) {
+
                                 }
-                            });
-                        });
-                        break;
+                            };
+                            com.facebook.ads.AdView.AdViewLoadConfig loadAdConfig = fanAdView.buildLoadAdConfig()
+                                    .withAdListener(adListener).build();
+                            fanAdView.loadAd(loadAdConfig);
+                            break;
 
-                    case FAN:
-                    case FACEBOOK:
-                        fanAdView = new com.facebook.ads.AdView(activity, fanBannerId, AdSize.RECTANGLE_HEIGHT_250);
-                        RelativeLayout fanAdViewContainer = activity.findViewById(R.id.fan_banner_view_container);
-                        fanAdViewContainer.addView(fanAdView);
-                        com.facebook.ads.AdListener adListener = new com.facebook.ads.AdListener() {
-                            @Override
-                            public void onError(Ad ad, com.facebook.ads.AdError adError) {
-                                fanAdViewContainer.setVisibility(View.GONE);
-                                loadBackupBannerAd();
-                                Log.d(TAG, "Error load FAN : " + adError.getErrorMessage());
-                            }
-
-                            @Override
-                            public void onAdLoaded(Ad ad) {
-                                fanAdViewContainer.setVisibility(View.VISIBLE);
-                            }
-
-                            @Override
-                            public void onAdClicked(Ad ad) {
-
-                            }
-
-                            @Override
-                            public void onLoggingImpression(Ad ad) {
-
-                            }
-                        };
-                        com.facebook.ads.AdView.AdViewLoadConfig loadAdConfig = fanAdView.buildLoadAdConfig()
-                                .withAdListener(adListener).build();
-                        fanAdView.loadAd(loadAdConfig);
-                        break;
-
-                    default:
-                        break;
+                        default:
+                            break;
+                    }
+                    Log.d(TAG, "Banner Ad is enabled");
+                } else {
+                    Log.d(TAG, "Banner Ad is disabled");
                 }
-                Log.d(TAG, "Banner Ad is enabled");
-            } else {
-                Log.d(TAG, "Banner Ad is disabled");
+            } catch (Exception e) {
+                Log.e(TAG, "Error in loadBannerAd: " + e.getMessage());
+                loadBackupBannerAd();
             }
         }
 
         public void loadBackupBannerAd() {
-            if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
-                switch (backupAdNetwork) {
-                    case ADMOB:
-                    case FAN_BIDDING_ADMOB:
-                        FrameLayout adContainerView = activity.findViewById(R.id.admob_banner_view_container);
-                        adContainerView.post(() -> {
-                            adView = new AdView(activity);
-                            adView.setAdUnitId(adMobBannerId);
-                            adContainerView.removeAllViews();
-                            adContainerView.addView(adView);
-                            adView.setAdSize(Tools.getAdSizeMREC());
-                            adView.loadAd(Tools.getAdRequest(activity, legacyGDPR));
-                            adView.setAdListener(new AdListener() {
-                                @Override
-                                public void onAdLoaded() {
-                                    // Code to be executed when an ad finishes loading.
-                                    adContainerView.setVisibility(View.VISIBLE);
-                                }
+            try {
+                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
+                    switch (backupAdNetwork) {
+                        case ADMOB:
+                        case FAN_BIDDING_ADMOB:
+                            FrameLayout adContainerView = activity.findViewById(R.id.admob_banner_view_container);
+                            adContainerView.post(() -> {
+                                try {
+                                    adView = new AdView(activity);
+                                    adView.setAdUnitId(adMobBannerId);
+                                    adContainerView.removeAllViews();
+                                    adContainerView.addView(adView);
+                                    adView.setAdSize(Tools.getAdSizeMREC());
+                                    adView.loadAd(Tools.getAdRequest(activity, legacyGDPR));
+                                    adView.setAdListener(new AdListener() {
+                                        @Override
+                                        public void onAdLoaded() {
+                                            // Code to be executed when an ad finishes loading.
+                                            adContainerView.setVisibility(View.VISIBLE);
+                                        }
 
-                                @Override
-                                public void onAdFailedToLoad(@NonNull LoadAdError adError) {
-                                    // Code to be executed when an ad request fails.
-                                    adContainerView.setVisibility(View.GONE);
-                                }
+                                        @Override
+                                        public void onAdFailedToLoad(@NonNull LoadAdError adError) {
+                                            // Code to be executed when an ad request fails.
+                                            adContainerView.setVisibility(View.GONE);
+                                        }
 
-                                @Override
-                                public void onAdOpened() {
-                                    // Code to be executed when an ad opens an overlay that
-                                    // covers the screen.
-                                }
+                                        @Override
+                                        public void onAdOpened() {
+                                            // Code to be executed when an ad opens an overlay that
+                                            // covers the screen.
+                                        }
 
-                                @Override
-                                public void onAdClicked() {
-                                    // Code to be executed when the user clicks on an ad.
-                                }
+                                        @Override
+                                        public void onAdClicked() {
+                                            // Code to be executed when the user clicks on an ad.
+                                        }
 
-                                @Override
-                                public void onAdClosed() {
-                                    // Code to be executed when the user is about to return
-                                    // to the app after tapping on an ad.
-                                }
-                            });
-                        });
-                        Log.d(TAG, adNetwork + " Banner Ad unit Id : " + adMobBannerId);
-                        break;
-
-                    case GOOGLE_AD_MANAGER:
-                    case FAN_BIDDING_AD_MANAGER:
-                        FrameLayout googleAdContainerView = activity.findViewById(R.id.google_ad_banner_view_container);
-                        googleAdContainerView.post(() -> {
-                            adManagerAdView = new AdManagerAdView(activity);
-                            adManagerAdView.setAdUnitId(googleAdManagerBannerId);
-                            googleAdContainerView.removeAllViews();
-                            googleAdContainerView.addView(adManagerAdView);
-                            adManagerAdView.setAdSize(Tools.getAdSizeMREC());
-                            adManagerAdView.loadAd(Tools.getGoogleAdManagerRequest());
-                            adManagerAdView.setAdListener(new AdListener() {
-                                @Override
-                                public void onAdClicked() {
-                                    super.onAdClicked();
-                                }
-
-                                @Override
-                                public void onAdClosed() {
-                                    super.onAdClosed();
-                                }
-
-                                @Override
-                                public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                    super.onAdFailedToLoad(loadAdError);
-                                    googleAdContainerView.setVisibility(View.GONE);
-                                }
-
-                                @Override
-                                public void onAdImpression() {
-                                    super.onAdImpression();
-                                }
-
-                                @Override
-                                public void onAdLoaded() {
-                                    super.onAdLoaded();
-                                    googleAdContainerView.setVisibility(View.VISIBLE);
-                                }
-
-                                @Override
-                                public void onAdOpened() {
-                                    super.onAdOpened();
+                                        @Override
+                                        public void onAdClosed() {
+                                            // Code to be executed when the user is about to return
+                                            // to the app after tapping on an ad.
+                                        }
+                                    });
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Error inside adContainerView.post: " + e.getMessage());
                                 }
                             });
-                        });
-                        break;
+                            Log.d(TAG, adNetwork + " Banner Ad unit Id : " + adMobBannerId);
+                            break;
 
-                    case FAN:
-                    case FACEBOOK:
-                        fanAdView = new com.facebook.ads.AdView(activity, fanBannerId, AdSize.RECTANGLE_HEIGHT_250);
-                        RelativeLayout fanAdViewContainer = activity.findViewById(R.id.fan_banner_view_container);
-                        fanAdViewContainer.addView(fanAdView);
-                        com.facebook.ads.AdListener adListener = new com.facebook.ads.AdListener() {
-                            @Override
-                            public void onError(Ad ad, com.facebook.ads.AdError adError) {
-                                fanAdViewContainer.setVisibility(View.GONE);
-                                Log.d(TAG, "Error load FAN : " + adError.getErrorMessage());
-                            }
+                        case FAN:
+                        case FACEBOOK:
+                            fanAdView = new com.facebook.ads.AdView(activity, fanBannerId, AdSize.RECTANGLE_HEIGHT_250);
+                            RelativeLayout fanAdViewContainer = activity.findViewById(R.id.fan_banner_view_container);
+                            fanAdViewContainer.addView(fanAdView);
+                            com.facebook.ads.AdListener adListener = new com.facebook.ads.AdListener() {
+                                @Override
+                                public void onError(Ad ad, com.facebook.ads.AdError adError) {
+                                    fanAdViewContainer.setVisibility(View.GONE);
+                                    Log.d(TAG, "Error load FAN : " + adError.getErrorMessage());
+                                }
 
-                            @Override
-                            public void onAdLoaded(Ad ad) {
-                                fanAdViewContainer.setVisibility(View.VISIBLE);
-                            }
+                                @Override
+                                public void onAdLoaded(Ad ad) {
+                                    fanAdViewContainer.setVisibility(View.VISIBLE);
+                                }
 
-                            @Override
-                            public void onAdClicked(Ad ad) {
+                                @Override
+                                public void onAdClicked(Ad ad) {
 
-                            }
+                                }
 
-                            @Override
-                            public void onLoggingImpression(Ad ad) {
+                                @Override
+                                public void onLoggingImpression(Ad ad) {
 
-                            }
-                        };
-                        com.facebook.ads.AdView.AdViewLoadConfig loadAdConfig = fanAdView.buildLoadAdConfig()
-                                .withAdListener(adListener).build();
-                        fanAdView.loadAd(loadAdConfig);
-                        break;
+                                }
+                            };
+                            com.facebook.ads.AdView.AdViewLoadConfig loadAdConfig = fanAdView.buildLoadAdConfig()
+                                    .withAdListener(adListener).build();
+                            fanAdView.loadAd(loadAdConfig);
+                            break;
 
-                    default:
-                        break;
+                        default:
+                            break;
+                    }
+                    Log.d(TAG, "Banner Ad is enabled");
+                } else {
+                    Log.d(TAG, "Banner Ad is disabled");
                 }
-                Log.d(TAG, "Banner Ad is enabled");
-            } else {
-                Log.d(TAG, "Banner Ad is disabled");
+            } catch (Exception e) {
+                Log.e(TAG, "Error in loadBackupBannerAd: " + e.getMessage());
             }
         }
 
@@ -412,11 +327,7 @@ public class MediumRectangleAd {
                 adView.destroy();
                 adView = null;
             }
-            if (adManagerAdView != null) {
-                adManagerAdView.setAdListener(null);
-                adManagerAdView.destroy();
-                adManagerAdView = null;
-            }
+
             if (fanAdView != null) {
                 fanAdView.destroy();
                 fanAdView = null;

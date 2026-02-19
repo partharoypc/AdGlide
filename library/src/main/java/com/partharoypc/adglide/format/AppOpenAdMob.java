@@ -27,6 +27,9 @@ public class AppOpenAdMob {
     private boolean isShowingAd = false;
     private long loadTime = 0;
 
+    private long lastAdShowTime = 0;
+    private static final long MIN_TIME_BETWEEN_ADS_MS = 1000 * 60 * 60 * 4;
+
     /**
      * Returns whether an app open ad is currently being shown.
      *
@@ -40,28 +43,33 @@ public class AppOpenAdMob {
     }
 
     public void loadAd(Context context, String adMobAppOpenAdUnitId) {
-        if (isLoadingAd || isAdAvailable()) {
-            return;
+        try {
+            if (isLoadingAd || isAdAvailable()) {
+                return;
+            }
+
+            isLoadingAd = true;
+            AdRequest request = new AdRequest.Builder().build();
+            AppOpenAd.load(context, adMobAppOpenAdUnitId, request, new AppOpenAd.AppOpenAdLoadCallback() {
+                @Override
+                public void onAdLoaded(@NonNull AppOpenAd ad) {
+                    appOpenAd = ad;
+                    isLoadingAd = false;
+                    loadTime = (new Date()).getTime();
+
+                    Log.d(LOG_TAG, "onAdLoaded.");
+                }
+
+                @Override
+                public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                    isLoadingAd = false;
+                    Log.d(LOG_TAG, "onAdFailedToLoad: " + loadAdError.getMessage());
+                }
+            });
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Error in loadAd: " + e.getMessage());
+            isLoadingAd = false;
         }
-
-        isLoadingAd = true;
-        AdRequest request = new AdRequest.Builder().build();
-        AppOpenAd.load(context, adMobAppOpenAdUnitId, request, new AppOpenAd.AppOpenAdLoadCallback() {
-            @Override
-            public void onAdLoaded(@NonNull AppOpenAd ad) {
-                appOpenAd = ad;
-                isLoadingAd = false;
-                loadTime = (new Date()).getTime();
-
-                Log.d(LOG_TAG, "onAdLoaded.");
-            }
-
-            @Override
-            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                isLoadingAd = false;
-                Log.d(LOG_TAG, "onAdFailedToLoad: " + loadAdError.getMessage());
-            }
-        });
     }
 
     public boolean wasLoadTimeLessThanNHoursAgo(long numHours) {
@@ -81,48 +89,64 @@ public class AppOpenAdMob {
 
     public void showAdIfAvailable(@NonNull final Activity activity, String appOpenAdUnitId,
             @NonNull OnShowAdCompleteListener onShowAdCompleteListener) {
-        if (isShowingAd) {
-            Log.d(LOG_TAG, "The app open ad is already showing.");
-            return;
-        }
+        try {
+            if (isShowingAd) {
+                Log.d(LOG_TAG, "The app open ad is already showing.");
+                return;
+            }
 
-        if (!isAdAvailable()) {
-            Log.d(LOG_TAG, "The app open ad is not ready yet.");
+            if (!isAdAvailable()) {
+                Log.d(LOG_TAG, "The app open ad is not ready yet.");
+                onShowAdCompleteListener.onShowAdComplete();
+                loadAd(activity, appOpenAdUnitId);
+                return;
+            }
+
+            long currentTime = new Date().getTime();
+            long timeSinceLastShow = currentTime - lastAdShowTime;
+            if (lastAdShowTime > 0 && timeSinceLastShow < MIN_TIME_BETWEEN_ADS_MS) {
+                Log.d(LOG_TAG,
+                        "The app open ad was shown " + (timeSinceLastShow / 1000 / 60) + " minutes ago. Skipping.");
+                onShowAdCompleteListener.onShowAdComplete();
+                return;
+            }
+
+            Log.d(LOG_TAG, "Will show ad.");
+
+            appOpenAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                @Override
+                public void onAdDismissedFullScreenContent() {
+                    appOpenAd = null;
+                    isShowingAd = false;
+
+                    Log.d(LOG_TAG, "onAdDismissedFullScreenContent.");
+
+                    onShowAdCompleteListener.onShowAdComplete();
+                    loadAd(activity, appOpenAdUnitId);
+                }
+
+                @Override
+                public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
+                    appOpenAd = null;
+                    isShowingAd = false;
+                    Log.d(LOG_TAG, "onAdFailedToShowFullScreenContent: " + adError.getMessage());
+                    onShowAdCompleteListener.onShowAdComplete();
+                    loadAd(activity, appOpenAdUnitId);
+                }
+
+                @Override
+                public void onAdShowedFullScreenContent() {
+                    lastAdShowTime = new Date().getTime();
+                    Log.d(LOG_TAG, "onAdShowedFullScreenContent.");
+                }
+            });
+
+            isShowingAd = true;
+            appOpenAd.show(activity);
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Error in showAdIfAvailable: " + e.getMessage());
             onShowAdCompleteListener.onShowAdComplete();
             loadAd(activity, appOpenAdUnitId);
-            return;
         }
-
-        Log.d(LOG_TAG, "Will show ad.");
-
-        appOpenAd.setFullScreenContentCallback(new FullScreenContentCallback() {
-            @Override
-            public void onAdDismissedFullScreenContent() {
-                appOpenAd = null;
-                isShowingAd = false;
-
-                Log.d(LOG_TAG, "onAdDismissedFullScreenContent.");
-
-                onShowAdCompleteListener.onShowAdComplete();
-                loadAd(activity, appOpenAdUnitId);
-            }
-
-            @Override
-            public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
-                appOpenAd = null;
-                isShowingAd = false;
-                Log.d(LOG_TAG, "onAdFailedToShowFullScreenContent: " + adError.getMessage());
-                onShowAdCompleteListener.onShowAdComplete();
-                loadAd(activity, appOpenAdUnitId);
-            }
-
-            @Override
-            public void onAdShowedFullScreenContent() {
-                Log.d(LOG_TAG, "onAdShowedFullScreenContent.");
-            }
-        });
-
-        isShowingAd = true;
-        appOpenAd.show(activity);
     }
 }

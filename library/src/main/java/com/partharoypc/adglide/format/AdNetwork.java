@@ -8,11 +8,8 @@ import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.FACEBOOK;
 import static com.partharoypc.adglide.util.Constant.FAN;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_ADMOB;
-import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_AD_MANAGER;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_IRONSOURCE;
-import static com.partharoypc.adglide.util.Constant.GOOGLE_AD_MANAGER;
-import static com.partharoypc.adglide.util.Constant.IRONSOURCE;
 import static com.partharoypc.adglide.util.Constant.NONE;
 import static com.partharoypc.adglide.util.Constant.STARTAPP;
 import static com.partharoypc.adglide.util.Constant.UNITY;
@@ -33,6 +30,9 @@ import com.unity3d.ads.IUnityAdsInitializationListener;
 import com.unity3d.ads.UnityAds;
 import com.wortise.ads.WortiseSdk;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 public class AdNetwork {
@@ -44,6 +44,7 @@ public class AdNetwork {
         private String adStatus = "";
         private String adNetwork = "";
         private String backupAdNetwork = "";
+        private List<String> backupAdNetworks = new ArrayList<>(); // New: Support for multiple backups
         private String adMobAppId = "";
         private String startappAppId = "0";
         private String unityGameId = "";
@@ -74,6 +75,25 @@ public class AdNetwork {
 
         public Initialize setBackupAdNetwork(String backupAdNetwork) {
             this.backupAdNetwork = backupAdNetwork;
+            if (!this.backupAdNetworks.contains(backupAdNetwork)) {
+                this.backupAdNetworks.add(backupAdNetwork);
+            }
+            return this;
+        }
+
+        public Initialize addBackupAdNetwork(String backupAdNetwork) {
+            if (!this.backupAdNetworks.contains(backupAdNetwork)) {
+                this.backupAdNetworks.add(backupAdNetwork);
+            }
+            return this;
+        }
+
+        public Initialize setBackupAdNetworks(String... backupAdNetworks) {
+            this.backupAdNetworks.clear();
+            this.backupAdNetworks.addAll(Arrays.asList(backupAdNetworks));
+            if (!this.backupAdNetworks.isEmpty()) {
+                this.backupAdNetwork = this.backupAdNetworks.get(0); // Maintain legacy sync
+            }
             return this;
         }
 
@@ -114,149 +134,91 @@ public class AdNetwork {
 
         public void initAds() {
             if (adStatus.equals(AD_STATUS_ON)) {
-                switch (adNetwork) {
-                    case ADMOB:
-                    case GOOGLE_AD_MANAGER:
-                    case FAN_BIDDING_ADMOB:
-                    case FAN_BIDDING_AD_MANAGER:
-                        MobileAds.initialize(activity, initializationStatus -> {
-                            Map<String, AdapterStatus> statusMap = initializationStatus.getAdapterStatusMap();
-                            for (String adapterClass : statusMap.keySet()) {
-                                AdapterStatus adapterStatus = statusMap.get(adapterClass);
-                                if (adapterStatus != null) {
-                                    Log.d(TAG, String.format("Adapter name: %s, Description: %s, Latency: %d",
-                                            adapterClass, adapterStatus.getDescription(), adapterStatus.getLatency()));
-                                }
-                            }
-                        });
-                        AudienceNetworkInitializeHelper.initializeAd(activity, debug);
-                        break;
-                    case FAN:
-                    case FACEBOOK:
-                        AudienceNetworkInitializeHelper.initializeAd(activity, debug);
-                        break;
-                    case UNITY:
-                        UnityAds.initialize(activity, unityGameId, debug, new IUnityAdsInitializationListener() {
-                            @Override
-                            public void onInitializationComplete() {
-                                Log.d(TAG, "Unity Ads Initialization Complete");
-                            }
-
-                            @Override
-                            public void onInitializationFailed(UnityAds.UnityAdsInitializationError error,
-                                    String message) {
-                                Log.d(TAG, "Unity Ads Initialization Failed: " + error + " - " + message);
-                            }
-                        });
-                        break;
-                    case APPLOVIN:
-                    case APPLOVIN_MAX:
-                    case FAN_BIDDING_APPLOVIN_MAX:
-                        AppLovinSdk.getInstance(activity).setMediationProvider(AppLovinMediationProvider.MAX);
-                        AppLovinSdk.getInstance(activity).initializeSdk(config -> {
-                        });
-                        AudienceNetworkInitializeHelper.initializeAd(activity, debug);
-                        break;
-                    case APPLOVIN_DISCOVERY:
-                        AppLovinSdk.initializeSdk(activity);
-                        break;
-                    case IRONSOURCE:
-                    case FAN_BIDDING_IRONSOURCE:
-                        IronSource.init(activity, ironSourceAppKey, IronSource.AD_UNIT.REWARDED_VIDEO,
-                                IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.BANNER);
-                        AudienceNetworkInitializeHelper.initializeAd(activity, debug);
-                        break;
-                    case STARTAPP:
-                        StartAppSDK.init(activity, startappAppId, true);
-                        StartAppSDK.setTestAdsEnabled(debug);
-                        StartAppAd.disableSplash();
-                        StartAppSDK.enableReturnAds(false);
-                        break;
-                    case WORTISE:
-                        WortiseSdk.initialize(activity, wortiseAppId);
-                        break;
-                    case NONE:
-                        // do nothing
-                        break;
-                    default:
-                        break;
-                }
+                initializeSdk(adNetwork);
                 Log.d(TAG, "[" + adNetwork + "] is selected as Primary Ads");
             }
         }
 
         public void initBackupAds() {
             if (adStatus.equals(AD_STATUS_ON)) {
-                switch (backupAdNetwork) {
-                    case ADMOB:
-                    case GOOGLE_AD_MANAGER:
-                    case FAN_BIDDING_ADMOB:
-                    case FAN_BIDDING_AD_MANAGER:
-                        MobileAds.initialize(activity, initializationStatus -> {
-                            Map<String, AdapterStatus> statusMap = initializationStatus.getAdapterStatusMap();
-                            for (String adapterClass : statusMap.keySet()) {
-                                AdapterStatus adapterStatus = statusMap.get(adapterClass);
-                                if (adapterStatus != null) {
-                                    Log.d(TAG,
-                                            String.format("Adapter name: %s, Description: %s, Latency: %d",
-                                                    adapterClass,
-                                                    adapterStatus.getDescription(), adapterStatus.getLatency()));
-                                }
-                            }
-                        });
-                        AudienceNetworkInitializeHelper.initialize(activity);
-                        break;
-                    case FAN:
-                    case FACEBOOK:
-                        AudienceNetworkInitializeHelper.initializeAd(activity, debug);
-                        break;
-                    case UNITY:
-                        UnityAds.initialize(activity, unityGameId, debug, new IUnityAdsInitializationListener() {
-                            @Override
-                            public void onInitializationComplete() {
-                                Log.d(TAG, "Unity Ads Initialization Complete");
-                            }
-
-                            @Override
-                            public void onInitializationFailed(UnityAds.UnityAdsInitializationError error,
-                                    String message) {
-                                Log.d(TAG, "Unity Ads Initialization Failed: " + error + " - " + message);
-                            }
-                        });
-                        break;
-                    case APPLOVIN:
-                    case APPLOVIN_MAX:
-                    case FAN_BIDDING_APPLOVIN_MAX:
-                        AppLovinSdk.getInstance(activity).setMediationProvider(AppLovinMediationProvider.MAX);
-                        AppLovinSdk.getInstance(activity).initializeSdk(config -> {
-                        });
-                        AudienceNetworkInitializeHelper.initializeAd(activity, debug);
-                        break;
-                    case APPLOVIN_DISCOVERY:
-                        AppLovinSdk.initializeSdk(activity);
-                        break;
-                    case IRONSOURCE:
-                    case FAN_BIDDING_IRONSOURCE:
-                        IronSource.init(activity, ironSourceAppKey, IronSource.AD_UNIT.REWARDED_VIDEO,
-                                IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.BANNER);
-                        AudienceNetworkInitializeHelper.initializeAd(activity, debug);
-                        break;
-                    case STARTAPP:
-                        StartAppSDK.init(activity, startappAppId, true);
-                        StartAppSDK.setTestAdsEnabled(debug);
-                        StartAppAd.disableSplash();
-                        StartAppSDK.enableReturnAds(false);
-                        break;
-                    case WORTISE:
-                        WortiseSdk.initialize(activity, wortiseAppId);
-                        break;
-                    case NONE:
-                        // do nothing
-                        break;
-                    default:
-                        break;
+                // Initialize legacy single backup if set and list is empty (backward
+                // compatibility)
+                if (backupAdNetworks.isEmpty() && !backupAdNetwork.isEmpty()) {
+                    backupAdNetworks.add(backupAdNetwork);
                 }
-                Log.d(TAG, "[" + backupAdNetwork + "] is selected as Backup Ads");
+
+                for (String network : backupAdNetworks) {
+                    initializeSdk(network);
+                    Log.d(TAG, "[" + network + "] is selected as Backup Ads");
+                }
+            }
+        }
+
+        private void initializeSdk(String network) {
+            switch (network) {
+                case ADMOB:
+                case FAN_BIDDING_ADMOB:
+                    MobileAds.initialize(activity, initializationStatus -> {
+                        Map<String, AdapterStatus> statusMap = initializationStatus.getAdapterStatusMap();
+                        for (String adapterClass : statusMap.keySet()) {
+                            AdapterStatus adapterStatus = statusMap.get(adapterClass);
+                            if (adapterStatus != null) {
+                                Log.d(TAG, String.format("Adapter name: %s, Description: %s, Latency: %d",
+                                        adapterClass, adapterStatus.getDescription(), adapterStatus.getLatency()));
+                            }
+                        }
+                    });
+                    AudienceNetworkInitializeHelper.initializeAd(activity, debug);
+                    break;
+                case FAN:
+                case FACEBOOK:
+                    AudienceNetworkInitializeHelper.initializeAd(activity, debug);
+                    break;
+                case UNITY:
+                    UnityAds.initialize(activity, unityGameId, debug, new IUnityAdsInitializationListener() {
+                        @Override
+                        public void onInitializationComplete() {
+                            Log.d(TAG, "Unity Ads Initialization Complete");
+                        }
+
+                        @Override
+                        public void onInitializationFailed(UnityAds.UnityAdsInitializationError error,
+                                String message) {
+                            Log.d(TAG, "Unity Ads Initialization Failed: " + error + " - " + message);
+                        }
+                    });
+                    break;
+                case APPLOVIN:
+                case APPLOVIN_MAX:
+                case FAN_BIDDING_APPLOVIN_MAX:
+                    AppLovinSdk.getInstance(activity).setMediationProvider(AppLovinMediationProvider.MAX);
+                    AppLovinSdk.getInstance(activity).initializeSdk(config -> {
+                    });
+                    AudienceNetworkInitializeHelper.initializeAd(activity, debug);
+                    break;
+                case APPLOVIN_DISCOVERY:
+                    AppLovinSdk.initializeSdk(activity);
+                    break;
+                case IRONSOURCE:
+                case FAN_BIDDING_IRONSOURCE:
+                    IronSource.init(activity, ironSourceAppKey, IronSource.AD_UNIT.REWARDED_VIDEO,
+                            IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.BANNER);
+                    AudienceNetworkInitializeHelper.initializeAd(activity, debug);
+                    break;
+                case STARTAPP:
+                    StartAppSDK.init(activity, startappAppId, true);
+                    StartAppSDK.setTestAdsEnabled(debug);
+                    StartAppAd.disableSplash();
+                    StartAppSDK.enableReturnAds(false);
+                    break;
+                case WORTISE:
+                    WortiseSdk.initialize(activity, wortiseAppId);
+                    break;
+                case NONE:
+                    // do nothing
+                    break;
+                default:
+                    break;
             }
         }
 

@@ -11,7 +11,6 @@ public class Constant {
 
     // ad option
     public static final String ADMOB = "admob";
-    public static final String GOOGLE_AD_MANAGER = "google_ad_manager";
     public static final String FAN = "fan";
     public static final String FACEBOOK = "facebook";
     public static final String STARTAPP = "startapp";
@@ -25,7 +24,6 @@ public class Constant {
 
     // ad bidding
     public static final String FAN_BIDDING_ADMOB = "fan_bidding_admob";
-    public static final String FAN_BIDDING_AD_MANAGER = "fan_bidding_ad_manager";
     public static final String FAN_BIDDING_APPLOVIN_MAX = "fan_bidding_applovin_max";
     public static final String FAN_BIDDING_IRONSOURCE = "fan_bidding_ironsource";
 
