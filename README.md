@@ -20,35 +20,37 @@ Follow this sequence for a perfect implementation:
 
 ---
 
-## 🏗 Ad Networks Capability Matrix
+### 📊 Ad Networks Capability Matrix
 
-| Network | Key | Integration Type | Banner | Interstitial | Rewarded | Native | App Open |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **AdMob** | `admob` | Direct | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Meta (FAN)**| `meta` | Direct + Bidding | ✅ | ✅ | ✅ | ✅ | ✅* |
-| **Unity Ads** | `unity` | Direct | ✅ | ✅ | ✅ | ❌ | ❌ |
-| **AppLovin MAX**| `applovin` | Direct | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **IronSource** | `ironsource`| Direct | ✅ | ✅ | ✅ | ❌ | ❌ |
-| **StartApp** | `startapp` | Direct | ✅ | ✅ | ✅ | ⚠️ | ❌ |
-| **Wortise** | `wortise` | Direct | ✅ | ✅ | ✅ | ⚠️ | ✅ |
-
-*\*Meta App Open is typically handled via AdMob/MAX bidding.*
+| Ad Format | AdMob | Meta | Unity | AppLovin | IronSource | StartApp | Wortise |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Banner** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Interstitial** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Native** | ✅ | ✅ | ❌ | ✅ | ❌ | ✅ | ✅ |
+| **Rewarded** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **App Open** | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ✅ |
+| **Medium Rectangle** | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Rewarded Interstitial** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 
 ---
 
-## 📦 Global Initialization Guide
+### 🌐 Global Initialization Guide
 
-Initialization is handled by the `AdNetwork.Initialize` builder. You MUST provide the specific App IDs/Keys for each network you intend to use.
+Initialize the SDK in your `SplashActivity` or `MainActivity`. AdGlide handles the heavy lifting of SDK warm-ups.
 
-### Network Initialization Keys
-| Network | Method | Required ID Type |
-| :--- | :--- | :--- |
-| **AdMob** | `setAdMobAppId(id)` | `ca-app-pub-xxxxxxxx~xxxxxxxx` |
-| **AppLovin**| `setAppLovinSdkKey(key)`| Long alphanumeric SDK Key |
-| **IronSource**| `setironSourceAppKey(key)`| Your IronSource App Key |
-| **StartApp**| `setStartappAppId(id)` | StartApp App ID |
-| **Unity** | `setUnityGameId(id)` | Unity Game ID |
-| **Wortise** | `setWortiseAppId(id)` | Wortise App ID |
+```java
+new AdNetwork.Builder(this)
+    .setAdStatus("1") // "1" for ON, "0" for OFF
+    .setAdNetwork("admob") // Primary Network: admob, meta, applovin, unity, ironsource, startapp, wortise
+    .setBackupAdNetworks("meta", "applovin") // Multiple fallbacks for Waterfall Logic
+    .setAdMobAppId("ca-app-pub-3940256099942544~3347511713")
+    .setWortiseAppId("YOUR_WORTISE_APP_ID")
+    .setAppLovinSdkKey("YOUR_SDK_KEY")
+    .setStartappAppId("YOUR_STARTAPP_ID")
+    .setUnityGameId("YOUR_UNITY_GAME_ID")
+    .setironSourceAppKey("YOUR_IRONSOURCE_APP_KEY")
+    .build();
+```
 
 ---
 
@@ -62,14 +64,25 @@ AdGlide supports adaptive sizing and the AdMob-exclusive collapsible feature.
 - `setMetaBannerId(String)`
 - `setUnityBannerId(String)`
 - `setAppLovinBannerId(String)` (MAX)
-- `setApplovinDiscBannerZoneId(String)` (Discovery)
+- `setAppLovinBannerZoneId(String)` (Discovery)
 - `setironSourceBannerId(String)`
 - `setWortiseBannerId(String)`
 - `setIsCollapsibleBanner(boolean)`: Enables bottom-collapsible banners (AdMob).
 
 ---
 
-### 2. Interstitial Ads
+### 2. Medium Rectangle Ads
+Handles loading and displaying medium rectangle (300x250) ads.
+
+**Builder Options:**
+- `setAdMobBannerId(String)`
+- `setMetaBannerId(String)`
+- `setPlacementStatus(int)`
+- `setDarkTheme(boolean)`
+
+---
+
+### 3. Interstitial Ads
 Includes built-in **Frequency Capping** via intervals.
 
 **Builder Options:**
@@ -84,7 +97,7 @@ Includes built-in **Frequency Capping** via intervals.
 
 ---
 
-### 3. Native Ads
+### 4. Native Ads
 Supports AdMob Templates and Meta Custom Layouts.
 
 **Supported Meta Styles:**
@@ -102,28 +115,55 @@ NativeTemplateStyle styles = new NativeTemplateStyle.Builder()
     .build();
 
 new NativeAd.Builder(activity)
-    .setNativeTemplateStyle(styles)
+    .setNativeAdStyle("medium") // Available styles: small, medium, radio, news, video_small, video_large, stream
     .build();
 ```
 
 ---
 
-### 4. Rewarded Ads
-Incentivized video ads with complete callback lifecycle.
+### 5. Rewarded Ads
+Incentivized video ads with complete callback lifecycle. Supports **AdMob, Meta, Unity, AppLovin, StartApp, Wortise, and IronSource**.
 
-**Callback Interfaces:**
-- `OnRewardedAdCompleteListener`: Triggered when the user successfully earns the reward.
-- `OnRewardedAdDismissedListener`: Triggered when the ad is closed.
-- `OnRewardedAdErrorListener`: Triggered if the ad fails to show.
+**Usage Example:**
+```java
+new RewardedAd.Builder(activity)
+    .setAdStatus("1")
+    .setAdNetwork("admob")
+    .setAdMobRewardedId("YOUR_REWARDED_ID")
+    .build(new OnRewardedAdCompleteListener() {
+        @Override
+        public void onRewardedAdComplete() {
+            // Reward the user
+        }
+    }, new OnRewardedAdDismissedListener() {
+        @Override
+        public void onRewardedAdDismissed() {
+            // Load the next ad
+        }
+    });
+```
 
 ---
 
-### 5. App Open Ads
+### 6. Rewarded Interstitial Ads
+Combines the impact of interstitial ads with the reward mechanic.
+
+**Builder Options:**
+- `setAdMobRewardedInterstitialId(String)`
+
+---
+
+### 7. App Open Ads
 Optimized for cold starts or background-to-foreground transitions.
 
 **Implementation Modes:**
 - **Immediate**: Load and show directly on the splash screen.
-- **Lifecycle Based**: Registers `ProcessLifecycleOwner` to automatically show ads when the user returns to the app.
+- **Lifecycle Based**: Registers lifecycle callbacks to automatically show ads when the user returns to the app.
+
+**Builder Options:**
+- `setAdMobAppOpenId(String)`
+- `setAppLovinAppOpenId(String)`
+- `setWortiseAppOpenId(String)`
 
 ---
 
@@ -200,9 +240,9 @@ Every network integrated into AdGlide has been tuned for maximum stability. Belo
 ---
 
 ## 🔄 The Waterfall Logic
-AdGlide uses a linear **Waterfall Strategy**. If the **Primary Network** fails to load after 2-5 seconds (internal timeout), the SDK automatically attempts to load the **Backup Network**.
+AdGlide uses a robust **Waterfall Strategy**. If the **Primary Network** fails to load, the SDK automatically attempts to load the **Backup Network** using a chain of internal listeners.
 
-If you use `setBackupAdNetworks(String...)`, the SDK will cycle through the entire list until an ad is filled.
+If you use `setBackupAdNetworks(String...)`, the SDK will cycle through the entire list in sequence until an ad is filled or all networks are exhausted.
 
 ---
 
@@ -218,7 +258,10 @@ The `RemoteConfigHelper` allows you to switch ad networks dynamically. The expec
   "backup_ad_network": "applovin",
   "ad_mob_app_id": "ca-app-pub-3940256099942544~3347511713",
   "ad_mob_banner_id": "ca-app-pub-3940256099942544/6300978111",
-  ... (any other ID fields)
+  "ad_mob_interstitial_id": "ca-app-pub-3940256099942544/1033173712",
+  "ad_mob_rewarded_id": "ca-app-pub-3940256099942544/5224354917",
+  "ad_mob_native_id": "ca-app-pub-3940256099942544/2247696110",
+  "ad_mob_app_open_id": "ca-app-pub-3940256099942544/9257395921"
 }
 ```
 
@@ -261,21 +304,31 @@ debugSettings = new ConsentDebugSettings.Builder(activity)
 
 ### `AdNetwork.Initialize`
 - `setAdStatus(String)`: "1" for ON, "0" for OFF.
-- `setAdNetwork(String)`: Set primary network key.
-- `addBackupAdNetwork(String)`: Add a fallback network to the waterfall.
-- `setDebug(boolean)`: Enable verbose logging and test modes.
+- `setAdNetwork(String)`: Set primary network key (e.g., `admob`, `meta`).
+- `setBackupAdNetworks(String...)`: Set multiple fallback networks.
+- `setDebug(boolean)`: Enable verbose logging.
 
-### `BannerAd.Builder`
+### `BannerAd.Builder` / `MediumRectangleAd.Builder`
 - `setAdMobBannerId(String)`
 - `setMetaBannerId(String)`
-- `setAppLovinBannerId(String)` / `setApplovinDiscBannerZoneId(String)`
-- `setIsCollapsibleBanner(boolean)`: (AdMob only)
+- `setAppLovinBannerId(String)` / `setAppLovinBannerZoneId(String)`
+- `setIsCollapsibleBanner(boolean)`: (Banner only, AdMob specific)
 
 ### `NativeAd.Builder`
 - `setPadding(L, T, R, B)`: Layout customization.
-- `setDarkTheme(boolean)`: Switch to high-contrast dark mode styles.
-- `setNativeAdStyle(String)`: Use `Constant.STYLE_*` for Meta layouts.
-- `setNativeAdBackgroundColor(int, int)`: Light and Dark resources.
+- `setDarkTheme(boolean)`: Optimized dark mode styles.
+- `setNativeAdStyle(String)`: Support Meta styles (news, medium, etc).
+- `setNativeAdBackgroundColor(int, int)`: (Light, Dark) resources.
+
+### `RewardedAd.Builder` / `RewardedInterstitialAd.Builder`
+- `setAdMobRewardedId(String)` / `setAdMobRewardedInterstitialId(String)`
+- `setMetaRewardedId(String)`
+- `setUnityRewardedId(String)`
+
+### `AppOpenAd.Builder`
+- `setAdMobAppOpenId(String)`
+- `setAppLovinAppOpenId(String)`
+- `setWortiseAppOpenId(String)`
 
 ---
 
