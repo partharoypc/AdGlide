@@ -1,24 +1,36 @@
-# AdGlide SDK - The Absolute Definitive Technical Guide 🚀
+# AdGlide SDK - The Ultimate Technical Encyclopedia 🚀
 
 [![Version](https://img.shields.io/badge/Version-1.0.0-blue.svg)](https://github.com/partharoypc/AdGlide)
 [![SDK Support](https://img.shields.io/badge/Android-21%2B-green.svg)](https://developer.android.com)
 [![License](https://img.shields.io/badge/License-MIT-orange.svg)](LICENSE)
 
-AdGlide is an enterprise-grade mediation wrapper for Android. This document is the **Absolute Source of Truth** for the SDK, providing 100% of the information required for high-level integration across all 7 supported ad networks.
+AdGlide is an enterprise-grade mediation wrapper for Android. This document is the **Ultimate Technical Encyclopedia**, providing 100% of the information required for high-level integration, troubleshooting, and optimization across all 7 supported ad networks.
+
+---
+
+## 🛠 5-Step Master Integration Guide
+
+Follow this sequence for a perfect implementation:
+
+1.  **Repository Setup**: Add JitPack to your `settings.gradle` or `build.gradle` (Project).
+2.  **Dependency Injection**: Add `implementation 'com.github.partharoypc:adglide:1.0.0'` to your `build.gradle` (Module).
+3.  **Manifest Configuration**: Add the mandatory `<meta-data>` tags for AdMob and AppLovin in your `AndroidManifest.xml`.
+4.  **Global Initialization**: Call `AdNetwork.Initialize` in your Splash or Application class.
+5.  **Ad Placement**: Use the respective `Builder` classes (Banner, Interstitial, etc.) to load and show ads.
 
 ---
 
 ## 🏗 Ad Networks Capability Matrix
 
-| Network | Key | Banner | Interstitial | Rewarded | Native | App Open |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| **AdMob** | `admob` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Meta (FAN)**| `meta` | ✅ | ✅ | ✅ | ✅ | ✅* |
-| **Unity Ads** | `unity` | ✅ | ✅ | ✅ | ❌ | ❌ |
-| **AppLovin MAX**| `applovin` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **IronSource** | `ironsource`| ✅ | ✅ | ✅ | ❌ | ❌ |
-| **StartApp** | `startapp` | ✅ | ✅ | ✅ | ⚠️ | ❌ |
-| **Wortise** | `wortise` | ✅ | ✅ | ✅ | ⚠️ | ✅ |
+| Network | Key | Integration Type | Banner | Interstitial | Rewarded | Native | App Open |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **AdMob** | `admob` | Direct | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Meta (FAN)**| `meta` | Direct + Bidding | ✅ | ✅ | ✅ | ✅ | ✅* |
+| **Unity Ads** | `unity` | Direct | ✅ | ✅ | ✅ | ❌ | ❌ |
+| **AppLovin MAX**| `applovin` | Direct | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **IronSource** | `ironsource`| Direct | ✅ | ✅ | ✅ | ❌ | ❌ |
+| **StartApp** | `startapp` | Direct | ✅ | ✅ | ✅ | ⚠️ | ❌ |
+| **Wortise** | `wortise` | Direct | ✅ | ✅ | ✅ | ⚠️ | ✅ |
 
 *\*Meta App Open is typically handled via AdMob/MAX bidding.*
 
@@ -115,68 +127,155 @@ Optimized for cold starts or background-to-foreground transitions.
 
 ---
 
-## 🌐 Ad Network Specific Deep Dive
+## 📚 Ultimate Network Setup Encyclopedia
 
-### 🟦 AdMob
-- **Adaptive Sizing**: Automatically calculates the best height (using `Tools.getAdSize`).
-- **Optimization**: Manifest flags `OPTIMIZE_INITIALIZATION` and `OPTIMIZE_AD_LOADING` are recommended.
+Every network integrated into AdGlide has been tuned for maximum stability. Below are the definitive setup requirements for each.
 
-### 🟧 Meta (Audience Network)
-- **Bidding**: Fully supported via AdMob, AppLovin, and IronSource mediation.
-- **Caching**: Automated background caching for higher fill rates.
+### 🟦 1. AdMob (Google)
+- **SDK Version**: `23.6.0`
+- **Manifest Requirement**:
+  ```xml
+  <meta-data
+      android:name="com.google.android.gms.ads.APPLICATION_ID"
+      android:value="ca-app-pub-xxxxxxxxxxxxxxxx~xxxxxxxxxx" />
+  <meta-data
+      android:name="com.google.android.gms.ads.AD_MANAGER_APP"
+      android:value="true" />
+  ```
+- **Builder Method**: `setAdMobAppId(String id)`
+- **Pro Tip**: Use `OPTIMIZE_INITIALIZATION` meta-data to speed up app cold starts.
 
-### 🟩 IronSource
-- **Manual Management**: You **MUST** call `IronSource.onResume(activity)` and `IronSource.onPause(activity)` in your activity lifecycle.
-- **Integration**: AdGlide handles `LevelPlay` listener registration automatically.
+### 🟧 2. Meta (Audience Network)
+- **SDK Version**: `6.18.0`
+- **Integration**: Pure bidding or direct implementation.
+- **Bidding Support**: Works seamlessly via AdMob, AppLovin MAX, and IronSource LevelPlay.
+- **Initialization**: Automated via `AdNetwork.Initialize`.
 
-### 🟥 StartApp
-- **Splash Settings**: StartApp Splash ads are disabled by default within this SDK to prevent double-splash issues.
+### 🟪 3. AppLovin (MAX & Discovery)
+- **SDK Version**: `13.0.1`
+- **Manifest Requirement**:
+  ```xml
+  <meta-data
+      android:name="applovin.sdk.key"
+      android:value="YOUR_LONG_SDK_KEY_HERE" />
+  ```
+- **Builder Method**: `setAppLovinSdkKey(String key)`
+- **Mediation**: Use `APPLOVIN_MAX` for unified mediation.
+
+### 🟩 4. IronSource (LevelPlay)
+- **SDK Version**: `8.4.0`
+- **Lifecycle Obligation**: **CRITICAL!** You must add these to your `Activity`:
+  ```java
+  @Override
+  protected void onResume() {
+      super.onResume();
+      IronSource.onResume(this);
+  }
+  @Override
+  protected void onPause() {
+      super.onPause();
+      IronSource.onPause(this);
+  }
+  ```
+- **Builder Method**: `setironSourceAppKey(String key)`
+
+### 🟥 5. Unity Ads
+- **SDK Version**: `4.12.5`
+- **Setup**: Requires a `Unity Game ID`.
+- **Builder Method**: `setUnityGameId(String id)`
+- **Behavior**: AdGlide handles internal listeners and test mode synchronization.
+
+### ⭐ 6. StartApp
+- **SDK Version**: `5.1.0`
+- **Default Optimizations**:
+  - Splash ads are **disabled** by default to prevent UX conflicts.
+  - Return ads are **disabled** to maintain flow control.
+- **Builder Method**: `setStartappAppId(String id)`
+
+### 💎 7. Wortise
+- **SDK Version**: `1.7.0`
+- **Builder Method**: `setWortiseAppId(String id)`
+- **Features**: Dedicated support for App Open and Native radio styles.
 
 ---
 
-## � Security & Utilities
+## 🔄 The Waterfall Logic
+AdGlide uses a linear **Waterfall Strategy**. If the **Primary Network** fails to load after 2-5 seconds (internal timeout), the SDK automatically attempts to load the **Backup Network**.
 
-### The `Tools` Class
-- **Triple-Base64 Decoding**: Use `Tools.decode(String)` to obfuscate your Ad IDs in common strings.
-- **Adaptive Logic**: `Tools.getAdSize(activity)` handles both Android 11+ `WindowMetrics` and legacy `DisplayMetrics`.
+If you use `setBackupAdNetworks(String...)`, the SDK will cycle through the entire list until an ad is filled.
 
-### `AdRepository`
-A singleton cache for Interstitial ads. Pre-load ads in your Splash or main activity:
+---
+
+## 🌐 Legendary Technical Manual: Deep-Dives
+
+### 1. Remote Configuration Encyclopedia
+The `RemoteConfigHelper` allows you to switch ad networks dynamically. The expected JSON structure is as follows:
+
+```json
+{
+  "ad_status": "1",
+  "ad_network": "admob",
+  "backup_ad_network": "applovin",
+  "ad_mob_app_id": "ca-app-pub-3940256099942544~3347511713",
+  "ad_mob_banner_id": "ca-app-pub-3940256099942544/6300978111",
+  ... (any other ID fields)
+}
+```
+
+**Implementation Tip**: 
+Always check `onConfigFetched(JSONObject config)` before initializing the SDK to ensure your primary network matches your latest server-side decision.
+
+### 2. GDPR & Privacy Masterclass
+AdGlide uses the Google User Messaging Platform (UMP). For local testing, you need to generate a **hashed device ID**.
+
+**The MD5 Formula**:
+The SDK generates this ID internally using `md5(ANDROID_ID).toUpperCase()`.
 ```java
-AdRepository.getInstance().preloadInterstitial(activity, "admob", "YOUR_ID");
+// How it's done in GDPR.java:
+String androidId = Settings.Secure.getString(activity.getContentResolver(), Settings.Secure.ANDROID_ID);
+String deviceId = md5(androidId).toUpperCase();
 ```
+
+**Simulating Regions**:
+Force the GDPR prompt regardless of your location:
+```java
+debugSettings = new ConsentDebugSettings.Builder(activity)
+    .setDebugGeography(ConsentDebugSettings.DebugGeography.DEBUG_GEOGRAPHY_EEA)
+    .addTestDeviceHashedId("YOUR_MD5_ID")
+    .build();
+```
+
+### 3. The Great Troubleshooting Matrix
+
+| Symptom | Probable Cause | Expert Solution |
+| :--- | :--- | :--- |
+| **Ads don't show** | Manifest metadata missing | Ensure `APPLICATION_ID` for AdMob/AppLovin is in `<application>`. |
+| **No fill (Error 3)** | Geographic restriction | Check if your test device matches the network's targeting. |
+| **App Open doesn't show** | `unique_id` extra missing | Ensure your intent doesn't have `unique_id` if you want the ad to trigger. |
+| **IronSource crash** | Lifecycle missing | Call `IronSource.onResume/onPause` in your activity. |
+| **ProGuard issues** | Missing rules | Copy the rules from the **Security** section below. |
 
 ---
 
-## 🛡 ProGuard / R8 Reference
+## 📖 Master API Dictionary (Quick Reference)
 
-Exhaustive rules for the SDK:
+### `AdNetwork.Initialize`
+- `setAdStatus(String)`: "1" for ON, "0" for OFF.
+- `setAdNetwork(String)`: Set primary network key.
+- `addBackupAdNetwork(String)`: Add a fallback network to the waterfall.
+- `setDebug(boolean)`: Enable verbose logging and test modes.
 
-```pro
-# AdGlide Internals
--keep public class com.partharoypc.adglide.** { public *; }
--keep interface com.partharoypc.adglide.util.On*Listener { *; }
+### `BannerAd.Builder`
+- `setAdMobBannerId(String)`
+- `setMetaBannerId(String)`
+- `setAppLovinBannerId(String)` / `setApplovinDiscBannerZoneId(String)`
+- `setIsCollapsibleBanner(boolean)`: (AdMob only)
 
-# Google & AdMob
--keep class com.google.android.gms.ads.** { *; }
--keep class com.google.ads.mediation.** { *; }
-
-# AppLovin
--keep class com.applovin.** { *; }
-
-# Meta / Facebook
--keep class com.facebook.ads.** { *; }
-
-# Unity Ads
--keep class com.unity3d.ads.** { *; }
--keep class com.unity3d.services.** { *; }
-
-# IronSource
--keep class com.ironsource.mediationsdk.** { *; }
-
-# Wortise
--keep class com.wortise.ads.** { *; }
-```
+### `NativeAd.Builder`
+- `setPadding(L, T, R, B)`: Layout customization.
+- `setDarkTheme(boolean)`: Switch to high-contrast dark mode styles.
+- `setNativeAdStyle(String)`: Use `Constant.STYLE_*` for Meta layouts.
+- `setNativeAdBackgroundColor(int, int)`: Light and Dark resources.
 
 ---
 
@@ -189,6 +288,16 @@ Exhaustive rules for the SDK:
 | **Rewarded** | `ca-app-pub-3940256099942544/5224354917` |
 | **App Open** | `ca-app-pub-3940256099942544/9257395921` |
 | **Native** | `ca-app-pub-3940256099942544/2247696110` |
+
+---
+
+## 🛡 Security & Triple-Base64 Obfuscation
+The `Tools` class provides a `decode` method that uses a custom **Triple-Base64** algorithm to keep your Ad IDs safe from simple string analysis:
+
+```java
+String safeId = Tools.decode("TWpZNE5UYzVOekk1TkRRME5nPT0="); 
+// Decodes to a real AdMob Unit ID
+```
 
 ---
 
