@@ -22,8 +22,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
-import static com.partharoypc.adglide.util.Constant.FACEBOOK;
-import static com.partharoypc.adglide.util.Constant.FAN;
+import static com.partharoypc.adglide.util.Constant.META;
+import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_ADMOB;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_APPLOVIN_MAX;
 
@@ -32,7 +32,7 @@ import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_APPLOVIN_MAX;
  */
 public class AdRepository {
 
-    private static final String TAG = "AdRepository";
+    private static final String TAG = "AdGlide";
     private static AdRepository instance;
     private final ConcurrentHashMap<String, Object> interstitialCache = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Boolean> isLoading = new ConcurrentHashMap<>();
@@ -95,8 +95,7 @@ public class AdRepository {
                 loadAdMobInterstitial(context, key, adUnitId);
                 break;
 
-            case FAN:
-            case FACEBOOK:
+            case META:
                 loadFacebookInterstitial(context, key, adUnitId);
                 break;
             case APPLOVIN:
@@ -112,20 +111,21 @@ public class AdRepository {
     }
 
     private void loadAdMobInterstitial(Context context, String key, String adUnitId) {
-        InterstitialAd.load(context, adUnitId, Tools.getAdRequest(null, false), new InterstitialAdLoadCallback() {
-            @Override
-            public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-                interstitialCache.put(key, interstitialAd);
-                isLoading.put(key, false);
-                Log.d(TAG, "AdMob Interstitial Cached: " + key);
-            }
+        InterstitialAd.load(context.getApplicationContext(), adUnitId, Tools.getAdRequest(null, false),
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                        interstitialCache.put(key, interstitialAd);
+                        isLoading.put(key, false);
+                        Log.d(TAG, "AdMob Interstitial Cached: " + key);
+                    }
 
-            @Override
-            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                isLoading.put(key, false);
-                Log.e(TAG, "AdMob Pre-load Failed: " + loadAdError.getMessage());
-            }
-        });
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        isLoading.put(key, false);
+                        Log.e(TAG, "AdMob Pre-load Failed: " + loadAdError.getMessage());
+                    }
+                });
     }
 
     private void loadFacebookInterstitial(Context context, String key, String adUnitId) {
@@ -239,3 +239,4 @@ public class AdRepository {
         return adNetwork + "_" + adUnitId;
     }
 }
+

@@ -9,3 +9,4 @@ public interface OnRewardedAdLoadedListener {
     /** Called when the rewarded ad is loaded and available. */
     void onRewardedAdLoaded();
 }
+

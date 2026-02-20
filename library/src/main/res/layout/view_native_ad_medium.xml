@@ -19,13 +19,6 @@
             android:visibility="gone"
             app:gnt_template_type="@layout/gnt_admob_medium_template_view" />
 
-        <com.partharoypc.adglide.util.AdManagerTemplateView
-            android:id="@+id/google_ad_manager_native_ad_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:gnt_template_type="@layout/gnt_ad_manager_medium_template_view" />
-
         <com.facebook.ads.NativeAdLayout
             android:id="@+id/fan_native_ad_container"
             android:layout_width="match_parent"

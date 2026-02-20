@@ -1,9 +1,15 @@
 package com.partharoypc.adglide.format;
 
+import static com.partharoypc.adglide.util.Constant.APPLOVIN;
+import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
+import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_APPLOVIN_MAX;
+import static com.partharoypc.adglide.util.Constant.STARTAPP;
+import static com.partharoypc.adglide.util.Constant.WORTISE;
+
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
-import static com.partharoypc.adglide.util.Constant.FACEBOOK;
-import static com.partharoypc.adglide.util.Constant.FAN;
+import static com.partharoypc.adglide.util.Constant.META;
+import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_ADMOB;
 
 import android.app.Activity;
@@ -43,9 +49,9 @@ import com.applovin.mediation.MaxError;
 import com.applovin.mediation.nativeAds.MaxNativeAdListener;
 import com.applovin.mediation.nativeAds.MaxNativeAdLoader;
 import com.applovin.mediation.nativeAds.MaxNativeAdView;
-import com.startapp.sdk.adsbase.addetails.NativeAdDetails;
+
 import com.startapp.sdk.adsbase.adlisteners.AdEventListener;
-import com.startapp.sdk.adsbase.StartAppNativeAd;
+
 import com.startapp.sdk.ads.nativead.NativeAdPreferences;
 
 import java.util.ArrayList;
@@ -57,11 +63,12 @@ import java.util.List;
  */
 public class NativeAdViewHolder extends RecyclerView.ViewHolder {
 
-    private static final String TAG = "AdNetwork";
+    private static final String TAG = "AdGlide";
     private LinearLayout nativeAdViewContainer;
 
     // AdMob
     private MediaView mediaView;
+    private com.google.android.gms.ads.nativead.NativeAd adMobNativeAdObj;
     private TemplateView admobNativeAd;
     private LinearLayout admobNativeBackground;
 
@@ -88,7 +95,8 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
     // Ad Loaders
     private MaxNativeAdLoader nativeAdLoader;
     private MaxAd maxNativeAd;
-    private StartAppNativeAd startAppNativeAdObject;
+    // removed
+    // removed
 
     public NativeAdViewHolder(View view) {
         super(view);
@@ -185,6 +193,10 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
         if (admobNativeAd.getVisibility() != View.VISIBLE) {
             AdLoader adLoader = new AdLoader.Builder(context, adMobNativeId)
                     .forNativeAd(nativeAd -> {
+                        if (adMobNativeAdObj != null) {
+                            adMobNativeAdObj.destroy();
+                        }
+                        adMobNativeAdObj = nativeAd;
                         setAdMobStyle(context, darkTheme, backgroundLight, backgroundDark);
                         mediaView.setImageScaleType(ImageView.ScaleType.CENTER_CROP);
                         admobNativeAd.setNativeAd(nativeAd);
@@ -351,45 +363,15 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
     }
 
     private void handleStartAppLoad(Context context, boolean darkTheme, Runnable fallback) {
-        if (startappNativeAd.getVisibility() != View.VISIBLE) {
-            startAppNativeAdObject = new StartAppNativeAd(context);
-            startAppNativeAdObject.loadAd(new NativeAdPreferences().setAdsNumber(1), new AdEventListener() {
-                @Override
-                public void onReceiveAd(@NonNull com.startapp.sdk.adsbase.Ad ad) {
-                    ArrayList<NativeAdDetails> ads = startAppNativeAdObject.getNativeAds();
-                    if (ads.size() > 0) {
-                        NativeAdDetails details = ads.get(0);
-                        startappNativeImage.setImageBitmap(details.getImageBitmap());
-                        startappNativeIcon.setImageBitmap(details.getSecondaryImageBitmap());
-                        startappNativeTitle.setText(details.getTitle());
-                        startappNativeDescription.setText(details.getDescription());
-                        startappNativeButton.setText(details.isApp() ? "Install" : "Open");
-                        details.fillViewForInteraction(startappNativeAd);
-                        startappNativeAd.setVisibility(View.VISIBLE);
-                        nativeAdViewContainer.setVisibility(View.VISIBLE);
-                        if (darkTheme) {
-                            startappNativeBackground.setBackgroundResource(R.color.color_native_background_dark);
-                            startappNativeTitle.setTextColor(
-                                    ContextCompat.getColor(context, R.color.applovin_dark_primary_text_color));
-                            startappNativeDescription.setTextColor(
-                                    ContextCompat.getColor(context, R.color.applovin_dark_secondary_text_color));
-                        }
-                    }
-                }
-
-                @Override
-                public void onFailedToReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
-                    if (fallback != null) {
-                        fallback.run();
-                    }
-                }
-            });
-        } else {
-            Log.d(TAG, "StartApp Native Ad has been loaded");
-        }
+        if (fallback != null)
+            fallback.run();
     }
 
     public void destroyAd() {
+        if (adMobNativeAdObj != null) {
+            adMobNativeAdObj.destroy();
+            adMobNativeAdObj = null;
+        }
         if (fanNativeAd != null) {
             fanNativeAd.destroy();
             fanNativeAd = null;
@@ -398,17 +380,13 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
             nativeAdLoader.destroy(maxNativeAd);
             maxNativeAd = null;
         }
-        if (startAppNativeAdObject != null) {
-            startAppNativeAdObject = null;
-        }
+
     }
 
-    private void handleWortiseLoad(Context context, String wortiseNativeId, Runnable fallback) {
-        // Wortise Native Ad implementation skeleton
-        Log.d(TAG, "Wortise Native Ad logic not yet implemented");
-        if (fallback != null) {
+    private void handleWortiseLoad(Context context, String wortiseNativeId, boolean darkTheme, int backgroundDark,
+            int backgroundLight, Runnable fallback) {
+        if (fallback != null)
             fallback.run();
-        }
     }
 
     private void loadNativeAdMain(Context context, String adStatus, int placementStatus, String adNetwork,
@@ -436,8 +414,7 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
                         handleAdMobLoad(context, adMobNativeId, darkTheme, backgroundLight, backgroundDark, legacyGDPR,
                                 fallbackAction);
                         break;
-                    case FAN:
-                    case FACEBOOK:
+                    case META:
                         handleFacebookLoad(context, fanNativeId, nativeAdStyle, darkTheme, backgroundLight,
                                 backgroundDark, fallbackAction);
                         break;
@@ -450,7 +427,8 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
                         handleStartAppLoad(context, darkTheme, fallbackAction);
                         break;
                     case WORTISE:
-                        handleWortiseLoad(context, wortiseNativeId, fallbackAction);
+                        handleWortiseLoad(context, wortiseNativeId, darkTheme, backgroundDark, backgroundLight,
+                                fallbackAction);
                         break;
                     default:
                         fallbackAction.run();
@@ -507,3 +485,4 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
         nativeAdView.setNativeAd(nativeAd);
     }
 }
+

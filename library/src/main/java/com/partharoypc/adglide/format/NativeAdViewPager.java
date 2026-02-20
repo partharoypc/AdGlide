@@ -2,8 +2,8 @@ package com.partharoypc.adglide.format;
 
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
-import static com.partharoypc.adglide.util.Constant.FACEBOOK;
-import static com.partharoypc.adglide.util.Constant.FAN;
+import static com.partharoypc.adglide.util.Constant.META;
+import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_ADMOB;
 
 import android.app.Activity;
@@ -46,12 +46,13 @@ public class NativeAdViewPager {
 
     public static class Builder {
 
-        private static final String TAG = "AdNetwork";
+        private static final String TAG = "AdGlide";
         private final Activity activity;
 
         private View view;
 
         private MediaView mediaView;
+        private com.google.android.gms.ads.nativead.NativeAd adMobNativeAdObj;
         private TemplateView admobNativeAd;
         private LinearLayout admobNativeBackground;
 
@@ -88,56 +89,67 @@ public class NativeAdViewPager {
             this.view = view;
         }
 
+        @androidx.annotation.NonNull
         public Builder build() {
             loadNativeAd();
             return this;
         }
 
-        public Builder setAdStatus(String adStatus) {
+        @androidx.annotation.NonNull
+        public Builder setAdStatus(@androidx.annotation.NonNull String adStatus) {
             this.adStatus = adStatus;
             return this;
         }
 
-        public Builder setAdNetwork(String adNetwork) {
+        @androidx.annotation.NonNull
+        public Builder setAdNetwork(@androidx.annotation.NonNull String adNetwork) {
             this.adNetwork = adNetwork;
             return this;
         }
 
-        public Builder setBackupAdNetwork(String backupAdNetwork) {
+        @androidx.annotation.Nullable
+        public Builder setBackupAdNetwork(@androidx.annotation.Nullable String backupAdNetwork) {
             this.backupAdNetwork = backupAdNetwork;
             return this;
         }
 
-        public Builder setAdMobNativeId(String adMobNativeId) {
+        @androidx.annotation.NonNull
+        public Builder setAdMobNativeId(@androidx.annotation.NonNull String adMobNativeId) {
             this.adMobNativeId = adMobNativeId;
             return this;
         }
 
-        public Builder setFanNativeId(String fanNativeId) {
+        @androidx.annotation.NonNull
+        public Builder setFanNativeId(@androidx.annotation.NonNull String fanNativeId) {
             this.fanNativeId = fanNativeId;
             return this;
         }
 
-        public Builder setAppLovinNativeId(String appLovinNativeId) {
+        @androidx.annotation.NonNull
+        public Builder setAppLovinNativeId(@androidx.annotation.NonNull String appLovinNativeId) {
             this.appLovinNativeId = appLovinNativeId;
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder setPlacementStatus(int placementStatus) {
             this.placementStatus = placementStatus;
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder setDarkTheme(boolean darkTheme) {
             this.darkTheme = darkTheme;
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder setLegacyGDPR(boolean legacyGDPR) {
             this.legacyGDPR = legacyGDPR;
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder setNativeAdBackgroundColor(int colorLight, int colorDark) {
             this.nativeBackgroundLight = colorLight;
             this.nativeBackgroundDark = colorDark;
@@ -187,6 +199,10 @@ public class NativeAdViewPager {
                                                 admobNativeAd.setStyles(styles);
                                                 admobNativeBackground.setBackgroundResource(nativeBackgroundLight);
                                             }
+                                            if (adMobNativeAdObj != null) {
+                                                adMobNativeAdObj.destroy();
+                                            }
+                                            adMobNativeAdObj = NativeAd;
                                             mediaView.setImageScaleType(ImageView.ScaleType.CENTER_CROP);
                                             admobNativeAd.setNativeAd(NativeAd);
                                             admobNativeAd.setVisibility(View.VISIBLE);
@@ -206,8 +222,7 @@ public class NativeAdViewPager {
                             }
                             break;
 
-                        case FAN:
-                        case FACEBOOK:
+                        case META:
                             if (fanNativeAdLayout.getVisibility() != View.VISIBLE) {
                                 fanNativeAd = new com.facebook.ads.NativeAd(activity, fanNativeId);
                                 NativeAdListener nativeAdListener = new NativeAdListener() {
@@ -378,6 +393,10 @@ public class NativeAdViewPager {
                                                 admobNativeAd.setStyles(styles);
                                                 admobNativeBackground.setBackgroundResource(nativeBackgroundLight);
                                             }
+                                            if (adMobNativeAdObj != null) {
+                                                adMobNativeAdObj.destroy();
+                                            }
+                                            adMobNativeAdObj = NativeAd;
                                             mediaView.setImageScaleType(ImageView.ScaleType.CENTER_CROP);
                                             admobNativeAd.setNativeAd(NativeAd);
                                             admobNativeAd.setVisibility(View.VISIBLE);
@@ -398,8 +417,7 @@ public class NativeAdViewPager {
                             }
                             break;
 
-                        case FAN:
-                        case FACEBOOK:
+                        case META:
                             if (fanNativeAdLayout.getVisibility() != View.VISIBLE) {
                                 fanNativeAd = new com.facebook.ads.NativeAd(activity, fanNativeId);
                                 NativeAdListener nativeAdListener = new NativeAdListener() {
@@ -532,6 +550,10 @@ public class NativeAdViewPager {
          * Should be called when the hosting ViewPager is destroyed.
          */
         public void destroyNativeAd() {
+            if (adMobNativeAdObj != null) {
+                adMobNativeAdObj.destroy();
+                adMobNativeAdObj = null;
+            }
             if (admobNativeAd != null) {
                 admobNativeAd.destroyNativeAd();
             }
@@ -544,3 +566,4 @@ public class NativeAdViewPager {
     }
 
 }
+

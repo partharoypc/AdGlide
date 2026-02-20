@@ -18,11 +18,16 @@ import java.util.Date;
  * Ads are cached for up to 4 hours before requiring a reload.
  */
 public class AppOpenAdWortise implements AppOpenAd.Listener {
+    @Override
+    public void onAppOpenRevenuePaid(@NonNull com.wortise.ads.appopen.AppOpenAd ad,
+            @NonNull com.wortise.ads.RevenueData rd) {
+    }
 
-    private static final String LOG_TAG = "AppOpenAd";
+    private static final String TAG = "AdGlide";
     private AppOpenAd appOpenAd;
     private boolean isLoadingAd = false;
     private boolean isShowingAd = false;
+    public boolean isShowingAd() { return isShowingAd; }
     private long loadTime = 0;
     private OnShowAdCompleteListener onShowAdCompleteListener;
 
@@ -59,31 +64,31 @@ public class AppOpenAdWortise implements AppOpenAd.Listener {
         this.onShowAdCompleteListener = onShowAdCompleteListener;
 
         if (isShowingAd) {
-            Log.d(LOG_TAG, "The app open ad is already showing.");
+            Log.d(TAG, "The app open ad is already showing.");
             return;
         }
 
         if (!isAdAvailable()) {
-            Log.d(LOG_TAG, "The app open ad is not ready yet.");
+            Log.d(TAG, "The app open ad is not ready yet.");
             onShowAdCompleteListener.onShowAdComplete();
             loadAd(activity, wortiseAppOpenAdUnitId);
             return;
         }
 
-        Log.d(LOG_TAG, "Will show ad.");
+        Log.d(TAG, "Will show ad.");
         appOpenAd.showAd();
     }
 
     @Override
     public void onAppOpenLoaded(@NonNull AppOpenAd ad) {
-        Log.d(LOG_TAG, "Wortise App Open ad loaded.");
+        Log.d(TAG, "Wortise App Open ad loaded.");
         loadTime = (new Date()).getTime();
         isLoadingAd = false;
     }
 
     @Override
     public void onAppOpenFailedToLoad(@NonNull AppOpenAd ad, @NonNull AdError error) {
-        Log.d(LOG_TAG, "Wortise App Open ad failed to load: " + error.getMessage());
+        Log.d(TAG, "Wortise App Open ad failed to load: " + error.getMessage());
         isLoadingAd = false;
     }
 
@@ -93,7 +98,7 @@ public class AppOpenAdWortise implements AppOpenAd.Listener {
 
     @Override
     public void onAppOpenDismissed(@NonNull AppOpenAd ad) {
-        Log.d(LOG_TAG, "Wortise App Open ad dismissed.");
+        Log.d(TAG, "Wortise App Open ad dismissed.");
         isShowingAd = false;
         if (onShowAdCompleteListener != null) {
             onShowAdCompleteListener.onShowAdComplete();
@@ -104,7 +109,7 @@ public class AppOpenAdWortise implements AppOpenAd.Listener {
 
     @Override
     public void onAppOpenFailedToShow(@NonNull AppOpenAd ad, @NonNull AdError error) {
-        Log.d(LOG_TAG, "Wortise App Open ad failed to show: " + error.getMessage());
+        Log.d(TAG, "Wortise App Open ad failed to show: " + error.getMessage());
         isShowingAd = false;
         if (onShowAdCompleteListener != null) {
             onShowAdCompleteListener.onShowAdComplete();
@@ -117,7 +122,8 @@ public class AppOpenAdWortise implements AppOpenAd.Listener {
 
     @Override
     public void onAppOpenShown(@NonNull AppOpenAd ad) {
-        Log.d(LOG_TAG, "Wortise App Open ad shown.");
+        Log.d(TAG, "Wortise App Open ad shown.");
         isShowingAd = true;
     }
 }
+

@@ -22,7 +22,7 @@ import java.util.concurrent.Executors;
  */
 public class RemoteConfigHelper {
 
-    private static final String TAG = "RemoteConfigHelper";
+    private static final String TAG = "AdGlide";
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
@@ -75,3 +75,4 @@ public class RemoteConfigHelper {
         });
     }
 }
+

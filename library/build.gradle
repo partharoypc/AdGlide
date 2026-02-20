@@ -52,10 +52,10 @@ dependencies {
 
     // Secondary Ad Networks
     implementation 'com.unity3d.ads:unity-ads:4.12.5'
-    implementation 'com.applovin:applovin-sdk:13.0.1'
+    api 'com.applovin:applovin-sdk:13.0.1'
     implementation 'com.ironsource.sdk:mediationsdk:8.4.0'
     implementation 'com.startapp:inapp-sdk:5.1.0'
-    implementation 'com.wortise:android-sdk:1.7.0'
+    api 'com.wortise:android-sdk:1.7.0'
 
     //GDPR
     implementation 'com.google.android.ump:user-messaging-platform:3.1.0'

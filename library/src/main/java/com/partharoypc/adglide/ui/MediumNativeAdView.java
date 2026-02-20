@@ -84,3 +84,4 @@ public class MediumNativeAdView extends LinearLayout {
     }
 
 }
+

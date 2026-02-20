@@ -312,3 +312,4 @@ public class TemplateView extends FrameLayout {
         background = findViewById(R.id.background);
     }
 }
+

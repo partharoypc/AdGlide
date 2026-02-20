@@ -1,5 +1,7 @@
 package com.partharoypc.adglide.format;
 
+import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_APPLOVIN_MAX;
+
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
@@ -13,6 +15,7 @@ import android.app.Application;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdRequest;
@@ -26,6 +29,7 @@ import com.partharoypc.adglide.util.OnShowAdCompleteListener;
  */
 @SuppressLint("StaticFieldLeak")
 public class AppOpenAd {
+    private static final String TAG = "AdGlide";
 
     public static com.google.android.gms.ads.appopen.AppOpenAd appOpenAd = null;
     public static boolean isAppOpenAdLoaded = false;
@@ -41,62 +45,145 @@ public class AppOpenAd {
     private String wortiseAppOpenId = "";
     private Activity currentActivity;
 
-    public AppOpenAd initAppOpenAdMob(AppOpenAdMob appOpenAdMob) {
+    /**
+     * Initializes AdMob for App Open Ads.
+     * 
+     * @param appOpenAdMob The helper instance.
+     * @return The AppOpenAd instance.
+     */
+    @NonNull
+    public AppOpenAd initAppOpenAdMob(@NonNull AppOpenAdMob appOpenAdMob) {
         this.appOpenAdMob = appOpenAdMob;
         return this;
     }
 
-    public AppOpenAd initAppOpenAdAppLovin(AppOpenAdAppLovin appOpenAdAppLovin) {
+    /**
+     * Initializes AppLovin for App Open Ads.
+     * 
+     * @param appOpenAdAppLovin The helper instance.
+     * @return The AppOpenAd instance.
+     */
+    @NonNull
+    public AppOpenAd initAppOpenAdAppLovin(@NonNull AppOpenAdAppLovin appOpenAdAppLovin) {
         this.appOpenAdAppLovin = appOpenAdAppLovin;
         return this;
     }
 
-    public AppOpenAd initAppOpenAdWortise(AppOpenAdWortise appOpenAdWortise) {
+    /**
+     * Initializes Wortise for App Open Ads.
+     * 
+     * @param appOpenAdWortise The helper instance.
+     * @return The AppOpenAd instance.
+     */
+    @NonNull
+    public AppOpenAd initAppOpenAdWortise(@NonNull AppOpenAdWortise appOpenAdWortise) {
         this.appOpenAdWortise = appOpenAdWortise;
         return this;
     }
 
+    /**
+     * Sets the ad status.
+     * 
+     * @param adStatus True to enable.
+     * @return The AppOpenAd instance.
+     */
+    @NonNull
     public AppOpenAd setAdStatus(boolean adStatus) {
         this.adStatus = adStatus;
         return this;
     }
 
+    /**
+     * Sets the placement status.
+     * 
+     * @param placementStatus True to enable.
+     * @return The AppOpenAd instance.
+     */
+    @NonNull
     public AppOpenAd setPlacementStatus(boolean placementStatus) {
         this.placementStatus = placementStatus;
         return this;
     }
 
-    public AppOpenAd setAdNetwork(String adNetwork) {
+    /**
+     * Sets the primary ad network.
+     * 
+     * @param adNetwork The primary network key.
+     * @return The AppOpenAd instance.
+     */
+    @NonNull
+    public AppOpenAd setAdNetwork(@NonNull String adNetwork) {
         this.adNetwork = adNetwork;
         return this;
     }
 
-    public AppOpenAd setBackupAdNetwork(String backupAdNetwork) {
+    /**
+     * Sets the backup ad network.
+     * 
+     * @param backupAdNetwork The backup network key.
+     * @return The AppOpenAd instance.
+     */
+    @NonNull
+    public AppOpenAd setBackupAdNetwork(@Nullable String backupAdNetwork) {
         this.backupAdNetwork = backupAdNetwork;
         return this;
     }
 
-    public AppOpenAd setAdMobAppOpenId(String adMobAppOpenId) {
+    /**
+     * Sets AdMob App Open ID.
+     * 
+     * @param adMobAppOpenId The ad unit ID.
+     * @return The AppOpenAd instance.
+     */
+    @NonNull
+    public AppOpenAd setAdMobAppOpenId(@NonNull String adMobAppOpenId) {
         this.adMobAppOpenId = adMobAppOpenId;
         return this;
     }
 
-    public AppOpenAd setApplovinAppOpenId(String applovinAppOpenId) {
+    /**
+     * Sets AppLovin App Open ID.
+     * 
+     * @param applovinAppOpenId The ad unit ID.
+     * @return The AppOpenAd instance.
+     */
+    @NonNull
+    public AppOpenAd setApplovinAppOpenId(@NonNull String applovinAppOpenId) {
         this.applovinAppOpenId = applovinAppOpenId;
         return this;
     }
 
-    public AppOpenAd setWortiseAppOpenId(String wortiseAppOpenId) {
+    /**
+     * Sets Wortise App Open ID.
+     * 
+     * @param wortiseAppOpenId The ad unit ID.
+     * @return The AppOpenAd instance.
+     */
+    @NonNull
+    public AppOpenAd setWortiseAppOpenId(@NonNull String wortiseAppOpenId) {
         this.wortiseAppOpenId = wortiseAppOpenId;
         return this;
     }
 
+    /**
+     * Registers the observer for app start events.
+     * 
+     * @return The AppOpenAd instance.
+     */
+    @NonNull
     public AppOpenAd setOnStartLifecycleObserver() {
         onStartLifecycleObserver();
         return this;
     }
 
-    public AppOpenAd setOnStartActivityLifecycleCallbacks(Activity activity) {
+    /**
+     * Registers activity lifecycle callbacks.
+     * 
+     * @param activity The Activity.
+     * @return The AppOpenAd instance.
+     */
+    @NonNull
+    public AppOpenAd setOnStartActivityLifecycleCallbacks(@NonNull Activity activity) {
         onStartActivityLifecycleCallbacks(activity);
         return this;
     }
@@ -137,7 +224,7 @@ public class AppOpenAd {
                 }
             }
         } catch (Exception e) {
-            Log.e("AppOpenAd", "Error in onStartLifecycleObserver: " + e.getMessage());
+            Log.e(TAG, "Error in onStartLifecycleObserver: " + e.getMessage());
         }
     }
 
@@ -174,7 +261,7 @@ public class AppOpenAd {
                 }
             }
         } catch (Exception e) {
-            Log.e("AppOpenAd", "Error in onStartActivityLifecycleCallbacks: " + e.getMessage());
+            Log.e(TAG, "Error in onStartActivityLifecycleCallbacks: " + e.getMessage());
         }
     }
 
@@ -214,7 +301,7 @@ public class AppOpenAd {
                 onShowAdCompleteListener.onShowAdComplete();
             }
         } catch (Exception e) {
-            Log.e("AppOpenAd", "Error in showAppOpenAdIfAvailable: " + e.getMessage());
+            Log.e(TAG, "Error in showAppOpenAdIfAvailable: " + e.getMessage());
             onShowAdCompleteListener.onShowAdComplete();
         }
         return this;
@@ -250,14 +337,14 @@ public class AppOpenAd {
                 }
             }
         } catch (Exception e) {
-            Log.e("AppOpenAd", "Error in showAdIfAvailable: " + e.getMessage());
+            Log.e(TAG, "Error in showAdIfAvailable: " + e.getMessage());
             onShowAdCompleteListener.onShowAdComplete();
         }
     }
 
     public static class Builder {
 
-        private static final String TAG = "AdNetwork";
+        private static final String TAG = "AdGlide";
         private final Activity activity;
         private String adStatus = "";
         private String adNetwork = "";
@@ -270,52 +357,62 @@ public class AppOpenAd {
             this.activity = activity;
         }
 
+        @androidx.annotation.NonNull
         public Builder build() {
             loadAppOpenAd();
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder build(OnShowAdCompleteListener onShowAdCompleteListener) {
             loadAppOpenAd(onShowAdCompleteListener);
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder show() {
             showAppOpenAd();
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder show(OnShowAdCompleteListener onShowAdCompleteListener) {
             showAppOpenAd(onShowAdCompleteListener);
             return this;
         }
 
-        public Builder setAdStatus(String adStatus) {
+        @androidx.annotation.NonNull
+        public Builder setAdStatus(@androidx.annotation.NonNull String adStatus) {
             this.adStatus = adStatus;
             return this;
         }
 
-        public Builder setAdNetwork(String adNetwork) {
+        @androidx.annotation.NonNull
+        public Builder setAdNetwork(@androidx.annotation.NonNull String adNetwork) {
             this.adNetwork = adNetwork;
             return this;
         }
 
-        public Builder setBackupAdNetwork(String backupAdNetwork) {
+        @androidx.annotation.Nullable
+        public Builder setBackupAdNetwork(@androidx.annotation.Nullable String backupAdNetwork) {
             this.backupAdNetwork = backupAdNetwork;
             return this;
         }
 
-        public Builder setAdMobAppOpenId(String adMobAppOpenId) {
+        @androidx.annotation.NonNull
+        public Builder setAdMobAppOpenId(@androidx.annotation.NonNull String adMobAppOpenId) {
             this.adMobAppOpenId = adMobAppOpenId;
             return this;
         }
 
-        public Builder setApplovinAppOpenId(String applovinAppOpenId) {
+        @androidx.annotation.NonNull
+        public Builder setApplovinAppOpenId(@androidx.annotation.NonNull String applovinAppOpenId) {
             this.applovinAppOpenId = applovinAppOpenId;
             return this;
         }
 
-        public Builder setWortiseAppOpenId(String wortiseAppOpenId) {
+        @androidx.annotation.NonNull
+        public Builder setWortiseAppOpenId(@androidx.annotation.NonNull String wortiseAppOpenId) {
             this.wortiseAppOpenId = wortiseAppOpenId;
             return this;
         }
@@ -673,3 +770,4 @@ public class AppOpenAd {
     }
 
 }
+

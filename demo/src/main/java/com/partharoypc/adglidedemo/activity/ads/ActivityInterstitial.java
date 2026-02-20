@@ -52,7 +52,7 @@ public class ActivityInterstitial extends AppCompatActivity {
                 .setAdNetwork(Constant.AD_NETWORK)
                 .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
                 .setAdMobInterstitialId(Constant.ADMOB_INTERSTITIAL_ID)
-                .setGoogleAdManagerInterstitialId(Constant.GOOGLE_AD_MANAGER_INTERSTITIAL_ID)
+//                 .setGoogleAdManagerInterstitialId(Constant.GOOGLE_AD_MANAGER_INTERSTITIAL_ID)
                 .setFanInterstitialId(Constant.FAN_INTERSTITIAL_ID)
                 .setUnityInterstitialId(Constant.UNITY_INTERSTITIAL_ID)
                 .setAppLovinInterstitialId(Constant.APPLOVIN_INTERSTITIAL_ID)

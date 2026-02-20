@@ -21,7 +21,7 @@ import java.util.Date;
  */
 public class AppOpenAdMob {
 
-    private static final String LOG_TAG = "AppOpenAd";
+    private static final String TAG = "AdGlide";
     private AppOpenAd appOpenAd = null;
     private boolean isLoadingAd = false;
     private boolean isShowingAd = false;
@@ -57,17 +57,17 @@ public class AppOpenAdMob {
                     isLoadingAd = false;
                     loadTime = (new Date()).getTime();
 
-                    Log.d(LOG_TAG, "onAdLoaded.");
+                    Log.d(TAG, "onAdLoaded.");
                 }
 
                 @Override
                 public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                     isLoadingAd = false;
-                    Log.d(LOG_TAG, "onAdFailedToLoad: " + loadAdError.getMessage());
+                    Log.d(TAG, "onAdFailedToLoad: " + loadAdError.getMessage());
                 }
             });
         } catch (Exception e) {
-            Log.e(LOG_TAG, "Error in loadAd: " + e.getMessage());
+            Log.e(TAG, "Error in loadAd: " + e.getMessage());
             isLoadingAd = false;
         }
     }
@@ -91,12 +91,12 @@ public class AppOpenAdMob {
             @NonNull OnShowAdCompleteListener onShowAdCompleteListener) {
         try {
             if (isShowingAd) {
-                Log.d(LOG_TAG, "The app open ad is already showing.");
+                Log.d(TAG, "The app open ad is already showing.");
                 return;
             }
 
             if (!isAdAvailable()) {
-                Log.d(LOG_TAG, "The app open ad is not ready yet.");
+                Log.d(TAG, "The app open ad is not ready yet.");
                 onShowAdCompleteListener.onShowAdComplete();
                 loadAd(activity, appOpenAdUnitId);
                 return;
@@ -105,13 +105,13 @@ public class AppOpenAdMob {
             long currentTime = new Date().getTime();
             long timeSinceLastShow = currentTime - lastAdShowTime;
             if (lastAdShowTime > 0 && timeSinceLastShow < MIN_TIME_BETWEEN_ADS_MS) {
-                Log.d(LOG_TAG,
+                Log.d(TAG,
                         "The app open ad was shown " + (timeSinceLastShow / 1000 / 60) + " minutes ago. Skipping.");
                 onShowAdCompleteListener.onShowAdComplete();
                 return;
             }
 
-            Log.d(LOG_TAG, "Will show ad.");
+            Log.d(TAG, "Will show ad.");
 
             appOpenAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                 @Override
@@ -119,7 +119,7 @@ public class AppOpenAdMob {
                     appOpenAd = null;
                     isShowingAd = false;
 
-                    Log.d(LOG_TAG, "onAdDismissedFullScreenContent.");
+                    Log.d(TAG, "onAdDismissedFullScreenContent.");
 
                     onShowAdCompleteListener.onShowAdComplete();
                     loadAd(activity, appOpenAdUnitId);
@@ -129,7 +129,7 @@ public class AppOpenAdMob {
                 public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
                     appOpenAd = null;
                     isShowingAd = false;
-                    Log.d(LOG_TAG, "onAdFailedToShowFullScreenContent: " + adError.getMessage());
+                    Log.d(TAG, "onAdFailedToShowFullScreenContent: " + adError.getMessage());
                     onShowAdCompleteListener.onShowAdComplete();
                     loadAd(activity, appOpenAdUnitId);
                 }
@@ -137,16 +137,17 @@ public class AppOpenAdMob {
                 @Override
                 public void onAdShowedFullScreenContent() {
                     lastAdShowTime = new Date().getTime();
-                    Log.d(LOG_TAG, "onAdShowedFullScreenContent.");
+                    Log.d(TAG, "onAdShowedFullScreenContent.");
                 }
             });
 
             isShowingAd = true;
             appOpenAd.show(activity);
         } catch (Exception e) {
-            Log.e(LOG_TAG, "Error in showAdIfAvailable: " + e.getMessage());
+            Log.e(TAG, "Error in showAdIfAvailable: " + e.getMessage());
             onShowAdCompleteListener.onShowAdComplete();
             loadAd(activity, appOpenAdUnitId);
         }
     }
 }
+

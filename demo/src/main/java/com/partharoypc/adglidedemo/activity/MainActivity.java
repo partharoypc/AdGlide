@@ -4,7 +4,6 @@ import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_DISCOVERY;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.FAN;
-import static com.partharoypc.adglide.util.Constant.GOOGLE_AD_MANAGER;
 import static com.partharoypc.adglide.util.Constant.IRONSOURCE;
 import static com.partharoypc.adglide.util.Constant.STARTAPP;
 import static com.partharoypc.adglide.util.Constant.UNITY;
@@ -147,7 +146,6 @@ public class MainActivity extends AppCompatActivity {
                     .setAdNetwork(Constant.AD_NETWORK)
                     .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
                     .setAdMobAppOpenId(Constant.ADMOB_APP_OPEN_AD_ID)
-                    .setAdManagerAppOpenId(Constant.GOOGLE_AD_MANAGER_APP_OPEN_AD_ID)
                     .setApplovinAppOpenId(Constant.APPLOVIN_APP_OPEN_AP_ID)
                     .setWortiseAppOpenId(Constant.WORTISE_APP_OPEN_AD_ID)
                     .build();

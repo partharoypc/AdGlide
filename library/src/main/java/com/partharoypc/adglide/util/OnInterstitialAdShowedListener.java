@@ -8,3 +8,4 @@ public interface OnInterstitialAdShowedListener {
     /** Called when the interstitial ad is displayed on screen. */
     void onInterstitialAdShowed();
 }
+

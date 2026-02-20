@@ -8,3 +8,4 @@ public interface OnRewardedAdErrorListener {
     /** Called when a rewarded ad error occurs. */
     void onRewardedAdError();
 }
+

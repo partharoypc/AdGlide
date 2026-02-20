@@ -54,7 +54,6 @@ public class ActivityRewarded extends AppCompatActivity {
                 .setMainAds(Constant.AD_NETWORK)
                 .setBackupAds(Constant.BACKUP_AD_NETWORK)
                 .setAdMobRewardedId(Constant.ADMOB_REWARDED_ID)
-                .setAdManagerRewardedId(Constant.GOOGLE_AD_MANAGER_REWARDED_ID)
                 .setFanRewardedId(Constant.FAN_REWARDED_ID)
                 .setUnityRewardedId(Constant.UNITY_REWARDED_ID)
                 .setApplovinMaxRewardedId(Constant.APPLOVIN_MAX_REWARDED_ID)

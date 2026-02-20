@@ -85,3 +85,4 @@ public class SmallNativeAdView extends LinearLayout {
     }
 
 }
+

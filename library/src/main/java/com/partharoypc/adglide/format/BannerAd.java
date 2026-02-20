@@ -5,8 +5,8 @@ import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_DISCOVERY;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
-import static com.partharoypc.adglide.util.Constant.FACEBOOK;
-import static com.partharoypc.adglide.util.Constant.FAN;
+import static com.partharoypc.adglide.util.Constant.META;
+import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_ADMOB;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_IRONSOURCE;
@@ -62,7 +62,7 @@ public class BannerAd {
 
     public static class Builder {
 
-        private static final String TAG = "AdNetwork";
+    private static final String TAG = "AdGlide";
         private final Activity activity;
         private AdView adView;
         private com.facebook.ads.AdView fanAdView;
@@ -96,22 +96,26 @@ public class BannerAd {
             this.activity = activity;
         }
 
+        @androidx.annotation.NonNull
         public Builder build() {
             loadBannerAd();
             return this;
         }
 
-        public Builder setAdStatus(String adStatus) {
+        @androidx.annotation.NonNull
+        public Builder setAdStatus(@androidx.annotation.NonNull String adStatus) {
             this.adStatus = adStatus;
             return this;
         }
 
-        public Builder setAdNetwork(String adNetwork) {
+        @androidx.annotation.NonNull
+        public Builder setAdNetwork(@androidx.annotation.NonNull String adNetwork) {
             this.adNetwork = adNetwork;
             return this;
         }
 
-        public Builder setBackupAdNetwork(String backupAdNetwork) {
+        @androidx.annotation.Nullable
+        public Builder setBackupAdNetwork(@androidx.annotation.Nullable String backupAdNetwork) {
             this.backupAdNetwork = backupAdNetwork;
             if (waterfallManager == null) {
                 waterfallManager = new WaterfallManager(backupAdNetwork);
@@ -121,7 +125,8 @@ public class BannerAd {
             return this;
         }
 
-        public Builder addBackupAdNetwork(String backupAdNetwork) {
+        @androidx.annotation.Nullable
+        public Builder addBackupAdNetwork(@androidx.annotation.Nullable String backupAdNetwork) {
             if (waterfallManager == null) {
                 waterfallManager = new WaterfallManager(backupAdNetwork);
             } else {
@@ -130,6 +135,7 @@ public class BannerAd {
             return this;
         }
 
+        @androidx.annotation.Nullable
         public Builder setBackupAdNetworks(String... backupAdNetworks) {
             this.waterfallManager = new WaterfallManager(backupAdNetworks);
             if (backupAdNetworks.length > 0) {
@@ -138,56 +144,67 @@ public class BannerAd {
             return this;
         }
 
-        public Builder setAdMobBannerId(String adMobBannerId) {
+        @androidx.annotation.NonNull
+        public Builder setAdMobBannerId(@androidx.annotation.NonNull String adMobBannerId) {
             this.adMobBannerId = adMobBannerId;
             return this;
         }
 
-        public Builder setFanBannerId(String fanBannerId) {
+        @androidx.annotation.NonNull
+        public Builder setFanBannerId(@androidx.annotation.NonNull String fanBannerId) {
             this.fanBannerId = fanBannerId;
             return this;
         }
 
-        public Builder setUnityBannerId(String unityBannerId) {
+        @androidx.annotation.NonNull
+        public Builder setUnityBannerId(@androidx.annotation.NonNull String unityBannerId) {
             this.unityBannerId = unityBannerId;
             return this;
         }
 
-        public Builder setAppLovinBannerId(String appLovinBannerId) {
+        @androidx.annotation.NonNull
+        public Builder setAppLovinBannerId(@androidx.annotation.NonNull String appLovinBannerId) {
             this.appLovinBannerId = appLovinBannerId;
             return this;
         }
 
-        public Builder setAppLovinBannerZoneId(String appLovinBannerZoneId) {
+        @androidx.annotation.NonNull
+        public Builder setAppLovinBannerZoneId(@androidx.annotation.NonNull String appLovinBannerZoneId) {
             this.appLovinBannerZoneId = appLovinBannerZoneId;
             return this;
         }
 
-        public Builder setIronSourceBannerId(String ironSourceBannerId) {
+        @androidx.annotation.NonNull
+        public Builder setIronSourceBannerId(@androidx.annotation.NonNull String ironSourceBannerId) {
             this.ironSourceBannerId = ironSourceBannerId;
             return this;
         }
 
-        public Builder setWortiseBannerId(String wortiseBannerId) {
+        @androidx.annotation.NonNull
+        public Builder setWortiseBannerId(@androidx.annotation.NonNull String wortiseBannerId) {
             this.wortiseBannerId = wortiseBannerId;
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder setPlacementStatus(int placementStatus) {
             this.placementStatus = placementStatus;
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder setDarkTheme(boolean darkTheme) {
             this.darkTheme = darkTheme;
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder setLegacyGDPR(boolean legacyGDPR) {
             this.legacyGDPR = legacyGDPR;
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder setIsCollapsibleBanner(boolean collapsibleBanner) {
             this.collapsibleBanner = collapsibleBanner;
             return this;
@@ -241,8 +258,7 @@ public class BannerAd {
                             break;
                         }
 
-                        case FAN:
-                        case FACEBOOK: {
+                        case META: {
                             fanAdView = new com.facebook.ads.AdView(activity, fanBannerId, AdSize.BANNER_HEIGHT_50);
                             RelativeLayout fanAdViewContainer = activity.findViewById(R.id.fan_banner_view_container);
                             fanAdViewContainer.addView(fanAdView);
@@ -568,8 +584,7 @@ public class BannerAd {
                             break;
                         }
 
-                        case FAN:
-                        case FACEBOOK: {
+                        case META: {
                             fanAdView = new com.facebook.ads.AdView(activity, fanBannerId, AdSize.BANNER_HEIGHT_50);
                             RelativeLayout fanAdViewContainer = activity.findViewById(R.id.fan_banner_view_container);
                             fanAdViewContainer.addView(fanAdView);
@@ -869,3 +884,4 @@ public class BannerAd {
     }
 
 }
+

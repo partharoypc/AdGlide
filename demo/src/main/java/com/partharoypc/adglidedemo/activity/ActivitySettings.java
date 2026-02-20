@@ -6,7 +6,6 @@ import static com.partharoypc.adglide.util.Constant.APPLOVIN_DISCOVERY;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.FACEBOOK;
 import static com.partharoypc.adglide.util.Constant.FAN;
-import static com.partharoypc.adglide.util.Constant.GOOGLE_AD_MANAGER;
 import static com.partharoypc.adglide.util.Constant.IRONSOURCE;
 import static com.partharoypc.adglide.util.Constant.NONE;
 import static com.partharoypc.adglide.util.Constant.STARTAPP;
@@ -71,7 +70,7 @@ public class ActivitySettings extends AppCompatActivity {
     private void setupData() {
         primaryNetworks = new ArrayList<>();
         primaryNetworks.add(new AdapterNetwork.NetworkItem("AdMob", ADMOB));
-        primaryNetworks.add(new AdapterNetwork.NetworkItem("Google Ad Manager", GOOGLE_AD_MANAGER));
+//         primaryNetworks.add(new AdapterNetwork.NetworkItem("Google Ad Manager", GOOGLE_AD_MANAGER));
         primaryNetworks.add(new AdapterNetwork.NetworkItem("Meta Audience Network", FAN));
         primaryNetworks.add(new AdapterNetwork.NetworkItem("Unity Ads", UNITY));
         primaryNetworks.add(new AdapterNetwork.NetworkItem("AppLovin MAX", APPLOVIN_MAX));

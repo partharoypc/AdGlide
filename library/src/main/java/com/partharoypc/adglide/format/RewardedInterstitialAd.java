@@ -15,7 +15,6 @@ import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.OnUserEarnedRewardListener;
 
 import com.google.android.gms.ads.rewarded.RewardItem;
-import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd;
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback;
 import com.partharoypc.adglide.util.OnRewardedAdCompleteListener;
 import com.partharoypc.adglide.util.OnRewardedAdDismissedListener;
@@ -32,9 +31,9 @@ public class RewardedInterstitialAd {
 
     public static class Builder {
 
-        private static final String TAG = "AdNetwork";
+        private static final String TAG = "AdGlide";
         private final Activity activity;
-        private RewardedInterstitialAd adMobRewardedInterstitialAd;
+        private com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd adMobRewardedInterstitialAd;
 
         private String adStatus = "";
         private String adNetwork = "";
@@ -50,28 +49,33 @@ public class RewardedInterstitialAd {
             this.activity = activity;
         }
 
+        @androidx.annotation.NonNull
         public Builder build(OnRewardedAdCompleteListener onComplete, OnRewardedAdDismissedListener onDismiss) {
             loadRewardedInterstitialAd(onComplete, onDismiss);
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder show(OnRewardedAdCompleteListener onComplete, OnRewardedAdDismissedListener onDismiss,
                 OnRewardedAdErrorListener onError) {
             showRewardedInterstitialAd(onComplete, onDismiss, onError);
             return this;
         }
 
-        public Builder setAdStatus(String adStatus) {
+        @androidx.annotation.NonNull
+        public Builder setAdStatus(@androidx.annotation.NonNull String adStatus) {
             this.adStatus = adStatus;
             return this;
         }
 
-        public Builder setAdNetwork(String adNetwork) {
+        @androidx.annotation.NonNull
+        public Builder setAdNetwork(@androidx.annotation.NonNull String adNetwork) {
             this.adNetwork = adNetwork;
             return this;
         }
 
-        public Builder setBackupAdNetwork(String backupAdNetwork) {
+        @androidx.annotation.Nullable
+        public Builder setBackupAdNetwork(@androidx.annotation.Nullable String backupAdNetwork) {
             this.backupAdNetwork = backupAdNetwork;
             if (!backupAdNetwork.isEmpty()) {
                 this.waterfallManager = new WaterfallManager(backupAdNetwork);
@@ -79,6 +83,7 @@ public class RewardedInterstitialAd {
             return this;
         }
 
+        @androidx.annotation.Nullable
         public Builder setBackupAdNetworks(String... backupAdNetworks) {
             this.waterfallManager = new WaterfallManager(backupAdNetworks);
             if (backupAdNetworks.length > 0) {
@@ -87,16 +92,19 @@ public class RewardedInterstitialAd {
             return this;
         }
 
-        public Builder setAdMobRewardedInterstitialId(String adMobRewardedInterstitialId) {
+        @androidx.annotation.NonNull
+        public Builder setAdMobRewardedInterstitialId(@androidx.annotation.NonNull String adMobRewardedInterstitialId) {
             this.adMobRewardedInterstitialId = adMobRewardedInterstitialId;
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder setPlacementStatus(int placementStatus) {
             this.placementStatus = placementStatus;
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder setLegacyGDPR(boolean legacyGDPR) {
             this.legacyGDPR = legacyGDPR;
             return this;
@@ -112,10 +120,12 @@ public class RewardedInterstitialAd {
                     switch (adNetwork) {
                         case ADMOB:
                         case FAN_BIDDING_ADMOB:
-                            RewardedInterstitialAd.load(activity, adMobRewardedInterstitialId,
+                            com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd.load(activity,
+                                    adMobRewardedInterstitialId,
                                     Tools.getAdRequest(activity, legacyGDPR), new RewardedInterstitialAdLoadCallback() {
                                         @Override
-                                        public void onAdLoaded(@NonNull RewardedInterstitialAd ad) {
+                                        public void onAdLoaded(
+                                                @NonNull com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd ad) {
                                             adMobRewardedInterstitialAd = ad;
                                             adMobRewardedInterstitialAd
                                                     .setFullScreenContentCallback(new FullScreenContentCallback() {
@@ -182,10 +192,12 @@ public class RewardedInterstitialAd {
                     switch (backupAdNetwork) {
                         case ADMOB:
                         case FAN_BIDDING_ADMOB:
-                            RewardedInterstitialAd.load(activity, adMobRewardedInterstitialId,
+                            com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd.load(activity,
+                                    adMobRewardedInterstitialId,
                                     Tools.getAdRequest(activity, legacyGDPR), new RewardedInterstitialAdLoadCallback() {
                                         @Override
-                                        public void onAdLoaded(@NonNull RewardedInterstitialAd ad) {
+                                        public void onAdLoaded(
+                                                @NonNull com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd ad) {
                                             adMobRewardedInterstitialAd = ad;
                                             adMobRewardedInterstitialAd
                                                     .setFullScreenContentCallback(new FullScreenContentCallback() {
@@ -287,3 +299,4 @@ public class RewardedInterstitialAd {
 
     }
 }
+

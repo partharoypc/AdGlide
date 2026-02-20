@@ -11,8 +11,7 @@ public class Constant {
 
     // ad option
     public static final String ADMOB = "admob";
-    public static final String FAN = "fan";
-    public static final String FACEBOOK = "facebook";
+    public static final String META = "meta";
     public static final String STARTAPP = "startapp";
     public static final String UNITY = "unity";
     public static final String APPLOVIN = "applovin";
@@ -52,3 +51,4 @@ public class Constant {
     public static final String VALUE = "";
 
 }
+

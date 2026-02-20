@@ -2,8 +2,8 @@ package com.partharoypc.adglide.format;
 
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
-import static com.partharoypc.adglide.util.Constant.FACEBOOK;
-import static com.partharoypc.adglide.util.Constant.FAN;
+import static com.partharoypc.adglide.util.Constant.META;
+import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_ADMOB;
 
 import android.app.Activity;
@@ -47,13 +47,14 @@ public class NativeAdFragment {
 
     public static class Builder {
 
-        private static final String TAG = "AdNetwork";
+        private static final String TAG = "AdGlide";
         private final Activity activity;
         private View view;
 
         private LinearLayout nativeAdViewContainer;
 
         private MediaView mediaView;
+        private com.google.android.gms.ads.nativead.NativeAd adMobNativeAdObj;
         private TemplateView admobNativeAd;
         private LinearLayout admobNativeBackground;
 
@@ -90,86 +91,103 @@ public class NativeAdFragment {
             this.activity = activity;
         }
 
+        @androidx.annotation.NonNull
         public Builder build() {
             loadNativeAd();
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder setPadding(int left, int top, int right, int bottom) {
             setNativeAdPadding(left, top, right, bottom);
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder setMargin(int left, int top, int right, int bottom) {
             setNativeAdMargin(left, top, right, bottom);
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder setBackgroundResource(int drawableBackground) {
             setNativeAdBackgroundResource(drawableBackground);
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder setView(View view) {
             this.view = view;
             return this;
         }
 
-        public Builder setAdStatus(String adStatus) {
+        @androidx.annotation.NonNull
+        public Builder setAdStatus(@androidx.annotation.NonNull String adStatus) {
             this.adStatus = adStatus;
             return this;
         }
 
-        public Builder setAdNetwork(String adNetwork) {
+        @androidx.annotation.NonNull
+        public Builder setAdNetwork(@androidx.annotation.NonNull String adNetwork) {
             this.adNetwork = adNetwork;
             return this;
         }
 
-        public Builder setBackupAdNetwork(String backupAdNetwork) {
+        @androidx.annotation.Nullable
+        public Builder setBackupAdNetwork(@androidx.annotation.Nullable String backupAdNetwork) {
             this.backupAdNetwork = backupAdNetwork;
             return this;
         }
 
-        public Builder setAdMobNativeId(String adMobNativeId) {
+        @androidx.annotation.NonNull
+        public Builder setAdMobNativeId(@androidx.annotation.NonNull String adMobNativeId) {
             this.adMobNativeId = adMobNativeId;
             return this;
         }
 
-        public Builder setAppLovinDiscoveryMrecZoneId(String appLovinDiscMrecZoneId) {
+        @androidx.annotation.NonNull
+        public Builder setAppLovinDiscoveryMrecZoneId(@androidx.annotation.NonNull String appLovinDiscMrecZoneId) {
             this.appLovinDiscMrecZoneId = appLovinDiscMrecZoneId;
             return this;
         }
 
-        public Builder setFanNativeId(String fanNativeId) {
+        @androidx.annotation.NonNull
+        public Builder setFanNativeId(@androidx.annotation.NonNull String fanNativeId) {
             this.fanNativeId = fanNativeId;
             return this;
         }
 
-        public Builder setAppLovinNativeId(String appLovinNativeId) {
+        @androidx.annotation.NonNull
+        public Builder setAppLovinNativeId(@androidx.annotation.NonNull String appLovinNativeId) {
             this.appLovinNativeId = appLovinNativeId;
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder setPlacementStatus(int placementStatus) {
             this.placementStatus = placementStatus;
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder setDarkTheme(boolean darkTheme) {
             this.darkTheme = darkTheme;
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder setLegacyGDPR(boolean legacyGDPR) {
             this.legacyGDPR = legacyGDPR;
             return this;
         }
 
-        public Builder setNativeAdStyle(String nativeAdStyle) {
+        @androidx.annotation.NonNull
+        public Builder setNativeAdStyle(@androidx.annotation.NonNull String nativeAdStyle) {
             this.nativeAdStyle = nativeAdStyle;
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder setNativeAdBackgroundColor(int colorLight, int colorDark) {
             this.nativeBackgroundLight = colorLight;
             this.nativeBackgroundDark = colorDark;
@@ -221,6 +239,10 @@ public class NativeAdFragment {
                                                 admobNativeAd.setStyles(styles);
                                                 admobNativeBackground.setBackgroundResource(nativeBackgroundLight);
                                             }
+                                            if (adMobNativeAdObj != null) {
+                                                adMobNativeAdObj.destroy();
+                                            }
+                                            adMobNativeAdObj = NativeAd;
                                             mediaView.setImageScaleType(ImageView.ScaleType.CENTER_CROP);
                                             admobNativeAd.setNativeAd(NativeAd);
                                             admobNativeAd.setVisibility(View.VISIBLE);
@@ -239,8 +261,7 @@ public class NativeAdFragment {
                             }
                             break;
 
-                        case FAN:
-                        case FACEBOOK:
+                        case META:
                             fanNativeAd = new com.facebook.ads.NativeAd(activity, fanNativeId);
                             NativeAdListener nativeAdListener = new NativeAdListener() {
                                 @Override
@@ -435,6 +456,10 @@ public class NativeAdFragment {
                                                 admobNativeAd.setStyles(styles);
                                                 admobNativeBackground.setBackgroundResource(nativeBackgroundLight);
                                             }
+                                            if (adMobNativeAdObj != null) {
+                                                adMobNativeAdObj.destroy();
+                                            }
+                                            adMobNativeAdObj = NativeAd;
                                             mediaView.setImageScaleType(ImageView.ScaleType.CENTER_CROP);
                                             admobNativeAd.setNativeAd(NativeAd);
                                             admobNativeAd.setVisibility(View.VISIBLE);
@@ -454,8 +479,7 @@ public class NativeAdFragment {
                             }
                             break;
 
-                        case FAN:
-                        case FACEBOOK:
+                        case META:
                             fanNativeAd = new com.facebook.ads.NativeAd(activity, fanNativeId);
                             NativeAdListener nativeAdListener = new NativeAdListener() {
                                 @Override
@@ -639,6 +663,10 @@ public class NativeAdFragment {
          * Should be called when the hosting Fragment is destroyed.
          */
         public void destroyNativeAd() {
+            if (adMobNativeAdObj != null) {
+                adMobNativeAdObj.destroy();
+                adMobNativeAdObj = null;
+            }
             if (admobNativeAd != null) {
                 admobNativeAd.destroyNativeAd();
             }
@@ -651,3 +679,4 @@ public class NativeAdFragment {
     }
 
 }
+

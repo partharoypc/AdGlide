@@ -8,3 +8,4 @@ public interface OnRewardedAdDismissedListener {
     /** Called when the rewarded ad is closed. */
     void onRewardedAdDismissed();
 }
+

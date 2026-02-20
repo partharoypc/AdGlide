@@ -5,8 +5,8 @@ import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_DISCOVERY;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
-import static com.partharoypc.adglide.util.Constant.FACEBOOK;
-import static com.partharoypc.adglide.util.Constant.FAN;
+import static com.partharoypc.adglide.util.Constant.META;
+import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_ADMOB;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_IRONSOURCE;
@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.applovin.mediation.MaxAd;
 import com.applovin.mediation.MaxError;
@@ -60,7 +61,7 @@ public class RewardedAd {
     @SuppressWarnings("deprecation")
     public static class Builder {
 
-        private static final String TAG = "AdNetwork";
+    private static final String TAG = "AdGlide";
         private final Activity activity;
         private com.google.android.gms.ads.rewarded.RewardedAd adMobRewardedAd;
         private com.facebook.ads.RewardedVideoAd fanRewardedVideoAd;
@@ -82,44 +83,75 @@ public class RewardedAd {
         private int placementStatus = 1;
         private boolean legacyGDPR = false;
 
-        public Builder(Activity activity) {
+        /**
+         * Initializes the RewardedAd Builder.
+         * @param activity The Activity context.
+         */
+        public Builder(@NonNull Activity activity) {
             this.activity = activity;
         }
 
+        @androidx.annotation.NonNull
         public Builder build(OnRewardedAdCompleteListener onComplete, OnRewardedAdDismissedListener onDismiss) {
             loadRewardedAd(onComplete, onDismiss);
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder show(OnRewardedAdCompleteListener onComplete, OnRewardedAdDismissedListener onDismiss,
                 OnRewardedAdErrorListener onError) {
             showRewardedAd(onComplete, onDismiss, onError);
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder build(OnRewardedAdLoadedListener onLoaded, OnRewardedAdErrorListener onError,
                 OnRewardedAdDismissedListener onDismiss, OnRewardedAdCompleteListener onComplete) {
             loadAndShowRewardedAd(onLoaded, onError, onDismiss, onComplete);
             return this;
         }
 
-        public Builder setAdStatus(String adStatus) {
+        /**
+         * Sets the ad status (e.g., ON/OFF).
+         * @param adStatus The status string.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder setAdStatus(@NonNull String adStatus) {
             this.adStatus = adStatus;
             return this;
         }
 
-        public Builder setAdNetwork(String adNetwork) {
+        /**
+         * Sets the primary ad network to use.
+         * @param adNetwork The primary network key.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder setAdNetwork(@NonNull String adNetwork) {
             this.adNetwork = adNetwork;
             return this;
         }
 
-        public Builder setBackupAdNetwork(String backupAdNetwork) {
+        /**
+         * Sets a single backup ad network.
+         * @param backupAdNetwork The backup network key.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder setBackupAdNetwork(@Nullable String backupAdNetwork) {
             this.backupAdNetwork = backupAdNetwork;
             this.waterfallManager = new WaterfallManager(backupAdNetwork);
             return this;
         }
 
-        public Builder setBackupAdNetworks(String... backupAdNetworks) {
+        /**
+         * Sets multiple backup ad networks for a waterfall fallback.
+         * @param backupAdNetworks An array or varargs of backup network keys.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder setBackupAdNetworks(@Nullable String... backupAdNetworks) {
             this.waterfallManager = new WaterfallManager(backupAdNetworks);
             if (backupAdNetworks.length > 0) {
                 this.backupAdNetwork = backupAdNetworks[0];
@@ -129,59 +161,115 @@ public class RewardedAd {
 
         /** @deprecated Use {@link #setAdNetwork(String)} instead. */
         @Deprecated
-        public Builder setMainAds(String mainAds) {
+        @androidx.annotation.NonNull
+        public Builder setMainAds(@androidx.annotation.NonNull String mainAds) {
             this.adNetwork = mainAds;
             return this;
         }
 
         /** @deprecated Use {@link #setBackupAdNetwork(String)} instead. */
         @Deprecated
-        public Builder setBackupAds(String backupAds) {
+        @androidx.annotation.NonNull
+        public Builder setBackupAds(@androidx.annotation.NonNull String backupAds) {
             this.backupAdNetwork = backupAds;
             this.waterfallManager = new WaterfallManager(backupAds);
             return this;
         }
 
-        public Builder setAdMobRewardedId(String adMobRewardedId) {
+        /**
+         * Sets the AdMobRewarded Ad Unit ID.
+         * @param adMobRewardedId The placement ID.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder setAdMobRewardedId(@NonNull String adMobRewardedId) {
             this.adMobRewardedId = adMobRewardedId;
             return this;
         }
 
-        public Builder setFanRewardedId(String fanRewardedId) {
+        /**
+         * Sets the FanRewarded Ad Unit ID.
+         * @param fanRewardedId The placement ID.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder setFanRewardedId(@NonNull String fanRewardedId) {
             this.fanRewardedId = fanRewardedId;
             return this;
         }
 
-        public Builder setUnityRewardedId(String unityRewardedId) {
+        /**
+         * Sets the UnityRewarded Ad Unit ID.
+         * @param unityRewardedId The placement ID.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder setUnityRewardedId(@NonNull String unityRewardedId) {
             this.unityRewardedId = unityRewardedId;
             return this;
         }
 
-        public Builder setApplovinMaxRewardedId(String applovinMaxRewardedId) {
+        /**
+         * Sets the ApplovinMaxRewarded Ad Unit ID.
+         * @param applovinMaxRewardedId The placement ID.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder setApplovinMaxRewardedId(@NonNull String applovinMaxRewardedId) {
             this.applovinMaxRewardedId = applovinMaxRewardedId;
             return this;
         }
 
-        public Builder setApplovinDiscRewardedZoneId(String applovinDiscRewardedZoneId) {
+        /**
+         * Sets the ApplovinDiscRewardedZone Ad Unit ID.
+         * @param applovinDiscRewardedZoneId The placement ID.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder setApplovinDiscRewardedZoneId(@NonNull String applovinDiscRewardedZoneId) {
             this.applovinDiscRewardedZoneId = applovinDiscRewardedZoneId;
             return this;
         }
 
-        public Builder setIronSourceRewardedId(String ironSourceRewardedId) {
+        /**
+         * Sets the IronSourceRewarded Ad Unit ID.
+         * @param ironSourceRewardedId The placement ID.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder setIronSourceRewardedId(@NonNull String ironSourceRewardedId) {
             this.ironSourceRewardedId = ironSourceRewardedId;
             return this;
         }
 
-        public Builder setWortiseRewardedId(String wortiseRewardedId) {
+        /**
+         * Sets the WortiseRewarded Ad Unit ID.
+         * @param wortiseRewardedId The placement ID.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder setWortiseRewardedId(@NonNull String wortiseRewardedId) {
             this.wortiseRewardedId = wortiseRewardedId;
             return this;
         }
 
+        /**
+         * Sets the placement status.
+         * @param placementStatus Integer representing status.
+         * @return The configured Builder instance.
+         */
+        @NonNull
         public Builder setPlacementStatus(int placementStatus) {
             this.placementStatus = placementStatus;
             return this;
         }
 
+        /**
+         * Toggles legacy GDPR compliance extras.
+         * @param legacyGDPR True to enable.
+         * @return The configured Builder instance.
+         */
+        @NonNull
         public Builder setLegacyGDPR(boolean legacyGDPR) {
             this.legacyGDPR = legacyGDPR;
             return this;
@@ -231,8 +319,7 @@ public class RewardedAd {
                             break;
                         }
 
-                        case FAN:
-                        case FACEBOOK: {
+                        case META: {
                             fanRewardedVideoAd = new com.facebook.ads.RewardedVideoAd(activity, fanRewardedId);
                             fanRewardedVideoAd.loadAd(fanRewardedVideoAd.buildLoadAdConfig()
                                     .withAdListener(new RewardedVideoAdListener() {
@@ -501,8 +588,7 @@ public class RewardedAd {
                             break;
                         }
 
-                        case FAN:
-                        case FACEBOOK: {
+                        case META: {
                             fanRewardedVideoAd = new com.facebook.ads.RewardedVideoAd(activity, fanRewardedId);
                             fanRewardedVideoAd.loadAd(fanRewardedVideoAd.buildLoadAdConfig()
                                     .withAdListener(new RewardedVideoAdListener() {
@@ -626,8 +712,7 @@ public class RewardedAd {
                             break;
                         }
 
-                        case FAN:
-                        case FACEBOOK: {
+                        case META: {
                             if (fanRewardedVideoAd != null && fanRewardedVideoAd.isAdLoaded()) {
                                 fanRewardedVideoAd.show();
                             } else {
@@ -746,8 +831,7 @@ public class RewardedAd {
                             break;
                         }
 
-                        case FAN:
-                        case FACEBOOK: {
+                        case META: {
                             if (fanRewardedVideoAd != null && fanRewardedVideoAd.isAdLoaded()) {
                                 fanRewardedVideoAd.show();
                             }
@@ -833,8 +917,7 @@ public class RewardedAd {
                             break;
                         }
 
-                        case FAN:
-                        case FACEBOOK: {
+                        case META: {
                             fanRewardedVideoAd = new com.facebook.ads.RewardedVideoAd(activity, fanRewardedId);
                             fanRewardedVideoAd.loadAd(fanRewardedVideoAd.buildLoadAdConfig()
                                     .withAdListener(new RewardedVideoAdListener() {
@@ -986,8 +1069,7 @@ public class RewardedAd {
                             break;
                         }
 
-                        case FAN:
-                        case FACEBOOK: {
+                        case META: {
                             fanRewardedVideoAd = new com.facebook.ads.RewardedVideoAd(activity, fanRewardedId);
                             fanRewardedVideoAd.loadAd(fanRewardedVideoAd.buildLoadAdConfig()
                                     .withAdListener(new RewardedVideoAdListener() {
@@ -1110,3 +1192,4 @@ public class RewardedAd {
         }
     }
 }
+

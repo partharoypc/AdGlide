@@ -28,7 +28,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class Tools {
 
-    private static final String TAG = "AdNetwork";
+    private static final String TAG = "AdGlide";
 
     /**
      * Calculates the adaptive banner ad size based on the device screen width.
@@ -139,3 +139,4 @@ public class Tools {
     }
 
 }
+

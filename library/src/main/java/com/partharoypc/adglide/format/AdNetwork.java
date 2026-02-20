@@ -1,12 +1,14 @@
 package com.partharoypc.adglide.format;
 
+import static com.partharoypc.adglide.util.Constant.IRONSOURCE;
+
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_DISCOVERY;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
-import static com.partharoypc.adglide.util.Constant.FACEBOOK;
-import static com.partharoypc.adglide.util.Constant.FAN;
+import static com.partharoypc.adglide.util.Constant.META;
+import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_ADMOB;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_IRONSOURCE;
@@ -39,7 +41,7 @@ public class AdNetwork {
 
     public static class Initialize {
 
-        private static final String TAG = "AdNetwork";
+    private static final String TAG = "AdGlide";
         private final Activity activity;
         private String adStatus = "";
         private String adNetwork = "";
@@ -170,8 +172,7 @@ public class AdNetwork {
                     });
                     AudienceNetworkInitializeHelper.initializeAd(activity, debug);
                     break;
-                case FAN:
-                case FACEBOOK:
+                case META:
                     AudienceNetworkInitializeHelper.initializeAd(activity, debug);
                     break;
                 case UNITY:
@@ -225,3 +226,4 @@ public class AdNetwork {
     }
 
 }
+

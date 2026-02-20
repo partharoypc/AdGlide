@@ -47,3 +47,4 @@ public class BannerAdView extends LinearLayout {
     }
 
 }
+

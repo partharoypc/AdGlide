@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * parameters.
  */
 public class GDPR {
+    private static final String TAG = "AdGlide";
 
     private ConsentInformation consentInformation;
     private ConsentDebugSettings debugSettings;
@@ -51,7 +52,7 @@ public class GDPR {
         },
                 formError -> {
                 });
-        Log.d("GDPR", "AdMob GDPR is selected");
+        Log.d(TAG, "AdMob GDPR is selected");
     }
 
     @SuppressLint("HardwareIds")
@@ -141,9 +142,10 @@ public class GDPR {
     public void showPrivacyOptionsForm() {
         UserMessagingPlatform.showPrivacyOptionsForm(activity, formError -> {
             if (formError != null) {
-                Log.d("GDPR", "showPrivacyOptionsForm error: " + formError.getMessage());
+                Log.d(TAG, "showPrivacyOptionsForm error: " + formError.getMessage());
             }
         });
     }
 
 }
+

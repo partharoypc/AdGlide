@@ -4,7 +4,6 @@ import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
-import static com.partharoypc.adglide.util.Constant.GOOGLE_AD_MANAGER;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import android.app.Application;
@@ -63,14 +62,14 @@ public class ActivitySplash extends AppCompatActivity {
                                 requestConfig();
                             }
                             break;
-                        case GOOGLE_AD_MANAGER:
-                            if (!Constant.GOOGLE_AD_MANAGER_APP_OPEN_AD_ID.equals("0")) {
-                                ((MyApplication) getApplication()).showAdIfAvailable(ActivitySplash.this,
-                                        this::requestConfig);
-                            } else {
-                                requestConfig();
-                            }
-                            break;
+                        // case GOOGLE_AD_MANAGER:
+                        // if (!Constant.GOOGLE_AD_MANAGER_APP_OPEN_AD_ID.equals("0")) {
+                        // ((MyApplication) getApplication()).showAdIfAvailable(ActivitySplash.this,
+                        // this::requestConfig);
+                        // } else {
+                        // requestConfig();
+                        // }
+                        // break;
                         case APPLOVIN:
                         case APPLOVIN_MAX:
                             if (!Constant.APPLOVIN_APP_OPEN_AP_ID.equals("0")) {
@@ -161,7 +160,6 @@ public class ActivitySplash extends AppCompatActivity {
                     .setAdNetwork(Constant.AD_NETWORK)
                     .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
                     .setAdMobAppOpenId(Constant.ADMOB_APP_OPEN_AD_ID)
-                    .setAdManagerAppOpenId(Constant.GOOGLE_AD_MANAGER_APP_OPEN_AD_ID)
                     .setApplovinAppOpenId(Constant.APPLOVIN_APP_OPEN_AP_ID)
                     .setWortiseAppOpenId(Constant.WORTISE_APP_OPEN_AD_ID)
                     .build(this::startMainActivity);

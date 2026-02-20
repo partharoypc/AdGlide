@@ -10,8 +10,8 @@ import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_DISCOVERY;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
-import static com.partharoypc.adglide.util.Constant.FACEBOOK;
-import static com.partharoypc.adglide.util.Constant.FAN;
+import static com.partharoypc.adglide.util.Constant.META;
+import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_ADMOB;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_IRONSOURCE;
@@ -25,6 +25,7 @@ import android.app.Activity;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.applovin.mediation.MaxAd;
 import com.applovin.mediation.MaxAdListener;
@@ -56,7 +57,7 @@ public class InterstitialAd {
 
     public static class Builder {
 
-        private static final String TAG = "AdNetwork";
+    private static final String TAG = "AdGlide";
         private final Activity activity;
         private com.google.android.gms.ads.interstitial.InterstitialAd adMobInterstitialAd;
         private com.facebook.ads.InterstitialAd fanInterstitialAd;
@@ -82,20 +83,33 @@ public class InterstitialAd {
         private int interval = 3;
         private boolean legacyGDPR = false;
 
-        public Builder(Activity activity) {
+        /**
+         * Initializes the InterstitialAd Builder.
+         * @param activity The Activity context.
+         */
+        public Builder(@NonNull Activity activity) {
             this.activity = activity;
         }
 
+        /**
+         * Initiates the ad loading process.
+         * @return The configured Builder instance.
+         */
+        @NonNull
         public Builder build() {
             loadInterstitialAd();
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder build(OnInterstitialAdDismissedListener onInterstitialAdDismissedListener) {
             loadInterstitialAd(onInterstitialAdDismissedListener);
             return this;
         }
 
+        /**
+         * Shows the ad if it is loaded.
+         */
         public void show() {
             showInterstitialAd();
         }
@@ -105,23 +119,47 @@ public class InterstitialAd {
             showInterstitialAd(onInterstitialAdShowedListener, onInterstitialAdDismissedListener);
         }
 
-        public Builder setAdStatus(String adStatus) {
+        /**
+         * Sets the ad status (e.g., ON/OFF).
+         * @param adStatus The status string.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder setAdStatus(@NonNull String adStatus) {
             this.adStatus = adStatus;
             return this;
         }
 
-        public Builder setAdNetwork(String adNetwork) {
+        /**
+         * Sets the primary ad network to use.
+         * @param adNetwork The primary network key.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder setAdNetwork(@NonNull String adNetwork) {
             this.adNetwork = adNetwork;
             return this;
         }
 
-        public Builder setBackupAdNetwork(String backupAdNetwork) {
+        /**
+         * Sets a single backup ad network.
+         * @param backupAdNetwork The backup network key.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder setBackupAdNetwork(@Nullable String backupAdNetwork) {
             this.backupAdNetwork = backupAdNetwork;
             this.waterfallManager = new WaterfallManager(backupAdNetwork);
             return this;
         }
 
-        public Builder setBackupAdNetworks(String... backupAdNetworks) {
+        /**
+         * Sets multiple backup ad networks for a waterfall fallback.
+         * @param backupAdNetworks An array or varargs of backup network keys.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder setBackupAdNetworks(@Nullable String... backupAdNetworks) {
             this.waterfallManager = new WaterfallManager(backupAdNetworks);
             if (backupAdNetworks.length > 0) {
                 this.backupAdNetwork = backupAdNetworks[0];
@@ -129,57 +167,117 @@ public class InterstitialAd {
             return this;
         }
 
-        public Builder setAdMobInterstitialId(String adMobInterstitialId) {
+        /**
+         * Sets the AdMobInterstitial Ad Unit ID.
+         * @param adMobInterstitialId The placement ID.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder setAdMobInterstitialId(@NonNull String adMobInterstitialId) {
             this.adMobInterstitialId = adMobInterstitialId;
             return this;
         }
 
-        public Builder setFanInterstitialId(String fanInterstitialId) {
+        /**
+         * Sets the FanInterstitial Ad Unit ID.
+         * @param fanInterstitialId The placement ID.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder setFanInterstitialId(@NonNull String fanInterstitialId) {
             this.fanInterstitialId = fanInterstitialId;
             return this;
         }
 
-        public Builder setUnityInterstitialId(String unityInterstitialId) {
+        /**
+         * Sets the UnityInterstitial Ad Unit ID.
+         * @param unityInterstitialId The placement ID.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder setUnityInterstitialId(@NonNull String unityInterstitialId) {
             this.unityInterstitialId = unityInterstitialId;
             return this;
         }
 
-        public Builder setAppLovinInterstitialId(String appLovinInterstitialId) {
+        /**
+         * Sets the AppLovinInterstitial Ad Unit ID.
+         * @param appLovinInterstitialId The placement ID.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder setAppLovinInterstitialId(@NonNull String appLovinInterstitialId) {
             this.appLovinInterstitialId = appLovinInterstitialId;
             return this;
         }
 
-        public Builder setAppLovinInterstitialZoneId(String appLovinInterstitialZoneId) {
+        /**
+         * Sets the AppLovinInterstitialZone Ad Unit ID.
+         * @param appLovinInterstitialZoneId The placement ID.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder setAppLovinInterstitialZoneId(@NonNull String appLovinInterstitialZoneId) {
             this.appLovinInterstitialZoneId = appLovinInterstitialZoneId;
             return this;
         }
 
-        public Builder setIronSourceInterstitialId(String ironSourceInterstitialId) {
+        /**
+         * Sets the IronSourceInterstitial Ad Unit ID.
+         * @param ironSourceInterstitialId The placement ID.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder setIronSourceInterstitialId(@NonNull String ironSourceInterstitialId) {
             this.ironSourceInterstitialId = ironSourceInterstitialId;
             return this;
         }
 
-        public Builder setWortiseInterstitialId(String wortiseInterstitialId) {
+        /**
+         * Sets the WortiseInterstitial Ad Unit ID.
+         * @param wortiseInterstitialId The placement ID.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder setWortiseInterstitialId(@NonNull String wortiseInterstitialId) {
             this.wortiseInterstitialId = wortiseInterstitialId;
             return this;
         }
 
+        /**
+         * Sets the placement status.
+         * @param placementStatus Integer representing status.
+         * @return The configured Builder instance.
+         */
+        @NonNull
         public Builder setPlacementStatus(int placementStatus) {
             this.placementStatus = placementStatus;
             return this;
         }
 
+        /**
+         * Sets the display interval.
+         * @param interval The interval count.
+         * @return The configured Builder instance.
+         */
+        @NonNull
         public Builder setInterval(int interval) {
             this.interval = interval;
             return this;
         }
 
+        /**
+         * Toggles legacy GDPR compliance extras.
+         * @param legacyGDPR True to enable.
+         * @return The configured Builder instance.
+         */
+        @NonNull
         public Builder setLegacyGDPR(boolean legacyGDPR) {
             this.legacyGDPR = legacyGDPR;
             return this;
         }
 
-        public void loadInterstitialAd() {
+        private void loadInterstitialAd() {
             try {
                 if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
                     if (waterfallManager != null) {
@@ -218,8 +316,7 @@ public class InterstitialAd {
                             break;
                         }
 
-                        case FAN:
-                        case FACEBOOK: {
+                        case META: {
                             fanInterstitialAd = new com.facebook.ads.InterstitialAd(activity, fanInterstitialId);
                             com.facebook.ads.InterstitialAdListener adListener = new InterstitialAdListener() {
                                 @Override
@@ -442,7 +539,7 @@ public class InterstitialAd {
             }
         }
 
-        public void loadBackupInterstitialAd() {
+        private void loadBackupInterstitialAd() {
             try {
                 if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
                     if (waterfallManager == null) {
@@ -493,8 +590,7 @@ public class InterstitialAd {
                             break;
                         }
 
-                        case FAN:
-                        case FACEBOOK: {
+                        case META: {
                             Object cachedFan = AdRepository.getInstance().getInterstitial(backupAdNetwork,
                                     fanInterstitialId);
                             if (cachedFan instanceof com.facebook.ads.InterstitialAd) {
@@ -715,8 +811,7 @@ public class InterstitialAd {
                                 break;
                             }
 
-                            case FAN:
-                            case FACEBOOK: {
+                            case META: {
                                 if (fanInterstitialAd != null && fanInterstitialAd.isAdLoaded()) {
                                     fanInterstitialAd.show();
                                     Log.d(TAG, "fan interstitial not null");
@@ -826,8 +921,7 @@ public class InterstitialAd {
                             break;
                         }
 
-                        case FAN:
-                        case FACEBOOK: {
+                        case META: {
                             if (fanInterstitialAd != null && fanInterstitialAd.isAdLoaded()) {
                                 fanInterstitialAd.show();
                             }
@@ -935,8 +1029,7 @@ public class InterstitialAd {
                             break;
                         }
 
-                        case FAN:
-                        case FACEBOOK: {
+                        case META: {
                             fanInterstitialAd = new com.facebook.ads.InterstitialAd(activity, fanInterstitialId);
                             com.facebook.ads.InterstitialAdListener adListener = new InterstitialAdListener() {
                                 @Override
@@ -1226,8 +1319,7 @@ public class InterstitialAd {
                             break;
                         }
 
-                        case FAN:
-                        case FACEBOOK: {
+                        case META: {
                             Object cachedFan = AdRepository.getInstance().getInterstitial(adNetwork, fanInterstitialId);
                             if (cachedFan instanceof com.facebook.ads.InterstitialAd) {
                                 fanInterstitialAd = (com.facebook.ads.InterstitialAd) cachedFan;
@@ -1453,8 +1545,7 @@ public class InterstitialAd {
                                 break;
                             }
 
-                            case FAN:
-                            case FACEBOOK: {
+                            case META: {
                                 if (fanInterstitialAd != null && fanInterstitialAd.isAdLoaded()) {
                                     fanInterstitialAd.show();
                                     onInterstitialAdShowedListener.onInterstitialAdShowed();
@@ -1580,8 +1671,7 @@ public class InterstitialAd {
                             break;
                         }
 
-                        case FAN:
-                        case FACEBOOK: {
+                        case META: {
                             if (fanInterstitialAd != null && fanInterstitialAd.isAdLoaded()) {
                                 fanInterstitialAd.show();
                                 onInterstitialAdShowedListener.onInterstitialAdShowed();
@@ -1746,3 +1836,4 @@ public class InterstitialAd {
     }
 
 }
+

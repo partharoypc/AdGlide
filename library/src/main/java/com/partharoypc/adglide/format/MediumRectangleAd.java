@@ -2,8 +2,8 @@ package com.partharoypc.adglide.format;
 
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
-import static com.partharoypc.adglide.util.Constant.FACEBOOK;
-import static com.partharoypc.adglide.util.Constant.FAN;
+import static com.partharoypc.adglide.util.Constant.META;
+import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_ADMOB;
 
 import android.app.Activity;
@@ -31,7 +31,7 @@ public class MediumRectangleAd {
 
     public static class Builder {
 
-        private static final String TAG = "AdNetwork";
+    private static final String TAG = "AdGlide";
         private final Activity activity;
         private AdView adView;
         private com.facebook.ads.AdView fanAdView;
@@ -54,66 +54,79 @@ public class MediumRectangleAd {
             this.activity = activity;
         }
 
+        @androidx.annotation.NonNull
         public Builder build() {
             loadBannerAd();
             return this;
         }
 
-        public Builder setAdStatus(String adStatus) {
+        @androidx.annotation.NonNull
+        public Builder setAdStatus(@androidx.annotation.NonNull String adStatus) {
             this.adStatus = adStatus;
             return this;
         }
 
-        public Builder setAdNetwork(String adNetwork) {
+        @androidx.annotation.NonNull
+        public Builder setAdNetwork(@androidx.annotation.NonNull String adNetwork) {
             this.adNetwork = adNetwork;
             return this;
         }
 
-        public Builder setBackupAdNetwork(String backupAdNetwork) {
+        @androidx.annotation.Nullable
+        public Builder setBackupAdNetwork(@androidx.annotation.Nullable String backupAdNetwork) {
             this.backupAdNetwork = backupAdNetwork;
             return this;
         }
 
-        public Builder setAdMobBannerId(String adMobBannerId) {
+        @androidx.annotation.NonNull
+        public Builder setAdMobBannerId(@androidx.annotation.NonNull String adMobBannerId) {
             this.adMobBannerId = adMobBannerId;
             return this;
         }
 
-        public Builder setFanBannerId(String fanBannerId) {
+        @androidx.annotation.NonNull
+        public Builder setFanBannerId(@androidx.annotation.NonNull String fanBannerId) {
             this.fanBannerId = fanBannerId;
             return this;
         }
 
-        public Builder setUnityBannerId(String unityBannerId) {
+        @androidx.annotation.NonNull
+        public Builder setUnityBannerId(@androidx.annotation.NonNull String unityBannerId) {
             this.unityBannerId = unityBannerId;
             return this;
         }
 
-        public Builder setAppLovinBannerId(String appLovinBannerId) {
+        @androidx.annotation.NonNull
+        public Builder setAppLovinBannerId(@androidx.annotation.NonNull String appLovinBannerId) {
             this.appLovinBannerId = appLovinBannerId;
             return this;
         }
 
-        public Builder setAppLovinBannerZoneId(String appLovinBannerZoneId) {
+        @androidx.annotation.NonNull
+        public Builder setAppLovinBannerZoneId(@androidx.annotation.NonNull String appLovinBannerZoneId) {
             this.appLovinBannerZoneId = appLovinBannerZoneId;
             return this;
         }
 
-        public Builder setIronSourceBannerId(String ironSourceBannerId) {
+        @androidx.annotation.NonNull
+        public Builder setIronSourceBannerId(@androidx.annotation.NonNull String ironSourceBannerId) {
             this.ironSourceBannerId = ironSourceBannerId;
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder setPlacementStatus(int placementStatus) {
             this.placementStatus = placementStatus;
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder setDarkTheme(boolean darkTheme) {
             this.darkTheme = darkTheme;
             return this;
         }
 
+        @androidx.annotation.NonNull
         public Builder setLegacyGDPR(boolean legacyGDPR) {
             this.legacyGDPR = legacyGDPR;
             return this;
@@ -173,8 +186,7 @@ public class MediumRectangleAd {
                             Log.d(TAG, adNetwork + " Banner Ad unit Id : " + adMobBannerId);
                             break;
 
-                        case FAN:
-                        case FACEBOOK:
+                        case META:
                             fanAdView = new com.facebook.ads.AdView(activity, fanBannerId, AdSize.RECTANGLE_HEIGHT_250);
                             RelativeLayout fanAdViewContainer = activity.findViewById(R.id.fan_banner_view_container);
                             fanAdViewContainer.addView(fanAdView);
@@ -271,8 +283,7 @@ public class MediumRectangleAd {
                             Log.d(TAG, adNetwork + " Banner Ad unit Id : " + adMobBannerId);
                             break;
 
-                        case FAN:
-                        case FACEBOOK:
+                        case META:
                             fanAdView = new com.facebook.ads.AdView(activity, fanBannerId, AdSize.RECTANGLE_HEIGHT_250);
                             RelativeLayout fanAdViewContainer = activity.findViewById(R.id.fan_banner_view_container);
                             fanAdViewContainer.addView(fanAdView);
@@ -337,3 +348,4 @@ public class MediumRectangleAd {
     }
 
 }
+

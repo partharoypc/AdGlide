@@ -21,10 +21,15 @@ import java.util.Date;
  */
 public class AppOpenAdAppLovin implements MaxAdListener {
 
-    private static final String LOG_TAG = "AppOpenAd";
+    private static final String TAG = "AdGlide";
     private MaxAppOpenAd appOpenAd;
     private boolean isLoadingAd = false;
     private boolean isShowingAd = false;
+
+    public boolean isShowingAd() {
+        return isShowingAd;
+    }
+
     private long loadTime = 0;
     private OnShowAdCompleteListener onShowAdCompleteListener;
 
@@ -61,43 +66,43 @@ public class AppOpenAdAppLovin implements MaxAdListener {
         this.onShowAdCompleteListener = onShowAdCompleteListener;
 
         if (isShowingAd) {
-            Log.d(LOG_TAG, "The app open ad is already showing.");
+            Log.d(TAG, "The app open ad is already showing.");
             return;
         }
 
         if (!isAdAvailable()) {
-            Log.d(LOG_TAG, "The app open ad is not ready yet.");
+            Log.d(TAG, "The app open ad is not ready yet.");
             onShowAdCompleteListener.onShowAdComplete();
             loadAd(activity, appOpenAdUnitId);
             return;
         }
 
-        Log.d(LOG_TAG, "Will show ad.");
+        Log.d(TAG, "Will show ad.");
         appOpenAd.showAd();
     }
 
     @Override
     public void onAdLoaded(MaxAd ad) {
-        Log.d(LOG_TAG, "AppLovin App Open ad loaded.");
+        Log.d(TAG, "AppLovin App Open ad loaded.");
         loadTime = (new Date()).getTime();
         isLoadingAd = false;
     }
 
     @Override
     public void onAdLoadFailed(String adUnitId, MaxError error) {
-        Log.d(LOG_TAG, "AppLovin App Open ad failed to load: " + error.getMessage());
+        Log.d(TAG, "AppLovin App Open ad failed to load: " + error.getMessage());
         isLoadingAd = false;
     }
 
     @Override
     public void onAdDisplayed(MaxAd ad) {
-        Log.d(LOG_TAG, "AppLovin App Open ad displayed.");
+        Log.d(TAG, "AppLovin App Open ad displayed.");
         isShowingAd = true;
     }
 
     @Override
-    public void onAdNotDisplayed(MaxAd ad, MaxError error) {
-        Log.d(LOG_TAG, "AppLovin App Open ad failed to display: " + error.getMessage());
+    public void onAdDisplayFailed(MaxAd ad, MaxError error) {
+        Log.d(TAG, "AppLovin App Open ad failed to display: " + error.getMessage());
         isShowingAd = false;
         if (onShowAdCompleteListener != null) {
             onShowAdCompleteListener.onShowAdComplete();
@@ -106,7 +111,7 @@ public class AppOpenAdAppLovin implements MaxAdListener {
 
     @Override
     public void onAdHidden(MaxAd ad) {
-        Log.d(LOG_TAG, "AppLovin App Open ad hidden.");
+        Log.d(TAG, "AppLovin App Open ad hidden.");
         isShowingAd = false;
         if (onShowAdCompleteListener != null) {
             onShowAdCompleteListener.onShowAdComplete();
@@ -119,3 +124,4 @@ public class AppOpenAdAppLovin implements MaxAdListener {
     public void onAdClicked(MaxAd ad) {
     }
 }
+

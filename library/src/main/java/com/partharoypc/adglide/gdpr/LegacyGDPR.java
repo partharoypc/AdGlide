@@ -12,6 +12,7 @@ import java.net.URL;
  * Uses AdMob adapter bundles for consent signaling.
  */
 public class LegacyGDPR {
+    private static final String TAG = "AdGlide";
 
     private final Activity activity;
 
@@ -39,12 +40,15 @@ public class LegacyGDPR {
         private URL getUrlPrivacyPolicy(String privacyPolicyUrl) {
             URL mUrl = null;
             try {
-                mUrl = new URL(privacyPolicyUrl);
+                mUrl = java.net.URI.create(privacyPolicyUrl).toURL();
             } catch (MalformedURLException e) {
-                Log.e("GDPR", e.getMessage());
+                Log.e(TAG, e.getMessage());
+            } catch (IllegalArgumentException e) {
+                Log.e(TAG, "Invalid URI: " + e.getMessage());
             }
             return mUrl;
         }
     }
 
 }
+

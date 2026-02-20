@@ -8,3 +8,4 @@ public interface OnInterstitialAdDismissedListener {
     /** Called when the interstitial ad is closed. */
     void onInterstitialAdDismissed();
 }
+

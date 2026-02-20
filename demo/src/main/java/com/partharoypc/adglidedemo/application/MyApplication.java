@@ -4,7 +4,7 @@ import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
-import static com.partharoypc.adglide.util.Constant.GOOGLE_AD_MANAGER;
+// import static com.partharoypc.adglide.util.Constant.GOOGLE_AD_MANAGER;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import android.app.Activity;
@@ -21,7 +21,7 @@ import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.multidex.MultiDex;
 
 import com.partharoypc.adglide.format.AppOpenAdAppLovin;
-import com.partharoypc.adglide.format.AppOpenAdManager;
+// import com.partharoypc.adglide.format.AppOpenAdManager;
 import com.partharoypc.adglide.format.AppOpenAdMob;
 import com.partharoypc.adglide.format.AppOpenAdWortise;
 import com.partharoypc.adglide.util.OnShowAdCompleteListener;
@@ -31,7 +31,7 @@ import com.partharoypc.adglidedemo.data.Constant;
 public class MyApplication extends Application {
 
     private AppOpenAdMob appOpenAdMob;
-    private AppOpenAdManager appOpenAdManager;
+    // private AppOpenAdManager appOpenAdManager;
     private AppOpenAdAppLovin appOpenAdAppLovin;
     private AppOpenAdWortise appOpenAdWortise;
     Activity currentActivity;
@@ -43,7 +43,7 @@ public class MyApplication extends Application {
             registerActivityLifecycleCallbacks(activityLifecycleCallbacks);
             ProcessLifecycleOwner.get().getLifecycle().addObserver(lifecycleObserver);
             appOpenAdMob = new AppOpenAdMob();
-            appOpenAdManager = new AppOpenAdManager();
+            // appOpenAdManager = new AppOpenAdManager();
             appOpenAdAppLovin = new AppOpenAdAppLovin();
             appOpenAdWortise = new AppOpenAdWortise();
         }
@@ -70,14 +70,14 @@ public class MyApplication extends Application {
                                     }
                                 }
                                 break;
-                            case GOOGLE_AD_MANAGER:
+/*                             case GOOGLE_AD_MANAGER:
                                 if (!Constant.GOOGLE_AD_MANAGER_APP_OPEN_AD_ID.equals("0")) {
                                     if (!currentActivity.getIntent().hasExtra("unique_id")) {
                                         appOpenAdManager.showAdIfAvailable(currentActivity,
                                                 Constant.GOOGLE_AD_MANAGER_APP_OPEN_AD_ID);
                                     }
                                 }
-                                break;
+                                break; */
                             case APPLOVIN:
                             case APPLOVIN_MAX:
                                 if (!Constant.APPLOVIN_APP_OPEN_AP_ID.equals("0")) {
@@ -120,13 +120,13 @@ public class MyApplication extends Application {
                                 }
                             }
                             break;
-                        case GOOGLE_AD_MANAGER:
+/*                         case GOOGLE_AD_MANAGER:
                             if (!Constant.GOOGLE_AD_MANAGER_APP_OPEN_AD_ID.equals("0")) {
                                 if (!appOpenAdManager.isShowingAd()) {
                                     currentActivity = activity;
                                 }
                             }
-                            break;
+                            break; */
                         case APPLOVIN:
                         case APPLOVIN_MAX:
                             if (!Constant.APPLOVIN_APP_OPEN_AP_ID.equals("0")) {
@@ -180,13 +180,13 @@ public class MyApplication extends Application {
                             Constant.isAppOpen = true;
                         }
                         break;
-                    case GOOGLE_AD_MANAGER:
+/*                     case GOOGLE_AD_MANAGER:
                         if (!Constant.GOOGLE_AD_MANAGER_APP_OPEN_AD_ID.equals("0")) {
                             appOpenAdManager.showAdIfAvailable(activity, Constant.GOOGLE_AD_MANAGER_APP_OPEN_AD_ID,
                                     onShowAdCompleteListener);
                             Constant.isAppOpen = true;
                         }
-                        break;
+                        break; */
                     case APPLOVIN:
                     case APPLOVIN_MAX:
                         if (!Constant.APPLOVIN_APP_OPEN_AP_ID.equals("0")) {
