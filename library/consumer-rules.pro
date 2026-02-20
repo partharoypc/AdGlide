@@ -4,11 +4,11 @@
 # ============================================================================
 
 # --- SDK Public API ---
--keep public class com.partharoypc.matrixads.format.** { public *; }
--keep public class com.partharoypc.matrixads.gdpr.** { public *; }
--keep public class com.partharoypc.matrixads.helper.** { public *; }
--keep public class com.partharoypc.matrixads.ui.** { public *; }
--keep public class com.partharoypc.matrixads.util.** { public *; }
+-keep public class com.partharoypc.adglide.format.** { public *; }
+-keep public class com.partharoypc.adglide.gdpr.** { public *; }
+-keep public class com.partharoypc.adglide.helper.** { public *; }
+-keep public class com.partharoypc.adglide.ui.** { public *; }
+-keep public class com.partharoypc.adglide.util.** { public *; }
 
 # --- Google Mobile Ads / AdMob ---
 -keep class com.google.android.gms.ads.** { *; }
@@ -21,4 +21,4 @@
 -keep class com.google.android.ump.** { *; }
 
 # --- Prevent stripping of ad callback interfaces ---
--keep interface com.partharoypc.matrixads.util.On*Listener { *; }
+-keep interface com.partharoypc.adglide.util.On*Listener { *; }

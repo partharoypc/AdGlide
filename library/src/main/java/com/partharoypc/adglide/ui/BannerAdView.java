@@ -43,8 +43,11 @@ public class BannerAdView extends LinearLayout {
     }
 
     private void initView() {
-        inflate(mContext, R.layout.view_banner_ad, this);
+        inflate(mContext, R.layout.adglide_view_banner_ad, this);
     }
 
 }
+
+
+
 

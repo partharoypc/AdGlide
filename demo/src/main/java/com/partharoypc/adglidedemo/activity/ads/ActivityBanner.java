@@ -56,7 +56,7 @@ public class ActivityBanner extends AppCompatActivity {
 
         // INFLATE THE LIBRARY LAYOUT HERE
         bannerContainer.removeAllViews();
-        bannerAdView = (LinearLayout) View.inflate(this, com.partharoypc.adglide.R.layout.view_banner_ad, null);
+        bannerAdView = (LinearLayout) View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_banner_ad, null);
         bannerContainer.addView(bannerAdView);
 
         bannerAd = new BannerAd.Builder(this)
@@ -65,11 +65,11 @@ public class ActivityBanner extends AppCompatActivity {
                 .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
                 .setAdMobBannerId(Constant.ADMOB_BANNER_ID)
 //                 .setGoogleAdManagerBannerId(Constant.GOOGLE_AD_MANAGER_BANNER_ID)
-                .setFanBannerId(Constant.FAN_BANNER_ID)
+                .setMetaBannerId(Constant.META_BANNER_ID)
                 .setUnityBannerId(Constant.UNITY_BANNER_ID)
                 .setAppLovinBannerId(Constant.APPLOVIN_BANNER_ID)
                 .setAppLovinBannerZoneId(Constant.APPLOVIN_BANNER_ZONE_ID)
-                .setIronSourceBannerId(Constant.IRONSOURCE_BANNER_ID)
+                .setironSourceBannerId(Constant.IRONSOURCE_BANNER_ID)
                 .setWortiseBannerId(Constant.WORTISE_BANNER_ID)
                 .setDarkTheme(sharedPref.getIsDarkTheme())
                 .setIsCollapsibleBanner(switchCollapsible.isChecked())

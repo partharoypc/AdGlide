@@ -12,9 +12,9 @@ import static com.partharoypc.adglide.util.Constant.APPLOVIN_DISCOVERY;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.META;
-import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_ADMOB;
-import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_APPLOVIN_MAX;
-import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_IRONSOURCE;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_IRONSOURCE;
 import static com.partharoypc.adglide.util.Constant.IRONSOURCE;
 import static com.partharoypc.adglide.util.Constant.NONE;
 import static com.partharoypc.adglide.util.Constant.STARTAPP;
@@ -60,7 +60,7 @@ public class InterstitialAd {
     private static final String TAG = "AdGlide";
         private final Activity activity;
         private com.google.android.gms.ads.interstitial.InterstitialAd adMobInterstitialAd;
-        private com.facebook.ads.InterstitialAd fanInterstitialAd;
+        private com.facebook.ads.InterstitialAd metaInterstitialAd;
         private MaxInterstitialAd appLovinMaxInterstitialAd;
         private com.applovin.adview.AppLovinInterstitialAd appLovinDiscoveryInterstitialAd;
         private StartAppAd startAppInterstitialAd;
@@ -73,7 +73,7 @@ public class InterstitialAd {
         private String backupAdNetwork = "";
         private WaterfallManager waterfallManager;
         private String adMobInterstitialId = "";
-        private String fanInterstitialId = "";
+        private String metaInterstitialId = "";
         private String unityInterstitialId = "";
         private String appLovinInterstitialId = "";
         private String appLovinInterstitialZoneId = "";
@@ -179,13 +179,13 @@ public class InterstitialAd {
         }
 
         /**
-         * Sets the FanInterstitial Ad Unit ID.
-         * @param fanInterstitialId The placement ID.
+         * Sets the MetaInterstitial Ad Unit ID.
+         * @param metaInterstitialId The placement ID.
          * @return The configured Builder instance.
          */
         @NonNull
-        public Builder setFanInterstitialId(@NonNull String fanInterstitialId) {
-            this.fanInterstitialId = fanInterstitialId;
+        public Builder setMetaInterstitialId(@NonNull String metaInterstitialId) {
+            this.metaInterstitialId = metaInterstitialId;
             return this;
         }
 
@@ -223,12 +223,12 @@ public class InterstitialAd {
         }
 
         /**
-         * Sets the IronSourceInterstitial Ad Unit ID.
+         * Sets the ironSourceInterstitial Ad Unit ID.
          * @param ironSourceInterstitialId The placement ID.
          * @return The configured Builder instance.
          */
         @NonNull
-        public Builder setIronSourceInterstitialId(@NonNull String ironSourceInterstitialId) {
+        public Builder setironSourceInterstitialId(@NonNull String ironSourceInterstitialId) {
             this.ironSourceInterstitialId = ironSourceInterstitialId;
             return this;
         }
@@ -285,7 +285,7 @@ public class InterstitialAd {
                     }
                     switch (adNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB: {
+                        case META_BIDDING_ADMOB: {
                             Object cachedAdMob = AdRepository.getInstance().getInterstitial(adNetwork,
                                     adMobInterstitialId);
                             if (cachedAdMob instanceof com.google.android.gms.ads.interstitial.InterstitialAd) {
@@ -317,7 +317,7 @@ public class InterstitialAd {
                         }
 
                         case META: {
-                            fanInterstitialAd = new com.facebook.ads.InterstitialAd(activity, fanInterstitialId);
+                            metaInterstitialAd = new com.facebook.ads.InterstitialAd(activity, metaInterstitialId);
                             com.facebook.ads.InterstitialAdListener adListener = new InterstitialAdListener() {
                                 @Override
                                 public void onInterstitialDisplayed(com.facebook.ads.Ad ad) {
@@ -325,7 +325,7 @@ public class InterstitialAd {
 
                                 @Override
                                 public void onInterstitialDismissed(com.facebook.ads.Ad ad) {
-                                    fanInterstitialAd.loadAd();
+                                    metaInterstitialAd.loadAd();
                                 }
 
                                 @Override
@@ -335,7 +335,7 @@ public class InterstitialAd {
 
                                 @Override
                                 public void onAdLoaded(com.facebook.ads.Ad ad) {
-                                    Log.d(TAG, "FAN Interstitial is loaded");
+                                    Log.d(TAG, "Meta Interstitial is loaded");
                                 }
 
                                 @Override
@@ -347,9 +347,9 @@ public class InterstitialAd {
                                 }
                             };
 
-                            com.facebook.ads.InterstitialAd.InterstitialLoadAdConfig loadAdConfig = fanInterstitialAd
+                            com.facebook.ads.InterstitialAd.InterstitialLoadAdConfig loadAdConfig = metaInterstitialAd
                                     .buildLoadAdConfig().withAdListener(adListener).build();
-                            fanInterstitialAd.loadAd(loadAdConfig);
+                            metaInterstitialAd.loadAd(loadAdConfig);
                             break;
                         }
 
@@ -372,7 +372,7 @@ public class InterstitialAd {
 
                         case APPLOVIN:
                         case APPLOVIN_MAX:
-                        case FAN_BIDDING_APPLOVIN_MAX: {
+                        case META_BIDDING_APPLOVIN_MAX: {
                             appLovinMaxInterstitialAd = new MaxInterstitialAd(appLovinInterstitialId, activity);
                             appLovinMaxInterstitialAd.setListener(new MaxAdListener() {
                                 @Override
@@ -412,18 +412,18 @@ public class InterstitialAd {
                         }
 
                         case IRONSOURCE:
-                        case FAN_BIDDING_IRONSOURCE: {
+                        case META_BIDDING_IRONSOURCE: {
                             IronSource.setLevelPlayInterstitialListener(new LevelPlayInterstitialListener() {
                                 @Override
                                 public void onAdReady(
                                         com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                    Log.d(TAG, "IronSource Interstitial Ad loaded");
+                                    Log.d(TAG, "ironSource Interstitial Ad loaded");
                                 }
 
                                 @Override
                                 public void onAdLoadFailed(IronSourceError ironSourceError) {
                                     loadBackupInterstitialAd();
-                                    Log.d(TAG, "IronSource Interstitial Ad failed to load: "
+                                    Log.d(TAG, "ironSource Interstitial Ad failed to load: "
                                             + ironSourceError.getErrorMessage());
                                 }
 
@@ -559,7 +559,7 @@ public class InterstitialAd {
 
                     switch (backupAdNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB: {
+                        case META_BIDDING_ADMOB: {
                             Object cachedAdMob = AdRepository.getInstance().getInterstitial(backupAdNetwork,
                                     adMobInterstitialId);
                             if (cachedAdMob instanceof com.google.android.gms.ads.interstitial.InterstitialAd) {
@@ -591,18 +591,18 @@ public class InterstitialAd {
                         }
 
                         case META: {
-                            Object cachedFan = AdRepository.getInstance().getInterstitial(backupAdNetwork,
-                                    fanInterstitialId);
-                            if (cachedFan instanceof com.facebook.ads.InterstitialAd) {
-                                fanInterstitialAd = (com.facebook.ads.InterstitialAd) cachedFan;
-                                setupFanCallback();
-                                Log.d(TAG, "FAN Backup Interstitial loaded from cache");
+                            Object cachedMeta = AdRepository.getInstance().getInterstitial(backupAdNetwork,
+                                    metaInterstitialId);
+                            if (cachedMeta instanceof com.facebook.ads.InterstitialAd) {
+                                metaInterstitialAd = (com.facebook.ads.InterstitialAd) cachedMeta;
+                                setupMetaCallback();
+                                Log.d(TAG, "Meta Backup Interstitial loaded from cache");
                             } else {
-                                fanInterstitialAd = new com.facebook.ads.InterstitialAd(activity, fanInterstitialId);
-                                setupFanCallback();
-                                com.facebook.ads.InterstitialAd.InterstitialLoadAdConfig loadAdConfig = fanInterstitialAd
-                                        .buildLoadAdConfig().withAdListener(fanAdListener).build();
-                                fanInterstitialAd.loadAd(loadAdConfig);
+                                metaInterstitialAd = new com.facebook.ads.InterstitialAd(activity, metaInterstitialId);
+                                setupMetaCallback();
+                                com.facebook.ads.InterstitialAd.InterstitialLoadAdConfig loadAdConfig = metaInterstitialAd
+                                        .buildLoadAdConfig().withAdListener(metaAdListener).build();
+                                metaInterstitialAd.loadAd(loadAdConfig);
                             }
                             break;
                         }
@@ -626,7 +626,7 @@ public class InterstitialAd {
 
                         case APPLOVIN:
                         case APPLOVIN_MAX:
-                        case FAN_BIDDING_APPLOVIN_MAX: {
+                        case META_BIDDING_APPLOVIN_MAX: {
                             appLovinMaxInterstitialAd = new MaxInterstitialAd(appLovinInterstitialId, activity);
                             appLovinMaxInterstitialAd.setListener(new MaxAdListener() {
                                 @Override
@@ -666,18 +666,18 @@ public class InterstitialAd {
                         }
 
                         case IRONSOURCE:
-                        case FAN_BIDDING_IRONSOURCE: {
+                        case META_BIDDING_IRONSOURCE: {
                             IronSource.setLevelPlayInterstitialListener(new LevelPlayInterstitialListener() {
                                 @Override
                                 public void onAdReady(
                                         com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                    Log.d(TAG, "IronSource Interstitial Ad loaded");
+                                    Log.d(TAG, "ironSource Interstitial Ad loaded");
                                 }
 
                                 @Override
                                 public void onAdLoadFailed(IronSourceError ironSourceError) {
                                     loadBackupInterstitialAd();
-                                    Log.d(TAG, "IronSource Interstitial Ad failed to load: "
+                                    Log.d(TAG, "ironSource Interstitial Ad failed to load: "
                                             + ironSourceError.getErrorMessage());
                                 }
 
@@ -800,7 +800,7 @@ public class InterstitialAd {
                     if (counter == interval) {
                         switch (adNetwork) {
                             case ADMOB:
-                            case FAN_BIDDING_ADMOB: {
+                            case META_BIDDING_ADMOB: {
                                 if (adMobInterstitialAd != null) {
                                     adMobInterstitialAd.show(activity);
                                     Log.d(TAG, "admob interstitial not null");
@@ -812,12 +812,12 @@ public class InterstitialAd {
                             }
 
                             case META: {
-                                if (fanInterstitialAd != null && fanInterstitialAd.isAdLoaded()) {
-                                    fanInterstitialAd.show();
-                                    Log.d(TAG, "fan interstitial not null");
+                                if (metaInterstitialAd != null && metaInterstitialAd.isAdLoaded()) {
+                                    metaInterstitialAd.show();
+                                    Log.d(TAG, "meta interstitial not null");
                                 } else {
                                     showBackupInterstitialAd();
-                                    Log.d(TAG, "fan interstitial null");
+                                    Log.d(TAG, "meta interstitial null");
                                 }
                                 break;
                             }
@@ -853,7 +853,7 @@ public class InterstitialAd {
 
                             case APPLOVIN:
                             case APPLOVIN_MAX:
-                            case FAN_BIDDING_APPLOVIN_MAX: {
+                            case META_BIDDING_APPLOVIN_MAX: {
                                 if (appLovinMaxInterstitialAd != null && appLovinMaxInterstitialAd.isReady()) {
                                     appLovinMaxInterstitialAd.showAd();
                                 } else {
@@ -867,7 +867,7 @@ public class InterstitialAd {
                             }
 
                             case IRONSOURCE:
-                            case FAN_BIDDING_IRONSOURCE: {
+                            case META_BIDDING_IRONSOURCE: {
                                 if (IronSource.isInterstitialReady()) {
                                     IronSource.showInterstitial();
                                 } else {
@@ -914,7 +914,7 @@ public class InterstitialAd {
                     Log.d(TAG, "Show Backup Interstitial Ad [" + backupAdNetwork.toUpperCase() + "]");
                     switch (backupAdNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB: {
+                        case META_BIDDING_ADMOB: {
                             if (adMobInterstitialAd != null) {
                                 adMobInterstitialAd.show(activity);
                             }
@@ -922,8 +922,8 @@ public class InterstitialAd {
                         }
 
                         case META: {
-                            if (fanInterstitialAd != null && fanInterstitialAd.isAdLoaded()) {
-                                fanInterstitialAd.show();
+                            if (metaInterstitialAd != null && metaInterstitialAd.isAdLoaded()) {
+                                metaInterstitialAd.show();
                             }
                             break;
                         }
@@ -937,7 +937,7 @@ public class InterstitialAd {
 
                         case APPLOVIN:
                         case APPLOVIN_MAX:
-                        case FAN_BIDDING_APPLOVIN_MAX: {
+                        case META_BIDDING_APPLOVIN_MAX: {
                             if (appLovinMaxInterstitialAd != null && appLovinMaxInterstitialAd.isReady()) {
                                 appLovinMaxInterstitialAd.showAd();
                             }
@@ -949,7 +949,7 @@ public class InterstitialAd {
                         }
 
                         case IRONSOURCE:
-                        case FAN_BIDDING_IRONSOURCE: {
+                        case META_BIDDING_IRONSOURCE: {
                             if (IronSource.isInterstitialReady()) {
                                 IronSource.showInterstitial();
                             }
@@ -987,7 +987,7 @@ public class InterstitialAd {
                     }
                     switch (adNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB: {
+                        case META_BIDDING_ADMOB: {
                             com.google.android.gms.ads.interstitial.InterstitialAd.load(activity, adMobInterstitialId,
                                     Tools.getAdRequest(activity, legacyGDPR), new InterstitialAdLoadCallback() {
                                         @Override
@@ -1030,7 +1030,7 @@ public class InterstitialAd {
                         }
 
                         case META: {
-                            fanInterstitialAd = new com.facebook.ads.InterstitialAd(activity, fanInterstitialId);
+                            metaInterstitialAd = new com.facebook.ads.InterstitialAd(activity, metaInterstitialId);
                             com.facebook.ads.InterstitialAdListener adListener = new InterstitialAdListener() {
                                 @Override
                                 public void onInterstitialDisplayed(com.facebook.ads.Ad ad) {
@@ -1038,7 +1038,7 @@ public class InterstitialAd {
 
                                 @Override
                                 public void onInterstitialDismissed(com.facebook.ads.Ad ad) {
-                                    fanInterstitialAd.loadAd();
+                                    metaInterstitialAd.loadAd();
                                     onInterstitialAdDismissedListener.onInterstitialAdDismissed();
                                 }
 
@@ -1049,7 +1049,7 @@ public class InterstitialAd {
 
                                 @Override
                                 public void onAdLoaded(com.facebook.ads.Ad ad) {
-                                    Log.d(TAG, "FAN Interstitial is loaded");
+                                    Log.d(TAG, "Meta Interstitial is loaded");
                                 }
 
                                 @Override
@@ -1061,9 +1061,9 @@ public class InterstitialAd {
                                 }
                             };
 
-                            com.facebook.ads.InterstitialAd.InterstitialLoadAdConfig loadAdConfig = fanInterstitialAd
+                            com.facebook.ads.InterstitialAd.InterstitialLoadAdConfig loadAdConfig = metaInterstitialAd
                                     .buildLoadAdConfig().withAdListener(adListener).build();
-                            fanInterstitialAd.loadAd(loadAdConfig);
+                            metaInterstitialAd.loadAd(loadAdConfig);
                             break;
                         }
 
@@ -1086,7 +1086,7 @@ public class InterstitialAd {
 
                         case APPLOVIN:
                         case APPLOVIN_MAX:
-                        case FAN_BIDDING_APPLOVIN_MAX: {
+                        case META_BIDDING_APPLOVIN_MAX: {
                             appLovinMaxInterstitialAd = new MaxInterstitialAd(appLovinInterstitialId, activity);
                             appLovinMaxInterstitialAd.setListener(new MaxAdListener() {
                                 @Override
@@ -1127,18 +1127,18 @@ public class InterstitialAd {
                         }
 
                         case IRONSOURCE:
-                        case FAN_BIDDING_IRONSOURCE: {
+                        case META_BIDDING_IRONSOURCE: {
                             IronSource.setLevelPlayInterstitialListener(new LevelPlayInterstitialListener() {
                                 @Override
                                 public void onAdReady(
                                         com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                    Log.d(TAG, "IronSource Interstitial Ad loaded");
+                                    Log.d(TAG, "ironSource Interstitial Ad loaded");
                                 }
 
                                 @Override
                                 public void onAdLoadFailed(IronSourceError ironSourceError) {
                                     loadBackupInterstitialAd(onInterstitialAdDismissedListener);
-                                    Log.d(TAG, "IronSource Interstitial Ad failed to load: "
+                                    Log.d(TAG, "ironSource Interstitial Ad failed to load: "
                                             + ironSourceError.getErrorMessage());
                                 }
 
@@ -1277,7 +1277,7 @@ public class InterstitialAd {
 
                     switch (backupAdNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB: {
+                        case META_BIDDING_ADMOB: {
                             com.google.android.gms.ads.interstitial.InterstitialAd.load(activity, adMobInterstitialId,
                                     Tools.getAdRequest(activity, legacyGDPR), new InterstitialAdLoadCallback() {
                                         @Override
@@ -1320,17 +1320,17 @@ public class InterstitialAd {
                         }
 
                         case META: {
-                            Object cachedFan = AdRepository.getInstance().getInterstitial(adNetwork, fanInterstitialId);
-                            if (cachedFan instanceof com.facebook.ads.InterstitialAd) {
-                                fanInterstitialAd = (com.facebook.ads.InterstitialAd) cachedFan;
-                                setupFanCallback();
-                                Log.d(TAG, "FAN Interstitial loaded from cache");
+                            Object cachedMeta = AdRepository.getInstance().getInterstitial(adNetwork, metaInterstitialId);
+                            if (cachedMeta instanceof com.facebook.ads.InterstitialAd) {
+                                metaInterstitialAd = (com.facebook.ads.InterstitialAd) cachedMeta;
+                                setupMetaCallback();
+                                Log.d(TAG, "Meta Interstitial loaded from cache");
                             } else {
-                                fanInterstitialAd = new com.facebook.ads.InterstitialAd(activity, fanInterstitialId);
-                                setupFanCallback();
-                                com.facebook.ads.InterstitialAd.InterstitialLoadAdConfig loadAdConfig = fanInterstitialAd
-                                        .buildLoadAdConfig().withAdListener(fanAdListener).build();
-                                fanInterstitialAd.loadAd(loadAdConfig);
+                                metaInterstitialAd = new com.facebook.ads.InterstitialAd(activity, metaInterstitialId);
+                                setupMetaCallback();
+                                com.facebook.ads.InterstitialAd.InterstitialLoadAdConfig loadAdConfig = metaInterstitialAd
+                                        .buildLoadAdConfig().withAdListener(metaAdListener).build();
+                                metaInterstitialAd.loadAd(loadAdConfig);
                             }
                             break;
                         }
@@ -1354,7 +1354,7 @@ public class InterstitialAd {
 
                         case APPLOVIN:
                         case APPLOVIN_MAX:
-                        case FAN_BIDDING_APPLOVIN_MAX: {
+                        case META_BIDDING_APPLOVIN_MAX: {
                             appLovinMaxInterstitialAd = new MaxInterstitialAd(appLovinInterstitialId, activity);
                             appLovinMaxInterstitialAd.setListener(new MaxAdListener() {
                                 @Override
@@ -1396,18 +1396,18 @@ public class InterstitialAd {
                         }
 
                         case IRONSOURCE:
-                        case FAN_BIDDING_IRONSOURCE: {
+                        case META_BIDDING_IRONSOURCE: {
                             IronSource.setLevelPlayInterstitialListener(new LevelPlayInterstitialListener() {
                                 @Override
                                 public void onAdReady(
                                         com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                    Log.d(TAG, "IronSource Interstitial Ad loaded");
+                                    Log.d(TAG, "ironSource Interstitial Ad loaded");
                                 }
 
                                 @Override
                                 public void onAdLoadFailed(IronSourceError ironSourceError) {
                                     loadBackupInterstitialAd(onInterstitialAdDismissedListener);
-                                    Log.d(TAG, "IronSource Interstitial Ad failed to load: "
+                                    Log.d(TAG, "ironSource Interstitial Ad failed to load: "
                                             + ironSourceError.getErrorMessage());
                                 }
 
@@ -1532,7 +1532,7 @@ public class InterstitialAd {
                     if (counter == interval) {
                         switch (adNetwork) {
                             case ADMOB:
-                            case FAN_BIDDING_ADMOB: {
+                            case META_BIDDING_ADMOB: {
                                 if (adMobInterstitialAd != null) {
                                     adMobInterstitialAd.show(activity);
                                     onInterstitialAdShowedListener.onInterstitialAdShowed();
@@ -1546,14 +1546,14 @@ public class InterstitialAd {
                             }
 
                             case META: {
-                                if (fanInterstitialAd != null && fanInterstitialAd.isAdLoaded()) {
-                                    fanInterstitialAd.show();
+                                if (metaInterstitialAd != null && metaInterstitialAd.isAdLoaded()) {
+                                    metaInterstitialAd.show();
                                     onInterstitialAdShowedListener.onInterstitialAdShowed();
-                                    Log.d(TAG, "fan interstitial not null");
+                                    Log.d(TAG, "meta interstitial not null");
                                 } else {
                                     showBackupInterstitialAd(onInterstitialAdShowedListener,
                                             onInterstitialAdDismissedListener);
-                                    Log.d(TAG, "fan interstitial null");
+                                    Log.d(TAG, "meta interstitial null");
                                 }
                                 break;
                             }
@@ -1591,7 +1591,7 @@ public class InterstitialAd {
 
                             case APPLOVIN:
                             case APPLOVIN_MAX:
-                            case FAN_BIDDING_APPLOVIN_MAX: {
+                            case META_BIDDING_APPLOVIN_MAX: {
                                 if (appLovinMaxInterstitialAd != null && appLovinMaxInterstitialAd.isReady()) {
                                     appLovinMaxInterstitialAd.showAd();
                                     onInterstitialAdShowedListener.onInterstitialAdShowed();
@@ -1607,7 +1607,7 @@ public class InterstitialAd {
                             }
 
                             case IRONSOURCE:
-                            case FAN_BIDDING_IRONSOURCE: {
+                            case META_BIDDING_IRONSOURCE: {
                                 if (IronSource.isInterstitialReady()) {
                                     IronSource.showInterstitial();
                                     onInterstitialAdShowedListener.onInterstitialAdShowed();
@@ -1663,7 +1663,7 @@ public class InterstitialAd {
                     Log.d(TAG, "Show Backup Interstitial Ad [" + backupAdNetwork.toUpperCase() + "]");
                     switch (backupAdNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB: {
+                        case META_BIDDING_ADMOB: {
                             if (adMobInterstitialAd != null) {
                                 adMobInterstitialAd.show(activity);
                                 onInterstitialAdShowedListener.onInterstitialAdShowed();
@@ -1672,8 +1672,8 @@ public class InterstitialAd {
                         }
 
                         case META: {
-                            if (fanInterstitialAd != null && fanInterstitialAd.isAdLoaded()) {
-                                fanInterstitialAd.show();
+                            if (metaInterstitialAd != null && metaInterstitialAd.isAdLoaded()) {
+                                metaInterstitialAd.show();
                                 onInterstitialAdShowedListener.onInterstitialAdShowed();
                             }
                             break;
@@ -1708,7 +1708,7 @@ public class InterstitialAd {
 
                         case APPLOVIN:
                         case APPLOVIN_MAX:
-                        case FAN_BIDDING_APPLOVIN_MAX: {
+                        case META_BIDDING_APPLOVIN_MAX: {
                             if (appLovinMaxInterstitialAd != null && appLovinMaxInterstitialAd.isReady()) {
                                 appLovinMaxInterstitialAd.showAd();
                                 onInterstitialAdShowedListener.onInterstitialAdShowed();
@@ -1721,7 +1721,7 @@ public class InterstitialAd {
                         }
 
                         case IRONSOURCE:
-                        case FAN_BIDDING_IRONSOURCE: {
+                        case META_BIDDING_IRONSOURCE: {
                             if (IronSource.isInterstitialReady()) {
                                 IronSource.showInterstitial();
                                 onInterstitialAdShowedListener.onInterstitialAdShowed();
@@ -1759,9 +1759,9 @@ public class InterstitialAd {
             if (adMobInterstitialAd != null) {
                 adMobInterstitialAd = null;
             }
-            if (fanInterstitialAd != null) {
-                fanInterstitialAd.destroy();
-                fanInterstitialAd = null;
+            if (metaInterstitialAd != null) {
+                metaInterstitialAd.destroy();
+                metaInterstitialAd = null;
             }
             if (appLovinMaxInterstitialAd != null) {
                 appLovinMaxInterstitialAd.destroy();
@@ -1779,7 +1779,7 @@ public class InterstitialAd {
             }
         }
 
-        private com.facebook.ads.InterstitialAdListener fanAdListener;
+        private com.facebook.ads.InterstitialAdListener metaAdListener;
 
         private void setupAdMobCallback() {
             if (adMobInterstitialAd == null)
@@ -1803,15 +1803,15 @@ public class InterstitialAd {
             });
         }
 
-        private void setupFanCallback() {
-            fanAdListener = new InterstitialAdListener() {
+        private void setupMetaCallback() {
+            metaAdListener = new InterstitialAdListener() {
                 @Override
                 public void onInterstitialDisplayed(com.facebook.ads.Ad ad) {
                 }
 
                 @Override
                 public void onInterstitialDismissed(com.facebook.ads.Ad ad) {
-                    fanInterstitialAd.loadAd();
+                    metaInterstitialAd.loadAd();
                 }
 
                 @Override
@@ -1821,7 +1821,7 @@ public class InterstitialAd {
 
                 @Override
                 public void onAdLoaded(com.facebook.ads.Ad ad) {
-                    Log.d(TAG, "FAN Interstitial is loaded");
+                    Log.d(TAG, "Meta Interstitial is loaded");
                 }
 
                 @Override
@@ -1836,4 +1836,7 @@ public class InterstitialAd {
     }
 
 }
+
+
+
 

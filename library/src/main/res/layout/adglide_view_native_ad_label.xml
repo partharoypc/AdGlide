@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ad_notification_view"
+    android:layout_width="@dimen/adglide_ad_indicator_width"
+    android:layout_height="@dimen/adglide_ad_indicator_height"
+    android:background="@drawable/adglide_ad_icon"
+    android:gravity="center"
+    android:text="@string/adglide_txt_ad"
+    android:textColor="@color/adglide_white"
+    android:textSize="@dimen/adglide_ad_indicator_text_size"
+    android:textStyle="bold" />
+

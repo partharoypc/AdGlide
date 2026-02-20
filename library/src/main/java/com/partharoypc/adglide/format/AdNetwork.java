@@ -9,9 +9,9 @@ import static com.partharoypc.adglide.util.Constant.APPLOVIN_DISCOVERY;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.META;
-import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_ADMOB;
-import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_APPLOVIN_MAX;
-import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_IRONSOURCE;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_IRONSOURCE;
 import static com.partharoypc.adglide.util.Constant.NONE;
 import static com.partharoypc.adglide.util.Constant.STARTAPP;
 import static com.partharoypc.adglide.util.Constant.UNITY;
@@ -119,7 +119,7 @@ public class AdNetwork {
             return this;
         }
 
-        public Initialize setIronSourceAppKey(String ironSourceAppKey) {
+        public Initialize setironSourceAppKey(String ironSourceAppKey) {
             this.ironSourceAppKey = ironSourceAppKey;
             return this;
         }
@@ -159,7 +159,7 @@ public class AdNetwork {
         private void initializeSdk(String network) {
             switch (network) {
                 case ADMOB:
-                case FAN_BIDDING_ADMOB:
+                case META_BIDDING_ADMOB:
                     MobileAds.initialize(activity, initializationStatus -> {
                         Map<String, AdapterStatus> statusMap = initializationStatus.getAdapterStatusMap();
                         for (String adapterClass : statusMap.keySet()) {
@@ -191,7 +191,7 @@ public class AdNetwork {
                     break;
                 case APPLOVIN:
                 case APPLOVIN_MAX:
-                case FAN_BIDDING_APPLOVIN_MAX:
+                case META_BIDDING_APPLOVIN_MAX:
                     AppLovinSdk.getInstance(activity).setMediationProvider(AppLovinMediationProvider.MAX);
                     AppLovinSdk.getInstance(activity).initializeSdk(config -> {
                     });
@@ -201,7 +201,7 @@ public class AdNetwork {
                     AppLovinSdk.initializeSdk(activity);
                     break;
                 case IRONSOURCE:
-                case FAN_BIDDING_IRONSOURCE:
+                case META_BIDDING_IRONSOURCE:
                     IronSource.init(activity, ironSourceAppKey, IronSource.AD_UNIT.REWARDED_VIDEO,
                             IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.BANNER);
                     AudienceNetworkInitializeHelper.initializeAd(activity, debug);
@@ -226,4 +226,7 @@ public class AdNetwork {
     }
 
 }
+
+
+
 

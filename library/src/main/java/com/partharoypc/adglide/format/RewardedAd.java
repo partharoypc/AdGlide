@@ -7,9 +7,9 @@ import static com.partharoypc.adglide.util.Constant.APPLOVIN_DISCOVERY;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.META;
-import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_ADMOB;
-import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_APPLOVIN_MAX;
-import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_IRONSOURCE;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_IRONSOURCE;
 import static com.partharoypc.adglide.util.Constant.IRONSOURCE;
 import static com.partharoypc.adglide.util.Constant.NONE;
 import static com.partharoypc.adglide.util.Constant.STARTAPP;
@@ -64,8 +64,8 @@ public class RewardedAd {
     private static final String TAG = "AdGlide";
         private final Activity activity;
         private com.google.android.gms.ads.rewarded.RewardedAd adMobRewardedAd;
-        private com.facebook.ads.RewardedVideoAd fanRewardedVideoAd;
-        private MaxRewardedAd applovinMaxRewardedAd;
+        private com.facebook.ads.RewardedVideoAd metaRewardedVideoAd;
+        private MaxRewardedAd appLovinMaxRewardedAd;
         private StartAppAd startAppRewardedAd;
         private com.wortise.ads.rewarded.RewardedAd wortiseRewardedAd;
 
@@ -74,9 +74,9 @@ public class RewardedAd {
         private String backupAdNetwork = "";
         private WaterfallManager waterfallManager;
         private String adMobRewardedId = "";
-        private String fanRewardedId = "";
+        private String metaRewardedId = "";
         private String unityRewardedId = "";
-        private String applovinMaxRewardedId = "";
+        private String appLovinMaxRewardedId = "";
         private String applovinDiscRewardedZoneId = "";
         private String ironSourceRewardedId = "";
         private String wortiseRewardedId = "";
@@ -188,13 +188,13 @@ public class RewardedAd {
         }
 
         /**
-         * Sets the FanRewarded Ad Unit ID.
-         * @param fanRewardedId The placement ID.
+         * Sets the MetaRewarded Ad Unit ID.
+         * @param metaRewardedId The placement ID.
          * @return The configured Builder instance.
          */
         @NonNull
-        public Builder setFanRewardedId(@NonNull String fanRewardedId) {
-            this.fanRewardedId = fanRewardedId;
+        public Builder setMetaRewardedId(@NonNull String metaRewardedId) {
+            this.metaRewardedId = metaRewardedId;
             return this;
         }
 
@@ -211,12 +211,12 @@ public class RewardedAd {
 
         /**
          * Sets the ApplovinMaxRewarded Ad Unit ID.
-         * @param applovinMaxRewardedId The placement ID.
+         * @param appLovinMaxRewardedId The placement ID.
          * @return The configured Builder instance.
          */
         @NonNull
-        public Builder setApplovinMaxRewardedId(@NonNull String applovinMaxRewardedId) {
-            this.applovinMaxRewardedId = applovinMaxRewardedId;
+        public Builder setApplovinMaxRewardedId(@NonNull String appLovinMaxRewardedId) {
+            this.appLovinMaxRewardedId = appLovinMaxRewardedId;
             return this;
         }
 
@@ -232,12 +232,12 @@ public class RewardedAd {
         }
 
         /**
-         * Sets the IronSourceRewarded Ad Unit ID.
+         * Sets the ironSourceRewarded Ad Unit ID.
          * @param ironSourceRewardedId The placement ID.
          * @return The configured Builder instance.
          */
         @NonNull
-        public Builder setIronSourceRewardedId(@NonNull String ironSourceRewardedId) {
+        public Builder setironSourceRewardedId(@NonNull String ironSourceRewardedId) {
             this.ironSourceRewardedId = ironSourceRewardedId;
             return this;
         }
@@ -283,7 +283,7 @@ public class RewardedAd {
                     }
                     switch (adNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB: {
+                        case META_BIDDING_ADMOB: {
                             com.google.android.gms.ads.rewarded.RewardedAd.load(activity, adMobRewardedId,
                                     Tools.getAdRequest(activity, legacyGDPR), new RewardedAdLoadCallback() {
                                         @Override
@@ -320,8 +320,8 @@ public class RewardedAd {
                         }
 
                         case META: {
-                            fanRewardedVideoAd = new com.facebook.ads.RewardedVideoAd(activity, fanRewardedId);
-                            fanRewardedVideoAd.loadAd(fanRewardedVideoAd.buildLoadAdConfig()
+                            metaRewardedVideoAd = new com.facebook.ads.RewardedVideoAd(activity, metaRewardedId);
+                            metaRewardedVideoAd.loadAd(metaRewardedVideoAd.buildLoadAdConfig()
                                     .withAdListener(new RewardedVideoAdListener() {
                                         @Override
                                         public void onRewardedVideoCompleted() {
@@ -337,12 +337,12 @@ public class RewardedAd {
                                         public void onError(Ad ad, AdError adError) {
                                             loadRewardedBackupAd(onComplete, onDismiss);
                                             Log.d(TAG,
-                                                    "[FAN] Failed to load rewarded ad: " + adError.getErrorMessage());
+                                                    "[Meta] Failed to load rewarded ad: " + adError.getErrorMessage());
                                         }
 
                                         @Override
                                         public void onAdLoaded(Ad ad) {
-                                            Log.d(TAG, "[FAN] Rewarded ad loaded");
+                                            Log.d(TAG, "[Meta] Rewarded ad loaded");
                                         }
 
                                         @Override
@@ -375,9 +375,9 @@ public class RewardedAd {
 
                         case APPLOVIN:
                         case APPLOVIN_MAX:
-                        case FAN_BIDDING_APPLOVIN_MAX: {
-                            applovinMaxRewardedAd = MaxRewardedAd.getInstance(applovinMaxRewardedId, activity);
-                            applovinMaxRewardedAd.setListener(new MaxRewardedAdListener() {
+                        case META_BIDDING_APPLOVIN_MAX: {
+                            appLovinMaxRewardedAd = MaxRewardedAd.getInstance(appLovinMaxRewardedId, activity);
+                            appLovinMaxRewardedAd.setListener(new MaxRewardedAdListener() {
                                 @Override
                                 public void onUserRewarded(MaxAd ad, MaxReward reward) {
                                     onComplete.onRewardedAdComplete();
@@ -412,7 +412,7 @@ public class RewardedAd {
                                 public void onAdDisplayFailed(MaxAd ad, com.applovin.mediation.MaxError error) {
                                 }
                             });
-                            applovinMaxRewardedAd.loadAd();
+                            appLovinMaxRewardedAd.loadAd();
                             break;
                         }
 
@@ -434,7 +434,7 @@ public class RewardedAd {
                         }
 
                         case IRONSOURCE:
-                        case FAN_BIDDING_IRONSOURCE: {
+                        case META_BIDDING_IRONSOURCE: {
                             IronSource.setLevelPlayRewardedVideoListener(new LevelPlayRewardedVideoListener() {
                                 @Override
                                 public void onAdOpened(AdInfo adInfo) {
@@ -553,7 +553,7 @@ public class RewardedAd {
 
                     switch (backupAdNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB: {
+                        case META_BIDDING_ADMOB: {
                             com.google.android.gms.ads.rewarded.RewardedAd.load(activity, adMobRewardedId,
                                     Tools.getAdRequest(activity, legacyGDPR), new RewardedAdLoadCallback() {
                                         @Override
@@ -589,8 +589,8 @@ public class RewardedAd {
                         }
 
                         case META: {
-                            fanRewardedVideoAd = new com.facebook.ads.RewardedVideoAd(activity, fanRewardedId);
-                            fanRewardedVideoAd.loadAd(fanRewardedVideoAd.buildLoadAdConfig()
+                            metaRewardedVideoAd = new com.facebook.ads.RewardedVideoAd(activity, metaRewardedId);
+                            metaRewardedVideoAd.loadAd(metaRewardedVideoAd.buildLoadAdConfig()
                                     .withAdListener(new RewardedVideoAdListener() {
                                         @Override
                                         public void onRewardedVideoCompleted() {
@@ -605,12 +605,12 @@ public class RewardedAd {
                                         @Override
                                         public void onError(Ad ad, AdError adError) {
                                             loadRewardedBackupAd(onComplete, onDismiss);
-                                            Log.d(TAG, "[FAN] [backup] Failed to load rewarded ad");
+                                            Log.d(TAG, "[Meta] [backup] Failed to load rewarded ad");
                                         }
 
                                         @Override
                                         public void onAdLoaded(Ad ad) {
-                                            Log.d(TAG, "[FAN] [backup] Rewarded ad loaded");
+                                            Log.d(TAG, "[Meta] [backup] Rewarded ad loaded");
                                         }
 
                                         @Override
@@ -643,9 +643,9 @@ public class RewardedAd {
 
                         case APPLOVIN:
                         case APPLOVIN_MAX:
-                        case FAN_BIDDING_APPLOVIN_MAX: {
-                            applovinMaxRewardedAd = MaxRewardedAd.getInstance(applovinMaxRewardedId, activity);
-                            applovinMaxRewardedAd.setListener(new MaxRewardedAdListener() {
+                        case META_BIDDING_APPLOVIN_MAX: {
+                            appLovinMaxRewardedAd = MaxRewardedAd.getInstance(appLovinMaxRewardedId, activity);
+                            appLovinMaxRewardedAd.setListener(new MaxRewardedAdListener() {
                                 @Override
                                 public void onUserRewarded(MaxAd ad, MaxReward reward) {
                                     onComplete.onRewardedAdComplete();
@@ -680,7 +680,7 @@ public class RewardedAd {
                                 public void onAdDisplayFailed(MaxAd ad, com.applovin.mediation.MaxError error) {
                                 }
                             });
-                            applovinMaxRewardedAd.loadAd();
+                            appLovinMaxRewardedAd.loadAd();
                             break;
                         }
 
@@ -700,7 +700,7 @@ public class RewardedAd {
                 if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
                     switch (adNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB: {
+                        case META_BIDDING_ADMOB: {
                             if (adMobRewardedAd != null) {
                                 adMobRewardedAd.show(activity, rewardItem -> {
                                     onComplete.onRewardedAdComplete();
@@ -713,8 +713,8 @@ public class RewardedAd {
                         }
 
                         case META: {
-                            if (fanRewardedVideoAd != null && fanRewardedVideoAd.isAdLoaded()) {
-                                fanRewardedVideoAd.show();
+                            if (metaRewardedVideoAd != null && metaRewardedVideoAd.isAdLoaded()) {
+                                metaRewardedVideoAd.show();
                             } else {
                                 showRewardedBackupAd(onComplete, onDismiss, onError);
                             }
@@ -751,9 +751,9 @@ public class RewardedAd {
 
                         case APPLOVIN:
                         case APPLOVIN_MAX:
-                        case FAN_BIDDING_APPLOVIN_MAX: {
-                            if (applovinMaxRewardedAd != null && applovinMaxRewardedAd.isReady()) {
-                                applovinMaxRewardedAd.showAd();
+                        case META_BIDDING_APPLOVIN_MAX: {
+                            if (appLovinMaxRewardedAd != null && appLovinMaxRewardedAd.isReady()) {
+                                appLovinMaxRewardedAd.showAd();
                             } else {
                                 showRewardedBackupAd(onComplete, onDismiss, onError);
                             }
@@ -788,7 +788,7 @@ public class RewardedAd {
                         }
 
                         case IRONSOURCE:
-                        case FAN_BIDDING_IRONSOURCE: {
+                        case META_BIDDING_IRONSOURCE: {
                             if (IronSource.isRewardedVideoAvailable()) {
                                 IronSource.showRewardedVideo();
                             } else {
@@ -822,7 +822,7 @@ public class RewardedAd {
                     Log.d(TAG, "Show Backup Rewarded Ad [" + backupAdNetwork.toUpperCase() + "]");
                     switch (backupAdNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB: {
+                        case META_BIDDING_ADMOB: {
                             if (adMobRewardedAd != null) {
                                 adMobRewardedAd.show(activity, rewardItem -> {
                                     onComplete.onRewardedAdComplete();
@@ -832,8 +832,8 @@ public class RewardedAd {
                         }
 
                         case META: {
-                            if (fanRewardedVideoAd != null && fanRewardedVideoAd.isAdLoaded()) {
-                                fanRewardedVideoAd.show();
+                            if (metaRewardedVideoAd != null && metaRewardedVideoAd.isAdLoaded()) {
+                                metaRewardedVideoAd.show();
                             }
                             break;
                         }
@@ -845,9 +845,9 @@ public class RewardedAd {
 
                         case APPLOVIN:
                         case APPLOVIN_MAX:
-                        case FAN_BIDDING_APPLOVIN_MAX: {
-                            if (applovinMaxRewardedAd != null && applovinMaxRewardedAd.isReady()) {
-                                applovinMaxRewardedAd.showAd();
+                        case META_BIDDING_APPLOVIN_MAX: {
+                            if (appLovinMaxRewardedAd != null && appLovinMaxRewardedAd.isReady()) {
+                                appLovinMaxRewardedAd.showAd();
                             }
                             break;
                         }
@@ -884,7 +884,7 @@ public class RewardedAd {
                     }
                     switch (adNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB: {
+                        case META_BIDDING_ADMOB: {
                             com.google.android.gms.ads.rewarded.RewardedAd.load(activity, adMobRewardedId,
                                     Tools.getAdRequest(activity, legacyGDPR), new RewardedAdLoadCallback() {
                                         @Override
@@ -918,8 +918,8 @@ public class RewardedAd {
                         }
 
                         case META: {
-                            fanRewardedVideoAd = new com.facebook.ads.RewardedVideoAd(activity, fanRewardedId);
-                            fanRewardedVideoAd.loadAd(fanRewardedVideoAd.buildLoadAdConfig()
+                            metaRewardedVideoAd = new com.facebook.ads.RewardedVideoAd(activity, metaRewardedId);
+                            metaRewardedVideoAd.loadAd(metaRewardedVideoAd.buildLoadAdConfig()
                                     .withAdListener(new RewardedVideoAdListener() {
                                         @Override
                                         public void onRewardedVideoCompleted() {
@@ -970,9 +970,9 @@ public class RewardedAd {
 
                         case APPLOVIN:
                         case APPLOVIN_MAX:
-                        case FAN_BIDDING_APPLOVIN_MAX: {
-                            applovinMaxRewardedAd = MaxRewardedAd.getInstance(applovinMaxRewardedId, activity);
-                            applovinMaxRewardedAd.setListener(new MaxRewardedAdListener() {
+                        case META_BIDDING_APPLOVIN_MAX: {
+                            appLovinMaxRewardedAd = MaxRewardedAd.getInstance(appLovinMaxRewardedId, activity);
+                            appLovinMaxRewardedAd.setListener(new MaxRewardedAdListener() {
                                 @Override
                                 public void onUserRewarded(MaxAd ad, MaxReward reward) {
                                     onComplete.onRewardedAdComplete();
@@ -1005,7 +1005,7 @@ public class RewardedAd {
                                 public void onAdDisplayFailed(MaxAd ad, com.applovin.mediation.MaxError error) {
                                 }
                             });
-                            applovinMaxRewardedAd.loadAd();
+                            appLovinMaxRewardedAd.loadAd();
                             break;
                         }
 
@@ -1036,7 +1036,7 @@ public class RewardedAd {
 
                     switch (backupAdNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB: {
+                        case META_BIDDING_ADMOB: {
                             com.google.android.gms.ads.rewarded.RewardedAd.load(activity, adMobRewardedId,
                                     Tools.getAdRequest(activity, legacyGDPR), new RewardedAdLoadCallback() {
                                         @Override
@@ -1070,8 +1070,8 @@ public class RewardedAd {
                         }
 
                         case META: {
-                            fanRewardedVideoAd = new com.facebook.ads.RewardedVideoAd(activity, fanRewardedId);
-                            fanRewardedVideoAd.loadAd(fanRewardedVideoAd.buildLoadAdConfig()
+                            metaRewardedVideoAd = new com.facebook.ads.RewardedVideoAd(activity, metaRewardedId);
+                            metaRewardedVideoAd.loadAd(metaRewardedVideoAd.buildLoadAdConfig()
                                     .withAdListener(new RewardedVideoAdListener() {
                                         @Override
                                         public void onRewardedVideoCompleted() {
@@ -1122,9 +1122,9 @@ public class RewardedAd {
 
                         case APPLOVIN:
                         case APPLOVIN_MAX:
-                        case FAN_BIDDING_APPLOVIN_MAX: {
-                            applovinMaxRewardedAd = MaxRewardedAd.getInstance(applovinMaxRewardedId, activity);
-                            applovinMaxRewardedAd.setListener(new MaxRewardedAdListener() {
+                        case META_BIDDING_APPLOVIN_MAX: {
+                            appLovinMaxRewardedAd = MaxRewardedAd.getInstance(appLovinMaxRewardedId, activity);
+                            appLovinMaxRewardedAd.setListener(new MaxRewardedAdListener() {
                                 @Override
                                 public void onUserRewarded(MaxAd ad, MaxReward reward) {
                                     onComplete.onRewardedAdComplete();
@@ -1157,7 +1157,7 @@ public class RewardedAd {
                                 public void onAdDisplayFailed(MaxAd ad, com.applovin.mediation.MaxError error) {
                                 }
                             });
-                            applovinMaxRewardedAd.loadAd();
+                            appLovinMaxRewardedAd.loadAd();
                             break;
                         }
 
@@ -1174,13 +1174,13 @@ public class RewardedAd {
             if (adMobRewardedAd != null) {
                 adMobRewardedAd = null;
             }
-            if (fanRewardedVideoAd != null) {
-                fanRewardedVideoAd.destroy();
-                fanRewardedVideoAd = null;
+            if (metaRewardedVideoAd != null) {
+                metaRewardedVideoAd.destroy();
+                metaRewardedVideoAd = null;
             }
-            if (applovinMaxRewardedAd != null) {
-                applovinMaxRewardedAd.destroy();
-                applovinMaxRewardedAd = null;
+            if (appLovinMaxRewardedAd != null) {
+                appLovinMaxRewardedAd.destroy();
+                appLovinMaxRewardedAd = null;
             }
             if (wortiseRewardedAd != null) {
                 wortiseRewardedAd.destroy();
@@ -1192,4 +1192,7 @@ public class RewardedAd {
         }
     }
 }
+
+
+
 

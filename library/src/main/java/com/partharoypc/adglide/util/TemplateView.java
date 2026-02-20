@@ -270,11 +270,11 @@ public class TemplateView extends FrameLayout {
 
     private void initView(Context context, AttributeSet attributeSet) {
 
-        TypedArray attributes = context.getTheme().obtainStyledAttributes(attributeSet, R.styleable.TemplateView, 0, 0);
+        TypedArray attributes = context.getTheme().obtainStyledAttributes(attributeSet, R.styleable.adglide_TemplateView, 0, 0);
 
         try {
-            templateType = attributes.getResourceId(R.styleable.TemplateView_gnt_template_type,
-                    R.layout.gnt_admob_medium_template_view);
+            templateType = attributes.getResourceId(R.styleable.adglide_TemplateView_adglide_template_type,
+                    R.layout.adglide_ad_mob_medium_template_view);
         } finally {
             attributes.recycle();
         }
@@ -282,7 +282,7 @@ public class TemplateView extends FrameLayout {
         inflater.inflate(templateType, this);
 
         // Add skeleton view
-        skeletonView = inflater.inflate(R.layout.gnt_skeleton_loading_view, null);
+        skeletonView = inflater.inflate(R.layout.adglide_skeleton_loading_view, null);
         addView(skeletonView);
 
         // Start pulsing animation
@@ -312,4 +312,7 @@ public class TemplateView extends FrameLayout {
         background = findViewById(R.id.background);
     }
 }
+
+
+
 

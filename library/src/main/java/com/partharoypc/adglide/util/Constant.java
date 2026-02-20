@@ -15,16 +15,16 @@ public class Constant {
     public static final String STARTAPP = "startapp";
     public static final String UNITY = "unity";
     public static final String APPLOVIN = "applovin";
-    public static final String APPLOVIN_MAX = "applovin_max";
-    public static final String APPLOVIN_DISCOVERY = "applovin_discovery";
+    public static final String APPLOVIN_MAX = "app_lovin_max";
+    public static final String APPLOVIN_DISCOVERY = "app_lovin_discovery";
     public static final String IRONSOURCE = "ironsource";
     public static final String WORTISE = "wortise";
     public static final String NONE = "none";
 
     // ad bidding
-    public static final String FAN_BIDDING_ADMOB = "fan_bidding_admob";
-    public static final String FAN_BIDDING_APPLOVIN_MAX = "fan_bidding_applovin_max";
-    public static final String FAN_BIDDING_IRONSOURCE = "fan_bidding_ironsource";
+    public static final String META_BIDDING_ADMOB = "META_BIDDING_ADMOB";
+    public static final String META_BIDDING_APPLOVIN_MAX = "META_BIDDING_APPLOVIN_MAX";
+    public static final String META_BIDDING_IRONSOURCE = "META_BIDDING_IRONSOURCE";
 
     // native ad styles
     public static final String STYLE_SMALL = "small";
@@ -51,4 +51,7 @@ public class Constant {
     public static final String VALUE = "";
 
 }
+
+
+
 

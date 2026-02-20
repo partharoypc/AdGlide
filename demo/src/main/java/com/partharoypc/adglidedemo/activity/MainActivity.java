@@ -3,7 +3,7 @@ package com.partharoypc.adglidedemo.activity;
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_DISCOVERY;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
-import static com.partharoypc.adglide.util.Constant.FAN;
+import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.IRONSOURCE;
 import static com.partharoypc.adglide.util.Constant.STARTAPP;
 import static com.partharoypc.adglide.util.Constant.UNITY;
@@ -127,8 +127,8 @@ public class MainActivity extends AppCompatActivity {
                 .setAdMobAppId(null)
                 .setStartappAppId(Constant.STARTAPP_APP_ID)
                 .setUnityGameId(Constant.UNITY_GAME_ID)
-                .setAppLovinSdkKey(getResources().getString(R.string.applovin_sdk_key))
-                .setIronSourceAppKey(Constant.IRONSOURCE_APP_KEY)
+                .setAppLovinSdkKey(getResources().getString(R.string.app_lovin_sdk_key))
+                .setironSourceAppKey(Constant.IRONSOURCE_APP_KEY)
                 .setWortiseAppId(Constant.WORTISE_APP_ID)
                 .setDebug(BuildConfig.DEBUG)
                 .build();
@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
                     .setAdNetwork(Constant.AD_NETWORK)
                     .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
                     .setAdMobAppOpenId(Constant.ADMOB_APP_OPEN_AD_ID)
-                    .setApplovinAppOpenId(Constant.APPLOVIN_APP_OPEN_AP_ID)
+                    .setAppLovinAppOpenId(Constant.APPLOVIN_APP_OPEN_AP_ID)
                     .setWortiseAppOpenId(Constant.WORTISE_APP_OPEN_AD_ID)
                     .build();
         }

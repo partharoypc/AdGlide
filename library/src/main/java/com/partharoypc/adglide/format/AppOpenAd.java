@@ -1,12 +1,12 @@
 package com.partharoypc.adglide.format;
 
-import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_APPLOVIN_MAX;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX;
 
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
-import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_ADMOB;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import android.annotation.SuppressLint;
@@ -33,51 +33,51 @@ public class AppOpenAd {
 
     public static com.google.android.gms.ads.appopen.AppOpenAd appOpenAd = null;
     public static boolean isAppOpenAdLoaded = false;
-    private AppOpenAdMob appOpenAdMob;
-    private AppOpenAdAppLovin appOpenAdAppLovin;
-    private AppOpenAdWortise appOpenAdWortise;
+    private AdMobAppOpenAd adMobAppOpenAd;
+    private AppLovinAppOpenAd appLovinAppOpenAd;
+    private WortiseAppOpenAd wortiseAppOpenAd;
     private boolean adStatus;
     private boolean placementStatus;
     private String adNetwork = "";
     private String backupAdNetwork = "";
     private String adMobAppOpenId = "";
-    private String applovinAppOpenId = "";
+    private String appLovinAppOpenId = "";
     private String wortiseAppOpenId = "";
     private Activity currentActivity;
 
     /**
      * Initializes AdMob for App Open Ads.
      * 
-     * @param appOpenAdMob The helper instance.
+     * @param adMobAppOpenAd The helper instance.
      * @return The AppOpenAd instance.
      */
     @NonNull
-    public AppOpenAd initAppOpenAdMob(@NonNull AppOpenAdMob appOpenAdMob) {
-        this.appOpenAdMob = appOpenAdMob;
+    public AppOpenAd initAdMobAppOpenAd(@NonNull AdMobAppOpenAd adMobAppOpenAd) {
+        this.adMobAppOpenAd = adMobAppOpenAd;
         return this;
     }
 
     /**
      * Initializes AppLovin for App Open Ads.
      * 
-     * @param appOpenAdAppLovin The helper instance.
+     * @param appLovinAppOpenAd The helper instance.
      * @return The AppOpenAd instance.
      */
     @NonNull
-    public AppOpenAd initAppOpenAdAppLovin(@NonNull AppOpenAdAppLovin appOpenAdAppLovin) {
-        this.appOpenAdAppLovin = appOpenAdAppLovin;
+    public AppOpenAd initAppLovinAppOpenAd(@NonNull AppLovinAppOpenAd appLovinAppOpenAd) {
+        this.appLovinAppOpenAd = appLovinAppOpenAd;
         return this;
     }
 
     /**
      * Initializes Wortise for App Open Ads.
      * 
-     * @param appOpenAdWortise The helper instance.
+     * @param wortiseAppOpenAd The helper instance.
      * @return The AppOpenAd instance.
      */
     @NonNull
-    public AppOpenAd initAppOpenAdWortise(@NonNull AppOpenAdWortise appOpenAdWortise) {
-        this.appOpenAdWortise = appOpenAdWortise;
+    public AppOpenAd initWortiseAppOpenAd(@NonNull WortiseAppOpenAd wortiseAppOpenAd) {
+        this.wortiseAppOpenAd = wortiseAppOpenAd;
         return this;
     }
 
@@ -144,12 +144,12 @@ public class AppOpenAd {
     /**
      * Sets AppLovin App Open ID.
      * 
-     * @param applovinAppOpenId The ad unit ID.
+     * @param appLovinAppOpenId The ad unit ID.
      * @return The AppOpenAd instance.
      */
     @NonNull
-    public AppOpenAd setApplovinAppOpenId(@NonNull String applovinAppOpenId) {
-        this.applovinAppOpenId = applovinAppOpenId;
+    public AppOpenAd setAppLovinAppOpenId(@NonNull String appLovinAppOpenId) {
+        this.appLovinAppOpenId = appLovinAppOpenId;
         return this;
     }
 
@@ -196,19 +196,19 @@ public class AppOpenAd {
                         return;
                     switch (adNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB:
+                        case META_BIDDING_ADMOB:
                             if (!adMobAppOpenId.equals("0")) {
                                 if (!currentActivity.getIntent().hasExtra("unique_id")) {
-                                    appOpenAdMob.showAdIfAvailable(currentActivity, adMobAppOpenId);
+                                    adMobAppOpenAd.showAdIfAvailable(currentActivity, adMobAppOpenId);
                                 }
                             }
                             break;
                         case APPLOVIN:
                         case APPLOVIN_MAX:
-                        case FAN_BIDDING_APPLOVIN_MAX:
-                            if (!applovinAppOpenId.equals("0")) {
+                        case META_BIDDING_APPLOVIN_MAX:
+                            if (!appLovinAppOpenId.equals("0")) {
                                 if (!currentActivity.getIntent().hasExtra("unique_id")) {
-                                    appOpenAdAppLovin.showAdIfAvailable(currentActivity, applovinAppOpenId);
+                                    appLovinAppOpenAd.showAdIfAvailable(currentActivity, appLovinAppOpenId);
                                 }
                             }
                             break;
@@ -216,7 +216,7 @@ public class AppOpenAd {
                         case WORTISE:
                             if (!wortiseAppOpenId.equals("0")) {
                                 if (!currentActivity.getIntent().hasExtra("unique_id")) {
-                                    appOpenAdWortise.showAdIfAvailable(currentActivity, wortiseAppOpenId);
+                                    wortiseAppOpenAd.showAdIfAvailable(currentActivity, wortiseAppOpenId);
                                 }
                             }
                             break;
@@ -234,25 +234,25 @@ public class AppOpenAd {
                 if (adStatus) {
                     switch (adNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB:
+                        case META_BIDDING_ADMOB:
                             if (!adMobAppOpenId.equals("0")) {
-                                if (!appOpenAdMob.isShowingAd()) {
+                                if (!adMobAppOpenAd.isShowingAd()) {
                                     currentActivity = activity;
                                 }
                             }
                             break;
                         case APPLOVIN:
                         case APPLOVIN_MAX:
-                        case FAN_BIDDING_APPLOVIN_MAX:
-                            if (!applovinAppOpenId.equals("0")) {
-                                if (!appOpenAdAppLovin.isShowingAd()) {
+                        case META_BIDDING_APPLOVIN_MAX:
+                            if (!appLovinAppOpenId.equals("0")) {
+                                if (!appLovinAppOpenAd.isShowingAd()) {
                                     currentActivity = activity;
                                 }
                             }
                             break;
                         case WORTISE:
                             if (!wortiseAppOpenId.equals("0")) {
-                                if (!appOpenAdWortise.isShowingAd()) {
+                                if (!wortiseAppOpenAd.isShowingAd()) {
                                     currentActivity = activity;
                                 }
                             }
@@ -270,7 +270,7 @@ public class AppOpenAd {
             if (adStatus && placementStatus) {
                 switch (adNetwork) {
                     case ADMOB:
-                    case FAN_BIDDING_ADMOB:
+                    case META_BIDDING_ADMOB:
                         if (!adMobAppOpenId.equals("0")) {
                             showAdIfAvailable(activity, onShowAdCompleteListener);
                         } else {
@@ -279,8 +279,8 @@ public class AppOpenAd {
                         break;
                     case APPLOVIN:
                     case APPLOVIN_MAX:
-                    case FAN_BIDDING_APPLOVIN_MAX:
-                        if (!applovinAppOpenId.equals("0")) {
+                    case META_BIDDING_APPLOVIN_MAX:
+                        if (!appLovinAppOpenId.equals("0")) {
                             showAdIfAvailable(activity, onShowAdCompleteListener);
                         } else {
                             onShowAdCompleteListener.onShowAdComplete();
@@ -314,22 +314,22 @@ public class AppOpenAd {
                 if (adStatus) {
                     switch (adNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB:
+                        case META_BIDDING_ADMOB:
                             if (!adMobAppOpenId.equals("0")) {
-                                appOpenAdMob.showAdIfAvailable(activity, adMobAppOpenId, onShowAdCompleteListener);
+                                adMobAppOpenAd.showAdIfAvailable(activity, adMobAppOpenId, onShowAdCompleteListener);
                             }
                             break;
                         case APPLOVIN:
                         case APPLOVIN_MAX:
-                        case FAN_BIDDING_APPLOVIN_MAX:
-                            if (!applovinAppOpenId.equals("0")) {
-                                appOpenAdAppLovin.showAdIfAvailable(activity, applovinAppOpenId,
+                        case META_BIDDING_APPLOVIN_MAX:
+                            if (!appLovinAppOpenId.equals("0")) {
+                                appLovinAppOpenAd.showAdIfAvailable(activity, appLovinAppOpenId,
                                         onShowAdCompleteListener);
                             }
                             break;
                         case WORTISE:
                             if (!wortiseAppOpenId.equals("0")) {
-                                appOpenAdWortise.showAdIfAvailable(activity, wortiseAppOpenId,
+                                wortiseAppOpenAd.showAdIfAvailable(activity, wortiseAppOpenId,
                                         onShowAdCompleteListener);
                             }
                             break;
@@ -350,7 +350,7 @@ public class AppOpenAd {
         private String adNetwork = "";
         private String backupAdNetwork = "";
         private String adMobAppOpenId = "";
-        private String applovinAppOpenId = "";
+        private String appLovinAppOpenId = "";
         private String wortiseAppOpenId = "";
 
         public Builder(Activity activity) {
@@ -406,8 +406,8 @@ public class AppOpenAd {
         }
 
         @androidx.annotation.NonNull
-        public Builder setApplovinAppOpenId(@androidx.annotation.NonNull String applovinAppOpenId) {
-            this.applovinAppOpenId = applovinAppOpenId;
+        public Builder setAppLovinAppOpenId(@androidx.annotation.NonNull String appLovinAppOpenId) {
+            this.appLovinAppOpenId = appLovinAppOpenId;
             return this;
         }
 
@@ -422,7 +422,7 @@ public class AppOpenAd {
             if (adStatus.equals(AD_STATUS_ON)) {
                 switch (adNetwork) {
                     case ADMOB:
-                    case FAN_BIDDING_ADMOB:
+                    case META_BIDDING_ADMOB:
                         if (appOpenAd != null) {
                             appOpenAd = null;
                         }
@@ -440,7 +440,7 @@ public class AppOpenAd {
                 if (adStatus.equals(AD_STATUS_ON)) {
                     switch (adNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB:
+                        case META_BIDDING_ADMOB:
                             AdRequest adRequest = new AdRequest.Builder().build();
                             com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
                                     new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
@@ -480,7 +480,7 @@ public class AppOpenAd {
             try {
                 switch (adNetwork) {
                     case ADMOB:
-                    case FAN_BIDDING_ADMOB:
+                    case META_BIDDING_ADMOB:
                         if (appOpenAd != null) {
                             appOpenAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                                 @Override
@@ -524,7 +524,7 @@ public class AppOpenAd {
                 if (adStatus.equals(AD_STATUS_ON)) {
                     switch (adNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB:
+                        case META_BIDDING_ADMOB:
                             AdRequest adRequest = new AdRequest.Builder().build();
                             com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
                                     new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
@@ -561,7 +561,7 @@ public class AppOpenAd {
             try {
                 switch (adNetwork) {
                     case ADMOB:
-                    case FAN_BIDDING_ADMOB:
+                    case META_BIDDING_ADMOB:
                         if (appOpenAd != null) {
                             appOpenAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                                 @Override
@@ -605,7 +605,7 @@ public class AppOpenAd {
                 if (adStatus.equals(AD_STATUS_ON)) {
                     switch (backupAdNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB:
+                        case META_BIDDING_ADMOB:
                             AdRequest adRequest = new AdRequest.Builder().build();
                             com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
                                     new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
@@ -647,7 +647,7 @@ public class AppOpenAd {
             try {
                 switch (backupAdNetwork) {
                     case ADMOB:
-                    case FAN_BIDDING_ADMOB:
+                    case META_BIDDING_ADMOB:
                         if (appOpenAd != null) {
                             appOpenAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                                 @Override
@@ -692,7 +692,7 @@ public class AppOpenAd {
                 if (adStatus.equals(AD_STATUS_ON)) {
                     switch (backupAdNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB:
+                        case META_BIDDING_ADMOB:
                             AdRequest adRequest = new AdRequest.Builder().build();
                             com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
                                     new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
@@ -730,7 +730,7 @@ public class AppOpenAd {
             try {
                 switch (backupAdNetwork) {
                     case ADMOB:
-                    case FAN_BIDDING_ADMOB:
+                    case META_BIDDING_ADMOB:
                         if (appOpenAd != null) {
                             appOpenAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                                 @Override
@@ -770,4 +770,7 @@ public class AppOpenAd {
     }
 
 }
+
+
+
 

@@ -20,20 +20,20 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.multidex.MultiDex;
 
-import com.partharoypc.adglide.format.AppOpenAdAppLovin;
+import com.partharoypc.adglide.format.AppLovinAppOpenAd;
 // import com.partharoypc.adglide.format.AppOpenAdManager;
-import com.partharoypc.adglide.format.AppOpenAdMob;
-import com.partharoypc.adglide.format.AppOpenAdWortise;
+import com.partharoypc.adglide.format.AdMobAppOpenAd;
+import com.partharoypc.adglide.format.WortiseAppOpenAd;
 import com.partharoypc.adglide.util.OnShowAdCompleteListener;
 import com.partharoypc.adglidedemo.data.Constant;
 
 @SuppressWarnings("ConstantConditions")
 public class MyApplication extends Application {
 
-    private AppOpenAdMob appOpenAdMob;
+    private AdMobAppOpenAd appOpenAdMob;
     // private AppOpenAdManager appOpenAdManager;
-    private AppOpenAdAppLovin appOpenAdAppLovin;
-    private AppOpenAdWortise appOpenAdWortise;
+    private AppLovinAppOpenAd appOpenAdAppLovin;
+    private WortiseAppOpenAd appOpenAdWortise;
     Activity currentActivity;
 
     @Override
@@ -42,10 +42,10 @@ public class MyApplication extends Application {
         if (!Constant.FORCE_TO_SHOW_APP_OPEN_AD_ON_START) {
             registerActivityLifecycleCallbacks(activityLifecycleCallbacks);
             ProcessLifecycleOwner.get().getLifecycle().addObserver(lifecycleObserver);
-            appOpenAdMob = new AppOpenAdMob();
+            appOpenAdMob = new AdMobAppOpenAd();
             // appOpenAdManager = new AppOpenAdManager();
-            appOpenAdAppLovin = new AppOpenAdAppLovin();
-            appOpenAdWortise = new AppOpenAdWortise();
+            appOpenAdAppLovin = new AppLovinAppOpenAd();
+            appOpenAdWortise = new WortiseAppOpenAd();
         }
     }
 

@@ -24,8 +24,8 @@ import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.META;
-import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_ADMOB;
-import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_APPLOVIN_MAX;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX;
 
 /**
  * Singleton repository to pre-load and store ads for instant display.
@@ -91,7 +91,7 @@ public class AdRepository {
 
         switch (adNetwork) {
             case ADMOB:
-            case FAN_BIDDING_ADMOB:
+            case META_BIDDING_ADMOB:
                 loadAdMobInterstitial(context, key, adUnitId);
                 break;
 
@@ -100,7 +100,7 @@ public class AdRepository {
                 break;
             case APPLOVIN:
             case APPLOVIN_MAX:
-            case FAN_BIDDING_APPLOVIN_MAX:
+            case META_BIDDING_APPLOVIN_MAX:
                 loadAppLovinInterstitial(context, key, adUnitId);
                 break;
             default:
@@ -129,7 +129,7 @@ public class AdRepository {
     }
 
     private void loadFacebookInterstitial(Context context, String key, String adUnitId) {
-        com.facebook.ads.InterstitialAd fanAd = new com.facebook.ads.InterstitialAd(context, adUnitId);
+        com.facebook.ads.InterstitialAd metaAd = new com.facebook.ads.InterstitialAd(context, adUnitId);
         com.facebook.ads.InterstitialAdListener listener = new InterstitialAdListener() {
             @Override
             public void onInterstitialDisplayed(com.facebook.ads.Ad ad) {
@@ -142,14 +142,14 @@ public class AdRepository {
             @Override
             public void onError(com.facebook.ads.Ad ad, com.facebook.ads.AdError adError) {
                 isLoading.put(key, false);
-                Log.e(TAG, "FAN Pre-load Failed: " + adError.getErrorMessage());
+                Log.e(TAG, "Meta Pre-load Failed: " + adError.getErrorMessage());
             }
 
             @Override
             public void onAdLoaded(com.facebook.ads.Ad ad) {
-                interstitialCache.put(key, fanAd);
+                interstitialCache.put(key, metaAd);
                 isLoading.put(key, false);
-                Log.d(TAG, "FAN Interstitial Cached: " + key);
+                Log.d(TAG, "Meta Interstitial Cached: " + key);
             }
 
             @Override
@@ -161,10 +161,10 @@ public class AdRepository {
             }
         };
 
-        com.facebook.ads.InterstitialAd.InterstitialLoadAdConfig loadAdConfig = fanAd.buildLoadAdConfig()
+        com.facebook.ads.InterstitialAd.InterstitialLoadAdConfig loadAdConfig = metaAd.buildLoadAdConfig()
                 .withAdListener(listener)
                 .build();
-        fanAd.loadAd(loadAdConfig);
+        metaAd.loadAd(loadAdConfig);
     }
 
     private void loadAppLovinInterstitial(Context context, String key, String adUnitId) {
@@ -239,4 +239,7 @@ public class AdRepository {
         return adNetwork + "_" + adUnitId;
     }
 }
+
+
+
 

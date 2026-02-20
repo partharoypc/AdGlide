@@ -19,10 +19,10 @@ public class Constant {
     public static final String GOOGLE_AD_MANAGER_NATIVE_ID = "/6499/example/native";
     public static final String GOOGLE_AD_MANAGER_APP_OPEN_AD_ID = "/6499/example/app-open";
 
-    public static final String FAN_BANNER_ID = "YOUR_PLACEMENT_ID";
-    public static final String FAN_INTERSTITIAL_ID = "YOUR_PLACEMENT_ID";
-    public static final String FAN_REWARDED_ID = "YOUR_PLACEMENT_ID";
-    public static final String FAN_NATIVE_ID = "YOUR_PLACEMENT_ID";
+    public static final String META_BANNER_ID = "YOUR_PLACEMENT_ID";
+    public static final String META_INTERSTITIAL_ID = "YOUR_PLACEMENT_ID";
+    public static final String META_REWARDED_ID = "YOUR_PLACEMENT_ID";
+    public static final String META_NATIVE_ID = "YOUR_PLACEMENT_ID";
 
     public static final String STARTAPP_APP_ID = "0";
 

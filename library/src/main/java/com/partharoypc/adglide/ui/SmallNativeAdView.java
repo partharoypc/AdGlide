@@ -55,14 +55,14 @@ public class SmallNativeAdView extends LinearLayout {
 
     @SuppressLint("CustomViewStyleable")
     private void initView() {
-        inflate(mContext, R.layout.view_native_ad_news, this);
-        TypedArray arr = mContext.obtainStyledAttributes(attrs, R.styleable.NativeAdView, styleAttr, 0);
+        inflate(mContext, R.layout.adglide_view_native_ad_news, this);
+        TypedArray arr = mContext.obtainStyledAttributes(attrs, R.styleable.adglide_NativeAdView, styleAttr, 0);
 
-        adMobDrawable = arr.getDrawable(R.styleable.NativeAdView_adMobNativeButton);
-        startAppDrawable = arr.getDrawable(R.styleable.NativeAdView_startappNativeButton);
+        adMobDrawable = arr.getDrawable(R.styleable.adglide_NativeAdView_adMobNativeButton);
+        startAppDrawable = arr.getDrawable(R.styleable.adglide_NativeAdView_startAppNativeButton);
 
         btnNativeAdMob = findViewById(R.id.cta);
-        btnNativeStartApp = findViewById(R.id.startapp_native_button);
+        btnNativeStartApp = findViewById(R.id.start_app_native_button);
 
         if (adMobDrawable != null) {
             setAdMobNativeButtonColor(adMobDrawable);
@@ -85,4 +85,7 @@ public class SmallNativeAdView extends LinearLayout {
     }
 
 }
+
+
+
 

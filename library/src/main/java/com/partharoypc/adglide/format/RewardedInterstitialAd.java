@@ -2,7 +2,7 @@ package com.partharoypc.adglide.format;
 
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
-import static com.partharoypc.adglide.util.Constant.FAN_BIDDING_ADMOB;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
 
 import android.app.Activity;
 import android.util.Log;
@@ -119,7 +119,7 @@ public class RewardedInterstitialAd {
                     }
                     switch (adNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB:
+                        case META_BIDDING_ADMOB:
                             com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd.load(activity,
                                     adMobRewardedInterstitialId,
                                     Tools.getAdRequest(activity, legacyGDPR), new RewardedInterstitialAdLoadCallback() {
@@ -191,7 +191,7 @@ public class RewardedInterstitialAd {
 
                     switch (backupAdNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB:
+                        case META_BIDDING_ADMOB:
                             com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd.load(activity,
                                     adMobRewardedInterstitialId,
                                     Tools.getAdRequest(activity, legacyGDPR), new RewardedInterstitialAdLoadCallback() {
@@ -243,7 +243,7 @@ public class RewardedInterstitialAd {
                 if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
                     switch (adNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB:
+                        case META_BIDDING_ADMOB:
                             if (adMobRewardedInterstitialAd != null) {
                                 adMobRewardedInterstitialAd.show(activity, new OnUserEarnedRewardListener() {
                                     @Override
@@ -273,7 +273,7 @@ public class RewardedInterstitialAd {
                 if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
                     switch (backupAdNetwork) {
                         case ADMOB:
-                        case FAN_BIDDING_ADMOB:
+                        case META_BIDDING_ADMOB:
                             if (adMobRewardedInterstitialAd != null) {
                                 adMobRewardedInterstitialAd.show(activity, new OnUserEarnedRewardListener() {
                                     @Override
@@ -299,4 +299,7 @@ public class RewardedInterstitialAd {
 
     }
 }
+
+
+
 
