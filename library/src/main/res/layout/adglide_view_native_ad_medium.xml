@@ -12,18 +12,17 @@
         android:orientation="vertical"
         android:visibility="gone">
 
-        <com.partharoypc.adglide.util.TemplateView
-            android:id="@+id/ad_mob_native_ad_container"
+        <ViewStub
+            android:id="@+id/ad_mob_native_ad_stub"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:adglide_template_type="@layout/adglide_ad_mob_medium_template_view" />
+            android:layout="@layout/adglide_stub_ad_mob_medium" />
 
-        <com.facebook.ads.NativeAdLayout
-            android:id="@+id/meta_native_ad_container"
+        <ViewStub
+            android:id="@+id/meta_native_ad_stub"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone" />
+            android:layout="@layout/adglide_stub_meta_native" />
 
         <include
             android:id="@+id/start_app_native_ad_container"

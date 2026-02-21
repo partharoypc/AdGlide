@@ -41,7 +41,7 @@ public class AdNetwork {
 
     public static class Initialize {
 
-    private static final String TAG = "AdGlide";
+        private static final String TAG = "AdGlide";
         private final Activity activity;
         private String adStatus = "";
         private String adNetwork = "";
@@ -157,76 +157,77 @@ public class AdNetwork {
         }
 
         private void initializeSdk(String network) {
-            switch (network) {
-                case ADMOB:
-                case META_BIDDING_ADMOB:
-                    MobileAds.initialize(activity, initializationStatus -> {
-                        Map<String, AdapterStatus> statusMap = initializationStatus.getAdapterStatusMap();
-                        for (String adapterClass : statusMap.keySet()) {
-                            AdapterStatus adapterStatus = statusMap.get(adapterClass);
-                            if (adapterStatus != null) {
-                                Log.d(TAG, String.format("Adapter name: %s, Description: %s, Latency: %d",
-                                        adapterClass, adapterStatus.getDescription(), adapterStatus.getLatency()));
+            try {
+                switch (network) {
+                    case ADMOB:
+                    case META_BIDDING_ADMOB:
+                        MobileAds.initialize(activity, initializationStatus -> {
+                            Map<String, AdapterStatus> statusMap = initializationStatus.getAdapterStatusMap();
+                            for (String adapterClass : statusMap.keySet()) {
+                                AdapterStatus adapterStatus = statusMap.get(adapterClass);
+                                if (adapterStatus != null) {
+                                    Log.d(TAG, String.format("Adapter name: %s, Description: %s, Latency: %d",
+                                            adapterClass, adapterStatus.getDescription(), adapterStatus.getLatency()));
+                                }
                             }
-                        }
-                    });
-                    AudienceNetworkInitializeHelper.initializeAd(activity, debug);
-                    break;
-                case META:
-                    AudienceNetworkInitializeHelper.initializeAd(activity, debug);
-                    break;
-                case UNITY:
-                    UnityAds.initialize(activity, unityGameId, debug, new IUnityAdsInitializationListener() {
-                        @Override
-                        public void onInitializationComplete() {
-                            Log.d(TAG, "Unity Ads Initialization Complete");
-                        }
+                        });
+                        AudienceNetworkInitializeHelper.initializeAd(activity, debug);
+                        break;
+                    case META:
+                        AudienceNetworkInitializeHelper.initializeAd(activity, debug);
+                        break;
+                    case UNITY:
+                        UnityAds.initialize(activity, unityGameId, debug, new IUnityAdsInitializationListener() {
+                            @Override
+                            public void onInitializationComplete() {
+                                Log.d(TAG, "Unity Ads Initialization Complete");
+                            }
 
-                        @Override
-                        public void onInitializationFailed(UnityAds.UnityAdsInitializationError error,
-                                String message) {
-                            Log.d(TAG, "Unity Ads Initialization Failed: " + error + " - " + message);
-                        }
-                    });
-                    break;
-                case APPLOVIN:
-                case APPLOVIN_MAX:
-                case META_BIDDING_APPLOVIN_MAX:
-                    AppLovinSdk.getInstance(activity).setMediationProvider(AppLovinMediationProvider.MAX);
-                    AppLovinSdk.getInstance(activity).initializeSdk(config -> {
-                    });
-                    AudienceNetworkInitializeHelper.initializeAd(activity, debug);
-                    break;
-                case APPLOVIN_DISCOVERY:
-                    AppLovinSdk.initializeSdk(activity);
-                    break;
-                case IRONSOURCE:
-                case META_BIDDING_IRONSOURCE:
-                    IronSource.init(activity, ironSourceAppKey, IronSource.AD_UNIT.REWARDED_VIDEO,
-                            IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.BANNER);
-                    AudienceNetworkInitializeHelper.initializeAd(activity, debug);
-                    break;
-                case STARTAPP:
-                    StartAppSDK.init(activity, startappAppId, true);
-                    StartAppSDK.setTestAdsEnabled(debug);
-                    StartAppAd.disableSplash();
-                    StartAppSDK.enableReturnAds(false);
-                    break;
-                case WORTISE:
-                    WortiseSdk.initialize(activity, wortiseAppId);
-                    break;
-                case NONE:
-                    // do nothing
-                    break;
-                default:
-                    break;
+                            @Override
+                            public void onInitializationFailed(UnityAds.UnityAdsInitializationError error,
+                                    String message) {
+                                Log.d(TAG, "Unity Ads Initialization Failed: " + error + " - " + message);
+                            }
+                        });
+                        break;
+                    case APPLOVIN:
+                    case APPLOVIN_MAX:
+                    case META_BIDDING_APPLOVIN_MAX:
+                        AppLovinSdk.getInstance(activity).setMediationProvider(AppLovinMediationProvider.MAX);
+                        AppLovinSdk.getInstance(activity).initializeSdk(config -> {
+                        });
+                        AudienceNetworkInitializeHelper.initializeAd(activity, debug);
+                        break;
+                    case APPLOVIN_DISCOVERY:
+                        AppLovinSdk.initializeSdk(activity);
+                        break;
+                    case IRONSOURCE:
+                    case META_BIDDING_IRONSOURCE:
+                        IronSource.init(activity, ironSourceAppKey, IronSource.AD_UNIT.REWARDED_VIDEO,
+                                IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.BANNER);
+                        AudienceNetworkInitializeHelper.initializeAd(activity, debug);
+                        break;
+                    case STARTAPP:
+                        StartAppSDK.init(activity, startappAppId, true);
+                        StartAppSDK.setTestAdsEnabled(debug);
+                        StartAppAd.disableSplash();
+                        StartAppSDK.enableReturnAds(false);
+                        break;
+                    case WORTISE:
+                        WortiseSdk.initialize(activity, wortiseAppId);
+                        break;
+                    case NONE:
+                        // do nothing
+                        break;
+                    default:
+                        break;
+                }
+            } catch (NoClassDefFoundError | Exception e) {
+                Log.e(TAG, "Failed to initialize " + network + " SDK. Are you sure you added the dependency? Error: "
+                        + e.getMessage());
             }
         }
 
     }
 
 }
-
-
-
-

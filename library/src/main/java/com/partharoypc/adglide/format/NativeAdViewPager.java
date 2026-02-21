@@ -2,7 +2,11 @@ package com.partharoypc.adglide.format;
 
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
-import static com.partharoypc.adglide.util.Constant.META;
+import static com.partharoypc.adglide.util.Constant.APPLOVIN;
+import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX;
+import static com.partharoypc.adglide.util.Constant.STARTAPP;
+import static com.partharoypc.adglide.util.Constant.WORTISE;
 import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
 
@@ -160,10 +164,20 @@ public class NativeAdViewPager {
             try {
                 if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
 
+                    // Inflate AdMob ViewStub if present
+                    android.view.ViewStub adMobStub = view.findViewById(R.id.ad_mob_native_ad_stub);
+                    if (adMobStub != null) {
+                        adMobStub.inflate();
+                    }
                     adMobNativeAdView = view.findViewById(R.id.ad_mob_native_ad_container);
                     mediaView = view.findViewById(R.id.media_view);
                     adMobNativeBackground = view.findViewById(R.id.background);
 
+                    // Inflate Meta ViewStub if present
+                    android.view.ViewStub metaStub = view.findViewById(R.id.meta_native_ad_stub);
+                    if (metaStub != null) {
+                        metaStub.inflate();
+                    }
                     metaNativeAdLayout = view.findViewById(R.id.meta_native_ad_container);
 
                     startAppNativeAdView = view.findViewById(R.id.start_app_native_ad_container);
@@ -182,6 +196,7 @@ public class NativeAdViewPager {
                         case ADMOB:
                         case META_BIDDING_ADMOB:
                             if (adMobNativeAdView.getVisibility() != View.VISIBLE) {
+                                adMobNativeAdView.setVisibility(View.VISIBLE);
                                 AdLoader adLoader = new AdLoader.Builder(activity, adMobNativeId)
                                         .forNativeAd(NativeAd -> {
                                             if (darkTheme) {
@@ -205,7 +220,6 @@ public class NativeAdViewPager {
                                             adMobNativeAd = NativeAd;
                                             mediaView.setImageScaleType(ImageView.ScaleType.CENTER_CROP);
                                             adMobNativeAdView.setNativeAd(NativeAd);
-                                            adMobNativeAdView.setVisibility(View.VISIBLE);
                                             progressBarAd.setVisibility(View.GONE);
                                         })
                                         .withAdListener(new AdListener() {
@@ -220,6 +234,20 @@ public class NativeAdViewPager {
                                 Log.d(TAG, "AdMob Native Ad has been loaded");
                                 progressBarAd.setVisibility(View.GONE);
                             }
+                            break;
+
+                        case APPLOVIN:
+                        case APPLOVIN_MAX:
+                        case META_BIDDING_APPLOVIN_MAX:
+                            handleAppLovinLoad(null);
+                            break;
+
+                        case STARTAPP:
+                            handleStartAppLoad(null);
+                            break;
+
+                        case WORTISE:
+                            handleWortiseLoad(null);
                             break;
 
                         case META:
@@ -354,10 +382,20 @@ public class NativeAdViewPager {
             try {
                 if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
 
+                    // Inflate AdMob ViewStub if present
+                    android.view.ViewStub adMobStub = view.findViewById(R.id.ad_mob_native_ad_stub);
+                    if (adMobStub != null) {
+                        adMobStub.inflate();
+                    }
                     adMobNativeAdView = view.findViewById(R.id.ad_mob_native_ad_container);
                     mediaView = view.findViewById(R.id.media_view);
                     adMobNativeBackground = view.findViewById(R.id.background);
 
+                    // Inflate Meta ViewStub if present
+                    android.view.ViewStub metaStub = view.findViewById(R.id.meta_native_ad_stub);
+                    if (metaStub != null) {
+                        metaStub.inflate();
+                    }
                     metaNativeAdLayout = view.findViewById(R.id.meta_native_ad_container);
 
                     startAppNativeAdView = view.findViewById(R.id.start_app_native_ad_container);
@@ -376,6 +414,7 @@ public class NativeAdViewPager {
                         case ADMOB:
                         case META_BIDDING_ADMOB:
                             if (adMobNativeAdView.getVisibility() != View.VISIBLE) {
+                                adMobNativeAdView.setVisibility(View.VISIBLE);
                                 AdLoader adLoader = new AdLoader.Builder(activity, adMobNativeId)
                                         .forNativeAd(NativeAd -> {
                                             if (darkTheme) {
@@ -399,7 +438,6 @@ public class NativeAdViewPager {
                                             adMobNativeAd = NativeAd;
                                             mediaView.setImageScaleType(ImageView.ScaleType.CENTER_CROP);
                                             adMobNativeAdView.setNativeAd(NativeAd);
-                                            adMobNativeAdView.setVisibility(View.VISIBLE);
                                             progressBarAd.setVisibility(View.GONE);
                                         })
                                         .withAdListener(new AdListener() {
@@ -535,6 +573,30 @@ public class NativeAdViewPager {
                             }
                             break;
 
+                        case APPLOVIN:
+                        case APPLOVIN_MAX:
+                        case META_BIDDING_APPLOVIN_MAX:
+                            handleAppLovinLoad(() -> {
+                                appLovinNativeAd.setVisibility(View.GONE);
+                                progressBarAd.setVisibility(View.GONE);
+                            });
+                            break;
+
+                        case STARTAPP:
+                            handleStartAppLoad(() -> {
+                                startAppNativeAdView.setVisibility(View.GONE);
+                                progressBarAd.setVisibility(View.GONE);
+                            });
+                            break;
+
+                        case WORTISE:
+                            handleWortiseLoad(() -> {
+                                if (wortiseNativeAd != null)
+                                    wortiseNativeAd.setVisibility(View.GONE);
+                                progressBarAd.setVisibility(View.GONE);
+                            });
+                            break;
+
                         default:
                             break;
 
@@ -561,12 +623,176 @@ public class NativeAdViewPager {
                 metaNativeAd.destroy();
                 metaNativeAd = null;
             }
+            if (nativeAdLoader != null) {
+                nativeAdLoader.destroy();
+                nativeAdLoader = null;
+            }
+            maxNativeAd = null;
+        }
+
+        private void handleAppLovinLoad(Runnable fallback) {
+            try {
+                if (appLovinNativeAd.getVisibility() != View.VISIBLE) {
+                    nativeAdLoader = new com.applovin.mediation.nativeAds.MaxNativeAdLoader(appLovinNativeId, activity);
+                    nativeAdLoader.setNativeAdListener(new com.applovin.mediation.nativeAds.MaxNativeAdListener() {
+                        @Override
+                        public void onNativeAdLoaded(com.applovin.mediation.nativeAds.MaxNativeAdView nativeAdView,
+                                com.applovin.mediation.MaxAd ad) {
+                            if (maxNativeAd != null)
+                                nativeAdLoader.destroy(maxNativeAd);
+                            maxNativeAd = ad;
+                            appLovinNativeAd.removeAllViews();
+                            appLovinNativeAd.addView(nativeAdView);
+                            appLovinNativeAd.setVisibility(View.VISIBLE);
+                            progressBarAd.setVisibility(View.GONE);
+                        }
+
+                        @Override
+                        public void onNativeAdLoadFailed(String adUnitId, com.applovin.mediation.MaxError error) {
+                            if (fallback != null)
+                                fallback.run();
+                            else
+                                loadBackupNativeAd();
+                        }
+                    });
+                    nativeAdLoader.loadAd();
+                } else {
+                    progressBarAd.setVisibility(View.GONE);
+                }
+            } catch (NoClassDefFoundError | Exception e) {
+                Log.e(TAG, "Failed to load AppLovin native ad. Error: " + e.getMessage());
+                if (fallback != null)
+                    fallback.run();
+                else
+                    loadBackupNativeAd();
+            }
+        }
+
+        private void handleStartAppLoad(Runnable fallback) {
+            try {
+                com.startapp.sdk.ads.nativead.StartAppNativeAd startAppNativeAd = new com.startapp.sdk.ads.nativead.StartAppNativeAd(
+                        activity);
+                com.startapp.sdk.ads.nativead.NativeAdPreferences nativePrefs = new com.startapp.sdk.ads.nativead.NativeAdPreferences()
+                        .setAdsNumber(1)
+                        .setAutoBitmapDownload(true)
+                        .setSecondaryImageSize(1);
+
+                com.startapp.sdk.adsbase.adlisteners.AdEventListener adEventListener = new com.startapp.sdk.adsbase.adlisteners.AdEventListener() {
+                    @Override
+                    public void onReceiveAd(@NonNull com.startapp.sdk.adsbase.Ad ad) {
+                        ArrayList<com.startapp.sdk.ads.nativead.NativeAdDetails> ads = startAppNativeAd.getNativeAds();
+                        if (ads != null && !ads.isEmpty()) {
+                            com.startapp.sdk.ads.nativead.NativeAdDetails nativeAdDetails = ads.get(0);
+                            populateStartAppNativeAdView(nativeAdDetails);
+                            startAppNativeAdView.setVisibility(View.VISIBLE);
+                            progressBarAd.setVisibility(View.GONE);
+                        } else {
+                            if (fallback != null)
+                                fallback.run();
+                            else
+                                loadBackupNativeAd();
+                        }
+                    }
+
+                    @Override
+                    public void onFailedToReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
+                        if (fallback != null)
+                            fallback.run();
+                        else
+                            loadBackupNativeAd();
+                    }
+                };
+                startAppNativeAd.loadAd(nativePrefs, adEventListener);
+            } catch (NoClassDefFoundError | Exception e) {
+                Log.e(TAG, "Failed to load StartApp native ad. Error: " + e.getMessage());
+                if (fallback != null)
+                    fallback.run();
+                else
+                    loadBackupNativeAd();
+            }
+        }
+
+        private void populateStartAppNativeAdView(com.startapp.sdk.ads.nativead.NativeAdDetails nativeAdDetails) {
+            int bgColor = darkTheme ? nativeBackgroundDark : nativeBackgroundLight;
+            if (startAppNativeBackground != null)
+                startAppNativeBackground.setBackgroundResource(bgColor);
+            if (startAppNativeTitle != null)
+                startAppNativeTitle.setText(nativeAdDetails.getTitle());
+            if (startAppNativeDescription != null)
+                startAppNativeDescription.setText(nativeAdDetails.getDescription());
+            if (startAppNativeImage != null)
+                startAppNativeImage.setImageBitmap(nativeAdDetails.getImageBitmap());
+            if (startAppNativeIcon != null)
+                startAppNativeIcon.setImageBitmap(nativeAdDetails.getSecondaryImageBitmap());
+            if (startAppNativeButton != null)
+                startAppNativeButton.setText(nativeAdDetails.isApp() ? "Install" : "Open");
+            nativeAdDetails.registerViewForInteraction(startAppNativeAdView);
+        }
+
+        private void handleWortiseLoad(Runnable fallback) {
+            // Wortise Native Ads implementation is temporarily disabled due to SDK version
+            // conflicts
+            if (fallback != null)
+                fallback.run();
+            else
+                loadBackupNativeAd();
+        }
+
+        private void populateWortiseNativeAdView(com.google.android.gms.ads.nativead.NativeAd nativeAd,
+                com.google.android.gms.ads.nativead.NativeAdView nativeAdView) {
+            int bgColor = darkTheme ? nativeBackgroundDark : nativeBackgroundLight;
+            View background = nativeAdView.findViewById(R.id.background);
+            if (background != null)
+                background.setBackgroundResource(bgColor);
+
+            nativeAdView.setMediaView(nativeAdView.findViewById(R.id.media_view));
+            nativeAdView.setHeadlineView(nativeAdView.findViewById(R.id.primary));
+            nativeAdView.setBodyView(nativeAdView.findViewById(R.id.body));
+            nativeAdView.setCallToActionView(nativeAdView.findViewById(R.id.cta));
+            nativeAdView.setIconView(nativeAdView.findViewById(R.id.icon));
+
+            if (nativeAdView.getHeadlineView() != null)
+                ((TextView) nativeAdView.getHeadlineView()).setText(nativeAd.getHeadline());
+            if (nativeAdView.getMediaView() != null)
+                nativeAdView.getMediaView().setMediaContent(nativeAd.getMediaContent());
+            if (nativeAdView.getBodyView() != null) {
+                if (nativeAd.getBody() == null) {
+                    nativeAdView.getBodyView().setVisibility(View.INVISIBLE);
+                } else {
+                    nativeAdView.getBodyView().setVisibility(View.VISIBLE);
+                    ((TextView) nativeAdView.getBodyView()).setText(nativeAd.getBody());
+                }
+            }
+            if (nativeAdView.getCallToActionView() != null) {
+                if (nativeAd.getCallToAction() == null) {
+                    nativeAdView.getCallToActionView().setVisibility(View.INVISIBLE);
+                } else {
+                    nativeAdView.getCallToActionView().setVisibility(View.VISIBLE);
+                    ((Button) nativeAdView.getCallToActionView()).setText(nativeAd.getCallToAction());
+                }
+            }
+            if (nativeAdView.getIconView() != null) {
+                if (nativeAd.getIcon() == null) {
+                    nativeAdView.getIconView().setVisibility(View.GONE);
+                } else {
+                    ((ImageView) nativeAdView.getIconView()).setImageDrawable(nativeAd.getIcon().getDrawable());
+                    nativeAdView.getIconView().setVisibility(View.VISIBLE);
+                }
+            }
+            nativeAdView.setNativeAd(nativeAd);
+        }
+
+        private com.applovin.mediation.nativeAds.MaxNativeAdLoader nativeAdLoader;
+        private com.applovin.mediation.MaxAd maxNativeAd;
+        private FrameLayout wortiseNativeAd;
+        private String wortiseNativeId = "";
+
+        @androidx.annotation.NonNull
+        public Builder setWortiseNativeId(@androidx.annotation.NonNull String wortiseNativeId) {
+            this.wortiseNativeId = wortiseNativeId;
+            return this;
         }
 
     }
 
 }
-
-
-
-

@@ -4,26 +4,13 @@
     <color name="colorPrimaryVariant">#3700B3</color>
     <color name="colorOnPrimary">#FFFFFF</color>
     <color name="colorSecondary">#03DAC6</color> <!-- Material Teal -->
-    <color name="colorSecondaryVariant">#018786</color>
     <color name="colorOnSecondary">#000000</color>
     <color name="colorBackground">#F5F5F5</color>
-    <color name="colorSurface">#FFFFFF</color>
-    <color name="colorError">#B00020</color>
-    <color name="colorOnBackground">#000000</color>
-    <color name="colorOnSurface">#000000</color>
-    <color name="colorOnError">#FFFFFF</color>
-
     <!-- Dark Theme Colors -->
     <color name="colorPrimaryDark">#BB86FC</color>
     <color name="colorOnPrimaryDark">#000000</color>
     <color name="colorSecondaryDark">#03DAC6</color>
     <color name="colorOnSecondaryDark">#000000</color>
-    <color name="colorBackgroundDark">#121212</color>
-    <color name="colorSurfaceDark">#121212</color>
-    <color name="colorErrorDark">#CF6679</color>
-    <color name="colorOnBackgroundDark">#FFFFFF</color>
-    <color name="colorOnSurfaceDark">#FFFFFF</color>
-    <color name="colorOnErrorDark">#000000</color>
 
     <color name="colorNativeBackgroundLight">#FFFFFF</color>
     <color name="colorNativeBackgroundDark">#2d2d2d</color>

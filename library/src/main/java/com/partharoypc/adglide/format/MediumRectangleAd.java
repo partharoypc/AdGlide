@@ -3,7 +3,6 @@ package com.partharoypc.adglide.format;
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.META;
-import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
 
 import android.app.Activity;
@@ -31,7 +30,7 @@ public class MediumRectangleAd {
 
     public static class Builder {
 
-    private static final String TAG = "AdGlide";
+        private static final String TAG = "AdGlide";
         private final Activity activity;
         private AdView adView;
         private com.facebook.ads.AdView metaAdView;
@@ -187,7 +186,8 @@ public class MediumRectangleAd {
                             break;
 
                         case META:
-                            metaAdView = new com.facebook.ads.AdView(activity, metaBannerId, AdSize.RECTANGLE_HEIGHT_250);
+                            metaAdView = new com.facebook.ads.AdView(activity, metaBannerId,
+                                    AdSize.RECTANGLE_HEIGHT_250);
                             RelativeLayout metaAdViewContainer = activity.findViewById(R.id.meta_banner_view_container);
                             metaAdViewContainer.addView(metaAdView);
                             com.facebook.ads.AdListener adListener = new com.facebook.ads.AdListener() {
@@ -284,7 +284,8 @@ public class MediumRectangleAd {
                             break;
 
                         case META:
-                            metaAdView = new com.facebook.ads.AdView(activity, metaBannerId, AdSize.RECTANGLE_HEIGHT_250);
+                            metaAdView = new com.facebook.ads.AdView(activity, metaBannerId,
+                                    AdSize.RECTANGLE_HEIGHT_250);
                             RelativeLayout metaAdViewContainer = activity.findViewById(R.id.meta_banner_view_container);
                             metaAdViewContainer.addView(metaAdView);
                             com.facebook.ads.AdListener adListener = new com.facebook.ads.AdListener() {
@@ -348,7 +349,3 @@ public class MediumRectangleAd {
     }
 
 }
-
-
-
-

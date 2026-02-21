@@ -46,7 +46,6 @@ public class TemplateView extends FrameLayout {
     private NativeTemplateStyle styles;
     private NativeAd nativeAd;
     private NativeAdView nativeAdView;
-    private android.view.View skeletonView;
 
     private TextView primaryView;
     private TextView secondaryView;
@@ -197,11 +196,6 @@ public class TemplateView extends FrameLayout {
     public void setNativeAd(NativeAd nativeAd) {
         this.nativeAd = nativeAd;
 
-        if (skeletonView != null) {
-            skeletonView.clearAnimation();
-            skeletonView.setVisibility(GONE);
-        }
-
         String store = nativeAd.getStore();
         String advertiser = nativeAd.getAdvertiser();
         String headline = nativeAd.getHeadline();
@@ -270,7 +264,8 @@ public class TemplateView extends FrameLayout {
 
     private void initView(Context context, AttributeSet attributeSet) {
 
-        TypedArray attributes = context.getTheme().obtainStyledAttributes(attributeSet, R.styleable.adglide_TemplateView, 0, 0);
+        TypedArray attributes = context.getTheme().obtainStyledAttributes(attributeSet,
+                R.styleable.adglide_TemplateView, 0, 0);
 
         try {
             templateType = attributes.getResourceId(R.styleable.adglide_TemplateView_adglide_template_type,
@@ -281,16 +276,6 @@ public class TemplateView extends FrameLayout {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(templateType, this);
 
-        // Add skeleton view
-        skeletonView = inflater.inflate(R.layout.adglide_skeleton_loading_view, null);
-        addView(skeletonView);
-
-        // Start pulsing animation
-        android.view.animation.AlphaAnimation anim = new android.view.animation.AlphaAnimation(0.5f, 1.0f);
-        anim.setDuration(800);
-        anim.setRepeatMode(android.view.animation.Animation.REVERSE);
-        anim.setRepeatCount(android.view.animation.Animation.INFINITE);
-        skeletonView.startAnimation(anim);
     }
 
     @Override
@@ -312,7 +297,3 @@ public class TemplateView extends FrameLayout {
         background = findViewById(R.id.background);
     }
 }
-
-
-
-

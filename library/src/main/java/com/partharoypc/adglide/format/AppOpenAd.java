@@ -441,26 +441,32 @@ public class AppOpenAd {
                     switch (adNetwork) {
                         case ADMOB:
                         case META_BIDDING_ADMOB:
-                            AdRequest adRequest = new AdRequest.Builder().build();
-                            com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
-                                    new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
-                                        @Override
-                                        public void onAdLoaded(
-                                                @NonNull com.google.android.gms.ads.appopen.AppOpenAd ad) {
-                                            appOpenAd = ad;
-                                            showAppOpenAd(onShowAdCompleteListener);
-                                            Log.d(TAG, "[" + adNetwork + "] " + "[on start] app open ad loaded");
-                                        }
+                            try {
+                                AdRequest adRequest = new AdRequest.Builder().build();
+                                com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
+                                        new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
+                                            @Override
+                                            public void onAdLoaded(
+                                                    @NonNull com.google.android.gms.ads.appopen.AppOpenAd ad) {
+                                                appOpenAd = ad;
+                                                showAppOpenAd(onShowAdCompleteListener);
+                                                Log.d(TAG, "[" + adNetwork + "] " + "[on start] app open ad loaded");
+                                            }
 
-                                        @Override
-                                        public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                            appOpenAd = null;
-                                            loadBackupAppOpenAd(onShowAdCompleteListener);
-                                            Log.d(TAG,
-                                                    "[" + adNetwork + "] " + "[on start] failed to load app open ad: "
-                                                            + loadAdError.getMessage());
-                                        }
-                                    });
+                                            @Override
+                                            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                                                appOpenAd = null;
+                                                loadBackupAppOpenAd(onShowAdCompleteListener);
+                                                Log.d(TAG,
+                                                        "[" + adNetwork + "] "
+                                                                + "[on start] failed to load app open ad: "
+                                                                + loadAdError.getMessage());
+                                            }
+                                        });
+                            } catch (NoClassDefFoundError | Exception e) {
+                                Log.e(TAG, "Failed to load AdMob app open ad. Error: " + e.getMessage());
+                                loadBackupAppOpenAd(onShowAdCompleteListener);
+                            }
                             break;
 
                         default:
@@ -525,27 +531,33 @@ public class AppOpenAd {
                     switch (adNetwork) {
                         case ADMOB:
                         case META_BIDDING_ADMOB:
-                            AdRequest adRequest = new AdRequest.Builder().build();
-                            com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
-                                    new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
-                                        @Override
-                                        public void onAdLoaded(
-                                                @NonNull com.google.android.gms.ads.appopen.AppOpenAd ad) {
-                                            appOpenAd = ad;
-                                            isAppOpenAdLoaded = true;
-                                            Log.d(TAG, "[" + adNetwork + "] " + "[on resume] app open ad loaded");
-                                        }
+                            try {
+                                AdRequest adRequest = new AdRequest.Builder().build();
+                                com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
+                                        new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
+                                            @Override
+                                            public void onAdLoaded(
+                                                    @NonNull com.google.android.gms.ads.appopen.AppOpenAd ad) {
+                                                appOpenAd = ad;
+                                                isAppOpenAdLoaded = true;
+                                                Log.d(TAG, "[" + adNetwork + "] " + "[on resume] app open ad loaded");
+                                            }
 
-                                        @Override
-                                        public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                            appOpenAd = null;
-                                            isAppOpenAdLoaded = false;
-                                            loadBackupAppOpenAd();
-                                            Log.d(TAG,
-                                                    "[" + adNetwork + "] " + "[on resume] failed to load app open ad : "
-                                                            + loadAdError.getMessage());
-                                        }
-                                    });
+                                            @Override
+                                            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                                                appOpenAd = null;
+                                                isAppOpenAdLoaded = false;
+                                                loadBackupAppOpenAd();
+                                                Log.d(TAG,
+                                                        "[" + adNetwork + "] "
+                                                                + "[on resume] failed to load app open ad : "
+                                                                + loadAdError.getMessage());
+                                            }
+                                        });
+                            } catch (NoClassDefFoundError | Exception e) {
+                                Log.e(TAG, "Failed to load AdMob app open ad on resume. Error: " + e.getMessage());
+                                loadBackupAppOpenAd();
+                            }
                             break;
 
                         default:
@@ -606,28 +618,33 @@ public class AppOpenAd {
                     switch (backupAdNetwork) {
                         case ADMOB:
                         case META_BIDDING_ADMOB:
-                            AdRequest adRequest = new AdRequest.Builder().build();
-                            com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
-                                    new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
-                                        @Override
-                                        public void onAdLoaded(
-                                                @NonNull com.google.android.gms.ads.appopen.AppOpenAd ad) {
-                                            appOpenAd = ad;
-                                            showBackupAppOpenAd(onShowAdCompleteListener);
-                                            Log.d(TAG, "[" + backupAdNetwork + "] "
-                                                    + "[on start] [backup] app open ad loaded");
-                                        }
+                            try {
+                                AdRequest adRequest = new AdRequest.Builder().build();
+                                com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
+                                        new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
+                                            @Override
+                                            public void onAdLoaded(
+                                                    @NonNull com.google.android.gms.ads.appopen.AppOpenAd ad) {
+                                                appOpenAd = ad;
+                                                showBackupAppOpenAd(onShowAdCompleteListener);
+                                                Log.d(TAG, "[" + backupAdNetwork + "] "
+                                                        + "[on start] [backup] app open ad loaded");
+                                            }
 
-                                        @Override
-                                        public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                            appOpenAd = null;
-                                            onShowAdCompleteListener.onShowAdComplete();
-                                            Log.d(TAG,
-                                                    "[" + backupAdNetwork + "] "
-                                                            + "[on start] [backup] failed to load app open ad: "
-                                                            + loadAdError.getMessage());
-                                        }
-                                    });
+                                            @Override
+                                            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                                                appOpenAd = null;
+                                                onShowAdCompleteListener.onShowAdComplete();
+                                                Log.d(TAG,
+                                                        "[" + backupAdNetwork + "] "
+                                                                + "[on start] [backup] failed to load app open ad: "
+                                                                + loadAdError.getMessage());
+                                            }
+                                        });
+                            } catch (NoClassDefFoundError | Exception e) {
+                                Log.e(TAG, "Failed to load backup AdMob app open ad. Error: " + e.getMessage());
+                                onShowAdCompleteListener.onShowAdComplete();
+                            }
                             break;
 
                         default:
@@ -693,28 +710,33 @@ public class AppOpenAd {
                     switch (backupAdNetwork) {
                         case ADMOB:
                         case META_BIDDING_ADMOB:
-                            AdRequest adRequest = new AdRequest.Builder().build();
-                            com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
-                                    new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
-                                        @Override
-                                        public void onAdLoaded(
-                                                @NonNull com.google.android.gms.ads.appopen.AppOpenAd ad) {
-                                            appOpenAd = ad;
-                                            isAppOpenAdLoaded = true;
-                                            Log.d(TAG, "[" + backupAdNetwork + "] "
-                                                    + "[on resume] [backup] app open ad loaded");
-                                        }
+                            try {
+                                AdRequest adRequest = new AdRequest.Builder().build();
+                                com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
+                                        new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
+                                            @Override
+                                            public void onAdLoaded(
+                                                    @NonNull com.google.android.gms.ads.appopen.AppOpenAd ad) {
+                                                appOpenAd = ad;
+                                                isAppOpenAdLoaded = true;
+                                                Log.d(TAG, "[" + backupAdNetwork + "] "
+                                                        + "[on resume] [backup] app open ad loaded");
+                                            }
 
-                                        @Override
-                                        public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                            appOpenAd = null;
-                                            isAppOpenAdLoaded = false;
-                                            Log.d(TAG,
-                                                    "[" + backupAdNetwork + "] "
-                                                            + "[on resume] [backup] failed to load app open ad : "
-                                                            + loadAdError.getMessage());
-                                        }
-                                    });
+                                            @Override
+                                            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                                                appOpenAd = null;
+                                                isAppOpenAdLoaded = false;
+                                                Log.d(TAG,
+                                                        "[" + backupAdNetwork + "] "
+                                                                + "[on resume] [backup] failed to load app open ad : "
+                                                                + loadAdError.getMessage());
+                                            }
+                                        });
+                            } catch (NoClassDefFoundError | Exception e) {
+                                Log.e(TAG,
+                                        "Failed to load backup AdMob app open ad on resume. Error: " + e.getMessage());
+                            }
                             break;
 
                         default:
@@ -770,7 +792,3 @@ public class AppOpenAd {
     }
 
 }
-
-
-
-

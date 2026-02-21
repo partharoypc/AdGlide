@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- Ignore minor layout depth structure and overdraw warnings in demo for simplicity -->
+    <issue id="UselessParent" severity="ignore" />
+    <issue id="TooDeepLayout" severity="ignore" />
+    <issue id="Overdraw" severity="ignore" />
+    <issue id="NotifyDataSetChanged" severity="info" />
+    <issue id="UnusedResources" severity="info" />
+</lint>

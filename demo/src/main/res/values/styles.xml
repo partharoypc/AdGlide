@@ -14,10 +14,6 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.Material3.Light" />
 
-    <style name="ToolbarStyle" parent="Widget.Material3.Toolbar">
-        <item name="android:background">@color/colorPrimary</item>
-        <item name="titleTextColor">@color/colorOnPrimary</item>
-    </style>
 
     <style name="AppDarkTheme" parent="Theme.Material3.Dark.NoActionBar">
         <item name="colorPrimary">@color/colorPrimaryDark</item>

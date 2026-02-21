@@ -3,4 +3,28 @@
     <string name="btn_show_interstitial_ad">Show Interstitial Ad</string>
     <string name="btn_show_rewarded_ad">Show Rewarded Ad</string>
     <string name="btn_load_show_rewarded_ad">Load &amp; Show Rewarded Ad</string>
+    <string name="loading">Loading...</string>
+    <string name="settings">Settings</string>
+    <string name="collapsible_banner">Collapsible Banner</string>
+    <string name="load_banner">Load Banner</string>
+    <string name="destroy">Destroy</string>
+    <string name="banner_area">Banner Area</string>
+    <string name="txt_exit_dialog">What do you want to do?</string>
+    <string name="load_interstitial">Load Interstitial</string>
+    <string name="show_interstitial">Show Interstitial</string>
+    <string name="logs">Logs:</string>
+    <string name="change_style">Change Style</string>
+    <string name="refresh_ad">Refresh Ad</string>
+    <string name="native_ad_area">Native Ad Area</string>
+    <string name="load_rewarded_ad">Load Rewarded Ad</string>
+    <string name="show_rewarded_ad_btn">Show Rewarded Ad</string>
+    <string name="primary_network">Primary Ad Network</string>
+    <string name="backup_network">Backup Ad Network</string>
+    <string name="preferences">Preferences</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="show_app_open">Show App Open Ad on Resume</string>
+    <string name="privacy">Privacy</string>
+    <string name="manage_consent">Manage GDPR Consent</string>
+
+
 </resources>

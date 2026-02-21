@@ -17,5 +17,37 @@
 #-keepattributes SourceFile,LineNumberTable
 
 # If you keep the line number information, uncomment this to
-# hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# ============================================================================
+# Optional Ad Network Dependencies (compileOnly)
+# These rules prevent R8/ProGuard from crashing the build with "Missing class"
+# errors when a developer chooses to omit a specific ad network.
+# ============================================================================
+
+# AdMob (Google Mobile Ads)
+-dontwarn com.google.android.gms.ads.**
+-dontwarn com.google.ads.mediation.**
+
+# Google UMP
+-dontwarn com.google.android.ump.**
+
+# Meta Audience Network (FAN)
+-dontwarn com.facebook.ads.**
+-dontwarn com.facebook.infer.annotation.**
+
+# AppLovin
+-dontwarn com.applovin.**
+
+# Unity Ads
+-dontwarn com.unity3d.ads.**
+
+# IronSource
+-dontwarn com.ironsource.**
+
+# StartApp
+-dontwarn com.startapp.**
+
+# Wortise / Bytedance (Pangle)
+-dontwarn com.wortise.**
+-dontwarn com.bytedance.**

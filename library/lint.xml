@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- Ignore minor layout depth structure warnings as restructuring risks visual breakage for ad templates -->
+    <issue id="UselessParent" severity="ignore" />
+    <issue id="TooDeepLayout" severity="ignore" />
+</lint>

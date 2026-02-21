@@ -45,7 +45,7 @@
                     android:id="@+id/btn_load"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Load Interstitial"
+                    android:text="@string/load_interstitial"
                     android:layout_marginBottom="8dp"
                     style="@style/Widget.Material3.Button.OutlinedButton"/>
 
@@ -53,7 +53,7 @@
                     android:id="@+id/btn_show"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Show Interstitial"
+                    android:text="@string/show_interstitial"
                     style="@style/Widget.Material3.Button"/>
 
             </LinearLayout>
@@ -63,7 +63,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Logs:"
+            android:text="@string/logs"
             android:textAppearance="?attr/textAppearanceTitleMedium"
             android:layout_marginBottom="8dp"/>
 

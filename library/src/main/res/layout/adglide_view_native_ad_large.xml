@@ -10,20 +10,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.partharoypc.adglide.util.TemplateView
-            android:id="@+id/ad_mob_native_ad_container"
+        <ViewStub
+            android:id="@+id/ad_mob_native_ad_stub"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:visibility="gone"
-            app:adglide_template_type="@layout/adglide_ad_mob_large_template_view" />
+            android:layout="@layout/adglide_stub_ad_mob_large" />
 
-        <com.facebook.ads.NativeAdLayout
-            android:id="@+id/meta_native_ad_container"
+        <ViewStub
+            android:id="@+id/meta_native_ad_stub"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:visibility="gone" />
+            android:layout="@layout/adglide_stub_meta_native" />
 
         <include
             android:id="@+id/start_app_native_ad_container"

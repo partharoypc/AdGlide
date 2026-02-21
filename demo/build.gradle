@@ -36,6 +36,11 @@ android {
     lint {
         disable 'GradleDependency'
     }
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
 }
 
 dependencies {
@@ -55,4 +60,32 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:5.0.5'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
     implementation project(':library')
+    
+    // Ad Networks (Required by Demo App)
+    implementation 'com.google.android.gms:play-services-ads:23.6.0'
+    implementation 'com.applovin:applovin-sdk:13.1.0'
+    implementation 'com.startapp:inapp-sdk:5.1.0'
+    implementation 'com.unity3d.ads:unity-ads:4.12.5'
+    implementation 'com.facebook.android:audience-network-sdk:6.18.0'
+    implementation 'com.ironsource.sdk:mediationsdk:8.6.1'
+    implementation 'com.wortise:android-sdk:1.6.0'
+    
+    // Mediation adapters if necessary
+    implementation 'com.google.ads.mediation:facebook:6.18.0.0'
+    implementation 'com.google.ads.mediation:applovin:13.0.1.0'
+    implementation 'com.google.ads.mediation:vungle:7.4.2.0'
+    implementation 'com.google.ads.mediation:ironsource:8.6.0.0'
+    
+    implementation 'com.applovin.mediation:facebook-adapter:6.18.0.0'
+    implementation 'com.applovin.mediation:google-adapter:23.6.0.0'
+
+    // Force updated Pangle SDK and Adapter versions to resolve 16KB page size alignment issues
+    constraints {
+        implementation('com.pangle.global:ads-sdk:6.4.0.6') {
+            because 'Version 6.4+ is compiled with 16KB ELF page size alignment for Android 15+'
+        }
+        implementation('com.google.ads.mediation:pangle:6.4.0.6.0') {
+            because 'Adapter must match the Pangle SDK version'
+        }
+    }
 }

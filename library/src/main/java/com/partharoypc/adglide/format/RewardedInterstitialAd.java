@@ -187,7 +187,8 @@ public class RewardedInterstitialAd {
                         return;
                     }
                     backupAdNetwork = networkToLoad;
-                    Log.d(TAG, "Loading Backup Rewarded Interstitial Ad [" + backupAdNetwork.toUpperCase() + "]");
+                    Log.d(TAG, "Loading Backup Rewarded Interstitial Ad ["
+                            + backupAdNetwork.toUpperCase(java.util.Locale.ROOT) + "]");
 
                     switch (backupAdNetwork) {
                         case ADMOB:
@@ -299,7 +300,3 @@ public class RewardedInterstitialAd {
 
     }
 }
-
-
-
-
