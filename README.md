@@ -63,16 +63,60 @@ new AdNetwork.Initialize(this)
 
 ---
 
-### 📊 Ad Networks Capability Matrix
+### 📊 Advanced Capability Matrix
 
 | Ad Format | AdMob | Meta | Unity | AppLovin | IronSource | StartApp | Wortise |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Direct Use** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Bidding Support**| ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
+| **Waterfall** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Banner** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Interstitial** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Native** | ✅ | ✅ | ❌ | ✅ | ❌ | ✅ | ✅ |
 | **Rewarded** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **App Open** | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ✅ |
-| **Medium Rectangle** | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+
+---
+
+## 🌐 Initialization Modes & Mediation
+
+AdGlide supports three distinct integration patterns to maximize your yield and simplify your code.
+
+### 1. Direct Use (Standalone)
+Target a single network exclusively.
+```java
+.setAdNetwork("admob") // admob, meta, applovin, unity, ironsource, startapp, wortise
+```
+
+### 2. Bidding Mediation (High-Yield)
+Utilize real-time bidding for supported networks.
+```java
+// Supported modes: META_BIDDING_ADMOB, META_BIDDING_APPLOVIN_MAX, META_BIDDING_IRONSOURCE
+.setAdNetwork("META_BIDDING_ADMOB") 
+```
+
+### 3. Sequential Waterfall (Fail-Safe)
+The ultimate fallback system. If the primary network fails to fill, AdGlide cycles through your list automatically.
+```java
+.setAdNetwork("admob")
+.setBackupAdNetworks("meta", "applovin_max", "unity", "startapp")
+```
+
+---
+
+## 🚀 All Possible Features & Advanced Config
+
+| Feature | Description | Implementation |
+| :--- | :--- | :--- |
+| **AdRepository** | Zero-latency pre-fetching singleton | `AdRepository.getInstance().preload(...)` |
+| **Triple-Base64** | Industrial-grade ID obfuscation | `Tools.decode("...")` |
+| **Adaptive Sizing**| Dynamic banner height calculation | `Tools.getAdSize(activity)` |
+| **Frequency Capping**| Show ads every X times to improve UX | `.setInterval(3)` |
+| **Collapsible Banner**| AdMob's high-CTR banner format | `.setIsCollapsibleBanner(true)` |
+| **GDPR/UMP** | Modern consent management support | `new GDPR(activity).update(...)` |
+| **Dark Theme** | Auto-stying for native ads | `.setNativeAdBackgroundColor(...)` |
+| **Fluid Layouts** | News, Medium, Radio, Stream, etc. | `.setNativeAdStyle("news")` |
+| **Remote Toggle** | Turn ads on/off via server JSON | `RemoteConfigHelper` |
 
 ---
 
@@ -184,6 +228,98 @@ Add these rules to your `proguard-rules.pro` to ensure the SDK functions correct
 
 ---
 
+
+---
+
+## 📘 Full API Reference
+
+### 🏗️ Ad Format Builders
+
+#### `BannerAd.Builder`
+The foundational builder for all banner integrations.
+
+| Method | Description |
+| :--- | :--- |
+| `setAdStatus(String)` | Set to `AD_STATUS_ON` or `AD_STATUS_OFF` (from `Constant`). |
+| `setAdNetwork(String)` | Sets the primary network (e.g., `ADMOB`, `META`, `UNITY`). |
+| `setBackupAdNetwork(String)` | Sets a single fallback network. |
+| `setBackupAdNetworks(String...)` | Configures a sequential waterfall (e.g., `ADMOB, META, UNITY`). |
+| `setAdMobBannerId(String)` | Google AdMob / GAM Banner ID. |
+| `setMetaBannerId(String)` | Meta Audience Network Placement ID. |
+| `setUnityBannerId(String)` | Unity Ads Placement ID. |
+| `setAppLovinBannerId(String)` | AppLovin MAX / Discovery ID. |
+| `setironSourceBannerId(String)` | IronSource Placement Name. |
+| `setWortiseBannerId(String)` | Wortise Ad Unit ID. |
+| `setPlacementStatus(int)` | Remote toggle for this specific placement (`1` = ON). |
+| `setDarkTheme(boolean)` | Enables specialized dark UI for Native-style banners. |
+| `setIsCollapsibleBanner(boolean)` | **(Exclusive)** Enables AdMob Collapsible Banner support. |
+| `setLegacyGDPR(boolean)` | Forces legacy GDPR dialog instead of Google UMP. |
+| `build()` | Initializes and starts loading the ad. |
+
+#### `InterstitialAd.Builder`
+High-performance full-screen ad manager with built-in caps.
+
+| Method | Description |
+| :--- | :--- |
+| `setInterval(int)` | Show ad every X triggers (e.g., `3` means show on 3rd, 6th...). |
+| `setAdMobInterstitialId(String)` | AdMob Interstitial Unit ID. |
+| `setMetaInterstitialId(String)` | Meta Interstitial Placement ID. |
+| `setUnityInterstitialId(String)` | Unity Interstitial Placement ID. |
+| `setAppLovinInterstitialId(String)`| MAX Interstitial ID. |
+| `setironSourceInterstitialId(String)`| IronSource Interstitial Name. |
+| `setWortiseInterstitialId(String)` | Wortise Interstitial ID. |
+| `build()` | Starts pre-fetching the interstitial ad. |
+| `show()` | Displays the ad if loaded and interval criteria met. |
+
+#### `NativeAd.Builder`
+Advanced customization for seamless UI integration.
+
+| Method | Description |
+| :--- | :--- |
+| `setNativeAdStyle(String)` | Choose from `news`, `medium`, `small`, `radio`, `stream`. |
+| `setNativeAdBackgroundColor(String, String)` | Custom background code for Light & Dark modes. |
+| `setPadding(int, int, int, int)` | Precise padding control for the ad container. |
+| `setMargin(int, int, int, int)` | Precise margin control for the ad container. |
+| `setAdMobNativeId(String)` | AdMob Native Advanced ID. |
+| `setMetaNativeId(String)` | Meta Native Ad ID. |
+| `setAppLovinNativeId(String)` | Max Native Ad ID. |
+| `setWortiseNativeId(String)` | Wortise Native Unit ID. |
+| `build()` | Fetches and renders the ad into the provided container. |
+
+#### `RewardedAd.Builder`
+Reward-based monetization with full lifecycle callbacks.
+
+| Method | Description |
+| :--- | :--- |
+| `setAdMobRewardedId(String)` | AdMob Rewarded Unit ID. |
+| `setMetaRewardedId(String)` | Meta Rewarded Placement ID. |
+| `setUnityRewardedId(String)` | Unity Rewarded Placement ID. |
+| `setApplovinMaxRewardedId(String)`| MAX Rewarded ID. |
+| `setironSourceRewardedId(String)`| IronSource Rewarded Name. |
+| `build(OnRewardedAdCompleteListener, OnRewardedAdDismissedListener)` | Pre-loads with listeners. |
+| `show(OnRewardedAdCompleteListener, OnRewardedAdDismissedListener, OnRewardedAdErrorListener)` | Show with state tracking. |
+
+---
+
+### ⚡ Performance & Security Utils
+
+#### `AdRepository` (Zero-Latency Cache)
+Standalone singleton for pre-caching ads for high-traffic entry points.
+
+- `getInstance().preloadInterstitial(Context, String network, String id)`: Background load.
+- `getInstance().isInterstitialAvailable(String network, String id)`: Check status.
+- `getInstance().getInterstitial(String network, String id)`: Fetch from cache.
+
+#### `Tools` (Obfuscation & Layout)
+- `decode(String)`: Decodes Triple-Base64 IDs (Recommended for security).
+- `getAdSize(Activity)`: Dynamically calculates Adaptive Banner size based on screen width.
+
+#### `Constant` (Network Identifiers)
+Use these strings for `setAdNetwork`:
+`ADMOB`, `META`, `UNITY`, `APPLOVIN`, `APPLOVIN_MAX`, `IRONSOURCE`, `STARTAPP`, `WORTISE`.
+
+---
+
 ## 🤝 Support & Community
 
 Developed with ❤️ by **[Partha Roy](https://github.com/partharoypc)**.
@@ -192,3 +328,4 @@ For bugs, feature requests, or custom mediation integrations, please open an iss
 
 ---
 *AdGlide is MIT Licensed. © 2024 Partha Roy.*
+
