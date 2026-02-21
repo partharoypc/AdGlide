@@ -1,4 +1,6 @@
-![AdGlide Banner](assets/banner.png)
+<p align="center">
+  <img src="assets/banner.png" alt="AdGlide Banner">
+</p>
 
 # AdGlide SDK 🚀
 ### *The Premium Mediation Wrapper for High-Performance Android Apps*
