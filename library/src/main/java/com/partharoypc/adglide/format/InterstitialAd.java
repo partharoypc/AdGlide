@@ -293,551 +293,11 @@ public class InterstitialAd {
         }
 
         private void loadInterstitialAd() {
-            try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
-                    if (waterfallManager != null) {
-                        waterfallManager.reset();
-                    }
-                    switch (adNetwork) {
-                        case ADMOB:
-                        case META_BIDDING_ADMOB: {
-                            Object cachedAdMob = AdRepository.getInstance().getInterstitial(adNetwork,
-                                    adMobInterstitialId);
-                            if (cachedAdMob instanceof com.google.android.gms.ads.interstitial.InterstitialAd) {
-                                adMobInterstitialAd = (com.google.android.gms.ads.interstitial.InterstitialAd) cachedAdMob;
-                                setupAdMobCallback();
-                                Log.d(TAG, "AdMob Interstitial loaded from cache");
-                            } else {
-                                com.google.android.gms.ads.interstitial.InterstitialAd.load(activity,
-                                        adMobInterstitialId,
-                                        Tools.getAdRequest(activity, legacyGDPR), new InterstitialAdLoadCallback() {
-                                            @Override
-                                            public void onAdLoaded(
-                                                    @NonNull com.google.android.gms.ads.interstitial.InterstitialAd interstitialAd) {
-                                                adMobInterstitialAd = interstitialAd;
-                                                setupAdMobCallback();
-                                                Log.i(TAG, "onAdLoaded");
-                                            }
-
-                                            @Override
-                                            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                                Log.i(TAG, loadAdError.getMessage());
-                                                adMobInterstitialAd = null;
-                                                loadBackupInterstitialAd();
-                                                Log.d(TAG, "Failed load AdMob Interstitial Ad");
-                                            }
-                                        });
-                            }
-                            break;
-                        }
-
-                        case META: {
-                            metaInterstitialAd = new com.facebook.ads.InterstitialAd(activity, metaInterstitialId);
-                            com.facebook.ads.InterstitialAdListener adListener = new InterstitialAdListener() {
-                                @Override
-                                public void onInterstitialDisplayed(com.facebook.ads.Ad ad) {
-                                }
-
-                                @Override
-                                public void onInterstitialDismissed(com.facebook.ads.Ad ad) {
-                                    metaInterstitialAd.loadAd();
-                                }
-
-                                @Override
-                                public void onError(com.facebook.ads.Ad ad, com.facebook.ads.AdError adError) {
-                                    loadBackupInterstitialAd();
-                                }
-
-                                @Override
-                                public void onAdLoaded(com.facebook.ads.Ad ad) {
-                                    Log.d(TAG, "Meta Interstitial is loaded");
-                                }
-
-                                @Override
-                                public void onAdClicked(com.facebook.ads.Ad ad) {
-                                }
-
-                                @Override
-                                public void onLoggingImpression(com.facebook.ads.Ad ad) {
-                                }
-                            };
-
-                            com.facebook.ads.InterstitialAd.InterstitialLoadAdConfig loadAdConfig = metaInterstitialAd
-                                    .buildLoadAdConfig().withAdListener(adListener).build();
-                            metaInterstitialAd.loadAd(loadAdConfig);
-                            break;
-                        }
-
-                        case UNITY: {
-                            try {
-                                UnityAds.load(unityInterstitialId, new IUnityAdsLoadListener() {
-                                    @Override
-                                    public void onUnityAdsAdLoaded(String placementId) {
-                                        Log.d(TAG, "Unity Interstitial Ad loaded");
-                                    }
-
-                                    @Override
-                                    public void onUnityAdsFailedToLoad(String placementId,
-                                            UnityAds.UnityAdsLoadError error,
-                                            String message) {
-                                        loadBackupInterstitialAd();
-                                        Log.d(TAG, "Unity Interstitial Ad failed to load: " + error + " - " + message);
-                                    }
-                                });
-                            } catch (NoClassDefFoundError | Exception e) {
-                                Log.e(TAG, "Failed to load backup interstitial for Unity. Error: " + e.getMessage());
-                                loadBackupInterstitialAd();
-                            }
-                            break;
-                        }
-
-                        case APPLOVIN:
-                        case APPLOVIN_MAX:
-                        case META_BIDDING_APPLOVIN_MAX: {
-                            try {
-                                appLovinMaxInterstitialAd = new MaxInterstitialAd(appLovinInterstitialId, activity);
-                                appLovinMaxInterstitialAd.setListener(new MaxAdListener() {
-                                    @Override
-                                    public void onAdLoaded(MaxAd ad) {
-                                        Log.d(TAG, "AppLovin Interstitial Ad loaded");
-                                    }
-
-                                    @Override
-                                    public void onAdDisplayed(MaxAd ad) {
-                                    }
-
-                                    @Override
-                                    public void onAdHidden(MaxAd ad) {
-                                        loadInterstitialAd();
-                                    }
-
-                                    @Override
-                                    public void onAdClicked(MaxAd ad) {
-                                    }
-
-                                    @Override
-                                    public void onAdLoadFailed(String adUnitId, MaxError error) {
-                                        loadBackupInterstitialAd();
-                                        Log.d(TAG, "AppLovin Interstitial Ad failed to load: " + error.getMessage());
-                                    }
-
-                                    @Override
-                                    public void onAdDisplayFailed(MaxAd ad, MaxError error) {
-                                    }
-                                });
-                                appLovinMaxInterstitialAd.loadAd();
-                            } catch (NoClassDefFoundError | Exception e) {
-                                Log.e(TAG, "Failed to load backup interstitial for AppLovin. Error: " + e.getMessage());
-                                loadBackupInterstitialAd();
-                            }
-                            break;
-                        }
-
-                        case APPLOVIN_DISCOVERY: {
-                            loadBackupInterstitialAd();
-                            break;
-                        }
-
-                        case IRONSOURCE:
-                        case META_BIDDING_IRONSOURCE: {
-                            try {
-                                IronSource.setLevelPlayInterstitialListener(new LevelPlayInterstitialListener() {
-                                    @Override
-                                    public void onAdReady(
-                                            com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                        Log.d(TAG, "ironSource Interstitial Ad loaded");
-                                    }
-
-                                    @Override
-                                    public void onAdLoadFailed(IronSourceError ironSourceError) {
-                                        loadBackupInterstitialAd();
-                                        Log.d(TAG, "ironSource Interstitial Ad failed to load: "
-                                                + ironSourceError.getErrorMessage());
-                                    }
-
-                                    @Override
-                                    public void onAdOpened(
-                                            com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                    }
-
-                                    @Override
-                                    public void onAdClosed(
-                                            com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                        loadInterstitialAd();
-                                    }
-
-                                    @Override
-                                    public void onAdShowSucceeded(
-                                            com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                    }
-
-                                    @Override
-                                    public void onAdShowFailed(IronSourceError ironSourceError,
-                                            com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                    }
-
-                                    @Override
-                                    public void onAdClicked(
-                                            com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                    }
-                                });
-                                IronSource.loadInterstitial();
-                            } catch (NoClassDefFoundError | Exception e) {
-                                Log.e(TAG,
-                                        "Failed to load backup interstitial for IronSource. Error: " + e.getMessage());
-                                loadBackupInterstitialAd();
-                            }
-                            break;
-                        }
-
-                        case STARTAPP: {
-                            try {
-                                startAppInterstitialAd = new StartAppAd(activity);
-                                startAppInterstitialAd.loadAd(new AdEventListener() {
-                                    @Override
-                                    public void onReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
-                                        Log.d(TAG, "StartApp Interstitial Ad loaded");
-                                    }
-
-                                    @Override
-                                    public void onFailedToReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
-                                        loadBackupInterstitialAd();
-                                        Log.d(TAG, "StartApp Interstitial Ad failed to load");
-                                    }
-                                });
-                            } catch (NoClassDefFoundError | Exception e) {
-                                Log.e(TAG, "Failed to load backup interstitial for StartApp. Error: " + e.getMessage());
-                                loadBackupInterstitialAd();
-                            }
-                            break;
-                        }
-
-                        case WORTISE: {
-                            try {
-                                wortiseInterstitialAd = new com.wortise.ads.interstitial.InterstitialAd(activity,
-                                        wortiseInterstitialId);
-                                wortiseInterstitialAd
-                                        .setListener(new com.wortise.ads.interstitial.InterstitialAd.Listener() {
-                                            @Override
-                                            public void onInterstitialClicked(
-                                                    @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
-                                            }
-
-                                            @Override
-                                            public void onInterstitialDismissed(
-                                                    @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
-                                                loadInterstitialAd();
-                                            }
-
-                                            @Override
-                                            public void onInterstitialFailedToLoad(
-                                                    @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd,
-                                                    @NonNull com.wortise.ads.AdError adError) {
-                                                loadBackupInterstitialAd();
-                                                Log.d(TAG, "Wortise Interstitial Ad failed to load");
-                                            }
-
-                                            @Override
-                                            public void onInterstitialFailedToShow(
-                                                    @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd,
-                                                    @NonNull com.wortise.ads.AdError adError) {
-                                            }
-
-                                            @Override
-                                            public void onInterstitialImpression(
-                                                    @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
-                                            }
-
-                                            @Override
-                                            public void onInterstitialLoaded(
-                                                    @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
-                                                Log.d(TAG, "Wortise Interstitial Ad loaded");
-                                            }
-
-                                            @Override
-                                            public void onInterstitialShown(
-                                                    @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
-                                            }
-
-                                            @Override
-                                            public void onInterstitialRevenuePaid(
-                                                    @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd,
-                                                    @NonNull com.wortise.ads.RevenueData revenueData) {
-                                            }
-                                        });
-                                wortiseInterstitialAd.loadAd();
-                            } catch (NoClassDefFoundError | Exception e) {
-                                Log.e(TAG, "Failed to load backup interstitial for Wortise. Error: " + e.getMessage());
-                                loadBackupInterstitialAd();
-                            }
-                            break;
-                        }
-
-                        default:
-                            loadBackupInterstitialAd();
-                            break;
-                    }
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error loading Interstitial Ad: " + e.getMessage());
-            }
+            loadInterstitialAd(null);
         }
 
-        private void loadBackupInterstitialAd() {
-            try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
-                    if (waterfallManager == null) {
-                        if (!backupAdNetwork.isEmpty()) {
-                            waterfallManager = new WaterfallManager(backupAdNetwork);
-                        } else {
-                            return;
-                        }
-                    }
-                    String networkToLoad = waterfallManager.getNext();
-                    if (networkToLoad == null) {
-                        Log.d(TAG, "All backup interstitial ads failed to load");
-                        return;
-                    }
-                    backupAdNetwork = networkToLoad;
-                    Log.d(TAG, "Loading Backup Interstitial Ad [" + backupAdNetwork.toUpperCase(java.util.Locale.ROOT)
-                            + "]");
-
-                    switch (backupAdNetwork) {
-                        case ADMOB:
-                        case META_BIDDING_ADMOB: {
-                            Object cachedAdMob = AdRepository.getInstance().getInterstitial(backupAdNetwork,
-                                    adMobInterstitialId);
-                            if (cachedAdMob instanceof com.google.android.gms.ads.interstitial.InterstitialAd) {
-                                adMobInterstitialAd = (com.google.android.gms.ads.interstitial.InterstitialAd) cachedAdMob;
-                                setupAdMobCallback();
-                                Log.d(TAG, "AdMob Backup Interstitial loaded from cache");
-                            } else {
-                                com.google.android.gms.ads.interstitial.InterstitialAd.load(activity,
-                                        adMobInterstitialId,
-                                        Tools.getAdRequest(activity, legacyGDPR), new InterstitialAdLoadCallback() {
-                                            @Override
-                                            public void onAdLoaded(
-                                                    @NonNull com.google.android.gms.ads.interstitial.InterstitialAd interstitialAd) {
-                                                adMobInterstitialAd = interstitialAd;
-                                                setupAdMobCallback();
-                                                Log.i(TAG, "onAdLoaded");
-                                            }
-
-                                            @Override
-                                            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                                Log.i(TAG, loadAdError.getMessage());
-                                                adMobInterstitialAd = null;
-                                                loadBackupInterstitialAd();
-                                                Log.d(TAG, "Failed load AdMob Interstitial Ad");
-                                            }
-                                        });
-                            }
-                            break;
-                        }
-
-                        case META: {
-                            Object cachedMeta = AdRepository.getInstance().getInterstitial(backupAdNetwork,
-                                    metaInterstitialId);
-                            if (cachedMeta instanceof com.facebook.ads.InterstitialAd) {
-                                metaInterstitialAd = (com.facebook.ads.InterstitialAd) cachedMeta;
-                                setupMetaCallback();
-                                Log.d(TAG, "Meta Backup Interstitial loaded from cache");
-                            } else {
-                                metaInterstitialAd = new com.facebook.ads.InterstitialAd(activity, metaInterstitialId);
-                                setupMetaCallback();
-                                com.facebook.ads.InterstitialAd.InterstitialLoadAdConfig loadAdConfig = metaInterstitialAd
-                                        .buildLoadAdConfig().withAdListener(metaAdListener).build();
-                                metaInterstitialAd.loadAd(loadAdConfig);
-                            }
-                            break;
-                        }
-
-                        case UNITY: {
-                            UnityAds.load(unityInterstitialId, new IUnityAdsLoadListener() {
-                                @Override
-                                public void onUnityAdsAdLoaded(String placementId) {
-                                    Log.d(TAG, "Unity Interstitial Ad loaded");
-                                }
-
-                                @Override
-                                public void onUnityAdsFailedToLoad(String placementId, UnityAds.UnityAdsLoadError error,
-                                        String message) {
-                                    loadBackupInterstitialAd();
-                                    Log.d(TAG, "Unity Interstitial Ad failed to load: " + error + " - " + message);
-                                }
-                            });
-                            break;
-                        }
-
-                        case APPLOVIN:
-                        case APPLOVIN_MAX:
-                        case META_BIDDING_APPLOVIN_MAX: {
-                            appLovinMaxInterstitialAd = new MaxInterstitialAd(appLovinInterstitialId, activity);
-                            appLovinMaxInterstitialAd.setListener(new MaxAdListener() {
-                                @Override
-                                public void onAdLoaded(MaxAd ad) {
-                                    Log.d(TAG, "AppLovin Interstitial Ad loaded");
-                                }
-
-                                @Override
-                                public void onAdDisplayed(MaxAd ad) {
-                                }
-
-                                @Override
-                                public void onAdHidden(MaxAd ad) {
-                                    loadInterstitialAd();
-                                }
-
-                                @Override
-                                public void onAdClicked(MaxAd ad) {
-                                }
-
-                                @Override
-                                public void onAdLoadFailed(String adUnitId, MaxError error) {
-                                    loadBackupInterstitialAd();
-                                    Log.d(TAG, "AppLovin Interstitial Ad failed to load: " + error.getMessage());
-                                }
-
-                                @Override
-                                public void onAdDisplayFailed(MaxAd ad, MaxError error) {
-                                }
-                            });
-                            appLovinMaxInterstitialAd.loadAd();
-                            break;
-                        }
-
-                        case APPLOVIN_DISCOVERY: {
-                            loadBackupInterstitialAd();
-                            break;
-                        }
-
-                        case IRONSOURCE:
-                        case META_BIDDING_IRONSOURCE: {
-                            IronSource.setLevelPlayInterstitialListener(new LevelPlayInterstitialListener() {
-                                @Override
-                                public void onAdReady(
-                                        com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                    Log.d(TAG, "ironSource Interstitial Ad loaded");
-                                }
-
-                                @Override
-                                public void onAdLoadFailed(IronSourceError ironSourceError) {
-                                    loadBackupInterstitialAd();
-                                    Log.d(TAG, "ironSource Interstitial Ad failed to load: "
-                                            + ironSourceError.getErrorMessage());
-                                }
-
-                                @Override
-                                public void onAdOpened(
-                                        com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                }
-
-                                @Override
-                                public void onAdClosed(
-                                        com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                    loadInterstitialAd();
-                                }
-
-                                @Override
-                                public void onAdShowSucceeded(
-                                        com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                }
-
-                                @Override
-                                public void onAdShowFailed(IronSourceError ironSourceError,
-                                        com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                }
-
-                                @Override
-                                public void onAdClicked(
-                                        com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                }
-                            });
-                            IronSource.loadInterstitial();
-                            break;
-                        }
-
-                        case STARTAPP: {
-                            startAppInterstitialAd = new StartAppAd(activity);
-                            startAppInterstitialAd.loadAd(new AdEventListener() {
-                                @Override
-                                public void onReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
-                                    Log.d(TAG, "StartApp Interstitial Ad loaded");
-                                }
-
-                                @Override
-                                public void onFailedToReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
-                                    loadBackupInterstitialAd();
-                                    Log.d(TAG, "StartApp Interstitial Ad failed to load");
-                                }
-                            });
-                            break;
-                        }
-
-                        case WORTISE: {
-                            wortiseInterstitialAd = new com.wortise.ads.interstitial.InterstitialAd(activity,
-                                    wortiseInterstitialId);
-                            wortiseInterstitialAd
-                                    .setListener(new com.wortise.ads.interstitial.InterstitialAd.Listener() {
-                                        @Override
-                                        public void onInterstitialClicked(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
-                                        }
-
-                                        @Override
-                                        public void onInterstitialDismissed(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
-                                            loadInterstitialAd();
-                                        }
-
-                                        @Override
-                                        public void onInterstitialFailedToLoad(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd,
-                                                @NonNull com.wortise.ads.AdError adError) {
-                                            loadBackupInterstitialAd();
-                                            Log.d(TAG, "Wortise Interstitial Ad failed to load");
-                                        }
-
-                                        @Override
-                                        public void onInterstitialFailedToShow(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd,
-                                                @NonNull com.wortise.ads.AdError adError) {
-                                        }
-
-                                        @Override
-                                        public void onInterstitialImpression(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
-                                        }
-
-                                        @Override
-                                        public void onInterstitialLoaded(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
-                                            Log.d(TAG, "Wortise Interstitial Ad loaded");
-                                        }
-
-                                        @Override
-                                        public void onInterstitialShown(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
-                                        }
-
-                                        @Override
-                                        public void onInterstitialRevenuePaid(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd,
-                                                @NonNull com.wortise.ads.RevenueData revenueData) {
-                                        }
-                                    });
-                            wortiseInterstitialAd.loadAd();
-                            break;
-                        }
-
-                        default:
-                            loadBackupInterstitialAd();
-                            break;
-                    }
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error loading Backup Interstitial Ad: " + e.getMessage());
-            }
+        public void loadBackupInterstitialAd() {
+            loadBackupInterstitialAd(null);
         }
 
         public void showInterstitialAd() {
@@ -1033,277 +493,10 @@ public class InterstitialAd {
                     if (waterfallManager != null) {
                         waterfallManager.reset();
                     }
-                    switch (adNetwork) {
-                        case ADMOB:
-                        case META_BIDDING_ADMOB: {
-                            com.google.android.gms.ads.interstitial.InterstitialAd.load(activity, adMobInterstitialId,
-                                    Tools.getAdRequest(activity, legacyGDPR), new InterstitialAdLoadCallback() {
-                                        @Override
-                                        public void onAdLoaded(
-                                                @NonNull com.google.android.gms.ads.interstitial.InterstitialAd interstitialAd) {
-                                            adMobInterstitialAd = interstitialAd;
-                                            adMobInterstitialAd
-                                                    .setFullScreenContentCallback(new FullScreenContentCallback() {
-                                                        @Override
-                                                        public void onAdDismissedFullScreenContent() {
-                                                            loadInterstitialAd(onInterstitialAdDismissedListener);
-                                                            onInterstitialAdDismissedListener
-                                                                    .onInterstitialAdDismissed();
-                                                        }
-
-                                                        @Override
-                                                        public void onAdFailedToShowFullScreenContent(
-                                                                @NonNull com.google.android.gms.ads.AdError adError) {
-                                                            Log.d(TAG, "The ad failed to show.");
-                                                        }
-
-                                                        @Override
-                                                        public void onAdShowedFullScreenContent() {
-                                                            adMobInterstitialAd = null;
-                                                            Log.d(TAG, "The ad was shown.");
-                                                        }
-                                                    });
-                                            Log.i(TAG, "onAdLoaded");
-                                        }
-
-                                        @Override
-                                        public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                            Log.i(TAG, loadAdError.getMessage());
-                                            adMobInterstitialAd = null;
-                                            loadBackupInterstitialAd(onInterstitialAdDismissedListener);
-                                            Log.d(TAG, "Failed load AdMob Interstitial Ad");
-                                        }
-                                    });
-                            break;
-                        }
-
-                        case META: {
-                            metaInterstitialAd = new com.facebook.ads.InterstitialAd(activity, metaInterstitialId);
-                            com.facebook.ads.InterstitialAdListener adListener = new InterstitialAdListener() {
-                                @Override
-                                public void onInterstitialDisplayed(com.facebook.ads.Ad ad) {
-                                }
-
-                                @Override
-                                public void onInterstitialDismissed(com.facebook.ads.Ad ad) {
-                                    metaInterstitialAd.loadAd();
-                                    onInterstitialAdDismissedListener.onInterstitialAdDismissed();
-                                }
-
-                                @Override
-                                public void onError(com.facebook.ads.Ad ad, com.facebook.ads.AdError adError) {
-                                    loadBackupInterstitialAd(onInterstitialAdDismissedListener);
-                                }
-
-                                @Override
-                                public void onAdLoaded(com.facebook.ads.Ad ad) {
-                                    Log.d(TAG, "Meta Interstitial is loaded");
-                                }
-
-                                @Override
-                                public void onAdClicked(com.facebook.ads.Ad ad) {
-                                }
-
-                                @Override
-                                public void onLoggingImpression(com.facebook.ads.Ad ad) {
-                                }
-                            };
-
-                            com.facebook.ads.InterstitialAd.InterstitialLoadAdConfig loadAdConfig = metaInterstitialAd
-                                    .buildLoadAdConfig().withAdListener(adListener).build();
-                            metaInterstitialAd.loadAd(loadAdConfig);
-                            break;
-                        }
-
-                        case UNITY: {
-                            UnityAds.load(unityInterstitialId, new IUnityAdsLoadListener() {
-                                @Override
-                                public void onUnityAdsAdLoaded(String placementId) {
-                                    Log.d(TAG, "Unity Interstitial Ad loaded");
-                                }
-
-                                @Override
-                                public void onUnityAdsFailedToLoad(String placementId, UnityAds.UnityAdsLoadError error,
-                                        String message) {
-                                    loadBackupInterstitialAd(onInterstitialAdDismissedListener);
-                                    Log.d(TAG, "Unity Interstitial Ad failed to load: " + error + " - " + message);
-                                }
-                            });
-                            break;
-                        }
-
-                        case APPLOVIN:
-                        case APPLOVIN_MAX:
-                        case META_BIDDING_APPLOVIN_MAX: {
-                            appLovinMaxInterstitialAd = new MaxInterstitialAd(appLovinInterstitialId, activity);
-                            appLovinMaxInterstitialAd.setListener(new MaxAdListener() {
-                                @Override
-                                public void onAdLoaded(MaxAd ad) {
-                                    Log.d(TAG, "AppLovin Interstitial Ad loaded");
-                                }
-
-                                @Override
-                                public void onAdDisplayed(MaxAd ad) {
-                                }
-
-                                @Override
-                                public void onAdHidden(MaxAd ad) {
-                                    loadInterstitialAd(onInterstitialAdDismissedListener);
-                                    onInterstitialAdDismissedListener.onInterstitialAdDismissed();
-                                }
-
-                                @Override
-                                public void onAdClicked(MaxAd ad) {
-                                }
-
-                                @Override
-                                public void onAdLoadFailed(String adUnitId, MaxError error) {
-                                    loadBackupInterstitialAd(onInterstitialAdDismissedListener);
-                                    Log.d(TAG, "AppLovin Interstitial Ad failed to load: " + error.getMessage());
-                                }
-
-                                @Override
-                                public void onAdDisplayFailed(MaxAd ad, MaxError error) {
-                                }
-                            });
-                            appLovinMaxInterstitialAd.loadAd();
-                            break;
-                        }
-
-                        case APPLOVIN_DISCOVERY: {
-                            break;
-                        }
-
-                        case IRONSOURCE:
-                        case META_BIDDING_IRONSOURCE: {
-                            IronSource.setLevelPlayInterstitialListener(new LevelPlayInterstitialListener() {
-                                @Override
-                                public void onAdReady(
-                                        com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                    Log.d(TAG, "ironSource Interstitial Ad loaded");
-                                }
-
-                                @Override
-                                public void onAdLoadFailed(IronSourceError ironSourceError) {
-                                    loadBackupInterstitialAd(onInterstitialAdDismissedListener);
-                                    Log.d(TAG, "ironSource Interstitial Ad failed to load: "
-                                            + ironSourceError.getErrorMessage());
-                                }
-
-                                @Override
-                                public void onAdOpened(
-                                        com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                }
-
-                                @Override
-                                public void onAdClosed(
-                                        com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                    loadInterstitialAd(onInterstitialAdDismissedListener);
-                                    onInterstitialAdDismissedListener.onInterstitialAdDismissed();
-                                }
-
-                                @Override
-                                public void onAdShowSucceeded(
-                                        com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                }
-
-                                @Override
-                                public void onAdShowFailed(IronSourceError ironSourceError,
-                                        com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                }
-
-                                @Override
-                                public void onAdClicked(
-                                        com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                }
-                            });
-                            IronSource.loadInterstitial();
-                            break;
-                        }
-
-                        case STARTAPP: {
-                            try {
-                                startAppInterstitialAd = new StartAppAd(activity);
-                                startAppInterstitialAd.loadAd(new AdEventListener() {
-                                    @Override
-                                    public void onReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
-                                        Log.d(TAG, "StartApp Interstitial Ad loaded");
-                                    }
-
-                                    @Override
-                                    public void onFailedToReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
-                                        loadBackupInterstitialAd(onInterstitialAdDismissedListener);
-                                        Log.d(TAG, "StartApp Interstitial Ad failed to load");
-                                    }
-                                });
-                            } catch (NoClassDefFoundError | Exception e) {
-                                Log.e(TAG, "Failed to load backup interstitial for StartApp. Error: " + e.getMessage());
-                                loadBackupInterstitialAd(onInterstitialAdDismissedListener);
-                            }
-                            break;
-                        }
-
-                        case WORTISE: {
-                            wortiseInterstitialAd = new com.wortise.ads.interstitial.InterstitialAd(activity,
-                                    wortiseInterstitialId);
-                            wortiseInterstitialAd
-                                    .setListener(new com.wortise.ads.interstitial.InterstitialAd.Listener() {
-                                        @Override
-                                        public void onInterstitialClicked(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
-                                        }
-
-                                        @Override
-                                        public void onInterstitialDismissed(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
-                                            loadInterstitialAd(onInterstitialAdDismissedListener);
-                                            onInterstitialAdDismissedListener.onInterstitialAdDismissed();
-                                        }
-
-                                        @Override
-                                        public void onInterstitialFailedToLoad(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd,
-                                                @NonNull com.wortise.ads.AdError adError) {
-                                            loadBackupInterstitialAd(onInterstitialAdDismissedListener);
-                                            Log.d(TAG, "Wortise Interstitial Ad failed to load");
-                                        }
-
-                                        @Override
-                                        public void onInterstitialFailedToShow(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd,
-                                                @NonNull com.wortise.ads.AdError adError) {
-                                        }
-
-                                        @Override
-                                        public void onInterstitialImpression(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
-                                        }
-
-                                        @Override
-                                        public void onInterstitialLoaded(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
-                                            Log.d(TAG, "Wortise Interstitial Ad loaded");
-                                        }
-
-                                        @Override
-                                        public void onInterstitialShown(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
-                                        }
-
-                                        @Override
-                                        public void onInterstitialRevenuePaid(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd,
-                                                @NonNull com.wortise.ads.RevenueData revenueData) {
-                                        }
-                                    });
-                            wortiseInterstitialAd.loadAd();
-                            break;
-                        }
-
-                        default:
-                            loadBackupInterstitialAd(onInterstitialAdDismissedListener);
-                            break;
-                    }
+                    Log.d(TAG, "Interstitial Ad is enabled: " + adNetwork);
+                    loadAdFromNetwork(adNetwork, onInterstitialAdDismissedListener);
+                } else {
+                    Log.d(TAG, "Interstitial Ad is disabled");
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Error in loadInterstitialAd: " + e.getMessage());
@@ -1314,7 +507,7 @@ public class InterstitialAd {
             try {
                 if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
                     if (waterfallManager == null) {
-                        if (!backupAdNetwork.isEmpty()) {
+                        if (backupAdNetwork != null && !backupAdNetwork.isEmpty()) {
                             waterfallManager = new WaterfallManager(backupAdNetwork);
                         } else {
                             return;
@@ -1330,256 +523,321 @@ public class InterstitialAd {
                     Log.d(TAG, "Loading Backup Interstitial Ad [" + backupAdNetwork.toUpperCase(java.util.Locale.ROOT)
                             + "]");
 
-                    switch (backupAdNetwork) {
-                        case ADMOB:
-                        case META_BIDDING_ADMOB: {
+                    loadAdFromNetwork(backupAdNetwork, onInterstitialAdDismissedListener);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error in loadBackupInterstitialAd: " + e.getMessage());
+            }
+        }
+
+        private void loadAdFromNetwork(String networkToLoad,
+                OnInterstitialAdDismissedListener onInterstitialAdDismissedListener) {
+            try {
+                switch (networkToLoad) {
+                    case ADMOB:
+                    case META_BIDDING_ADMOB: {
+                        if (!com.partharoypc.adglide.util.AdMobRateLimiter.isRequestAllowed(adMobInterstitialId)) {
+                            loadBackupInterstitialAd(onInterstitialAdDismissedListener);
+                            break;
+                        }
+                        Object cachedAdMob = AdRepository.getInstance().getInterstitial(adNetwork, adMobInterstitialId);
+                        if (cachedAdMob instanceof com.google.android.gms.ads.interstitial.InterstitialAd) {
+                            adMobInterstitialAd = (com.google.android.gms.ads.interstitial.InterstitialAd) cachedAdMob;
+                            setupAdMobCallback(onInterstitialAdDismissedListener);
+                            Log.d(TAG, "AdMob Interstitial loaded from cache");
+                        } else {
                             com.google.android.gms.ads.interstitial.InterstitialAd.load(activity, adMobInterstitialId,
                                     Tools.getAdRequest(activity, legacyGDPR), new InterstitialAdLoadCallback() {
                                         @Override
                                         public void onAdLoaded(
                                                 @NonNull com.google.android.gms.ads.interstitial.InterstitialAd interstitialAd) {
                                             adMobInterstitialAd = interstitialAd;
-                                            adMobInterstitialAd
-                                                    .setFullScreenContentCallback(new FullScreenContentCallback() {
-                                                        @Override
-                                                        public void onAdDismissedFullScreenContent() {
-                                                            loadInterstitialAd(onInterstitialAdDismissedListener);
-                                                            onInterstitialAdDismissedListener
-                                                                    .onInterstitialAdDismissed();
-                                                        }
-
-                                                        @Override
-                                                        public void onAdFailedToShowFullScreenContent(
-                                                                @NonNull com.google.android.gms.ads.AdError adError) {
-                                                            Log.d(TAG, "The ad failed to show.");
-                                                        }
-
-                                                        @Override
-                                                        public void onAdShowedFullScreenContent() {
-                                                            adMobInterstitialAd = null;
-                                                            Log.d(TAG, "The ad was shown.");
-                                                        }
-                                                    });
+                                            setupAdMobCallback(onInterstitialAdDismissedListener);
                                             Log.i(TAG, "onAdLoaded");
                                         }
 
                                         @Override
                                         public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+
+                                            if (loadAdError
+                                                    .getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
+                                                com.partharoypc.adglide.util.AdMobRateLimiter
+                                                        .recordFailure(adMobInterstitialId);
+                                            }
                                             Log.i(TAG, loadAdError.getMessage());
                                             adMobInterstitialAd = null;
                                             loadBackupInterstitialAd(onInterstitialAdDismissedListener);
                                             Log.d(TAG, "Failed load AdMob Interstitial Ad");
                                         }
                                     });
-                            break;
                         }
+                        break;
+                    }
 
-                        case META: {
-                            Object cachedMeta = AdRepository.getInstance().getInterstitial(adNetwork,
-                                    metaInterstitialId);
-                            if (cachedMeta instanceof com.facebook.ads.InterstitialAd) {
-                                metaInterstitialAd = (com.facebook.ads.InterstitialAd) cachedMeta;
-                                setupMetaCallback();
-                                Log.d(TAG, "Meta Interstitial loaded from cache");
-                            } else {
-                                metaInterstitialAd = new com.facebook.ads.InterstitialAd(activity, metaInterstitialId);
-                                setupMetaCallback();
-                                com.facebook.ads.InterstitialAd.InterstitialLoadAdConfig loadAdConfig = metaInterstitialAd
-                                        .buildLoadAdConfig().withAdListener(metaAdListener).build();
-                                metaInterstitialAd.loadAd(loadAdConfig);
+                    case META: {
+                        Object cachedMeta = AdRepository.getInstance().getInterstitial(adNetwork, metaInterstitialId);
+                        if (cachedMeta instanceof com.facebook.ads.InterstitialAd) {
+                            metaInterstitialAd = (com.facebook.ads.InterstitialAd) cachedMeta;
+                            setupMetaCallback(onInterstitialAdDismissedListener);
+                            Log.d(TAG, "Meta Interstitial loaded from cache");
+                        } else {
+                            metaInterstitialAd = new com.facebook.ads.InterstitialAd(activity, metaInterstitialId);
+                            setupMetaCallback(onInterstitialAdDismissedListener);
+
+                            com.facebook.ads.InterstitialAd.InterstitialLoadAdConfig loadAdConfig = metaInterstitialAd
+                                    .buildLoadAdConfig().withAdListener(metaAdListener).build();
+                            metaInterstitialAd.loadAd(loadAdConfig);
+                        }
+                        break;
+                    }
+
+                    case UNITY: {
+                        UnityAds.load(unityInterstitialId, new IUnityAdsLoadListener() {
+                            @Override
+                            public void onUnityAdsAdLoaded(String placementId) {
+                                Log.d(TAG, "Unity Interstitial Ad loaded");
                             }
-                            break;
-                        }
 
-                        case UNITY: {
-                            UnityAds.load(unityInterstitialId, new IUnityAdsLoadListener() {
-                                @Override
-                                public void onUnityAdsAdLoaded(String placementId) {
-                                    Log.d(TAG, "Unity Interstitial Ad loaded");
-                                }
+                            @Override
+                            public void onUnityAdsFailedToLoad(String placementId, UnityAds.UnityAdsLoadError error,
+                                    String message) {
+                                loadBackupInterstitialAd(onInterstitialAdDismissedListener);
+                                Log.d(TAG, "Unity Interstitial Ad failed to load: " + error + " - " + message);
+                            }
+                        });
+                        break;
+                    }
 
-                                @Override
-                                public void onUnityAdsFailedToLoad(String placementId, UnityAds.UnityAdsLoadError error,
-                                        String message) {
-                                    loadBackupInterstitialAd(onInterstitialAdDismissedListener);
-                                    Log.d(TAG, "Unity Interstitial Ad failed to load: " + error + " - " + message);
-                                }
-                            });
-                            break;
-                        }
+                    case APPLOVIN:
+                    case APPLOVIN_MAX:
+                    case META_BIDDING_APPLOVIN_MAX: {
+                        appLovinMaxInterstitialAd = new MaxInterstitialAd(appLovinInterstitialId, activity);
+                        appLovinMaxInterstitialAd.setListener(new MaxAdListener() {
+                            @Override
+                            public void onAdLoaded(MaxAd ad) {
+                                Log.d(TAG, "AppLovin Interstitial Ad loaded");
+                            }
 
-                        case APPLOVIN:
-                        case APPLOVIN_MAX:
-                        case META_BIDDING_APPLOVIN_MAX: {
-                            appLovinMaxInterstitialAd = new MaxInterstitialAd(appLovinInterstitialId, activity);
-                            appLovinMaxInterstitialAd.setListener(new MaxAdListener() {
-                                @Override
-                                public void onAdLoaded(MaxAd ad) {
-                                    Log.d(TAG, "AppLovin Interstitial Ad loaded");
-                                }
+                            @Override
+                            public void onAdDisplayed(MaxAd ad) {
+                            }
 
-                                @Override
-                                public void onAdDisplayed(MaxAd ad) {
-                                }
-
-                                @Override
-                                public void onAdHidden(MaxAd ad) {
-                                    loadInterstitialAd(onInterstitialAdDismissedListener);
+                            @Override
+                            public void onAdHidden(MaxAd ad) {
+                                loadInterstitialAd(onInterstitialAdDismissedListener);
+                                if (onInterstitialAdDismissedListener != null) {
                                     onInterstitialAdDismissedListener.onInterstitialAdDismissed();
                                 }
+                            }
 
-                                @Override
-                                public void onAdClicked(MaxAd ad) {
-                                }
+                            @Override
+                            public void onAdClicked(MaxAd ad) {
+                            }
 
-                                @Override
-                                public void onAdLoadFailed(String adUnitId, MaxError error) {
-                                    loadBackupInterstitialAd(onInterstitialAdDismissedListener);
-                                    Log.d(TAG, "AppLovin Interstitial Ad failed to load: " + error.getMessage());
-                                }
+                            @Override
+                            public void onAdLoadFailed(String adUnitId, MaxError error) {
+                                loadBackupInterstitialAd(onInterstitialAdDismissedListener);
+                                Log.d(TAG, "AppLovin Interstitial Ad failed to load: " + error.getMessage());
+                            }
 
-                                @Override
-                                public void onAdDisplayFailed(MaxAd ad, MaxError error) {
-                                }
-                            });
-                            appLovinMaxInterstitialAd.loadAd();
-                            break;
-                        }
+                            @Override
+                            public void onAdDisplayFailed(MaxAd ad, MaxError error) {
+                            }
+                        });
+                        appLovinMaxInterstitialAd.loadAd();
+                        break;
+                    }
 
-                        case APPLOVIN_DISCOVERY: {
-                            loadBackupInterstitialAd(onInterstitialAdDismissedListener);
-                            break;
-                        }
+                    case APPLOVIN_DISCOVERY: {
+                        loadBackupInterstitialAd(onInterstitialAdDismissedListener);
+                        break;
+                    }
 
-                        case IRONSOURCE:
-                        case META_BIDDING_IRONSOURCE: {
-                            IronSource.setLevelPlayInterstitialListener(new LevelPlayInterstitialListener() {
-                                @Override
-                                public void onAdReady(
-                                        com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                    Log.d(TAG, "ironSource Interstitial Ad loaded");
-                                }
+                    case IRONSOURCE:
+                    case META_BIDDING_IRONSOURCE: {
+                        IronSource.setLevelPlayInterstitialListener(new LevelPlayInterstitialListener() {
+                            @Override
+                            public void onAdReady(com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
+                                Log.d(TAG, "ironSource Interstitial Ad loaded");
+                            }
 
-                                @Override
-                                public void onAdLoadFailed(IronSourceError ironSourceError) {
-                                    loadBackupInterstitialAd(onInterstitialAdDismissedListener);
-                                    Log.d(TAG, "ironSource Interstitial Ad failed to load: "
-                                            + ironSourceError.getErrorMessage());
-                                }
+                            @Override
+                            public void onAdLoadFailed(IronSourceError ironSourceError) {
+                                loadBackupInterstitialAd(onInterstitialAdDismissedListener);
+                                Log.d(TAG, "ironSource Interstitial Ad failed to load: "
+                                        + ironSourceError.getErrorMessage());
+                            }
 
-                                @Override
-                                public void onAdOpened(
-                                        com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                }
+                            @Override
+                            public void onAdOpened(com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
+                            }
 
-                                @Override
-                                public void onAdClosed(
-                                        com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                    loadInterstitialAd(onInterstitialAdDismissedListener);
+                            @Override
+                            public void onAdClosed(com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
+                                loadInterstitialAd(onInterstitialAdDismissedListener);
+                                if (onInterstitialAdDismissedListener != null) {
                                     onInterstitialAdDismissedListener.onInterstitialAdDismissed();
                                 }
+                            }
 
-                                @Override
-                                public void onAdShowSucceeded(
-                                        com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
+                            @Override
+                            public void onAdShowSucceeded(
+                                    com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
+                            }
+
+                            @Override
+                            public void onAdShowFailed(IronSourceError ironSourceError,
+                                    com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
+                            }
+
+                            @Override
+                            public void onAdClicked(com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
+                            }
+                        });
+                        IronSource.loadInterstitial();
+                        break;
+                    }
+
+                    case STARTAPP: {
+                        startAppInterstitialAd = new StartAppAd(activity);
+                        startAppInterstitialAd.loadAd(new AdEventListener() {
+                            @Override
+                            public void onReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
+                                Log.d(TAG, "StartApp Interstitial Ad loaded");
+                            }
+
+                            @Override
+                            public void onFailedToReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
+                                loadBackupInterstitialAd(onInterstitialAdDismissedListener);
+                                Log.d(TAG, "StartApp Interstitial Ad failed to load");
+                            }
+                        });
+                        break;
+                    }
+
+                    case WORTISE: {
+                        wortiseInterstitialAd = new com.wortise.ads.interstitial.InterstitialAd(activity,
+                                wortiseInterstitialId);
+                        wortiseInterstitialAd.setListener(new com.wortise.ads.interstitial.InterstitialAd.Listener() {
+                            @Override
+                            public void onInterstitialClicked(
+                                    @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
+                            }
+
+                            @Override
+                            public void onInterstitialDismissed(
+                                    @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
+                                loadInterstitialAd(onInterstitialAdDismissedListener);
+                                if (onInterstitialAdDismissedListener != null) {
+                                    onInterstitialAdDismissedListener.onInterstitialAdDismissed();
                                 }
+                            }
 
-                                @Override
-                                public void onAdShowFailed(IronSourceError ironSourceError,
-                                        com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                }
+                            @Override
+                            public void onInterstitialFailedToLoad(
+                                    @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd,
+                                    @NonNull com.wortise.ads.AdError adError) {
+                                loadBackupInterstitialAd(onInterstitialAdDismissedListener);
+                                Log.d(TAG, "Wortise Interstitial Ad failed to load");
+                            }
 
-                                @Override
-                                public void onAdClicked(
-                                        com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo adInfo) {
-                                }
-                            });
-                            IronSource.loadInterstitial();
-                            break;
-                        }
+                            @Override
+                            public void onInterstitialFailedToShow(
+                                    @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd,
+                                    @NonNull com.wortise.ads.AdError adError) {
+                            }
 
-                        case STARTAPP: {
-                            startAppInterstitialAd = new StartAppAd(activity);
-                            startAppInterstitialAd.loadAd(new AdEventListener() {
-                                @Override
-                                public void onReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
-                                    Log.i(TAG, "onReceiveAd");
-                                }
+                            @Override
+                            public void onInterstitialImpression(
+                                    @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
+                            }
 
-                                @Override
-                                public void onFailedToReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
-                                    loadBackupInterstitialAd(onInterstitialAdDismissedListener);
-                                    Log.d(TAG, "Failed load StartApp Interstitial Ad");
-                                }
-                            });
-                            break;
-                        }
+                            @Override
+                            public void onInterstitialLoaded(
+                                    @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
+                                Log.d(TAG, "Wortise Interstitial Ad loaded");
+                            }
 
-                        case WORTISE: {
-                            wortiseInterstitialAd = new com.wortise.ads.interstitial.InterstitialAd(activity,
-                                    wortiseInterstitialId);
-                            wortiseInterstitialAd
-                                    .setListener(new com.wortise.ads.interstitial.InterstitialAd.Listener() {
-                                        @Override
-                                        public void onInterstitialClicked(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
-                                        }
+                            @Override
+                            public void onInterstitialShown(
+                                    @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
+                            }
 
-                                        @Override
-                                        public void onInterstitialDismissed(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
-                                            loadInterstitialAd(onInterstitialAdDismissedListener);
-                                            onInterstitialAdDismissedListener.onInterstitialAdDismissed();
-                                        }
+                            @Override
+                            public void onInterstitialRevenuePaid(
+                                    @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd,
+                                    @NonNull com.wortise.ads.RevenueData revenueData) {
+                            }
+                        });
+                        wortiseInterstitialAd.loadAd();
+                        break;
+                    }
 
-                                        @Override
-                                        public void onInterstitialFailedToLoad(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd,
-                                                @NonNull com.wortise.ads.AdError adError) {
-                                            loadBackupInterstitialAd(onInterstitialAdDismissedListener);
-                                            Log.d(TAG, "Wortise Interstitial Ad failed to load");
-                                        }
+                    default:
+                        loadBackupInterstitialAd(onInterstitialAdDismissedListener);
+                        break;
+                }
+            } catch (NoClassDefFoundError | Exception e) {
+                Log.e(TAG, "Failed to load interstitial for " + networkToLoad + ". Error: " + e.getMessage());
+                loadBackupInterstitialAd(onInterstitialAdDismissedListener);
+            }
+        }
 
-                                        @Override
-                                        public void onInterstitialFailedToShow(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd,
-                                                @NonNull com.wortise.ads.AdError adError) {
-                                        }
-
-                                        @Override
-                                        public void onInterstitialImpression(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
-                                        }
-
-                                        @Override
-                                        public void onInterstitialLoaded(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
-                                            Log.d(TAG, "Wortise Interstitial Ad loaded");
-                                        }
-
-                                        @Override
-                                        public void onInterstitialShown(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd) {
-                                        }
-
-                                        @Override
-                                        public void onInterstitialRevenuePaid(
-                                                @NonNull com.wortise.ads.interstitial.InterstitialAd interstitialAd,
-                                                @NonNull com.wortise.ads.RevenueData revenueData) {
-                                        }
-                                    });
-                            wortiseInterstitialAd.loadAd();
-                            break;
-                        }
-
-                        default:
-                            loadBackupInterstitialAd(onInterstitialAdDismissedListener);
-                            break;
+        private void setupAdMobCallback(OnInterstitialAdDismissedListener onInterstitialAdDismissedListener) {
+            adMobInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                @Override
+                public void onAdDismissedFullScreenContent() {
+                    loadInterstitialAd(onInterstitialAdDismissedListener);
+                    if (onInterstitialAdDismissedListener != null) {
+                        onInterstitialAdDismissedListener.onInterstitialAdDismissed();
                     }
                 }
-            } catch (Exception e) {
-                Log.e(TAG, "Error in loadBackupInterstitialAd: " + e.getMessage());
-            }
+
+                @Override
+                public void onAdFailedToShowFullScreenContent(@NonNull com.google.android.gms.ads.AdError adError) {
+                    Log.d(TAG, "The ad failed to show.");
+                }
+
+                @Override
+                public void onAdShowedFullScreenContent() {
+                    adMobInterstitialAd = null;
+                    Log.d(TAG, "The ad was shown.");
+                }
+            });
+        }
+
+        private void setupMetaCallback(OnInterstitialAdDismissedListener onInterstitialAdDismissedListener) {
+            metaAdListener = new InterstitialAdListener() {
+                @Override
+                public void onInterstitialDisplayed(com.facebook.ads.Ad ad) {
+                }
+
+                @Override
+                public void onInterstitialDismissed(com.facebook.ads.Ad ad) {
+                    metaInterstitialAd.loadAd();
+                    if (onInterstitialAdDismissedListener != null) {
+                        onInterstitialAdDismissedListener.onInterstitialAdDismissed();
+                    }
+                }
+
+                @Override
+                public void onError(com.facebook.ads.Ad ad, com.facebook.ads.AdError adError) {
+                    loadBackupInterstitialAd(onInterstitialAdDismissedListener);
+                }
+
+                @Override
+                public void onAdLoaded(com.facebook.ads.Ad ad) {
+                    Log.d(TAG, "Meta Interstitial is loaded");
+                }
+
+                @Override
+                public void onAdClicked(com.facebook.ads.Ad ad) {
+                }
+
+                @Override
+                public void onLoggingImpression(com.facebook.ads.Ad ad) {
+                }
+            };
         }
 
         public void showInterstitialAd(OnInterstitialAdShowedListener onInterstitialAdShowedListener,
@@ -1841,58 +1099,6 @@ public class InterstitialAd {
 
         private com.facebook.ads.InterstitialAdListener metaAdListener;
 
-        private void setupAdMobCallback() {
-            if (adMobInterstitialAd == null)
-                return;
-            adMobInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
-                @Override
-                public void onAdDismissedFullScreenContent() {
-                    loadInterstitialAd();
-                }
-
-                @Override
-                public void onAdFailedToShowFullScreenContent(@NonNull com.google.android.gms.ads.AdError adError) {
-                    Log.d(TAG, "The ad failed to show.");
-                }
-
-                @Override
-                public void onAdShowedFullScreenContent() {
-                    adMobInterstitialAd = null;
-                    Log.d(TAG, "The ad was shown.");
-                }
-            });
-        }
-
-        private void setupMetaCallback() {
-            metaAdListener = new InterstitialAdListener() {
-                @Override
-                public void onInterstitialDisplayed(com.facebook.ads.Ad ad) {
-                }
-
-                @Override
-                public void onInterstitialDismissed(com.facebook.ads.Ad ad) {
-                    metaInterstitialAd.loadAd();
-                }
-
-                @Override
-                public void onError(com.facebook.ads.Ad ad, com.facebook.ads.AdError adError) {
-                    loadBackupInterstitialAd();
-                }
-
-                @Override
-                public void onAdLoaded(com.facebook.ads.Ad ad) {
-                    Log.d(TAG, "Meta Interstitial is loaded");
-                }
-
-                @Override
-                public void onAdClicked(com.facebook.ads.Ad ad) {
-                }
-
-                @Override
-                public void onLoggingImpression(com.facebook.ads.Ad ad) {
-                }
-            };
-        }
     }
 
 }

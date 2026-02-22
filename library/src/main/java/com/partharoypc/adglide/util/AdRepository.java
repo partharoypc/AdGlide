@@ -167,34 +167,6 @@ public class AdRepository {
     }
 
     private void loadAppLovinInterstitial(Context context, String key, String adUnitId) {
-        // MaxInterstitialAd requires an Activity usually, but can accept Context for
-        // loading.
-        // However, the constructor expects Activity. We might need to pass the activity
-        // if available.
-        // Ideally, we pass the Application Context to avoid leaks, but MAX SDK might
-        // need Activity.
-        // Checked docs: MaxInterstitialAd(String adUnitId, Activity activity) OR
-        // MaxInterstitialAd(String adUnitId, AppLovinSdk sdk, Activity activity)
-        // It seems strict about Activity. We will try passing the context cast to
-        // Activity if possible, or application context if it allows.
-        // Android SDKs often allow Application Context for loading. Let's try passing
-        // the context.
-        // If context is not an activity, this might crash or fail.
-        // Safeguard: If context is not activity, we might skip AppLovin for pre-loading
-        // or accept the risk of passing Application Context (some SDKs handle it).
-
-        // For now, we will create it. If it fails at runtime, we'll catch it.
-        // Ideally, the 'context' passed to preloadInterstitial should be an Activity if
-        // possible, BUT for a repo, we want to store it longer than the activity.
-        // MaxInterstitialAd holds a reference to the activity. This is a leak risk if
-        // not destroyed.
-        // Given this, PRE-LOADING AppLovin MAX ads in a singleton is risky without
-        // careful management.
-        // Strategy: Skip AppLovin pre-loading in this generic singleton for now to
-        // ensure stability, OR implement a wrapper.
-        // Better: AdMob and GAM are the primary focus.
-
-        // Implemented with try-catch and Activity check.
         if (context instanceof android.app.Activity) {
             MaxInterstitialAd maxAd = new MaxInterstitialAd(adUnitId, (android.app.Activity) context);
             maxAd.setListener(new MaxAdListener() {
@@ -236,5 +208,22 @@ public class AdRepository {
 
     private String getKey(String adNetwork, String adUnitId) {
         return adNetwork + "_" + adUnitId;
+    }
+
+    /**
+     * Clears the ad cache and destroys any loaded ads to prevent memory leaks.
+     * Should be called when the application or main activity is destroyed.
+     */
+    public void clearCache() {
+        for (Object ad : interstitialCache.values()) {
+            if (ad instanceof com.applovin.mediation.ads.MaxInterstitialAd) {
+                ((com.applovin.mediation.ads.MaxInterstitialAd) ad).destroy();
+            } else if (ad instanceof com.facebook.ads.InterstitialAd) {
+                ((com.facebook.ads.InterstitialAd) ad).destroy();
+            }
+        }
+        interstitialCache.clear();
+        isLoading.clear();
+        Log.d(TAG, "AdRepository cache cleared to prevent memory leaks.");
     }
 }

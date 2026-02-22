@@ -50,11 +50,6 @@ import com.unity3d.ads.IUnityAdsLoadListener;
 import com.unity3d.ads.IUnityAdsShowListener;
 import com.unity3d.ads.UnityAds;
 
-/**
- * Handles loading and displaying rewarded ads from multiple ad networks.
- * Uses a Builder pattern for configuration with primary and backup network
- * support.
- */
 public class RewardedAd {
 
     @SuppressWarnings("deprecation")
@@ -294,283 +289,13 @@ public class RewardedAd {
                     if (waterfallManager != null) {
                         waterfallManager.reset();
                     }
-                    switch (adNetwork) {
-                        case ADMOB:
-                        case META_BIDDING_ADMOB: {
-                            com.google.android.gms.ads.rewarded.RewardedAd.load(activity, adMobRewardedId,
-                                    Tools.getAdRequest(activity, legacyGDPR), new RewardedAdLoadCallback() {
-                                        @Override
-                                        public void onAdLoaded(
-                                                @NonNull com.google.android.gms.ads.rewarded.RewardedAd ad) {
-                                            adMobRewardedAd = ad;
-                                            adMobRewardedAd
-                                                    .setFullScreenContentCallback(new FullScreenContentCallback() {
-                                                        @Override
-                                                        public void onAdDismissedFullScreenContent() {
-                                                            adMobRewardedAd = null;
-                                                            loadRewardedAd(onComplete, onDismiss);
-                                                            onDismiss.onRewardedAdDismissed();
-                                                        }
-
-                                                        @Override
-                                                        public void onAdFailedToShowFullScreenContent(
-                                                                @NonNull com.google.android.gms.ads.AdError adError) {
-                                                            adMobRewardedAd = null;
-                                                        }
-                                                    });
-                                            Log.d(TAG, "[ADMOB] Rewarded ad loaded");
-                                        }
-
-                                        @Override
-                                        public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                            adMobRewardedAd = null;
-                                            loadRewardedBackupAd(onComplete, onDismiss);
-                                            Log.d(TAG,
-                                                    "[ADMOB] Failed to load rewarded ad: " + loadAdError.getMessage());
-                                        }
-                                    });
-                            break;
-                        }
-
-                        case META: {
-                            metaRewardedVideoAd = new com.facebook.ads.RewardedVideoAd(activity, metaRewardedId);
-                            metaRewardedVideoAd.loadAd(metaRewardedVideoAd.buildLoadAdConfig()
-                                    .withAdListener(new RewardedVideoAdListener() {
-                                        @Override
-                                        public void onRewardedVideoCompleted() {
-                                            onComplete.onRewardedAdComplete();
-                                        }
-
-                                        @Override
-                                        public void onRewardedVideoClosed() {
-                                            onDismiss.onRewardedAdDismissed();
-                                        }
-
-                                        @Override
-                                        public void onError(Ad ad, AdError adError) {
-                                            loadRewardedBackupAd(onComplete, onDismiss);
-                                            Log.d(TAG,
-                                                    "[Meta] Failed to load rewarded ad: " + adError.getErrorMessage());
-                                        }
-
-                                        @Override
-                                        public void onAdLoaded(Ad ad) {
-                                            Log.d(TAG, "[Meta] Rewarded ad loaded");
-                                        }
-
-                                        @Override
-                                        public void onAdClicked(Ad ad) {
-                                        }
-
-                                        @Override
-                                        public void onLoggingImpression(Ad ad) {
-                                        }
-                                    }).build());
-                            break;
-                        }
-
-                        case UNITY: {
-                            try {
-                                UnityAds.load(unityRewardedId, new IUnityAdsLoadListener() {
-                                    @Override
-                                    public void onUnityAdsAdLoaded(String placementId) {
-                                        Log.d(TAG, "[UNITY] Rewarded ad loaded");
-                                    }
-
-                                    @Override
-                                    public void onUnityAdsFailedToLoad(String placementId,
-                                            UnityAds.UnityAdsLoadError error,
-                                            String message) {
-                                        loadRewardedBackupAd(onComplete, onDismiss);
-                                        Log.d(TAG, "[UNITY] Failed to load rewarded ad: " + message);
-                                    }
-                                });
-                            } catch (NoClassDefFoundError | Exception e) {
-                                Log.e(TAG, "Failed to load backup rewarded for Unity. Error: " + e.getMessage());
-                                loadRewardedBackupAd(onComplete, onDismiss);
-                            }
-                            break;
-                        }
-
-                        case APPLOVIN:
-                        case APPLOVIN_MAX:
-                        case META_BIDDING_APPLOVIN_MAX: {
-                            try {
-                                appLovinMaxRewardedAd = MaxRewardedAd.getInstance(appLovinMaxRewardedId, activity);
-                                appLovinMaxRewardedAd.setListener(new MaxRewardedAdListener() {
-                                    @Override
-                                    public void onUserRewarded(MaxAd ad, MaxReward reward) {
-                                        onComplete.onRewardedAdComplete();
-                                    }
-
-                                    @Override
-                                    public void onAdLoaded(MaxAd ad) {
-                                        Log.d(TAG, "[APPLOVIN MAX] Rewarded ad loaded");
-                                    }
-
-                                    @Override
-                                    public void onAdDisplayed(MaxAd ad) {
-                                    }
-
-                                    @Override
-                                    public void onAdHidden(MaxAd ad) {
-                                        loadRewardedAd(onComplete, onDismiss);
-                                        onDismiss.onRewardedAdDismissed();
-                                    }
-
-                                    @Override
-                                    public void onAdClicked(MaxAd ad) {
-                                    }
-
-                                    @Override
-                                    public void onAdLoadFailed(String adUnitId, com.applovin.mediation.MaxError error) {
-                                        loadRewardedBackupAd(onComplete, onDismiss);
-                                        Log.d(TAG, "[APPLOVIN MAX] Failed to load rewarded ad: " + error.getMessage());
-                                    }
-
-                                    @Override
-                                    public void onAdDisplayFailed(MaxAd ad, com.applovin.mediation.MaxError error) {
-                                    }
-                                });
-                                appLovinMaxRewardedAd.loadAd();
-                            } catch (NoClassDefFoundError | Exception e) {
-                                Log.e(TAG, "Failed to load backup rewarded for AppLovin. Error: " + e.getMessage());
-                                loadRewardedBackupAd(onComplete, onDismiss);
-                            }
-                            break;
-                        }
-
-                        case STARTAPP: {
-                            try {
-                                startAppRewardedAd = new StartAppAd(activity);
-                                startAppRewardedAd.loadAd(StartAppAd.AdMode.REWARDED_VIDEO, new AdEventListener() {
-                                    @Override
-                                    public void onReceiveAd(@NonNull com.startapp.sdk.adsbase.Ad ad) {
-                                        Log.d(TAG, "[STARTAPP] Rewarded ad loaded");
-                                    }
-
-                                    @Override
-                                    public void onFailedToReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
-                                        loadRewardedBackupAd(onComplete, onDismiss);
-                                        Log.d(TAG, "[STARTAPP] Failed to load rewarded ad");
-                                    }
-                                });
-                            } catch (NoClassDefFoundError | Exception e) {
-                                Log.e(TAG, "Failed to load backup rewarded for StartApp. Error: " + e.getMessage());
-                                loadRewardedBackupAd(onComplete, onDismiss);
-                            }
-                            break;
-                        }
-
-                        case IRONSOURCE:
-                        case META_BIDDING_IRONSOURCE: {
-                            try {
-                                IronSource.setLevelPlayRewardedVideoListener(new LevelPlayRewardedVideoListener() {
-                                    @Override
-                                    public void onAdOpened(AdInfo adInfo) {
-                                    }
-
-                                    @Override
-                                    public void onAdClosed(AdInfo adInfo) {
-                                        onDismiss.onRewardedAdDismissed();
-                                    }
-
-                                    @Override
-                                    public void onAdAvailable(AdInfo adInfo) {
-                                        Log.d(TAG, "[IRONSOURCE] Rewarded ad available");
-                                    }
-
-                                    @Override
-                                    public void onAdUnavailable() {
-                                    }
-
-                                    @Override
-                                    public void onAdShowFailed(IronSourceError ironSourceError, AdInfo adInfo) {
-                                    }
-
-                                    @Override
-                                    public void onAdRewarded(Placement placement, AdInfo adInfo) {
-                                        onComplete.onRewardedAdComplete();
-                                    }
-
-                                    @Override
-                                    public void onAdClicked(Placement placement, AdInfo adInfo) {
-                                    }
-                                });
-                                IronSource.loadRewardedVideo();
-                            } catch (NoClassDefFoundError | Exception e) {
-                                Log.e(TAG, "Failed to load backup rewarded for IronSource. Error: " + e.getMessage());
-                                loadRewardedBackupAd(onComplete, onDismiss);
-                            }
-                            break;
-                        }
-
-                        case WORTISE: {
-                            try {
-                                wortiseRewardedAd = new com.wortise.ads.rewarded.RewardedAd(activity,
-                                        wortiseRewardedId);
-                                wortiseRewardedAd.setListener(new com.wortise.ads.rewarded.RewardedAd.Listener() {
-                                    @Override
-                                    public void onRewardedFailedToLoad(@NonNull com.wortise.ads.rewarded.RewardedAd ad,
-                                            @NonNull com.wortise.ads.AdError error) {
-                                        loadRewardedBackupAd(onComplete, onDismiss);
-                                        Log.d(TAG, "[WORTISE] Failed to load rewarded ad");
-                                    }
-
-                                    @Override
-                                    public void onRewardedFailedToShow(@NonNull com.wortise.ads.rewarded.RewardedAd ad,
-                                            @NonNull com.wortise.ads.AdError error) {
-                                    }
-
-                                    @Override
-                                    public void onRewardedImpression(@NonNull com.wortise.ads.rewarded.RewardedAd ad) {
-                                    }
-
-                                    @Override
-                                    public void onRewardedClicked(@NonNull com.wortise.ads.rewarded.RewardedAd ad) {
-                                    }
-
-                                    @Override
-                                    public void onRewardedCompleted(@NonNull com.wortise.ads.rewarded.RewardedAd ad,
-                                            @NonNull com.wortise.ads.rewarded.models.Reward reward) {
-                                        onComplete.onRewardedAdComplete();
-                                    }
-
-                                    @Override
-                                    public void onRewardedDismissed(@NonNull com.wortise.ads.rewarded.RewardedAd ad) {
-                                        onDismiss.onRewardedAdDismissed();
-                                    }
-
-                                    @Override
-                                    public void onRewardedLoaded(@NonNull com.wortise.ads.rewarded.RewardedAd ad) {
-                                        Log.d(TAG, "[WORTISE] Rewarded ad loaded");
-                                    }
-
-                                    @Override
-                                    public void onRewardedShown(@NonNull com.wortise.ads.rewarded.RewardedAd ad) {
-                                    }
-
-                                    @Override
-                                    public void onRewardedRevenuePaid(@NonNull com.wortise.ads.rewarded.RewardedAd ad,
-                                            @NonNull com.wortise.ads.RevenueData revenueData) {
-                                    }
-                                });
-                                wortiseRewardedAd.loadAd();
-                            } catch (NoClassDefFoundError | Exception e) {
-                                Log.e(TAG, "Failed to load backup rewarded for Wortise. Error: " + e.getMessage());
-                                loadRewardedBackupAd(onComplete, onDismiss);
-                            }
-                            break;
-                        }
-
-                        case APPLOVIN_DISCOVERY:
-                        default:
-                            loadRewardedBackupAd(onComplete, onDismiss);
-                            break;
-                    }
+                    Log.d(TAG, "Rewarded Ad is enabled");
+                    loadAdFromNetwork(adNetwork, onComplete, onDismiss);
+                } else {
+                    Log.d(TAG, "Rewarded Ad is disabled");
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Error in loadRewardedAd: " + e.getMessage());
+                Log.e(TAG, "Error loading Rewarded Ad: " + e.getMessage());
             }
         }
 
@@ -579,173 +304,235 @@ public class RewardedAd {
             try {
                 if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
                     if (waterfallManager == null) {
-                        if (!backupAdNetwork.isEmpty()) {
+                        if (backupAdNetwork != null && !backupAdNetwork.isEmpty()) {
                             waterfallManager = new WaterfallManager(backupAdNetwork);
                         } else {
                             return;
                         }
                     }
+
                     String networkToLoad = waterfallManager.getNext();
                     if (networkToLoad == null) {
                         Log.d(TAG, "All backup rewarded ads failed to load");
                         return;
                     }
+
                     backupAdNetwork = networkToLoad;
-                    Log.d(TAG,
-                            "Loading Backup Rewarded Ad [" + backupAdNetwork.toUpperCase(java.util.Locale.ROOT) + "]");
+                    Log.d(TAG, "[" + networkToLoad + "] is selected as Backup Ads");
+                    loadAdFromNetwork(backupAdNetwork, onComplete, onDismiss);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error loading Backup Rewarded Ad: " + e.getMessage());
+            }
+        }
 
-                    switch (backupAdNetwork) {
-                        case ADMOB:
-                        case META_BIDDING_ADMOB: {
-                            com.google.android.gms.ads.rewarded.RewardedAd.load(activity, adMobRewardedId,
-                                    Tools.getAdRequest(activity, legacyGDPR), new RewardedAdLoadCallback() {
-                                        @Override
-                                        public void onAdLoaded(
-                                                @NonNull com.google.android.gms.ads.rewarded.RewardedAd ad) {
-                                            adMobRewardedAd = ad;
-                                            adMobRewardedAd
-                                                    .setFullScreenContentCallback(new FullScreenContentCallback() {
-                                                        @Override
-                                                        public void onAdDismissedFullScreenContent() {
-                                                            adMobRewardedAd = null;
-                                                            loadRewardedAd(onComplete, onDismiss);
-                                                            onDismiss.onRewardedAdDismissed();
-                                                        }
-
-                                                        @Override
-                                                        public void onAdFailedToShowFullScreenContent(
-                                                                @NonNull com.google.android.gms.ads.AdError adError) {
-                                                            adMobRewardedAd = null;
-                                                        }
-                                                    });
-                                            Log.d(TAG, "[ADMOB] [backup] Rewarded ad loaded");
-                                        }
-
-                                        @Override
-                                        public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                                            adMobRewardedAd = null;
-                                            loadRewardedBackupAd(onComplete, onDismiss);
-                                            Log.d(TAG, "[ADMOB] [backup] Failed to load rewarded ad");
-                                        }
-                                    });
+        private void loadAdFromNetwork(String networkToLoad, OnRewardedAdCompleteListener onComplete,
+                OnRewardedAdDismissedListener onDismiss) {
+            try {
+                switch (networkToLoad) {
+                    case ADMOB:
+                    case META_BIDDING_ADMOB: {
+                        if (!com.partharoypc.adglide.util.AdMobRateLimiter.isRequestAllowed(adMobRewardedId)) {
+                            loadRewardedBackupAd(onComplete, onDismiss);
                             break;
                         }
-
-                        case META: {
-                            metaRewardedVideoAd = new com.facebook.ads.RewardedVideoAd(activity, metaRewardedId);
-                            metaRewardedVideoAd.loadAd(metaRewardedVideoAd.buildLoadAdConfig()
-                                    .withAdListener(new RewardedVideoAdListener() {
-                                        @Override
-                                        public void onRewardedVideoCompleted() {
-                                            onComplete.onRewardedAdComplete();
-                                        }
-
-                                        @Override
-                                        public void onRewardedVideoClosed() {
-                                            onDismiss.onRewardedAdDismissed();
-                                        }
-
-                                        @Override
-                                        public void onError(Ad ad, AdError adError) {
-                                            loadRewardedBackupAd(onComplete, onDismiss);
-                                            Log.d(TAG, "[Meta] [backup] Failed to load rewarded ad");
-                                        }
-
-                                        @Override
-                                        public void onAdLoaded(Ad ad) {
-                                            Log.d(TAG, "[Meta] [backup] Rewarded ad loaded");
-                                        }
-
-                                        @Override
-                                        public void onAdClicked(Ad ad) {
-                                        }
-
-                                        @Override
-                                        public void onLoggingImpression(Ad ad) {
-                                        }
-                                    }).build());
-                            break;
-                        }
-
-                        case UNITY: {
-                            try {
-                                UnityAds.load(unityRewardedId, new IUnityAdsLoadListener() {
+                        com.google.android.gms.ads.rewarded.RewardedAd.load(activity, adMobRewardedId,
+                                Tools.getAdRequest(activity, legacyGDPR), new RewardedAdLoadCallback() {
                                     @Override
-                                    public void onUnityAdsAdLoaded(String placementId) {
-                                        Log.d(TAG, "[UNITY] [backup] Rewarded ad loaded");
+                                    public void onAdLoaded(@NonNull com.google.android.gms.ads.rewarded.RewardedAd ad) {
+                                        com.partharoypc.adglide.util.AdMobRateLimiter.resetCooldown(adMobRewardedId);
+                                        adMobRewardedAd = ad;
+                                        adMobRewardedAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                                            @Override
+                                            public void onAdDismissedFullScreenContent() {
+                                                adMobRewardedAd = null;
+                                                loadRewardedAd(onComplete, onDismiss);
+                                                onDismiss.onRewardedAdDismissed();
+                                            }
+
+                                            @Override
+                                            public void onAdFailedToShowFullScreenContent(
+                                                    @NonNull com.google.android.gms.ads.AdError adError) {
+                                                adMobRewardedAd = null;
+                                            }
+                                        });
+                                        Log.d(TAG, "[ADMOB] Rewarded ad loaded");
                                     }
 
                                     @Override
-                                    public void onUnityAdsFailedToLoad(String placementId,
-                                            UnityAds.UnityAdsLoadError error,
-                                            String message) {
+                                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+
+                                        if (loadAdError
+                                                .getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
+                                            com.partharoypc.adglide.util.AdMobRateLimiter
+                                                    .recordFailure(adMobRewardedId);
+                                        }
+                                        adMobRewardedAd = null;
                                         loadRewardedBackupAd(onComplete, onDismiss);
-                                        Log.d(TAG, "[UNITY] [backup] Failed to load rewarded ad");
+                                        Log.d(TAG, "[ADMOB] Failed to load rewarded ad: " + loadAdError.getMessage());
                                     }
                                 });
-                            } catch (NoClassDefFoundError | Exception e) {
-                                Log.e(TAG, "Failed to load backup rewarded for Unity. Error: " + e.getMessage());
-                                loadRewardedBackupAd(onComplete, onDismiss);
-                            }
-                            break;
-                        }
+                        break;
+                    }
 
-                        case APPLOVIN:
-                        case APPLOVIN_MAX:
-                        case META_BIDDING_APPLOVIN_MAX: {
-                            try {
-                                appLovinMaxRewardedAd = MaxRewardedAd.getInstance(appLovinMaxRewardedId, activity);
-                                appLovinMaxRewardedAd.setListener(new MaxRewardedAdListener() {
+                    case META: {
+                        metaRewardedVideoAd = new com.facebook.ads.RewardedVideoAd(activity, metaRewardedId);
+                        metaRewardedVideoAd.loadAd(metaRewardedVideoAd.buildLoadAdConfig()
+                                .withAdListener(new RewardedVideoAdListener() {
                                     @Override
-                                    public void onUserRewarded(MaxAd ad, MaxReward reward) {
+                                    public void onRewardedVideoCompleted() {
                                         onComplete.onRewardedAdComplete();
                                     }
 
                                     @Override
-                                    public void onAdLoaded(MaxAd ad) {
-                                        Log.d(TAG, "[APPLOVIN MAX] [backup] Rewarded ad loaded");
-                                    }
-
-                                    @Override
-                                    public void onAdDisplayed(MaxAd ad) {
-                                    }
-
-                                    @Override
-                                    public void onAdHidden(MaxAd ad) {
-                                        loadRewardedAd(onComplete, onDismiss);
+                                    public void onRewardedVideoClosed() {
                                         onDismiss.onRewardedAdDismissed();
                                     }
 
                                     @Override
-                                    public void onAdClicked(MaxAd ad) {
-                                    }
-
-                                    @Override
-                                    public void onAdLoadFailed(String adUnitId, com.applovin.mediation.MaxError error) {
+                                    public void onError(Ad ad, AdError adError) {
                                         loadRewardedBackupAd(onComplete, onDismiss);
-                                        Log.d(TAG, "[APPLOVIN MAX] [backup] Failed to load rewarded ad");
+                                        Log.d(TAG, "[Meta] Failed to load rewarded ad: " + adError.getErrorMessage());
                                     }
 
                                     @Override
-                                    public void onAdDisplayFailed(MaxAd ad, com.applovin.mediation.MaxError error) {
+                                    public void onAdLoaded(Ad ad) {
+                                        Log.d(TAG, "[Meta] Rewarded ad loaded");
                                     }
-                                });
-                                appLovinMaxRewardedAd.loadAd();
-                            } catch (NoClassDefFoundError | Exception e) {
-                                Log.e(TAG, "Failed to load backup rewarded for AppLovin. Error: " + e.getMessage());
-                                loadRewardedBackupAd(onComplete, onDismiss);
-                            }
-                            break;
-                        }
 
-                        case APPLOVIN_DISCOVERY:
-                        default:
-                            loadRewardedBackupAd(onComplete, onDismiss);
-                            break;
+                                    @Override
+                                    public void onAdClicked(Ad ad) {
+                                    }
+
+                                    @Override
+                                    public void onLoggingImpression(Ad ad) {
+                                    }
+                                }).build());
+                        break;
                     }
+
+                    case UNITY: {
+                        UnityAds.load(unityRewardedId, new IUnityAdsLoadListener() {
+                            @Override
+                            public void onUnityAdsAdLoaded(String placementId) {
+                                Log.d(TAG, "[UNITY] Rewarded ad loaded");
+                            }
+
+                            @Override
+                            public void onUnityAdsFailedToLoad(String placementId, UnityAds.UnityAdsLoadError error,
+                                    String message) {
+                                loadRewardedBackupAd(onComplete, onDismiss);
+                                Log.d(TAG, "[UNITY] Failed to load rewarded ad: " + message);
+                            }
+                        });
+                        break;
+                    }
+
+                    case APPLOVIN:
+                    case APPLOVIN_MAX:
+                    case META_BIDDING_APPLOVIN_MAX: {
+                        appLovinMaxRewardedAd = MaxRewardedAd.getInstance(appLovinMaxRewardedId, activity);
+                        appLovinMaxRewardedAd.setListener(new MaxRewardedAdListener() {
+                            @Override
+                            public void onUserRewarded(MaxAd ad, MaxReward reward) {
+                                onComplete.onRewardedAdComplete();
+                            }
+
+                            @Override
+                            public void onAdLoaded(MaxAd ad) {
+                                Log.d(TAG, "[APPLOVIN MAX] Rewarded ad loaded");
+                            }
+
+                            @Override
+                            public void onAdDisplayed(MaxAd ad) {
+                            }
+
+                            @Override
+                            public void onAdHidden(MaxAd ad) {
+                                loadRewardedAd(onComplete, onDismiss);
+                                onDismiss.onRewardedAdDismissed();
+                            }
+
+                            @Override
+                            public void onAdClicked(MaxAd ad) {
+                            }
+
+                            @Override
+                            public void onAdLoadFailed(String adUnitId, com.applovin.mediation.MaxError error) {
+                                loadRewardedBackupAd(onComplete, onDismiss);
+                                Log.d(TAG, "[APPLOVIN MAX] Failed to load rewarded ad: " + error.getMessage());
+                            }
+
+                            @Override
+                            public void onAdDisplayFailed(MaxAd ad, com.applovin.mediation.MaxError error) {
+                            }
+                        });
+                        appLovinMaxRewardedAd.loadAd();
+                        break;
+                    }
+
+                    case STARTAPP: {
+                        startAppRewardedAd = new StartAppAd(activity);
+                        startAppRewardedAd.loadAd(StartAppAd.AdMode.REWARDED_VIDEO, new AdEventListener() {
+                            @Override
+                            public void onReceiveAd(@NonNull com.startapp.sdk.adsbase.Ad ad) {
+                                Log.d(TAG, "[STARTAPP] Rewarded ad loaded");
+                            }
+
+                            @Override
+                            public void onFailedToReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
+                                loadRewardedBackupAd(onComplete, onDismiss);
+                                Log.d(TAG, "[STARTAPP] Failed to load rewarded ad");
+                            }
+                        });
+                        break;
+                    }
+
+                    case IRONSOURCE:
+                    case META_BIDDING_IRONSOURCE: {
+                        IronSource.setLevelPlayRewardedVideoListener(new LevelPlayRewardedVideoListener() {
+                            @Override
+                            public void onAdOpened(AdInfo adInfo) {
+                            }
+
+                            @Override
+                            public void onAdClosed(AdInfo adInfo) {
+                                onDismiss.onRewardedAdDismissed();
+                            }
+
+                            @Override
+                            public void onAdAvailable(AdInfo adInfo) {
+                                Log.d(TAG, "[IRONSOURCE] Rewarded ad available");
+                            }
+
+                            @Override
+                            public void onAdUnavailable() {
+                            }
+
+                            @Override
+                            public void onAdShowFailed(IronSourceError ironSourceError, AdInfo adInfo) {
+                            }
+
+                            @Override
+                            public void onAdRewarded(Placement placement, AdInfo adInfo) {
+                                onComplete.onRewardedAdComplete();
+                            }
+
+                            @Override
+                            public void onAdClicked(Placement placement, AdInfo adInfo) {
+                            }
+                        });
+                        IronSource.loadRewardedVideo();
+                        break;
+                    }
+
+                    default:
+                        loadRewardedBackupAd(onComplete, onDismiss);
+                        break;
                 }
-            } catch (Exception e) {
-                Log.e(TAG, "Error in loadRewardedBackupAd: " + e.getMessage());
+            } catch (NoClassDefFoundError | Exception e) {
+                Log.e(TAG, "Failed to load rewarded ad for " + networkToLoad + ". Error: " + e.getMessage());
+                loadRewardedBackupAd(onComplete, onDismiss);
             }
         }
 
