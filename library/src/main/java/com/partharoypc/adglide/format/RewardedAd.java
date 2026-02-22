@@ -3,7 +3,6 @@ package com.partharoypc.adglide.format;
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
-import static com.partharoypc.adglide.util.Constant.APPLOVIN_DISCOVERY;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
@@ -76,7 +75,6 @@ public class RewardedAd {
         private String metaRewardedId = "";
         private String unityRewardedId = "";
         private String appLovinMaxRewardedId = "";
-        private String applovinDiscRewardedZoneId = "";
         private String ironSourceRewardedId = "";
         private String wortiseRewardedId = "";
         private int placementStatus = 1;
@@ -141,24 +139,21 @@ public class RewardedAd {
          * @param backupAdNetwork The backup network key.
          * @return The configured Builder instance.
          */
-        @NonNull
-        public Builder setBackupAdNetwork(@Nullable String backupAdNetwork) {
-            this.backupAdNetwork = backupAdNetwork;
-            this.waterfallManager = new WaterfallManager(backupAdNetwork);
+        @androidx.annotation.NonNull
+        public Builder setBackupAdNetwork(@androidx.annotation.Nullable String backupAdNetwork) {
+            this.backupAdNetwork = (backupAdNetwork != null) ? backupAdNetwork : "";
+            if (waterfallManager == null) {
+                waterfallManager = new WaterfallManager();
+            }
+            waterfallManager.addNetwork(backupAdNetwork);
             return this;
         }
 
-        /**
-         * Sets multiple backup ad networks for a waterfall fallback.
-         * 
-         * @param backupAdNetworks An array or varargs of backup network keys.
-         * @return The configured Builder instance.
-         */
-        @NonNull
+        @androidx.annotation.NonNull
         public Builder setBackupAdNetworks(@Nullable String... backupAdNetworks) {
             this.waterfallManager = new WaterfallManager(backupAdNetworks);
-            if (backupAdNetworks.length > 0) {
-                this.backupAdNetwork = backupAdNetworks[0];
+            if (backupAdNetworks != null && backupAdNetworks.length > 0) {
+                this.backupAdNetwork = (backupAdNetworks[0] != null) ? backupAdNetworks[0] : "";
             }
             return this;
         }
@@ -228,26 +223,8 @@ public class RewardedAd {
             return this;
         }
 
-        /**
-         * Sets the ApplovinDiscRewardedZone Ad Unit ID.
-         * 
-         * @param applovinDiscRewardedZoneId The placement ID.
-         * @return The configured Builder instance.
-         */
         @NonNull
-        public Builder setApplovinDiscRewardedZoneId(@NonNull String applovinDiscRewardedZoneId) {
-            this.applovinDiscRewardedZoneId = applovinDiscRewardedZoneId;
-            return this;
-        }
-
-        /**
-         * Sets the ironSourceRewarded Ad Unit ID.
-         * 
-         * @param ironSourceRewardedId The placement ID.
-         * @return The configured Builder instance.
-         */
-        @NonNull
-        public Builder setironSourceRewardedId(@NonNull String ironSourceRewardedId) {
+        public Builder setIronSourceRewardedId(@NonNull String ironSourceRewardedId) {
             this.ironSourceRewardedId = ironSourceRewardedId;
             return this;
         }
@@ -578,7 +555,7 @@ public class RewardedAd {
                 if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
                     if (waterfallManager == null) {
                         if (!backupAdNetwork.isEmpty()) {
-                            waterfallManager = new WaterfallManager(backupAdNetwork);
+                            waterfallManager = new WaterfallManager().addNetwork(backupAdNetwork);
                         } else {
                             return;
                         }
@@ -1091,7 +1068,7 @@ public class RewardedAd {
                 if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
                     if (waterfallManager == null) {
                         if (!backupAdNetwork.isEmpty()) {
-                            waterfallManager = new WaterfallManager(backupAdNetwork);
+                            waterfallManager = new WaterfallManager().addNetwork(backupAdNetwork);
                         } else {
                             return;
                         }
@@ -1256,6 +1233,29 @@ public class RewardedAd {
             if (startAppRewardedAd != null) {
                 startAppRewardedAd = null;
             }
+        }
+
+        /**
+         * Cleans up rewarded ad resources. Call from onDestroy().
+         */
+        public void destroyAd() {
+            if (adMobRewardedAd != null) {
+                adMobRewardedAd.setFullScreenContentCallback(null);
+                adMobRewardedAd = null;
+            }
+            if (metaRewardedVideoAd != null) {
+                metaRewardedVideoAd.destroy();
+                metaRewardedVideoAd = null;
+            }
+            if (appLovinMaxRewardedAd != null) {
+                appLovinMaxRewardedAd.setListener(null);
+                appLovinMaxRewardedAd = null;
+            }
+            if (wortiseRewardedAd != null) {
+                wortiseRewardedAd.setListener(null);
+                wortiseRewardedAd = null;
+            }
+            startAppRewardedAd = null;
         }
     }
 }

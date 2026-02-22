@@ -44,6 +44,8 @@
         <activity android:name="com.partharoypc.adglidedemo.activity.ads.ActivityInterstitial" />
         <activity android:name="com.partharoypc.adglidedemo.activity.ads.ActivityRewarded" />
         <activity android:name="com.partharoypc.adglidedemo.activity.ads.ActivityNative" />
+        <activity android:name="com.partharoypc.adglidedemo.activity.ads.ActivityMediumRectangle" />
+        <activity android:name="com.partharoypc.adglidedemo.activity.ads.ActivityRewardedInterstitial" />
         <activity android:name="com.partharoypc.adglidedemo.activity.ActivitySettings" />
 
 

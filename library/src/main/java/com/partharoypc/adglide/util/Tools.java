@@ -3,13 +3,13 @@ package com.partharoypc.adglide.util;
 import static com.partharoypc.adglide.util.Constant.TOKEN;
 import static com.partharoypc.adglide.util.Constant.VALUE;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowMetrics;
 
 import androidx.annotation.NonNull;
@@ -138,8 +138,18 @@ public class Tools {
         return new String(valueDecoded);
     }
 
+    /**
+     * Performs a fade-in animation on a view.
+     *
+     * @param view the View to animate
+     */
+    public static void fadeIn(@NonNull final View view) {
+        view.setAlpha(0f);
+        view.setVisibility(View.VISIBLE);
+        view.animate()
+                .alpha(1f)
+                .setDuration(500)
+                .setListener(null);
+    }
+
 }
-
-
-
-

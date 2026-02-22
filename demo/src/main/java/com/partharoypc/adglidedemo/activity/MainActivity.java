@@ -26,6 +26,7 @@ import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.format.AdNetwork;
 import com.partharoypc.adglide.format.AppOpenAd;
 import com.partharoypc.adglide.gdpr.GDPR;
@@ -34,7 +35,9 @@ import com.partharoypc.adglidedemo.R;
 import com.partharoypc.adglidedemo.activity.ads.ActivityBanner;
 import com.partharoypc.adglidedemo.activity.ads.ActivityInterstitial;
 import com.partharoypc.adglidedemo.activity.ads.ActivityNative;
+import com.partharoypc.adglidedemo.activity.ads.ActivityMediumRectangle;
 import com.partharoypc.adglidedemo.activity.ads.ActivityRewarded;
+import com.partharoypc.adglidedemo.activity.ads.ActivityRewardedInterstitial;
 import com.partharoypc.adglidedemo.adapter.DashboardAdapter;
 import com.partharoypc.adglidedemo.data.Constant;
 import com.partharoypc.adglidedemo.database.SharedPref;
@@ -51,21 +54,6 @@ public class MainActivity extends AppCompatActivity {
     private DashboardAdapter adapter;
     private AppOpenAd.Builder appOpenAdBuilder;
     private GDPR gdpr;
-    private LifecycleObserver lifecycleObserver = new DefaultLifecycleObserver() {
-        @Override
-        public void onStart(@NonNull LifecycleOwner owner) {
-            DefaultLifecycleObserver.super.onStart(owner);
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                if (Constant.OPEN_ADS_ON_RESUME) {
-                    if (AppOpenAd.isAppOpenAdLoaded) {
-                        if (appOpenAdBuilder != null) {
-                            appOpenAdBuilder.show();
-                        }
-                    }
-                }
-            }, 100);
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,10 +67,6 @@ public class MainActivity extends AppCompatActivity {
         initAds();
         loadGdpr();
         loadOpenAds();
-
-        if (Constant.FORCE_TO_SHOW_APP_OPEN_AD_ON_START) {
-            ProcessLifecycleOwner.get().getLifecycle().addObserver(lifecycleObserver);
-        }
 
         setupDashboard();
     }
@@ -114,21 +98,24 @@ public class MainActivity extends AppCompatActivity {
                 ActivityRewarded.class));
         items.add(new DashboardItem("Native Ads", "Ads that blend into content", R.mipmap.ic_launcher,
                 ActivityNative.class));
+        items.add(new DashboardItem("Medium Rectangle Ads", "300x250 ad units", R.mipmap.ic_launcher,
+                ActivityMediumRectangle.class));
+        items.add(new DashboardItem("Rewarded Interstitial Ads", "Interstitial with rewards", R.mipmap.ic_launcher,
+                ActivityRewardedInterstitial.class));
 
         adapter = new DashboardAdapter(this, items);
         recyclerView.setAdapter(adapter);
     }
 
     private void initAds() {
-        new AdNetwork.Initialize(this)
+        AdGlide.init(this)
                 .setAdStatus(Constant.AD_STATUS)
                 .setAdNetwork(Constant.AD_NETWORK)
-                .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
-                .setAdMobAppId(null)
-                .setStartappAppId(Constant.STARTAPP_APP_ID)
+                .setBackupAdNetworks(Constant.BACKUP_AD_NETWORK)
+                .setStartAppId(Constant.STARTAPP_APP_ID)
                 .setUnityGameId(Constant.UNITY_GAME_ID)
                 .setAppLovinSdkKey(getResources().getString(R.string.app_lovin_sdk_key))
-                .setironSourceAppKey(Constant.IRONSOURCE_APP_KEY)
+                .setIronSourceAppKey(Constant.IRONSOURCE_APP_KEY)
                 .setWortiseAppId(Constant.WORTISE_APP_ID)
                 .setDebug(BuildConfig.DEBUG)
                 .build();
@@ -141,14 +128,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadOpenAds() {
         if (Constant.OPEN_ADS_ON_RESUME) {
-            appOpenAdBuilder = new AppOpenAd.Builder(this)
-                    .setAdStatus(Constant.AD_STATUS)
-                    .setAdNetwork(Constant.AD_NETWORK)
-                    .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
-                    .setAdMobAppOpenId(Constant.ADMOB_APP_OPEN_AD_ID)
-                    .setAppLovinAppOpenId(Constant.APPLOVIN_APP_OPEN_AP_ID)
-                    .setWortiseAppOpenId(Constant.WORTISE_APP_OPEN_AD_ID)
-                    .build();
+            AdGlide.loadAppOpenAd(this);
         }
     }
 
@@ -187,11 +167,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (Constant.FORCE_TO_SHOW_APP_OPEN_AD_ON_START) {
-            if (appOpenAdBuilder != null) {
-                appOpenAdBuilder.destroyOpenAd();
-            }
-            ProcessLifecycleOwner.get().getLifecycle().removeObserver(lifecycleObserver);
-        }
+        AdGlide.destroyAd();
     }
 }

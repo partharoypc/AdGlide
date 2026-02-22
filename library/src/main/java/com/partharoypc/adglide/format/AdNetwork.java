@@ -5,7 +5,6 @@ import static com.partharoypc.adglide.util.Constant.IRONSOURCE;
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
-import static com.partharoypc.adglide.util.Constant.APPLOVIN_DISCOVERY;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.META;
@@ -119,7 +118,7 @@ public class AdNetwork {
             return this;
         }
 
-        public Initialize setironSourceAppKey(String ironSourceAppKey) {
+        public Initialize setIronSourceAppKey(String ironSourceAppKey) {
             this.ironSourceAppKey = ironSourceAppKey;
             return this;
         }
@@ -197,9 +196,6 @@ public class AdNetwork {
                         AppLovinSdk.getInstance(activity).initializeSdk(config -> {
                         });
                         AudienceNetworkInitializeHelper.initializeAd(activity, debug);
-                        break;
-                    case APPLOVIN_DISCOVERY:
-                        AppLovinSdk.initializeSdk(activity);
                         break;
                     case IRONSOURCE:
                     case META_BIDDING_IRONSOURCE:

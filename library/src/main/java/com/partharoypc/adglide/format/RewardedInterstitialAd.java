@@ -41,6 +41,11 @@ public class RewardedInterstitialAd {
         private WaterfallManager waterfallManager;
 
         private String adMobRewardedInterstitialId = "";
+        private String metaRewardedId = "";
+        private String unityRewardedId = "";
+        private String appLovinMaxRewardedId = "";
+        private String ironSourceRewardedId = "";
+        private String wortiseRewardedId = "";
 
         private int placementStatus = 1;
         private boolean legacyGDPR = false;
@@ -74,12 +79,13 @@ public class RewardedInterstitialAd {
             return this;
         }
 
-        @androidx.annotation.Nullable
+        @androidx.annotation.NonNull
         public Builder setBackupAdNetwork(@androidx.annotation.Nullable String backupAdNetwork) {
-            this.backupAdNetwork = backupAdNetwork;
-            if (!backupAdNetwork.isEmpty()) {
-                this.waterfallManager = new WaterfallManager(backupAdNetwork);
+            this.backupAdNetwork = (backupAdNetwork != null) ? backupAdNetwork : "";
+            if (this.waterfallManager == null) {
+                this.waterfallManager = new WaterfallManager();
             }
+            this.waterfallManager.addNetwork(backupAdNetwork);
             return this;
         }
 
@@ -95,6 +101,36 @@ public class RewardedInterstitialAd {
         @androidx.annotation.NonNull
         public Builder setAdMobRewardedInterstitialId(@androidx.annotation.NonNull String adMobRewardedInterstitialId) {
             this.adMobRewardedInterstitialId = adMobRewardedInterstitialId;
+            return this;
+        }
+
+        @androidx.annotation.NonNull
+        public Builder setMetaRewardedId(@androidx.annotation.NonNull String metaRewardedId) {
+            this.metaRewardedId = metaRewardedId;
+            return this;
+        }
+
+        @androidx.annotation.NonNull
+        public Builder setUnityRewardedId(@androidx.annotation.NonNull String unityRewardedId) {
+            this.unityRewardedId = unityRewardedId;
+            return this;
+        }
+
+        @androidx.annotation.NonNull
+        public Builder setApplovinMaxRewardedId(@androidx.annotation.NonNull String appLovinMaxRewardedId) {
+            this.appLovinMaxRewardedId = appLovinMaxRewardedId;
+            return this;
+        }
+
+        @androidx.annotation.NonNull
+        public Builder setIronSourceRewardedId(@androidx.annotation.NonNull String ironSourceRewardedId) {
+            this.ironSourceRewardedId = ironSourceRewardedId;
+            return this;
+        }
+
+        @androidx.annotation.NonNull
+        public Builder setWortiseRewardedId(@androidx.annotation.NonNull String wortiseRewardedId) {
+            this.wortiseRewardedId = wortiseRewardedId;
             return this;
         }
 
@@ -175,7 +211,7 @@ public class RewardedInterstitialAd {
                 if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
                     if (waterfallManager == null) {
                         if (!backupAdNetwork.isEmpty()) {
-                            waterfallManager = new WaterfallManager(backupAdNetwork);
+                            waterfallManager = new WaterfallManager().addNetwork(backupAdNetwork);
                         } else {
                             return;
                         }
@@ -298,5 +334,11 @@ public class RewardedInterstitialAd {
             }
         }
 
+        public void destroyAd() {
+            if (adMobRewardedInterstitialAd != null) {
+                adMobRewardedInterstitialAd.setFullScreenContentCallback(null);
+                adMobRewardedInterstitialAd = null;
+            }
+        }
     }
 }

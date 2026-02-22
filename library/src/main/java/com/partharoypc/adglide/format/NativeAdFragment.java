@@ -84,7 +84,7 @@ public class NativeAdFragment {
         private LinearLayout startAppNativeBackground;
 
         private FrameLayout appLovinNativeAd;
-        private LinearLayout appLovinDiscoveryMrecAd;
+
         private FrameLayout wortiseNativeAd;
         private MaxNativeAdLoader nativeAdLoader;
         private MaxAd maxNativeAd;
@@ -96,7 +96,7 @@ public class NativeAdFragment {
         private String adMobNativeId = "";
         private String metaNativeId = "";
         private String appLovinNativeId = "";
-        private String appLovinDiscMrecZoneId = "";
+
         private String wortiseNativeId = "";
         private int placementStatus = 1;
         private boolean darkTheme = false;
@@ -161,12 +161,6 @@ public class NativeAdFragment {
         @androidx.annotation.NonNull
         public Builder setAdMobNativeId(@androidx.annotation.NonNull String adMobNativeId) {
             this.adMobNativeId = adMobNativeId;
-            return this;
-        }
-
-        @androidx.annotation.NonNull
-        public Builder setAppLovinDiscoveryMrecZoneId(@androidx.annotation.NonNull String appLovinDiscMrecZoneId) {
-            this.appLovinDiscMrecZoneId = appLovinDiscMrecZoneId;
             return this;
         }
 
@@ -251,7 +245,7 @@ public class NativeAdFragment {
                     startAppNativeBackground = view.findViewById(R.id.start_app_native_background);
 
                     appLovinNativeAd = view.findViewById(R.id.app_lovin_native_ad_container);
-                    appLovinDiscoveryMrecAd = view.findViewById(R.id.app_lovin_discovery_mrec_ad_container);
+
                     wortiseNativeAd = view.findViewById(R.id.wortise_native_ad_container);
 
                     switch (adNetwork) {
@@ -656,7 +650,6 @@ public class NativeAdFragment {
                     startAppNativeBackground = view.findViewById(R.id.start_app_native_background);
 
                     appLovinNativeAd = view.findViewById(R.id.app_lovin_native_ad_container);
-                    appLovinDiscoveryMrecAd = view.findViewById(R.id.app_lovin_discovery_mrec_ad_container);
 
                     switch (backupAdNetwork) {
                         case ADMOB:
@@ -918,10 +911,9 @@ public class NativeAdFragment {
         }
 
         /**
-         * Destroys and releases all native ad resources to prevent memory leaks.
-         * Should be called when the hosting Fragment is destroyed.
+         * Cleans up native resources. Call from onDestroy().
          */
-        public void destroyNativeAd() {
+        public void destroyAd() {
             if (adMobNativeAd != null) {
                 adMobNativeAd.destroy();
                 adMobNativeAd = null;

@@ -1,7 +1,6 @@
 package com.partharoypc.adglide.gdpr;
 
 import static com.partharoypc.adglide.util.Constant.ADMOB;
-import static com.partharoypc.adglide.util.Constant.APPLOVIN_DISCOVERY;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 
 import static com.partharoypc.adglide.util.Constant.STARTAPP;
@@ -88,8 +87,6 @@ public class GDPR {
                 break;
             case STARTAPP:
             case APPLOVIN_MAX:
-            case APPLOVIN_DISCOVERY:
-                break;
         }
     }
 

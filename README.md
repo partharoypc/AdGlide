@@ -17,9 +17,9 @@
 
 AdGlide supports three distinct integration patterns to maximize your yield:
 
-1.  **Direct Use**: Target a specific network exclusively.
-2.  **Bidding Mediation**: Utilize real-time header bidding for supported networks (AdMob, AppLovin MAX, IronSource).
-3.  **Sequential Waterfall**: A fail-safe manager that cycles through backup networks instantly if the primary fails to fill.
+1.  **Direct Use**: Target a specific network exclusively by its key (e.g., `"admob"`, `"unity"`, `"wortise"`).
+2.  **Bidding Mediation**: Utilize Meta's real-time bidding via mediation partners using keys like `"META_BIDDING_ADMOB"`.
+3.  **Sequential Waterfall**: A fail-safe manager that cycles through multiple backup networks defined in priority order.
 
 ### 📊 Comprehensive Capability Matrix
 
@@ -27,8 +27,9 @@ AdGlide supports three distinct integration patterns to maximize your yield:
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Direct Use** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Bidding Support**| ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| **Sequential Waterfall** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Sequential Waterfall**| ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Banner** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **MREC (300x250)** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Interstitial** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Native** | ✅ | ✅ | ❌ | ✅ | ❌ | ✅ | ✅ |
 | **Rewarded** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
@@ -113,18 +114,30 @@ appOpenAd.setPlacementStatus(true)
 
 ## 📺 Universal Ad Formats (Deep Dive)
 
-### 1. Banner & Medium Rectangle
-Supports **Adaptive Sizing** and **Collapsible Banners**.
+### 1. Banner & Medium Rectangle (MREC)
+Supports **Adaptive Sizing**, **Collapsible Banners**, and standard **300x250 MREC**.
 
+**Banner Implementation:**
 ```xml
 <include layout="@layout/adglide_view_banner_ad" />
 ```
-
 ```java
 new BannerAd.Builder(this)
     .setAdMobBannerId("YOUR_ID")
     .setIsCollapsibleBanner(true) // AdMob High-CTR format
-    .setDarkTheme(true) // Auto-styling for native-style banners
+    .setDarkTheme(true)
+    .build();
+```
+
+**MREC Implementation:**
+```xml
+<include layout="@layout/adglide_view_medium_rectangle_ad" />
+```
+```java
+new MediumRectangleAd.Builder(this)
+    .setAdMobBannerId("YOUR_ID")
+    .setWortiseBannerId("YOUR_ID") // Automatically uses HEIGHT_250
+    .setDarkTheme(true)
     .build();
 ```
 

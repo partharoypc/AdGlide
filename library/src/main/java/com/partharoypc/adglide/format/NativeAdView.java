@@ -70,7 +70,7 @@ public class NativeAdView {
         private LinearLayout startAppNativeBackground;
 
         private FrameLayout appLovinNativeAd;
-        private LinearLayout appLovinDiscoveryMrecAd;
+
         private FrameLayout wortiseNativeAd;
 
         private String adStatus = "";
@@ -79,7 +79,7 @@ public class NativeAdView {
         private String adMobNativeId = "";
         private String metaNativeId = "";
         private String appLovinNativeId = "";
-        private String appLovinDiscMrecZoneId = "";
+
         private String wortiseNativeId = "";
         private int placementStatus = 1;
         private boolean darkTheme = false;
@@ -144,12 +144,6 @@ public class NativeAdView {
         @androidx.annotation.NonNull
         public Builder setAdMobNativeId(@androidx.annotation.NonNull String adMobNativeId) {
             this.adMobNativeId = adMobNativeId;
-            return this;
-        }
-
-        @androidx.annotation.NonNull
-        public Builder setAppLovinDiscoveryMrecZoneId(@androidx.annotation.NonNull String appLovinDiscMrecZoneId) {
-            this.appLovinDiscMrecZoneId = appLovinDiscMrecZoneId;
             return this;
         }
 
@@ -224,7 +218,6 @@ public class NativeAdView {
                     startAppNativeBackground = view.findViewById(R.id.start_app_native_background);
 
                     appLovinNativeAd = view.findViewById(R.id.app_lovin_native_ad_container);
-                    appLovinDiscoveryMrecAd = view.findViewById(R.id.app_lovin_discovery_mrec_ad_container);
 
                     wortiseNativeAd = view.findViewById(R.id.wortise_native_ad_container);
 
@@ -305,7 +298,8 @@ public class NativeAdView {
                                         case Constant.STYLE_NEWS:
                                         case Constant.STYLE_MEDIUM:
                                             nativeAdView = (LinearLayout) inflater
-                                                    .inflate(R.layout.adglide_meta_news_template_view, metaNativeAdLayout,
+                                                    .inflate(R.layout.adglide_meta_news_template_view,
+                                                            metaNativeAdLayout,
                                                             false);
                                             break;
                                         case Constant.STYLE_VIDEO_SMALL:
@@ -321,11 +315,13 @@ public class NativeAdView {
                                         case Constant.STYLE_RADIO:
                                         case Constant.STYLE_SMALL:
                                             nativeAdView = (LinearLayout) inflater.inflate(
-                                                    R.layout.adglide_meta_radio_template_view, metaNativeAdLayout, false);
+                                                    R.layout.adglide_meta_radio_template_view, metaNativeAdLayout,
+                                                    false);
                                             break;
                                         default:
                                             nativeAdView = (LinearLayout) inflater.inflate(
-                                                    R.layout.adglide_meta_medium_template_view, metaNativeAdLayout, false);
+                                                    R.layout.adglide_meta_medium_template_view, metaNativeAdLayout,
+                                                    false);
                                             break;
                                     }
                                     metaNativeAdLayout.addView(nativeAdView);
@@ -445,7 +441,6 @@ public class NativeAdView {
                     startAppNativeBackground = view.findViewById(R.id.start_app_native_background);
 
                     appLovinNativeAd = view.findViewById(R.id.app_lovin_native_ad_container);
-                    appLovinDiscoveryMrecAd = view.findViewById(R.id.app_lovin_discovery_mrec_ad_container);
 
                     wortiseNativeAd = view.findViewById(R.id.wortise_native_ad_container);
 
@@ -595,7 +590,3 @@ public class NativeAdView {
     }
 
 }
-
-
-
-

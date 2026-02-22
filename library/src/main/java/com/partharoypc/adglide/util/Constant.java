@@ -16,7 +16,6 @@ public class Constant {
     public static final String UNITY = "unity";
     public static final String APPLOVIN = "applovin";
     public static final String APPLOVIN_MAX = "app_lovin_max";
-    public static final String APPLOVIN_DISCOVERY = "app_lovin_discovery";
     public static final String IRONSOURCE = "ironsource";
     public static final String WORTISE = "wortise";
     public static final String NONE = "none";

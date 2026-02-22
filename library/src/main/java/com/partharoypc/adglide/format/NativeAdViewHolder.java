@@ -87,7 +87,6 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
 
     // AppLovin
     private FrameLayout appLovinNativeAd;
-    private LinearLayout appLovinDiscoveryMrecAd;
 
     // Wortise
     private FrameLayout wortiseNativeAd;
@@ -135,7 +134,6 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
 
         // AppLovin
         appLovinNativeAd = view.findViewById(R.id.app_lovin_native_ad_container);
-        appLovinDiscoveryMrecAd = view.findViewById(R.id.app_lovin_discovery_mrec_ad_container);
 
         wortiseNativeAd = view.findViewById(R.id.wortise_native_ad_container);
 
@@ -143,20 +141,20 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
 
     public void loadNativeAd(Context context, String adStatus, int placementStatus, String adNetwork,
             String backupAdNetwork, String adMobNativeId, String metaNativeId,
-            String appLovinNativeId, String appLovinDiscMrecZoneId, String wortiseNativeId,
+            String appLovinNativeId, String wortiseNativeId,
             boolean darkTheme, boolean legacyGDPR, String nativeAdStyle, int nativeBackgroundLight,
             int nativeBackgroundDark) {
         loadNativeAdMain(context, adStatus, placementStatus, adNetwork, backupAdNetwork, adMobNativeId, metaNativeId,
-                appLovinNativeId, appLovinDiscMrecZoneId, wortiseNativeId, darkTheme, legacyGDPR, nativeAdStyle,
+                appLovinNativeId, wortiseNativeId, darkTheme, legacyGDPR, nativeAdStyle,
                 nativeBackgroundLight, nativeBackgroundDark, false);
     }
 
     public void loadBackupNativeAd(Context context, String adStatus, int placementStatus, String backupAdNetwork,
             String adMobNativeId, String metaNativeId, String appLovinNativeId,
-            String appLovinDiscMrecZoneId, String wortiseNativeId, boolean darkTheme,
+            String wortiseNativeId, boolean darkTheme,
             boolean legacyGDPR, String nativeAdStyle, int nativeBackgroundLight, int nativeBackgroundDark) {
         loadNativeAdMain(context, adStatus, placementStatus, "", backupAdNetwork, adMobNativeId, metaNativeId,
-                appLovinNativeId, appLovinDiscMrecZoneId, wortiseNativeId, darkTheme, legacyGDPR, nativeAdStyle,
+                appLovinNativeId, wortiseNativeId, darkTheme, legacyGDPR, nativeAdStyle,
                 nativeBackgroundLight, nativeBackgroundDark, true);
     }
 
@@ -457,7 +455,7 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
 
     private void loadNativeAdMain(Context context, String adStatus, int placementStatus, String adNetwork,
             String backupAdNetwork, String adMobNativeId, String metaNativeId,
-            String appLovinNativeId, String appLovinDiscMrecZoneId, String wortiseNativeId,
+            String appLovinNativeId, String wortiseNativeId,
             boolean darkTheme, boolean legacyGDPR, String nativeAdStyle, int backgroundLight,
             int backgroundDark, boolean isBackup) {
 
@@ -470,7 +468,7 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
                 } : () -> {
                     loadBackupNativeAd(context, adStatus, placementStatus, backupAdNetwork,
                             adMobNativeId, metaNativeId, appLovinNativeId,
-                            appLovinDiscMrecZoneId, wortiseNativeId, darkTheme, legacyGDPR,
+                            wortiseNativeId, darkTheme, legacyGDPR,
                             nativeAdStyle, backgroundLight, backgroundDark);
                 };
 

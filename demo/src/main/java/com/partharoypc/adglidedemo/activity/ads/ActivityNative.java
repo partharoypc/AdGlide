@@ -7,6 +7,7 @@ import android.widget.LinearLayout;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.format.NativeAd;
 import com.partharoypc.adglidedemo.R;
 import com.partharoypc.adglidedemo.data.Constant;
@@ -16,8 +17,8 @@ import static com.partharoypc.adglidedemo.data.Constant.*;
 public class ActivityNative extends AppCompatActivity {
 
     private LinearLayout nativeAdContainer;
-    private SharedPref sharedPref;
     private NativeAd.Builder nativeAd;
+    private SharedPref sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,44 +52,11 @@ public class ActivityNative extends AppCompatActivity {
 
     private void loadNativeAd() {
         nativeAdContainer.removeAllViews();
-        setNativeAdStyle(nativeAdContainer);
-
-        nativeAd = new NativeAd.Builder(this)
-                .setAdStatus(Constant.AD_STATUS)
-                .setAdNetwork(Constant.AD_NETWORK)
-                .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
-                .setAdMobNativeId(Constant.ADMOB_NATIVE_ID)
-                .setMetaNativeId(Constant.META_NATIVE_ID)
-                .setAppLovinNativeId(Constant.APPLOVIN_NATIVE_MANUAL_ID)
-//                 .setAppLovinDiscoveryMrecZoneId(Constant.APPLOVIN_BANNER_MREC_ZONE_ID)
-                .setWortiseNativeId(Constant.WORTISE_NATIVE_ID)
+        nativeAd = AdGlide.loadNativeAd(this, nativeAdContainer)
                 .setNativeAdStyle(Constant.NATIVE_STYLE)
                 .setNativeAdBackgroundColor(R.color.colorNativeBackgroundLight, R.color.colorNativeBackgroundDark)
                 .setPadding(0, 0, 0, 0)
-                .setDarkTheme(sharedPref.getIsDarkTheme())
-                .build();
-    }
-
-    private void setNativeAdStyle(LinearLayout nativeAdView) {
-        switch (Constant.NATIVE_STYLE) {
-            case STYLE_NEWS:
-                nativeAdView.addView(View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_news, null));
-                break;
-            case STYLE_RADIO:
-                nativeAdView.addView(View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_radio, null));
-                break;
-            case STYLE_VIDEO_SMALL:
-                nativeAdView
-                        .addView(View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_video_small, null));
-                break;
-            case STYLE_VIDEO_LARGE:
-                nativeAdView
-                        .addView(View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_video_large, null));
-                break;
-            default:
-                nativeAdView.addView(View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_medium, null));
-                break;
-        }
+                .setDarkTheme(sharedPref.getIsDarkTheme());
     }
 
     private void showStyleDialog() {
@@ -120,9 +88,9 @@ public class ActivityNative extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         if (nativeAd != null) {
-            nativeAd.destroyNativeAd();
+            nativeAd.destroyAd();
         }
+        super.onDestroy();
     }
 }

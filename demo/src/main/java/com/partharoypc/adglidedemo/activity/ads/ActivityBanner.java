@@ -7,6 +7,7 @@ import android.widget.LinearLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.format.BannerAd;
 import com.partharoypc.adglidedemo.R;
 import com.partharoypc.adglidedemo.data.Constant;
@@ -54,31 +55,16 @@ public class ActivityBanner extends AppCompatActivity {
     private void loadBanner() {
         destroyBanner();
 
-        // INFLATE THE LIBRARY LAYOUT HERE
         bannerContainer.removeAllViews();
-        bannerAdView = (LinearLayout) View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_banner_ad, null);
-        bannerContainer.addView(bannerAdView);
-
-        bannerAd = new BannerAd.Builder(this)
-                .setAdStatus(Constant.AD_STATUS)
-                .setAdNetwork(Constant.AD_NETWORK)
-                .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
-                .setAdMobBannerId(Constant.ADMOB_BANNER_ID)
-//                 .setGoogleAdManagerBannerId(Constant.GOOGLE_AD_MANAGER_BANNER_ID)
-                .setMetaBannerId(Constant.META_BANNER_ID)
-                .setUnityBannerId(Constant.UNITY_BANNER_ID)
-                .setAppLovinBannerId(Constant.APPLOVIN_BANNER_ID)
-                .setAppLovinBannerZoneId(Constant.APPLOVIN_BANNER_ZONE_ID)
-                .setironSourceBannerId(Constant.IRONSOURCE_BANNER_ID)
-                .setWortiseBannerId(Constant.WORTISE_BANNER_ID)
-                .setDarkTheme(sharedPref.getIsDarkTheme())
-                .setIsCollapsibleBanner(switchCollapsible.isChecked())
-                .build();
+        bannerAd = AdGlide.loadBanner(this, bannerContainer);
+        if (switchCollapsible.isChecked()) {
+            bannerAd.setIsCollapsibleBanner(true);
+        }
     }
 
     private void destroyBanner() {
         if (bannerAd != null) {
-            bannerAd.destroyAndDetachBanner();
+            bannerAd.destroyAd();
         }
         if (bannerContainer != null) {
             bannerContainer.removeAllViews();
