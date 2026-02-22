@@ -434,6 +434,7 @@ public class InterstitialAd {
                         }
 
                         case APPLOVIN_DISCOVERY: {
+                            loadBackupInterstitialAd();
                             break;
                         }
 
@@ -573,6 +574,7 @@ public class InterstitialAd {
                         }
 
                         default:
+                            loadBackupInterstitialAd();
                             break;
                     }
                 }
@@ -705,6 +707,7 @@ public class InterstitialAd {
                         }
 
                         case APPLOVIN_DISCOVERY: {
+                            loadBackupInterstitialAd();
                             break;
                         }
 
@@ -938,6 +941,7 @@ public class InterstitialAd {
                             }
 
                             default:
+                                showBackupInterstitialAd();
                                 break;
                         }
                         counter = 1;
@@ -1297,6 +1301,7 @@ public class InterstitialAd {
                         }
 
                         default:
+                            loadBackupInterstitialAd(onInterstitialAdDismissedListener);
                             break;
                     }
                 }
@@ -1568,6 +1573,7 @@ public class InterstitialAd {
                         }
 
                         default:
+                            loadBackupInterstitialAd(onInterstitialAdDismissedListener);
                             break;
                     }
                 }
@@ -1692,6 +1698,8 @@ public class InterstitialAd {
                             }
 
                             default:
+                                showBackupInterstitialAd(onInterstitialAdShowedListener,
+                                        onInterstitialAdDismissedListener);
                                 break;
                         }
                         counter = 1;

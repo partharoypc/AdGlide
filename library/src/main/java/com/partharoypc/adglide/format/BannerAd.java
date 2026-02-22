@@ -510,6 +510,7 @@ public class BannerAd {
                         }
 
                         default:
+                            loadBackupBannerAd();
                             break;
                     }
                     Log.d(TAG, "Banner Ad is enabled");
@@ -887,6 +888,7 @@ public class BannerAd {
                         }
 
                         default:
+                            loadBackupBannerAd();
                             break;
                     }
                     Log.d(TAG, "[" + networkToLoad + "] is selected as Backup Ads");

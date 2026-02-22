@@ -5,6 +5,7 @@ import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_DISCOVERY;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
+import static com.partharoypc.adglide.util.Constant.NONE;
 import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX;
@@ -276,14 +277,23 @@ public class NativeAd {
                         case WORTISE:
                             handleWortiseLoad(fallback);
                             break;
+                        case NONE:
+                            if (!isBackup)
+                                fallback.run();
+                            break;
+                        case APPLOVIN_DISCOVERY:
                         default:
                             if (!isBackup)
                                 fallback.run();
+                            else
+                                loadBackupNativeAd();
                             break;
                     }
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Error in loadNativeAdMain: " + e.getMessage());
+                if (!isBackup)
+                    loadBackupNativeAd();
             }
         }
 

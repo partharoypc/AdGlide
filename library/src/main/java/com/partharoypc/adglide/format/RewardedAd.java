@@ -563,7 +563,9 @@ public class RewardedAd {
                             break;
                         }
 
+                        case APPLOVIN_DISCOVERY:
                         default:
+                            loadRewardedBackupAd(onComplete, onDismiss);
                             break;
                     }
                 }
@@ -736,6 +738,7 @@ public class RewardedAd {
                             break;
                         }
 
+                        case APPLOVIN_DISCOVERY:
                         default:
                             loadRewardedBackupAd(onComplete, onDismiss);
                             break;

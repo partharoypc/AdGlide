@@ -22,6 +22,7 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.partharoypc.adglide.util.OnShowAdCompleteListener;
+import com.partharoypc.adglide.util.WaterfallManager;
 
 /**
  * Manages app open ads with primary and backup network support.
@@ -40,6 +41,7 @@ public class AppOpenAd {
     private boolean placementStatus;
     private String adNetwork = "";
     private String backupAdNetwork = "";
+    private WaterfallManager waterfallManager;
     private String adMobAppOpenId = "";
     private String appLovinAppOpenId = "";
     private String wortiseAppOpenId = "";
@@ -118,14 +120,30 @@ public class AppOpenAd {
     }
 
     /**
-     * Sets the backup ad network.
-     * 
+     * Sets a single backup ad network.
+     *
      * @param backupAdNetwork The backup network key.
      * @return The AppOpenAd instance.
      */
     @NonNull
     public AppOpenAd setBackupAdNetwork(@Nullable String backupAdNetwork) {
         this.backupAdNetwork = backupAdNetwork;
+        this.waterfallManager = new WaterfallManager(backupAdNetwork);
+        return this;
+    }
+
+    /**
+     * Sets multiple backup ad networks for a waterfall fallback.
+     *
+     * @param backupAdNetworks An array or varargs of backup network keys.
+     * @return The AppOpenAd instance.
+     */
+    @NonNull
+    public AppOpenAd setBackupAdNetworks(@Nullable String... backupAdNetworks) {
+        this.waterfallManager = new WaterfallManager(backupAdNetworks);
+        if (backupAdNetworks.length > 0) {
+            this.backupAdNetwork = backupAdNetworks[0];
+        }
         return this;
     }
 
@@ -349,6 +367,7 @@ public class AppOpenAd {
         private String adStatus = "";
         private String adNetwork = "";
         private String backupAdNetwork = "";
+        private WaterfallManager waterfallManager;
         private String adMobAppOpenId = "";
         private String appLovinAppOpenId = "";
         private String wortiseAppOpenId = "";
@@ -396,6 +415,16 @@ public class AppOpenAd {
         @androidx.annotation.Nullable
         public Builder setBackupAdNetwork(@androidx.annotation.Nullable String backupAdNetwork) {
             this.backupAdNetwork = backupAdNetwork;
+            this.waterfallManager = new WaterfallManager(backupAdNetwork);
+            return this;
+        }
+
+        @androidx.annotation.Nullable
+        public Builder setBackupAdNetworks(String... backupAdNetworks) {
+            this.waterfallManager = new WaterfallManager(backupAdNetworks);
+            if (backupAdNetworks.length > 0) {
+                this.backupAdNetwork = backupAdNetworks[0];
+            }
             return this;
         }
 
@@ -438,6 +467,9 @@ public class AppOpenAd {
         public void loadAppOpenAd(OnShowAdCompleteListener onShowAdCompleteListener) {
             try {
                 if (adStatus.equals(AD_STATUS_ON)) {
+                    if (waterfallManager != null) {
+                        waterfallManager.reset();
+                    }
                     switch (adNetwork) {
                         case ADMOB:
                         case META_BIDDING_ADMOB:
@@ -528,6 +560,9 @@ public class AppOpenAd {
         public void loadAppOpenAd() {
             try {
                 if (adStatus.equals(AD_STATUS_ON)) {
+                    if (waterfallManager != null) {
+                        waterfallManager.reset();
+                    }
                     switch (adNetwork) {
                         case ADMOB:
                         case META_BIDDING_ADMOB:
@@ -615,6 +650,26 @@ public class AppOpenAd {
         public void loadBackupAppOpenAd(OnShowAdCompleteListener onShowAdCompleteListener) {
             try {
                 if (adStatus.equals(AD_STATUS_ON)) {
+                    if (waterfallManager == null) {
+                        if (backupAdNetwork != null && !backupAdNetwork.isEmpty()) {
+                            waterfallManager = new WaterfallManager(backupAdNetwork);
+                        } else {
+                            onShowAdCompleteListener.onShowAdComplete();
+                            return;
+                        }
+                    }
+
+                    String networkToLoad = waterfallManager.getNext();
+                    if (networkToLoad == null) {
+                        Log.d(TAG, "All backup app open ads failed to load");
+                        onShowAdCompleteListener.onShowAdComplete();
+                        return;
+                    }
+
+                    backupAdNetwork = networkToLoad;
+                    Log.d(TAG,
+                            "Loading Backup App Open Ad [" + backupAdNetwork.toUpperCase(java.util.Locale.ROOT) + "]");
+
                     switch (backupAdNetwork) {
                         case ADMOB:
                         case META_BIDDING_ADMOB:
@@ -643,12 +698,12 @@ public class AppOpenAd {
                                         });
                             } catch (NoClassDefFoundError | Exception e) {
                                 Log.e(TAG, "Failed to load backup AdMob app open ad. Error: " + e.getMessage());
-                                onShowAdCompleteListener.onShowAdComplete();
+                                loadBackupAppOpenAd(onShowAdCompleteListener);
                             }
                             break;
 
                         default:
-                            onShowAdCompleteListener.onShowAdComplete();
+                            loadBackupAppOpenAd(onShowAdCompleteListener);
                             break;
                     }
                 } else {
@@ -707,6 +762,24 @@ public class AppOpenAd {
         public void loadBackupAppOpenAd() {
             try {
                 if (adStatus.equals(AD_STATUS_ON)) {
+                    if (waterfallManager == null) {
+                        if (backupAdNetwork != null && !backupAdNetwork.isEmpty()) {
+                            waterfallManager = new WaterfallManager(backupAdNetwork);
+                        } else {
+                            return;
+                        }
+                    }
+
+                    String networkToLoad = waterfallManager.getNext();
+                    if (networkToLoad == null) {
+                        Log.d(TAG, "All backup app open ads failed to load");
+                        return;
+                    }
+
+                    backupAdNetwork = networkToLoad;
+                    Log.d(TAG,
+                            "Loading Backup App Open Ad [" + backupAdNetwork.toUpperCase(java.util.Locale.ROOT) + "]");
+
                     switch (backupAdNetwork) {
                         case ADMOB:
                         case META_BIDDING_ADMOB:
@@ -736,10 +809,12 @@ public class AppOpenAd {
                             } catch (NoClassDefFoundError | Exception e) {
                                 Log.e(TAG,
                                         "Failed to load backup AdMob app open ad on resume. Error: " + e.getMessage());
+                                loadBackupAppOpenAd();
                             }
                             break;
 
                         default:
+                            loadBackupAppOpenAd();
                             break;
                     }
                 }

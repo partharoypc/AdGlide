@@ -219,6 +219,7 @@ public class MediumRectangleAd {
                             break;
 
                         default:
+                            loadBackupBannerAd();
                             break;
                     }
                     Log.d(TAG, "Banner Ad is enabled");
@@ -316,6 +317,7 @@ public class MediumRectangleAd {
                             break;
 
                         default:
+                            loadBackupBannerAd();
                             break;
                     }
                     Log.d(TAG, "Banner Ad is enabled");
