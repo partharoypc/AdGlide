@@ -48,7 +48,7 @@ import com.partharoypc.adglide.R;
 import com.partharoypc.adglide.util.Tools;
 import com.partharoypc.adglide.util.WaterfallManager;
 import com.startapp.sdk.ads.banner.Banner;
-import com.startapp.sdk.adsbase.adlisteners.AdEventListener;
+import com.startapp.sdk.ads.banner.BannerListener;
 import com.unity3d.services.banners.BannerErrorInfo;
 import com.unity3d.services.banners.BannerView;
 import com.unity3d.services.banners.UnityBannerSize;
