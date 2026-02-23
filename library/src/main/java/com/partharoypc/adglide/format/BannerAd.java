@@ -1,7 +1,6 @@
 package com.partharoypc.adglide.format;
 
 import static com.partharoypc.adglide.util.Constant.ADMOB;
-import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
@@ -16,6 +15,7 @@ import static com.partharoypc.adglide.util.Constant.UNITY;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import android.app.Activity;
+import com.partharoypc.adglide.AdGlideNetwork;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -75,7 +75,7 @@ public class BannerAd {
         private FrameLayout ironSourceBannerView;
         private FrameLayout wortiseBannerView;
 
-        private String adStatus = "";
+        private boolean adStatus = true;
         private String adNetwork = "";
         private String backupAdNetwork = "";
         private WaterfallManager waterfallManager;
@@ -107,19 +107,24 @@ public class BannerAd {
         }
 
         @androidx.annotation.NonNull
-        public Builder setAdStatus(@androidx.annotation.NonNull String adStatus) {
+        public Builder status(boolean adStatus) {
             this.adStatus = adStatus;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setAdNetwork(@androidx.annotation.NonNull String adNetwork) {
+        public Builder network(@androidx.annotation.NonNull String adNetwork) {
             this.adNetwork = adNetwork;
             return this;
         }
 
+        @androidx.annotation.NonNull
+        public Builder network(AdGlideNetwork network) {
+            return network(network.getValue());
+        }
+
         @androidx.annotation.Nullable
-        public Builder setBackupAdNetwork(@androidx.annotation.Nullable String backupAdNetwork) {
+        public Builder backup(@androidx.annotation.Nullable String backupAdNetwork) {
             this.backupAdNetwork = backupAdNetwork;
             if (waterfallManager == null) {
                 waterfallManager = new WaterfallManager(backupAdNetwork);
@@ -130,93 +135,93 @@ public class BannerAd {
         }
 
         @androidx.annotation.Nullable
-        public Builder addBackupAdNetwork(@androidx.annotation.Nullable String backupAdNetwork) {
-            if (waterfallManager == null) {
-                waterfallManager = new WaterfallManager(backupAdNetwork);
-            } else {
-                waterfallManager.getNetworks().add(backupAdNetwork);
+        public Builder backup(AdGlideNetwork backupAdNetwork) {
+            return backup(backupAdNetwork.getValue());
+        }
+
+        @androidx.annotation.Nullable
+        public Builder backups(String... backupAdNetworks) {
+            this.waterfallManager = new WaterfallManager(backupAdNetworks);
+            if (backupAdNetworks.length > 0) {
+                this.backupAdNetwork = backupAdNetworks[0];
             }
             return this;
         }
 
         @androidx.annotation.Nullable
-        public Builder setBackupAdNetworks(String... backupAdNetworks) {
-            this.waterfallManager = new WaterfallManager(backupAdNetworks);
-            if (backupAdNetworks.length > 0) {
-                this.backupAdNetwork = backupAdNetworks[0]; // Maintain legacy sync
-            }
-            return this;
+        public Builder backups(AdGlideNetwork... backupAdNetworks) {
+            return backups(AdGlideNetwork.toStringArray(backupAdNetworks));
         }
 
         @androidx.annotation.NonNull
-        public Builder setAdMobBannerId(@androidx.annotation.NonNull String adMobBannerId) {
+        public Builder adMobId(@androidx.annotation.NonNull String adMobBannerId) {
             this.adMobBannerId = adMobBannerId;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setMetaBannerId(@androidx.annotation.NonNull String metaBannerId) {
+        public Builder metaId(@androidx.annotation.NonNull String metaBannerId) {
             this.metaBannerId = metaBannerId;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setUnityBannerId(@androidx.annotation.NonNull String unityBannerId) {
+        public Builder unityId(@androidx.annotation.NonNull String unityBannerId) {
             this.unityBannerId = unityBannerId;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setAppLovinBannerId(@androidx.annotation.NonNull String appLovinBannerId) {
+        public Builder appLovinId(@androidx.annotation.NonNull String appLovinBannerId) {
             this.appLovinBannerId = appLovinBannerId;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setAppLovinBannerZoneId(@androidx.annotation.NonNull String appLovinBannerZoneId) {
+        public Builder zoneId(@androidx.annotation.NonNull String appLovinBannerZoneId) {
             this.appLovinBannerZoneId = appLovinBannerZoneId;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setironSourceBannerId(@androidx.annotation.NonNull String ironSourceBannerId) {
+        public Builder ironSourceId(@androidx.annotation.NonNull String ironSourceBannerId) {
             this.ironSourceBannerId = ironSourceBannerId;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setWortiseBannerId(@androidx.annotation.NonNull String wortiseBannerId) {
+        public Builder wortiseId(@androidx.annotation.NonNull String wortiseBannerId) {
             this.wortiseBannerId = wortiseBannerId;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setPlacementStatus(int placementStatus) {
+        public Builder placement(int placementStatus) {
             this.placementStatus = placementStatus;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setDarkTheme(boolean darkTheme) {
+        public Builder darkTheme(boolean darkTheme) {
             this.darkTheme = darkTheme;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setLegacyGDPR(boolean legacyGDPR) {
+        public Builder legacyGDPR(boolean legacyGDPR) {
             this.legacyGDPR = legacyGDPR;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setIsCollapsibleBanner(boolean collapsibleBanner) {
+        public Builder collapsible(boolean collapsibleBanner) {
             this.collapsibleBanner = collapsibleBanner;
             return this;
         }
 
         public void loadBannerAd() {
             try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
+                if (adStatus && placementStatus != 0) {
                     if (waterfallManager != null) {
                         waterfallManager.reset();
                     }
@@ -232,7 +237,7 @@ public class BannerAd {
 
         public void loadBackupBannerAd() {
             try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
+                if (adStatus && placementStatus != 0) {
                     if (waterfallManager == null) {
                         if (backupAdNetwork != null && !backupAdNetwork.isEmpty()) {
                             waterfallManager = new WaterfallManager(backupAdNetwork);

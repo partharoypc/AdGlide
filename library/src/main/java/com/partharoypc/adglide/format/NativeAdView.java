@@ -1,12 +1,28 @@
 package com.partharoypc.adglide.format;
 
+import com.partharoypc.adglide.AdGlideNetwork;
+import com.partharoypc.adglide.AdGlideNativeStyle;
+import com.partharoypc.adglide.util.WaterfallManager;
+
 import static com.partharoypc.adglide.util.Constant.ADMOB;
-import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
-import static com.partharoypc.adglide.util.Constant.META;
+import static com.partharoypc.adglide.util.Constant.APPLOVIN;
+import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX;
+import static com.partharoypc.adglide.util.Constant.STARTAPP;
+import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import android.app.Activity;
+import com.applovin.mediation.MaxAd;
+import com.applovin.mediation.MaxError;
+import com.applovin.mediation.nativeAds.MaxNativeAdListener;
+import com.applovin.mediation.nativeAds.MaxNativeAdLoader;
+import com.applovin.mediation.nativeAds.MaxNativeAdView;
+import com.startapp.sdk.ads.nativead.NativeAdDetails;
+import com.startapp.sdk.ads.nativead.NativeAdPreferences;
+import com.startapp.sdk.ads.nativead.StartAppNativeAd;
+import com.startapp.sdk.adsbase.adlisteners.AdEventListener;
 import android.graphics.drawable.ColorDrawable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -72,10 +88,14 @@ public class NativeAdView {
         private FrameLayout appLovinNativeAd;
         private LinearLayout appLovinDiscoveryMrecAd;
         private FrameLayout wortiseNativeAd;
+        private MaxNativeAdLoader nativeAdLoader;
+        private MaxAd maxNativeAd;
+        private StartAppNativeAd startAppNativeAd;
 
-        private String adStatus = "";
+        private boolean adStatus = true;
         private String adNetwork = "";
         private String backupAdNetwork = "";
+        private WaterfallManager waterfallManager;
         private String adMobNativeId = "";
         private String metaNativeId = "";
         private String appLovinNativeId = "";
@@ -105,408 +125,471 @@ public class NativeAdView {
         }
 
         @androidx.annotation.NonNull
-        public Builder setPadding(int left, int top, int right, int bottom) {
+        public Builder padding(int left, int top, int right, int bottom) {
             setNativeAdPadding(left, top, right, bottom);
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setMargin(int left, int top, int right, int bottom) {
+        public Builder margin(int left, int top, int right, int bottom) {
             setNativeAdMargin(left, top, right, bottom);
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setBackgroundResource(int drawableBackground) {
+        public Builder backgroundResource(int drawableBackground) {
             setNativeAdBackgroundResource(drawableBackground);
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setView(View view) {
+        public Builder view(View view) {
             this.view = view;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setAdStatus(@androidx.annotation.NonNull String adStatus) {
+        public Builder status(boolean adStatus) {
             this.adStatus = adStatus;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setAdNetwork(@androidx.annotation.NonNull String adNetwork) {
+        public Builder network(@androidx.annotation.NonNull String adNetwork) {
             this.adNetwork = adNetwork;
             return this;
         }
 
+        @androidx.annotation.NonNull
+        public Builder network(AdGlideNetwork network) {
+            return network(network.getValue());
+        }
+
         @androidx.annotation.Nullable
-        public Builder setBackupAdNetwork(@androidx.annotation.Nullable String backupAdNetwork) {
+        public Builder backup(@androidx.annotation.Nullable String backupAdNetwork) {
             this.backupAdNetwork = backupAdNetwork;
+            this.waterfallManager = new WaterfallManager(backupAdNetwork);
             return this;
         }
 
+        @androidx.annotation.Nullable
+        public Builder backup(AdGlideNetwork backupAdNetwork) {
+            return backup(backupAdNetwork.getValue());
+        }
+
+        @androidx.annotation.Nullable
+        public Builder backups(String... backupAdNetworks) {
+            this.waterfallManager = new WaterfallManager(backupAdNetworks);
+            if (backupAdNetworks.length > 0) {
+                this.backupAdNetwork = backupAdNetworks[0];
+            }
+            return this;
+        }
+
+        @androidx.annotation.Nullable
+        public Builder backups(AdGlideNetwork... backupAdNetworks) {
+            return backups(AdGlideNetwork.toStringArray(backupAdNetworks));
+        }
+
         @androidx.annotation.NonNull
-        public Builder setAdMobNativeId(@androidx.annotation.NonNull String adMobNativeId) {
+        public Builder adMobId(@androidx.annotation.NonNull String adMobNativeId) {
             this.adMobNativeId = adMobNativeId;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setAppLovinDiscoveryMrecZoneId(@androidx.annotation.NonNull String appLovinDiscMrecZoneId) {
+        public Builder zoneId(@androidx.annotation.NonNull String appLovinDiscMrecZoneId) {
             this.appLovinDiscMrecZoneId = appLovinDiscMrecZoneId;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setWortiseNativeId(@androidx.annotation.NonNull String wortiseNativeId) {
+        public Builder wortiseId(@androidx.annotation.NonNull String wortiseNativeId) {
             this.wortiseNativeId = wortiseNativeId;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setMetaNativeId(@androidx.annotation.NonNull String metaNativeId) {
+        public Builder metaId(@androidx.annotation.NonNull String metaNativeId) {
             this.metaNativeId = metaNativeId;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setAppLovinNativeId(@androidx.annotation.NonNull String appLovinNativeId) {
+        public Builder appLovinId(@androidx.annotation.NonNull String appLovinNativeId) {
             this.appLovinNativeId = appLovinNativeId;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setPlacementStatus(int placementStatus) {
+        public Builder placement(int placementStatus) {
             this.placementStatus = placementStatus;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setDarkTheme(boolean darkTheme) {
+        public Builder darkTheme(boolean darkTheme) {
             this.darkTheme = darkTheme;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setLegacyGDPR(boolean legacyGDPR) {
+        public Builder legacyGDPR(boolean legacyGDPR) {
             this.legacyGDPR = legacyGDPR;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setNativeAdStyle(@androidx.annotation.NonNull String nativeAdStyle) {
+        public Builder style(@androidx.annotation.NonNull String nativeAdStyle) {
             this.nativeAdStyle = nativeAdStyle;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setNativeAdBackgroundColor(int colorLight, int colorDark) {
+        public Builder style(AdGlideNativeStyle nativeAdStyle) {
+            return style(nativeAdStyle.getValue());
+        }
+
+        @androidx.annotation.NonNull
+        public Builder backgroundColor(int colorLight, int colorDark) {
             this.nativeBackgroundLight = colorLight;
             this.nativeBackgroundDark = colorDark;
             return this;
         }
 
         public void loadNativeAd() {
+            loadNativeAdMain(false);
+        }
+
+        private void loadNativeAdMain(boolean isBackup) {
             try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
-
-                    nativeAdViewContainer = view.findViewById(R.id.native_ad_view_container);
-
-                    adMobNativeAdView = view.findViewById(R.id.ad_mob_native_ad_container);
-                    mediaView = view.findViewById(R.id.media_view);
-                    adMobNativeBackground = view.findViewById(R.id.background);
-
-                    metaNativeAdLayout = view.findViewById(R.id.meta_native_ad_container);
-
-                    startAppNativeAdView = view.findViewById(R.id.start_app_native_ad_container);
-                    startAppNativeImage = view.findViewById(R.id.start_app_native_image);
-                    startAppNativeIcon = view.findViewById(R.id.start_app_native_icon);
-                    startAppNativeTitle = view.findViewById(R.id.start_app_native_title);
-                    startAppNativeDescription = view.findViewById(R.id.start_app_native_description);
-                    startAppNativeButton = view.findViewById(R.id.start_app_native_button);
-                    startAppNativeButton.setOnClickListener(v -> startAppNativeAdView.performClick());
-                    startAppNativeBackground = view.findViewById(R.id.start_app_native_background);
-
-                    appLovinNativeAd = view.findViewById(R.id.app_lovin_native_ad_container);
-                    appLovinDiscoveryMrecAd = view.findViewById(R.id.app_lovin_discovery_mrec_ad_container);
-
-                    wortiseNativeAd = view.findViewById(R.id.wortise_native_ad_container);
-
-                    switch (adNetwork) {
-                        case ADMOB:
-                        case META_BIDDING_ADMOB:
-                            if (adMobNativeAdView.getVisibility() != View.VISIBLE) {
-                                AdLoader adLoader = new AdLoader.Builder(activity, adMobNativeId)
-                                        .forNativeAd(NativeAd -> {
-                                            if (darkTheme) {
-                                                ColorDrawable colorDrawable = new ColorDrawable(
-                                                        ContextCompat.getColor(activity, nativeBackgroundDark));
-                                                NativeTemplateStyle styles = new NativeTemplateStyle.Builder()
-                                                        .withMainBackgroundColor(colorDrawable).build();
-                                                adMobNativeAdView.setStyles(styles);
-                                                adMobNativeBackground.setBackgroundResource(nativeBackgroundDark);
-                                            } else {
-                                                ColorDrawable colorDrawable = new ColorDrawable(
-                                                        ContextCompat.getColor(activity, nativeBackgroundLight));
-                                                NativeTemplateStyle styles = new NativeTemplateStyle.Builder()
-                                                        .withMainBackgroundColor(colorDrawable).build();
-                                                adMobNativeAdView.setStyles(styles);
-                                                adMobNativeBackground.setBackgroundResource(nativeBackgroundLight);
-                                            }
-                                            if (adMobNativeAd != null) {
-                                                adMobNativeAd.destroy();
-                                            }
-                                            adMobNativeAd = NativeAd;
-                                            mediaView.setImageScaleType(ImageView.ScaleType.CENTER_CROP);
-                                            adMobNativeAdView.setNativeAd(NativeAd);
-                                            adMobNativeAdView.setVisibility(View.VISIBLE);
-                                            nativeAdViewContainer.setVisibility(View.VISIBLE);
-                                        })
-                                        .withAdListener(new AdListener() {
-                                            @Override
-                                            public void onAdFailedToLoad(@NonNull LoadAdError adError) {
-                                                loadBackupNativeAd();
-                                            }
-                                        })
-                                        .build();
-                                adLoader.loadAd(Tools.getAdRequest(activity, legacyGDPR));
+                if (adStatus && placementStatus != 0) {
+                    if (isBackup) {
+                        if (waterfallManager == null) {
+                            if (!backupAdNetwork.isEmpty()) {
+                                waterfallManager = new WaterfallManager(backupAdNetwork);
                             } else {
-                                Log.d(TAG, "AdMob Native Ad has been loaded");
+                                return;
                             }
-                            break;
-
-                        case META:
-                            metaNativeAd = new com.facebook.ads.NativeAd(activity, metaNativeId);
-                            NativeAdListener nativeAdListener = new NativeAdListener() {
-                                @Override
-                                public void onMediaDownloaded(com.facebook.ads.Ad ad) {
-
-                                }
-
-                                @Override
-                                public void onError(com.facebook.ads.Ad ad, AdError adError) {
-                                    loadBackupNativeAd();
-                                }
-
-                                @Override
-                                public void onAdLoaded(com.facebook.ads.Ad ad) {
-                                    // Race condition, load() called again before last ad was displayed
-                                    metaNativeAdLayout.setVisibility(View.VISIBLE);
-                                    nativeAdViewContainer.setVisibility(View.VISIBLE);
-                                    if (metaNativeAd != ad) {
-                                        return;
-                                    }
-                                    // Inflate Native Ad into Container
-                                    // inflateAd(nativeAd);
-                                    metaNativeAd.unregisterView();
-                                    // Add the Ad view into the ad container.
-                                    LayoutInflater inflater = LayoutInflater.from(activity);
-                                    // Inflate the Ad view. The layout referenced should be the one you created in
-                                    // the last step.
-                                    LinearLayout nativeAdView;
-
-                                    switch (nativeAdStyle) {
-                                        case Constant.STYLE_NEWS:
-                                        case Constant.STYLE_MEDIUM:
-                                            nativeAdView = (LinearLayout) inflater
-                                                    .inflate(R.layout.adglide_meta_news_template_view,
-                                                            metaNativeAdLayout,
-                                                            false);
-                                            break;
-                                        case Constant.STYLE_VIDEO_SMALL:
-                                            nativeAdView = (LinearLayout) inflater.inflate(
-                                                    R.layout.adglide_meta_video_small_template_view, metaNativeAdLayout,
-                                                    false);
-                                            break;
-                                        case Constant.STYLE_VIDEO_LARGE:
-                                            nativeAdView = (LinearLayout) inflater.inflate(
-                                                    R.layout.adglide_meta_video_large_template_view, metaNativeAdLayout,
-                                                    false);
-                                            break;
-                                        case Constant.STYLE_RADIO:
-                                        case Constant.STYLE_SMALL:
-                                            nativeAdView = (LinearLayout) inflater.inflate(
-                                                    R.layout.adglide_meta_radio_template_view, metaNativeAdLayout,
-                                                    false);
-                                            break;
-                                        default:
-                                            nativeAdView = (LinearLayout) inflater.inflate(
-                                                    R.layout.adglide_meta_medium_template_view, metaNativeAdLayout,
-                                                    false);
-                                            break;
-                                    }
-                                    metaNativeAdLayout.addView(nativeAdView);
-
-                                    // Add the AdOptionsView
-                                    LinearLayout adChoicesContainer = nativeAdView
-                                            .findViewById(R.id.ad_choices_container);
-                                    AdOptionsView adOptionsView = new AdOptionsView(activity, metaNativeAd,
-                                            metaNativeAdLayout);
-                                    adChoicesContainer.removeAllViews();
-                                    adChoicesContainer.addView(adOptionsView, 0);
-
-                                    // Create native UI using the ad metadata.
-                                    TextView nativeAdTitle = nativeAdView.findViewById(R.id.native_ad_title);
-                                    com.facebook.ads.MediaView nativeAdMedia = nativeAdView
-                                            .findViewById(R.id.native_ad_media);
-                                    com.facebook.ads.MediaView nativeAdIcon = nativeAdView
-                                            .findViewById(R.id.native_ad_icon);
-                                    TextView nativeAdSocialContext = nativeAdView
-                                            .findViewById(R.id.native_ad_social_context);
-                                    TextView nativeAdBody = nativeAdView.findViewById(R.id.native_ad_body);
-                                    TextView sponsoredLabel = nativeAdView.findViewById(R.id.native_ad_sponsored_label);
-                                    Button nativeAdCallToAction = nativeAdView
-                                            .findViewById(R.id.native_ad_call_to_action);
-                                    LinearLayout metaNativeBackground = nativeAdView.findViewById(R.id.ad_unit);
-
-                                    if (darkTheme) {
-                                        nativeAdTitle.setTextColor(
-                                                ContextCompat.getColor(activity,
-                                                        R.color.adglide_app_lovin_dark_primary_text_color));
-                                        nativeAdSocialContext.setTextColor(
-                                                ContextCompat.getColor(activity,
-                                                        R.color.adglide_app_lovin_dark_primary_text_color));
-                                        sponsoredLabel.setTextColor(ContextCompat.getColor(activity,
-                                                R.color.adglide_app_lovin_dark_secondary_text_color));
-                                        nativeAdBody.setTextColor(ContextCompat.getColor(activity,
-                                                R.color.adglide_app_lovin_dark_secondary_text_color));
-                                        metaNativeBackground.setBackgroundResource(nativeBackgroundDark);
-                                    } else {
-                                        metaNativeBackground.setBackgroundResource(nativeBackgroundLight);
-                                    }
-
-                                    // Set the Text.
-                                    nativeAdTitle.setText(metaNativeAd.getAdvertiserName());
-                                    nativeAdBody.setText(metaNativeAd.getAdBodyText());
-                                    nativeAdSocialContext.setText(metaNativeAd.getAdSocialContext());
-                                    nativeAdCallToAction
-                                            .setVisibility(
-                                                    metaNativeAd.hasCallToAction() ? View.VISIBLE : View.INVISIBLE);
-                                    nativeAdCallToAction.setText(metaNativeAd.getAdCallToAction());
-                                    sponsoredLabel.setText(metaNativeAd.getSponsoredTranslation());
-
-                                    // Create a list of clickable views
-                                    List<View> clickableViews = new ArrayList<>();
-                                    clickableViews.add(nativeAdTitle);
-                                    clickableViews.add(sponsoredLabel);
-                                    clickableViews.add(nativeAdIcon);
-                                    clickableViews.add(nativeAdMedia);
-                                    clickableViews.add(nativeAdBody);
-                                    clickableViews.add(nativeAdSocialContext);
-                                    clickableViews.add(nativeAdCallToAction);
-
-                                    // Register the Title and CTA button to listen for clicks.
-                                    metaNativeAd.registerViewForInteraction(nativeAdView, nativeAdIcon, nativeAdMedia,
-                                            clickableViews);
-
-                                }
-
-                                @Override
-                                public void onAdClicked(com.facebook.ads.Ad ad) {
-
-                                }
-
-                                @Override
-                                public void onLoggingImpression(com.facebook.ads.Ad ad) {
-
-                                }
-                            };
-
-                            com.facebook.ads.NativeAd.NativeLoadAdConfig loadAdConfig = metaNativeAd.buildLoadAdConfig()
-                                    .withAdListener(nativeAdListener).build();
-                            metaNativeAd.loadAd(loadAdConfig);
-                            break;
-
-                        default:
-                            break;
-
+                        }
+                        String networkToLoad = waterfallManager.getNext();
+                        if (networkToLoad == null) {
+                            Log.d(TAG, "All backup native ads failed to load");
+                            return;
+                        }
+                        backupAdNetwork = networkToLoad;
+                    } else if (waterfallManager != null) {
+                        waterfallManager.reset();
                     }
 
+                    String network = isBackup ? backupAdNetwork : adNetwork;
+                    initializeViews();
+
+                    Runnable fallback = this::loadBackupNativeAd;
+
+                    switch (network) {
+                        case ADMOB:
+                        case META_BIDDING_ADMOB:
+                            handleAdMobLoad(fallback);
+                            break;
+                        case META:
+                            handleFacebookLoad(fallback);
+                            break;
+                        case APPLOVIN:
+                        case APPLOVIN_MAX:
+                        case META_BIDDING_APPLOVIN_MAX:
+                            handleAppLovinLoad(fallback);
+                            break;
+                        case STARTAPP:
+                            handleStartAppLoad(fallback);
+                            break;
+                        case WORTISE:
+                            handleWortiseLoad(fallback);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Error in loadNativeAd: " + e.getMessage());
-                loadBackupNativeAd();
+                Log.e(TAG, "Error in loadNativeAdMain: " + e.getMessage());
             }
+        }
 
+        private void initializeViews() {
+            nativeAdViewContainer = view.findViewById(R.id.native_ad_view_container);
+            adMobNativeAdView = view.findViewById(R.id.ad_mob_native_ad_container);
+            mediaView = view.findViewById(R.id.media_view);
+            adMobNativeBackground = view.findViewById(R.id.background);
+            metaNativeAdLayout = view.findViewById(R.id.meta_native_ad_container);
+            startAppNativeAdView = view.findViewById(R.id.start_app_native_ad_container);
+            startAppNativeImage = view.findViewById(R.id.start_app_native_image);
+            startAppNativeIcon = view.findViewById(R.id.start_app_native_icon);
+            startAppNativeTitle = view.findViewById(R.id.start_app_native_title);
+            startAppNativeDescription = view.findViewById(R.id.start_app_native_description);
+            startAppNativeButton = view.findViewById(R.id.start_app_native_button);
+            if (startAppNativeButton != null && startAppNativeAdView != null) {
+                startAppNativeButton.setOnClickListener(v -> startAppNativeAdView.performClick());
+            }
+            startAppNativeBackground = view.findViewById(R.id.start_app_native_background);
+            appLovinNativeAd = view.findViewById(R.id.app_lovin_native_ad_container);
+            appLovinDiscoveryMrecAd = view.findViewById(R.id.app_lovin_discovery_mrec_ad_container);
+            wortiseNativeAd = view.findViewById(R.id.wortise_native_ad_container);
+        }
+
+        private void handleAdMobLoad(Runnable fallback) {
+            if (adMobNativeAdView != null && adMobNativeId != null && !adMobNativeId.isEmpty()) {
+                if (!com.partharoypc.adglide.util.AdMobRateLimiter.isRequestAllowed(adMobNativeId)) {
+                    adMobNativeAdView.setVisibility(View.GONE);
+                    if (fallback != null)
+                        fallback.run();
+                    return;
+                }
+                AdLoader adLoader = new AdLoader.Builder(activity, adMobNativeId)
+                        .forNativeAd(nativeAd -> {
+                            com.partharoypc.adglide.util.AdMobRateLimiter.resetCooldown(adMobNativeId);
+                            if (darkTheme) {
+                                ColorDrawable colorDrawable = new ColorDrawable(
+                                        ContextCompat.getColor(activity, nativeBackgroundDark));
+                                NativeTemplateStyle styles = new NativeTemplateStyle.Builder()
+                                        .withMainBackgroundColor(colorDrawable).build();
+                                adMobNativeAdView.setStyles(styles);
+                                if (adMobNativeBackground != null)
+                                    adMobNativeBackground.setBackgroundResource(nativeBackgroundDark);
+                            } else {
+                                ColorDrawable colorDrawable = new ColorDrawable(
+                                        ContextCompat.getColor(activity, nativeBackgroundLight));
+                                NativeTemplateStyle styles = new NativeTemplateStyle.Builder()
+                                        .withMainBackgroundColor(colorDrawable).build();
+                                adMobNativeAdView.setStyles(styles);
+                                if (adMobNativeBackground != null)
+                                    adMobNativeBackground.setBackgroundResource(nativeBackgroundLight);
+                            }
+                            if (adMobNativeAd != null)
+                                adMobNativeAd.destroy();
+                            adMobNativeAd = nativeAd;
+                            if (mediaView != null)
+                                mediaView.setImageScaleType(ImageView.ScaleType.CENTER_CROP);
+                            adMobNativeAdView.setNativeAd(nativeAd);
+                            adMobNativeAdView.setVisibility(View.VISIBLE);
+                            if (nativeAdViewContainer != null)
+                                nativeAdViewContainer.setVisibility(View.VISIBLE);
+                        })
+                        .withAdListener(new AdListener() {
+                            @Override
+                            public void onAdFailedToLoad(@NonNull LoadAdError adError) {
+                                if (adError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
+                                    com.partharoypc.adglide.util.AdMobRateLimiter.recordFailure(adMobNativeId);
+                                }
+                                if (adMobNativeAdView != null)
+                                    adMobNativeAdView.setVisibility(View.GONE);
+                                if (fallback != null)
+                                    fallback.run();
+                            }
+                        }).build();
+                adLoader.loadAd(Tools.getAdRequest(activity, legacyGDPR));
+            } else if (fallback != null)
+                fallback.run();
+        }
+
+        private void handleFacebookLoad(Runnable fallback) {
+            if (metaNativeAdLayout != null) {
+                try {
+                    metaNativeAd = new com.facebook.ads.NativeAd(activity, metaNativeId);
+                    NativeAdListener nativeAdListener = new NativeAdListener() {
+                        @Override
+                        public void onMediaDownloaded(com.facebook.ads.Ad ad) {
+                        }
+
+                        @Override
+                        public void onAdClicked(com.facebook.ads.Ad ad) {
+                        }
+
+                        @Override
+                        public void onLoggingImpression(com.facebook.ads.Ad ad) {
+                        }
+
+                        @Override
+                        public void onError(com.facebook.ads.Ad ad, com.facebook.ads.AdError adError) {
+                            if (metaNativeAdLayout != null)
+                                metaNativeAdLayout.setVisibility(View.GONE);
+                            if (fallback != null)
+                                fallback.run();
+                        }
+
+                        @Override
+                        public void onAdLoaded(com.facebook.ads.Ad ad) {
+                            if (metaNativeAd == null || metaNativeAd != ad)
+                                return;
+                            metaNativeAdLayout.setVisibility(View.VISIBLE);
+                            if (nativeAdViewContainer != null)
+                                nativeAdViewContainer.setVisibility(View.VISIBLE);
+                            metaNativeAd.unregisterView();
+                            LayoutInflater inflater = LayoutInflater.from(activity);
+                            LinearLayout nativeAdView;
+                            switch (nativeAdStyle) {
+                                case Constant.STYLE_NEWS:
+                                case Constant.STYLE_MEDIUM:
+                                    nativeAdView = (LinearLayout) inflater.inflate(
+                                            R.layout.adglide_meta_news_template_view, metaNativeAdLayout, false);
+                                    break;
+                                case Constant.STYLE_VIDEO_SMALL:
+                                    nativeAdView = (LinearLayout) inflater.inflate(
+                                            R.layout.adglide_meta_video_small_template_view, metaNativeAdLayout, false);
+                                    break;
+                                case Constant.STYLE_VIDEO_LARGE:
+                                    nativeAdView = (LinearLayout) inflater.inflate(
+                                            R.layout.adglide_meta_video_large_template_view, metaNativeAdLayout, false);
+                                    break;
+                                case Constant.STYLE_RADIO:
+                                case Constant.STYLE_SMALL:
+                                    nativeAdView = (LinearLayout) inflater.inflate(
+                                            R.layout.adglide_meta_radio_template_view, metaNativeAdLayout, false);
+                                    break;
+                                default:
+                                    nativeAdView = (LinearLayout) inflater.inflate(
+                                            R.layout.adglide_meta_medium_template_view, metaNativeAdLayout, false);
+                                    break;
+                            }
+                            metaNativeAdLayout.removeAllViews();
+                            metaNativeAdLayout.addView(nativeAdView);
+                            LinearLayout adChoicesContainer = nativeAdView.findViewById(R.id.ad_choices_container);
+                            AdOptionsView adOptionsView = new AdOptionsView(activity, metaNativeAd, metaNativeAdLayout);
+                            adChoicesContainer.removeAllViews();
+                            adChoicesContainer.addView(adOptionsView, 0);
+                            TextView nativeAdTitle = nativeAdView.findViewById(R.id.native_ad_title);
+                            com.facebook.ads.MediaView nativeAdMedia = nativeAdView.findViewById(R.id.native_ad_media);
+                            com.facebook.ads.MediaView nativeAdIcon = nativeAdView.findViewById(R.id.native_ad_icon);
+                            TextView nativeAdSocialContext = nativeAdView.findViewById(R.id.native_ad_social_context);
+                            TextView nativeAdBody = nativeAdView.findViewById(R.id.native_ad_body);
+                            TextView sponsoredLabel = nativeAdView.findViewById(R.id.native_ad_sponsored_label);
+                            Button nativeAdCallToAction = nativeAdView.findViewById(R.id.native_ad_call_to_action);
+                            LinearLayout metaNativeBackground = nativeAdView.findViewById(R.id.ad_unit);
+                            if (darkTheme) {
+                                int color = ContextCompat.getColor(activity,
+                                        R.color.adglide_app_lovin_dark_primary_text_color);
+                                nativeAdTitle.setTextColor(color);
+                                nativeAdSocialContext.setTextColor(color);
+                                int secondaryColor = ContextCompat.getColor(activity,
+                                        R.color.adglide_app_lovin_dark_secondary_text_color);
+                                sponsoredLabel.setTextColor(secondaryColor);
+                                nativeAdBody.setTextColor(secondaryColor);
+                                metaNativeBackground.setBackgroundResource(nativeBackgroundDark);
+                            } else {
+                                metaNativeBackground.setBackgroundResource(nativeBackgroundLight);
+                            }
+                            nativeAdTitle.setText(metaNativeAd.getAdvertiserName());
+                            nativeAdBody.setText(metaNativeAd.getAdBodyText());
+                            nativeAdSocialContext.setText(metaNativeAd.getAdSocialContext());
+                            nativeAdCallToAction
+                                    .setVisibility(metaNativeAd.hasCallToAction() ? View.VISIBLE : View.INVISIBLE);
+                            nativeAdCallToAction.setText(metaNativeAd.getAdCallToAction());
+                            sponsoredLabel.setText(metaNativeAd.getSponsoredTranslation());
+                            List<View> clickableViews = new ArrayList<>();
+                            clickableViews.add(nativeAdTitle);
+                            clickableViews.add(sponsoredLabel);
+                            clickableViews.add(nativeAdIcon);
+                            clickableViews.add(nativeAdMedia);
+                            clickableViews.add(nativeAdBody);
+                            clickableViews.add(nativeAdSocialContext);
+                            clickableViews.add(nativeAdCallToAction);
+                            metaNativeAd.registerViewForInteraction(nativeAdView, nativeAdIcon, nativeAdMedia,
+                                    clickableViews);
+                        }
+                    };
+                    metaNativeAd.loadAd(metaNativeAd.buildLoadAdConfig().withAdListener(nativeAdListener).build());
+                } catch (Exception e) {
+                    if (fallback != null)
+                        fallback.run();
+                }
+            } else if (fallback != null)
+                fallback.run();
+        }
+
+        private void handleAppLovinLoad(Runnable fallback) {
+            if (appLovinNativeAd != null) {
+                nativeAdLoader = new MaxNativeAdLoader(appLovinNativeId, activity);
+                nativeAdLoader.setNativeAdListener(new MaxNativeAdListener() {
+                    @Override
+                    public void onNativeAdLoaded(MaxNativeAdView nativeAdView, MaxAd ad) {
+                        if (maxNativeAd != null)
+                            nativeAdLoader.destroy(maxNativeAd);
+                        maxNativeAd = ad;
+                        appLovinNativeAd.removeAllViews();
+                        appLovinNativeAd.addView(nativeAdView);
+                        appLovinNativeAd.setVisibility(View.VISIBLE);
+                        if (nativeAdViewContainer != null)
+                            nativeAdViewContainer.setVisibility(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onNativeAdLoadFailed(String adUnitId, MaxError error) {
+                        if (appLovinNativeAd != null)
+                            appLovinNativeAd.setVisibility(View.GONE);
+                        if (fallback != null)
+                            fallback.run();
+                    }
+                });
+                nativeAdLoader.loadAd();
+            } else if (fallback != null)
+                fallback.run();
+        }
+
+        private void handleStartAppLoad(Runnable fallback) {
+            if (startAppNativeAdView != null) {
+                startAppNativeAd = new StartAppNativeAd(activity);
+                startAppNativeAd.loadAd(
+                        new NativeAdPreferences().setAdsNumber(1).setAutoBitmapDownload(true).setPrimaryImageSize(2),
+                        new AdEventListener() {
+                            @Override
+                            public void onReceiveAd(@NonNull com.startapp.sdk.adsbase.Ad ad) {
+                                ArrayList<NativeAdDetails> ads = startAppNativeAd.getNativeAds();
+                                if (ads.size() > 0) {
+                                    populateStartAppNativeAdView(ads.get(0));
+                                    startAppNativeAdView.setVisibility(View.VISIBLE);
+                                    if (nativeAdViewContainer != null)
+                                        nativeAdViewContainer.setVisibility(View.VISIBLE);
+                                } else if (fallback != null)
+                                    fallback.run();
+                            }
+
+                            @Override
+                            public void onFailedToReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
+                                if (startAppNativeAdView != null)
+                                    startAppNativeAdView.setVisibility(View.GONE);
+                                if (fallback != null)
+                                    fallback.run();
+                            }
+                        });
+            } else if (fallback != null)
+                fallback.run();
+        }
+
+        private void populateStartAppNativeAdView(NativeAdDetails nativeAdDetails) {
+            if (startAppNativeTitle != null)
+                startAppNativeTitle.setText(nativeAdDetails.getTitle());
+            if (startAppNativeDescription != null)
+                startAppNativeDescription.setText(nativeAdDetails.getDescription());
+            if (startAppNativeImage != null)
+                startAppNativeImage.setImageBitmap(nativeAdDetails.getImageBitmap());
+            if (startAppNativeIcon != null)
+                startAppNativeIcon.setImageBitmap(nativeAdDetails.getSecondaryImageBitmap());
+            if (startAppNativeButton != null)
+                startAppNativeButton.setText(nativeAdDetails.isApp() ? "Install" : "Open");
+            if (startAppNativeBackground != null) {
+                if (darkTheme)
+                    startAppNativeBackground.setBackgroundResource(nativeBackgroundDark);
+                else
+                    startAppNativeBackground.setBackgroundResource(nativeBackgroundLight);
+            }
+        }
+
+        private void handleWortiseLoad(Runnable fallback) {
+            if (fallback != null)
+                fallback.run();
         }
 
         public void loadBackupNativeAd() {
-            try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
-
-                    nativeAdViewContainer = view.findViewById(R.id.native_ad_view_container);
-
-                    adMobNativeAdView = view.findViewById(R.id.ad_mob_native_ad_container);
-                    mediaView = view.findViewById(R.id.media_view);
-                    adMobNativeBackground = view.findViewById(R.id.background);
-
-                    metaNativeAdLayout = view.findViewById(R.id.meta_native_ad_container);
-
-                    startAppNativeAdView = view.findViewById(R.id.start_app_native_ad_container);
-                    startAppNativeImage = view.findViewById(R.id.start_app_native_image);
-                    startAppNativeIcon = view.findViewById(R.id.start_app_native_icon);
-                    startAppNativeTitle = view.findViewById(R.id.start_app_native_title);
-                    startAppNativeDescription = view.findViewById(R.id.start_app_native_description);
-                    startAppNativeButton = view.findViewById(R.id.start_app_native_button);
-                    startAppNativeButton.setOnClickListener(v -> startAppNativeAdView.performClick());
-                    startAppNativeBackground = view.findViewById(R.id.start_app_native_background);
-
-                    appLovinNativeAd = view.findViewById(R.id.app_lovin_native_ad_container);
-                    appLovinDiscoveryMrecAd = view.findViewById(R.id.app_lovin_discovery_mrec_ad_container);
-
-                    wortiseNativeAd = view.findViewById(R.id.wortise_native_ad_container);
-
-                    switch (backupAdNetwork) {
-                        case ADMOB:
-                        case META_BIDDING_ADMOB:
-                            if (adMobNativeAdView.getVisibility() != View.VISIBLE) {
-                                AdLoader adLoader = new AdLoader.Builder(activity, adMobNativeId)
-                                        .forNativeAd(NativeAd -> {
-                                            if (darkTheme) {
-                                                ColorDrawable colorDrawable = new ColorDrawable(
-                                                        ContextCompat.getColor(activity, nativeBackgroundDark));
-                                                NativeTemplateStyle styles = new NativeTemplateStyle.Builder()
-                                                        .withMainBackgroundColor(colorDrawable).build();
-                                                adMobNativeAdView.setStyles(styles);
-                                                adMobNativeBackground.setBackgroundResource(nativeBackgroundDark);
-                                            } else {
-                                                ColorDrawable colorDrawable = new ColorDrawable(
-                                                        ContextCompat.getColor(activity, nativeBackgroundLight));
-                                                NativeTemplateStyle styles = new NativeTemplateStyle.Builder()
-                                                        .withMainBackgroundColor(colorDrawable).build();
-                                                adMobNativeAdView.setStyles(styles);
-                                                adMobNativeBackground.setBackgroundResource(nativeBackgroundLight);
-                                            }
-                                            mediaView.setImageScaleType(ImageView.ScaleType.CENTER_CROP);
-                                            adMobNativeAdView.setNativeAd(NativeAd);
-                                            adMobNativeAdView.setVisibility(View.VISIBLE);
-                                            nativeAdViewContainer.setVisibility(View.VISIBLE);
-                                        })
-                                        .withAdListener(new AdListener() {
-                                            @Override
-                                            public void onAdFailedToLoad(@NonNull LoadAdError adError) {
-                                                adMobNativeAdView.setVisibility(View.GONE);
-                                                nativeAdViewContainer.setVisibility(View.GONE);
-                                            }
-                                        })
-                                        .build();
-                                adLoader.loadAd(Tools.getAdRequest(activity, legacyGDPR));
-                            } else {
-                                Log.d(TAG, "AdMob Native Ad has been loaded");
-                            }
-                            break;
-
-                        default:
-                            nativeAdViewContainer.setVisibility(View.GONE);
-                            break;
-
-                    }
-
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error in loadBackupNativeAd: " + e.getMessage());
-            }
+            loadNativeAdMain(true);
         }
 
         public void setNativeAdPadding(int left, int top, int right, int bottom) {

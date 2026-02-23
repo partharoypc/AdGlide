@@ -3,7 +3,6 @@ package com.partharoypc.adglide.format;
 import static com.partharoypc.adglide.util.Constant.IRONSOURCE;
 
 import static com.partharoypc.adglide.util.Constant.ADMOB;
-import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
@@ -19,6 +18,7 @@ import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import android.app.Activity;
 import android.util.Log;
+import com.partharoypc.adglide.AdGlideNetwork;
 
 import com.applovin.sdk.AppLovinMediationProvider;
 import com.applovin.sdk.AppLovinSdk;
@@ -43,7 +43,7 @@ public class AdNetwork {
 
         private static final String TAG = "AdGlide";
         private final Activity activity;
-        private String adStatus = "";
+        private boolean adStatus = true;
         private String adNetwork = "";
         private String backupAdNetwork = "";
         private List<String> backupAdNetworks = new ArrayList<>(); // New: Support for multiple backups
@@ -54,6 +54,7 @@ public class AdNetwork {
         private String ironSourceAppKey = "";
         private String wortiseAppId = "";
         private boolean debug = true;
+        private boolean testMode = false;
 
         public Initialize(Activity activity) {
             this.activity = activity;
@@ -65,17 +66,22 @@ public class AdNetwork {
             return this;
         }
 
-        public Initialize setAdStatus(String adStatus) {
+        public Initialize status(boolean adStatus) {
             this.adStatus = adStatus;
             return this;
         }
 
-        public Initialize setAdNetwork(String adNetwork) {
+        public Initialize network(String adNetwork) {
             this.adNetwork = adNetwork;
             return this;
         }
 
-        public Initialize setBackupAdNetwork(String backupAdNetwork) {
+        public Initialize network(AdGlideNetwork network) {
+            this.adNetwork = network.getValue();
+            return this;
+        }
+
+        public Initialize backup(String backupAdNetwork) {
             this.backupAdNetwork = backupAdNetwork;
             if (!this.backupAdNetworks.contains(backupAdNetwork)) {
                 this.backupAdNetworks.add(backupAdNetwork);
@@ -83,66 +89,79 @@ public class AdNetwork {
             return this;
         }
 
-        public Initialize addBackupAdNetwork(String backupAdNetwork) {
-            if (!this.backupAdNetworks.contains(backupAdNetwork)) {
-                this.backupAdNetworks.add(backupAdNetwork);
-            }
-            return this;
+        public Initialize backup(AdGlideNetwork backupAdNetwork) {
+            return backup(backupAdNetwork.getValue());
         }
 
-        public Initialize setBackupAdNetworks(String... backupAdNetworks) {
+        public Initialize backups(String... backupAdNetworks) {
             this.backupAdNetworks.clear();
             this.backupAdNetworks.addAll(Arrays.asList(backupAdNetworks));
             if (!this.backupAdNetworks.isEmpty()) {
-                this.backupAdNetwork = this.backupAdNetworks.get(0); // Maintain legacy sync
+                this.backupAdNetwork = this.backupAdNetworks.get(0);
             }
             return this;
         }
 
-        public Initialize setAdMobAppId(String adMobAppId) {
+        public Initialize backups(AdGlideNetwork... backupAdNetworks) {
+            this.backupAdNetworks.clear();
+            for (AdGlideNetwork network : backupAdNetworks) {
+                this.backupAdNetworks.add(network.getValue());
+            }
+            if (!this.backupAdNetworks.isEmpty()) {
+                this.backupAdNetwork = this.backupAdNetworks.get(0);
+            }
+            return this;
+        }
+
+        public Initialize adMobId(String adMobAppId) {
             this.adMobAppId = adMobAppId;
             return this;
         }
 
-        public Initialize setStartappAppId(String startappAppId) {
+        public Initialize startAppId(String startappAppId) {
             this.startappAppId = startappAppId;
             return this;
         }
 
-        public Initialize setUnityGameId(String unityGameId) {
+        public Initialize unityId(String unityGameId) {
             this.unityGameId = unityGameId;
             return this;
         }
 
-        public Initialize setAppLovinSdkKey(String appLovinSdkKey) {
+        public Initialize appLovinId(String appLovinSdkKey) {
             this.appLovinSdkKey = appLovinSdkKey;
             return this;
         }
 
-        public Initialize setironSourceAppKey(String ironSourceAppKey) {
+        public Initialize ironSourceId(String ironSourceAppKey) {
             this.ironSourceAppKey = ironSourceAppKey;
             return this;
         }
 
-        public Initialize setWortiseAppId(String wortiseAppId) {
+        public Initialize wortiseId(String wortiseAppId) {
             this.wortiseAppId = wortiseAppId;
             return this;
         }
 
-        public Initialize setDebug(boolean debug) {
+        public Initialize debug(boolean debug) {
             this.debug = debug;
             return this;
         }
 
+        public Initialize testMode(boolean testMode) {
+            this.testMode = testMode;
+            return this;
+        }
+
         public void initAds() {
-            if (adStatus.equals(AD_STATUS_ON)) {
+            if (adStatus) {
                 initializeSdk(adNetwork);
                 Log.d(TAG, "[" + adNetwork + "] is selected as Primary Ads");
             }
         }
 
         public void initBackupAds() {
-            if (adStatus.equals(AD_STATUS_ON)) {
+            if (adStatus) {
                 // Initialize legacy single backup if set and list is empty (backward
                 // compatibility)
                 if (backupAdNetworks.isEmpty() && !backupAdNetwork.isEmpty()) {
@@ -171,24 +190,25 @@ public class AdNetwork {
                                 }
                             }
                         });
-                        AudienceNetworkInitializeHelper.initializeAd(activity, debug);
+                        AudienceNetworkInitializeHelper.initializeAd(activity, debug || testMode);
                         break;
                     case META:
-                        AudienceNetworkInitializeHelper.initializeAd(activity, debug);
+                        AudienceNetworkInitializeHelper.initializeAd(activity, debug || testMode);
                         break;
                     case UNITY:
-                        UnityAds.initialize(activity, unityGameId, debug, new IUnityAdsInitializationListener() {
-                            @Override
-                            public void onInitializationComplete() {
-                                Log.d(TAG, "Unity Ads Initialization Complete");
-                            }
+                        UnityAds.initialize(activity, unityGameId, debug || testMode,
+                                new IUnityAdsInitializationListener() {
+                                    @Override
+                                    public void onInitializationComplete() {
+                                        Log.d(TAG, "Unity Ads Initialization Complete");
+                                    }
 
-                            @Override
-                            public void onInitializationFailed(UnityAds.UnityAdsInitializationError error,
-                                    String message) {
-                                Log.d(TAG, "Unity Ads Initialization Failed: " + error + " - " + message);
-                            }
-                        });
+                                    @Override
+                                    public void onInitializationFailed(UnityAds.UnityAdsInitializationError error,
+                                            String message) {
+                                        Log.d(TAG, "Unity Ads Initialization Failed: " + error + " - " + message);
+                                    }
+                                });
                         break;
                     case APPLOVIN:
                     case APPLOVIN_MAX:
@@ -196,18 +216,18 @@ public class AdNetwork {
                         AppLovinSdk.getInstance(activity).setMediationProvider(AppLovinMediationProvider.MAX);
                         AppLovinSdk.getInstance(activity).initializeSdk(config -> {
                         });
-                        AudienceNetworkInitializeHelper.initializeAd(activity, debug);
+                        AudienceNetworkInitializeHelper.initializeAd(activity, debug || testMode);
                         break;
 
                     case IRONSOURCE:
                     case META_BIDDING_IRONSOURCE:
                         IronSource.init(activity, ironSourceAppKey, IronSource.AD_UNIT.REWARDED_VIDEO,
                                 IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.BANNER);
-                        AudienceNetworkInitializeHelper.initializeAd(activity, debug);
+                        AudienceNetworkInitializeHelper.initializeAd(activity, debug || testMode);
                         break;
                     case STARTAPP:
                         StartAppSDK.init(activity, startappAppId, true);
-                        StartAppSDK.setTestAdsEnabled(debug);
+                        StartAppSDK.setTestAdsEnabled(debug || testMode);
                         StartAppAd.disableSplash();
                         StartAppSDK.enableReturnAds(false);
                         break;

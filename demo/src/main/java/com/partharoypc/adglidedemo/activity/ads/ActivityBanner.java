@@ -60,19 +60,18 @@ public class ActivityBanner extends AppCompatActivity {
         bannerContainer.addView(bannerAdView);
 
         bannerAd = new BannerAd.Builder(this)
-                .setAdStatus(Constant.AD_STATUS)
-                .setAdNetwork(Constant.AD_NETWORK)
-                .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
-                .setAdMobBannerId(Constant.ADMOB_BANNER_ID)
-                // .setGoogleAdManagerBannerId(Constant.GOOGLE_AD_MANAGER_BANNER_ID)
-                .setMetaBannerId(Constant.META_BANNER_ID)
-                .setUnityBannerId(Constant.UNITY_BANNER_ID)
-                .setAppLovinBannerId(Constant.APPLOVIN_BANNER_ID)
-                .setAppLovinBannerZoneId(Constant.APPLOVIN_BANNER_ZONE_ID)
-                .setironSourceBannerId(Constant.IRONSOURCE_BANNER_ID)
-                .setWortiseBannerId(Constant.WORTISE_BANNER_ID)
-                .setDarkTheme(sharedPref.getIsDarkTheme())
-                .setIsCollapsibleBanner(switchCollapsible.isChecked())
+                .status(Constant.AD_STATUS)
+                .network(Constant.AD_NETWORK)
+                .backup(Constant.BACKUP_AD_NETWORK)
+                .adMobId(Constant.ADMOB_BANNER_ID)
+                .metaId(Constant.META_BANNER_ID)
+                .unityId(Constant.UNITY_BANNER_ID)
+                .appLovinId(Constant.APPLOVIN_BANNER_ID)
+                .zoneId(Constant.APPLOVIN_BANNER_ZONE_ID)
+                .ironSourceId(Constant.IRONSOURCE_BANNER_ID)
+                .wortiseId(Constant.WORTISE_BANNER_ID)
+                .darkTheme(sharedPref.getIsDarkTheme())
+                .collapsible(switchCollapsible.isChecked())
                 .build().load();
     }
 

@@ -1,17 +1,19 @@
 package com.partharoypc.adglide.format;
 
 import static com.partharoypc.adglide.util.Constant.ADMOB;
-import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
 
 import android.app.Activity;
+import com.partharoypc.adglide.AdGlideNetwork;
+import com.partharoypc.adglide.util.WaterfallManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.facebook.ads.Ad;
 import com.facebook.ads.AdSize;
@@ -34,11 +36,11 @@ public class MediumRectangleAd {
         private final Activity activity;
         private AdView adView;
         private com.facebook.ads.AdView metaAdView;
-        private FrameLayout ironSourceBannerView;
 
-        private String adStatus = "";
+        private boolean adStatus = true;
         private String adNetwork = "";
         private String backupAdNetwork = "";
+        private WaterfallManager waterfallManager;
         private String adMobBannerId = "";
         private String metaBannerId = "";
         private String unityBannerId = "";
@@ -53,114 +55,144 @@ public class MediumRectangleAd {
             this.activity = activity;
         }
 
-        @androidx.annotation.NonNull
+        @NonNull
         public Builder build() {
             return this;
         }
 
-        @androidx.annotation.NonNull
+        @NonNull
         public Builder load() {
-            loadBannerAd();
+            loadMediumRectangleAd();
             return this;
         }
 
-        @androidx.annotation.NonNull
-        public Builder setAdStatus(@androidx.annotation.NonNull String adStatus) {
+        @NonNull
+        public Builder status(boolean adStatus) {
             this.adStatus = adStatus;
             return this;
         }
 
-        @androidx.annotation.NonNull
-        public Builder setAdNetwork(@androidx.annotation.NonNull String adNetwork) {
+        @NonNull
+        public Builder network(@NonNull String adNetwork) {
             this.adNetwork = adNetwork;
             return this;
         }
 
-        @androidx.annotation.Nullable
-        public Builder setBackupAdNetwork(@androidx.annotation.Nullable String backupAdNetwork) {
+        @NonNull
+        public Builder network(AdGlideNetwork network) {
+            return network(network.getValue());
+        }
+
+        @Nullable
+        public Builder backup(@Nullable String backupAdNetwork) {
             this.backupAdNetwork = backupAdNetwork;
+            this.waterfallManager = new WaterfallManager(backupAdNetwork);
             return this;
         }
 
-        @androidx.annotation.NonNull
-        public Builder setAdMobBannerId(@androidx.annotation.NonNull String adMobBannerId) {
+        @Nullable
+        public Builder backup(AdGlideNetwork backupAdNetwork) {
+            return backup(backupAdNetwork.getValue());
+        }
+
+        @Nullable
+        public Builder backups(String... backupAdNetworks) {
+            this.waterfallManager = new WaterfallManager(backupAdNetworks);
+            if (backupAdNetworks.length > 0) {
+                this.backupAdNetwork = backupAdNetworks[0];
+            }
+            return this;
+        }
+
+        @Nullable
+        public Builder backups(AdGlideNetwork... backupAdNetworks) {
+            return backups(AdGlideNetwork.toStringArray(backupAdNetworks));
+        }
+
+        @NonNull
+        public Builder adMobId(@NonNull String adMobBannerId) {
             this.adMobBannerId = adMobBannerId;
             return this;
         }
 
-        @androidx.annotation.NonNull
-        public Builder setMetaBannerId(@androidx.annotation.NonNull String metaBannerId) {
+        @NonNull
+        public Builder metaId(@NonNull String metaBannerId) {
             this.metaBannerId = metaBannerId;
             return this;
         }
 
-        @androidx.annotation.NonNull
-        public Builder setUnityBannerId(@androidx.annotation.NonNull String unityBannerId) {
+        @NonNull
+        public Builder unityId(@NonNull String unityBannerId) {
             this.unityBannerId = unityBannerId;
             return this;
         }
 
-        @androidx.annotation.NonNull
-        public Builder setAppLovinBannerId(@androidx.annotation.NonNull String appLovinBannerId) {
+        @NonNull
+        public Builder appLovinId(@NonNull String appLovinBannerId) {
             this.appLovinBannerId = appLovinBannerId;
             return this;
         }
 
-        @androidx.annotation.NonNull
-        public Builder setAppLovinBannerZoneId(@androidx.annotation.NonNull String appLovinBannerZoneId) {
+        @NonNull
+        public Builder zoneId(@NonNull String appLovinBannerZoneId) {
             this.appLovinBannerZoneId = appLovinBannerZoneId;
             return this;
         }
 
-        @androidx.annotation.NonNull
-        public Builder setironSourceBannerId(@androidx.annotation.NonNull String ironSourceBannerId) {
+        @NonNull
+        public Builder ironSourceId(@NonNull String ironSourceBannerId) {
             this.ironSourceBannerId = ironSourceBannerId;
             return this;
         }
 
-        @androidx.annotation.NonNull
-        public Builder setPlacementStatus(int placementStatus) {
+        @NonNull
+        public Builder placement(int placementStatus) {
             this.placementStatus = placementStatus;
             return this;
         }
 
-        @androidx.annotation.NonNull
-        public Builder setDarkTheme(boolean darkTheme) {
+        @NonNull
+        public Builder darkTheme(boolean darkTheme) {
             this.darkTheme = darkTheme;
             return this;
         }
 
-        @androidx.annotation.NonNull
-        public Builder setLegacyGDPR(boolean legacyGDPR) {
+        @NonNull
+        public Builder legacyGDPR(boolean legacyGDPR) {
             this.legacyGDPR = legacyGDPR;
             return this;
         }
 
-        public void loadBannerAd() {
-            try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
-                    Log.d(TAG, "Banner Ad is enabled");
-                    loadAdFromNetwork(adNetwork);
-                } else {
-                    Log.d(TAG, "Banner Ad is disabled");
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error loading Banner Ad: " + e.getMessage());
-            }
+        public void loadMediumRectangleAd() {
+            loadMediumRectangleAdMain(false);
         }
 
-        public void loadBackupBannerAd() {
+        private void loadMediumRectangleAdMain(boolean isBackup) {
             try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
-                    if (backupAdNetwork != null && !backupAdNetwork.isEmpty()) {
-                        Log.d(TAG, "Loading Backup Ad [" + backupAdNetwork.toUpperCase(java.util.Locale.ROOT) + "]");
-                        loadAdFromNetwork(backupAdNetwork);
-                    } else {
-                        Log.d(TAG, "No backup network available.");
+                if (adStatus && placementStatus != 0) {
+                    if (isBackup) {
+                        if (waterfallManager == null) {
+                            if (backupAdNetwork != null && !backupAdNetwork.isEmpty()) {
+                                waterfallManager = new WaterfallManager(backupAdNetwork);
+                            } else {
+                                return;
+                            }
+                        }
+                        String networkToLoad = waterfallManager.getNext();
+                        if (networkToLoad == null) {
+                            Log.d(TAG, "All backup medium rectangle ads failed to load");
+                            return;
+                        }
+                        backupAdNetwork = networkToLoad;
+                    } else if (waterfallManager != null) {
+                        waterfallManager.reset();
                     }
+
+                    String network = isBackup ? backupAdNetwork : adNetwork;
+                    loadAdFromNetwork(network);
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Error loading Backup Banner Ad: " + e.getMessage());
+                Log.e(TAG, "Error in loadMediumRectangleAdMain: " + e.getMessage());
             }
         }
 
@@ -170,82 +202,93 @@ public class MediumRectangleAd {
                     case ADMOB:
                     case META_BIDDING_ADMOB:
                         if (!com.partharoypc.adglide.util.AdMobRateLimiter.isRequestAllowed(adMobBannerId)) {
-                            if (networkToLoad.equals(adNetwork))
-                                loadBackupBannerAd();
+                            loadBackupMediumRectangleAd();
                             break;
                         }
                         FrameLayout adContainerView = activity.findViewById(R.id.ad_mob_banner_view_container);
-                        adContainerView.post(() -> {
-                            try {
-                                adView = new AdView(activity);
-                                adView.setAdUnitId(adMobBannerId);
-                                adContainerView.removeAllViews();
-                                adContainerView.addView(adView);
-                                adView.setAdSize(Tools.getAdSizeMREC());
-                                adView.loadAd(Tools.getAdRequest(activity, legacyGDPR));
-                                adView.setAdListener(new AdListener() {
-                                    @Override
-                                    public void onAdLoaded() {
-                                        com.partharoypc.adglide.util.AdMobRateLimiter.resetCooldown(adMobBannerId);
-                                        adContainerView.setVisibility(View.VISIBLE);
-                                    }
-
-                                    @Override
-                                    public void onAdFailedToLoad(@NonNull LoadAdError adError) {
-                                        if (adError
-                                                .getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
-                                            com.partharoypc.adglide.util.AdMobRateLimiter.recordFailure(adMobBannerId);
+                        if (adContainerView != null) {
+                            adContainerView.post(() -> {
+                                try {
+                                    adView = new AdView(activity);
+                                    adView.setAdUnitId(adMobBannerId);
+                                    adContainerView.removeAllViews();
+                                    adContainerView.addView(adView);
+                                    adView.setAdSize(Tools.getAdSizeMREC());
+                                    adView.loadAd(Tools.getAdRequest(activity, legacyGDPR));
+                                    adView.setAdListener(new AdListener() {
+                                        @Override
+                                        public void onAdLoaded() {
+                                            com.partharoypc.adglide.util.AdMobRateLimiter.resetCooldown(adMobBannerId);
+                                            adContainerView.setVisibility(View.VISIBLE);
                                         }
-                                        adContainerView.setVisibility(View.GONE);
-                                        if (networkToLoad.equals(adNetwork))
-                                            loadBackupBannerAd();
-                                    }
-                                });
-                            } catch (Exception e) {
-                                Log.e(TAG, "Error inside adContainerView.post: " + e.getMessage());
-                                if (networkToLoad.equals(adNetwork))
-                                    loadBackupBannerAd();
-                            }
-                        });
-                        Log.d(TAG, networkToLoad + " Banner Ad unit Id : " + adMobBannerId);
+
+                                        @Override
+                                        public void onAdFailedToLoad(@NonNull LoadAdError adError) {
+                                            if (adError
+                                                    .getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
+                                                com.partharoypc.adglide.util.AdMobRateLimiter
+                                                        .recordFailure(adMobBannerId);
+                                            }
+                                            adContainerView.setVisibility(View.GONE);
+                                            loadBackupMediumRectangleAd();
+                                        }
+                                    });
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Error inside adContainerView.post: " + e.getMessage());
+                                    loadBackupMediumRectangleAd();
+                                }
+                            });
+                        } else {
+                            loadBackupMediumRectangleAd();
+                        }
                         break;
 
                     case META:
                         metaAdView = new com.facebook.ads.AdView(activity, metaBannerId, AdSize.RECTANGLE_HEIGHT_250);
                         RelativeLayout metaAdViewContainer = activity.findViewById(R.id.meta_banner_view_container);
-                        metaAdViewContainer.addView(metaAdView);
-                        com.facebook.ads.AdListener adListener = new com.facebook.ads.AdListener() {
-                            @Override
-                            public void onError(Ad ad, com.facebook.ads.AdError adError) {
-                                metaAdViewContainer.setVisibility(View.GONE);
-                                Log.d(TAG, "Error load FAN : " + adError.getErrorMessage());
-                                if (networkToLoad.equals(adNetwork))
-                                    loadBackupBannerAd();
-                            }
+                        if (metaAdViewContainer != null) {
+                            metaAdViewContainer.removeAllViews();
+                            metaAdViewContainer.addView(metaAdView);
+                            com.facebook.ads.AdListener adListener = new com.facebook.ads.AdListener() {
+                                @Override
+                                public void onError(Ad ad, com.facebook.ads.AdError adError) {
+                                    metaAdViewContainer.setVisibility(View.GONE);
+                                    Log.d(TAG, "Error load FAN : " + adError.getErrorMessage());
+                                    loadBackupMediumRectangleAd();
+                                }
 
-                            @Override
-                            public void onAdLoaded(Ad ad) {
-                                metaAdViewContainer.setVisibility(View.VISIBLE);
-                            }
+                                @Override
+                                public void onAdLoaded(Ad ad) {
+                                    metaAdViewContainer.setVisibility(View.VISIBLE);
+                                }
 
-                            @Override
-                            public void onAdClicked(Ad ad) {
-                            }
+                                @Override
+                                public void onAdClicked(Ad ad) {
+                                }
 
-                            @Override
-                            public void onLoggingImpression(Ad ad) {
-                            }
-                        };
-                        com.facebook.ads.AdView.AdViewLoadConfig loadAdConfig = metaAdView.buildLoadAdConfig()
-                                .withAdListener(adListener).build();
-                        metaAdView.loadAd(loadAdConfig);
+                                @Override
+                                public void onLoggingImpression(Ad ad) {
+                                }
+                            };
+                            com.facebook.ads.AdView.AdViewLoadConfig loadAdConfig = metaAdView.buildLoadAdConfig()
+                                    .withAdListener(adListener).build();
+                            metaAdView.loadAd(loadAdConfig);
+                        } else {
+                            loadBackupMediumRectangleAd();
+                        }
+                        break;
+                    default:
+                        loadBackupMediumRectangleAd();
                         break;
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Error in loadAdFromNetwork: " + e.getMessage());
-                if (networkToLoad.equals(adNetwork))
-                    loadBackupBannerAd();
+                loadBackupMediumRectangleAd();
             }
+        }
+
+        public void loadBackupMediumRectangleAd() {
+            loadMediumRectangleAdMain(true);
         }
 
         public void destroyAndDetachBanner() {

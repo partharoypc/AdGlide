@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static com.partharoypc.adglide.util.Constant.ADMOB;
-import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
@@ -21,6 +20,7 @@ import static com.partharoypc.adglide.util.Constant.UNITY;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import android.app.Activity;
+import com.partharoypc.adglide.AdGlideNetwork;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -67,7 +67,7 @@ public class InterstitialAd {
         private int retryAttempt;
         private int counter = 1;
 
-        private String adStatus = "";
+        private boolean adStatus = true;
         private String adNetwork = "";
         private String backupAdNetwork = "";
         private WaterfallManager waterfallManager;
@@ -137,7 +137,7 @@ public class InterstitialAd {
          * @return The configured Builder instance.
          */
         @NonNull
-        public Builder setAdStatus(@NonNull String adStatus) {
+        public Builder status(boolean adStatus) {
             this.adStatus = adStatus;
             return this;
         }
@@ -149,9 +149,20 @@ public class InterstitialAd {
          * @return The configured Builder instance.
          */
         @NonNull
-        public Builder setAdNetwork(@NonNull String adNetwork) {
+        public Builder network(@NonNull String adNetwork) {
             this.adNetwork = adNetwork;
             return this;
+        }
+
+        /**
+         * Sets the primary ad network using AdGlideNetwork enum.
+         * 
+         * @param network The primary network enum.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder network(AdGlideNetwork network) {
+            return network(network.getValue());
         }
 
         /**
@@ -161,10 +172,15 @@ public class InterstitialAd {
          * @return The configured Builder instance.
          */
         @NonNull
-        public Builder setBackupAdNetwork(@Nullable String backupAdNetwork) {
+        public Builder backup(@Nullable String backupAdNetwork) {
             this.backupAdNetwork = backupAdNetwork;
             this.waterfallManager = new WaterfallManager(backupAdNetwork);
             return this;
+        }
+
+        @NonNull
+        public Builder backup(AdGlideNetwork backupAdNetwork) {
+            return backup(backupAdNetwork.getValue());
         }
 
         /**
@@ -174,12 +190,23 @@ public class InterstitialAd {
          * @return The configured Builder instance.
          */
         @NonNull
-        public Builder setBackupAdNetworks(@Nullable String... backupAdNetworks) {
+        public Builder backups(@Nullable String... backupAdNetworks) {
             this.waterfallManager = new WaterfallManager(backupAdNetworks);
             if (backupAdNetworks.length > 0) {
                 this.backupAdNetwork = backupAdNetworks[0];
             }
             return this;
+        }
+
+        /**
+         * Sets multiple backup ad networks using AdGlideNetwork enum.
+         * 
+         * @param backupAdNetworks Varargs of network enums.
+         * @return The configured Builder instance.
+         */
+        @NonNull
+        public Builder backups(AdGlideNetwork... backupAdNetworks) {
+            return backups(AdGlideNetwork.toStringArray(backupAdNetworks));
         }
 
         /**
@@ -189,7 +216,7 @@ public class InterstitialAd {
          * @return The configured Builder instance.
          */
         @NonNull
-        public Builder setAdMobInterstitialId(@NonNull String adMobInterstitialId) {
+        public Builder adMobId(@NonNull String adMobInterstitialId) {
             this.adMobInterstitialId = adMobInterstitialId;
             return this;
         }
@@ -201,7 +228,7 @@ public class InterstitialAd {
          * @return The configured Builder instance.
          */
         @NonNull
-        public Builder setMetaInterstitialId(@NonNull String metaInterstitialId) {
+        public Builder metaId(@NonNull String metaInterstitialId) {
             this.metaInterstitialId = metaInterstitialId;
             return this;
         }
@@ -213,7 +240,7 @@ public class InterstitialAd {
          * @return The configured Builder instance.
          */
         @NonNull
-        public Builder setUnityInterstitialId(@NonNull String unityInterstitialId) {
+        public Builder unityId(@NonNull String unityInterstitialId) {
             this.unityInterstitialId = unityInterstitialId;
             return this;
         }
@@ -225,7 +252,7 @@ public class InterstitialAd {
          * @return The configured Builder instance.
          */
         @NonNull
-        public Builder setAppLovinInterstitialId(@NonNull String appLovinInterstitialId) {
+        public Builder appLovinId(@NonNull String appLovinInterstitialId) {
             this.appLovinInterstitialId = appLovinInterstitialId;
             return this;
         }
@@ -237,7 +264,7 @@ public class InterstitialAd {
          * @return The configured Builder instance.
          */
         @NonNull
-        public Builder setAppLovinInterstitialZoneId(@NonNull String appLovinInterstitialZoneId) {
+        public Builder zoneId(@NonNull String appLovinInterstitialZoneId) {
             this.appLovinInterstitialZoneId = appLovinInterstitialZoneId;
             return this;
         }
@@ -249,7 +276,7 @@ public class InterstitialAd {
          * @return The configured Builder instance.
          */
         @NonNull
-        public Builder setironSourceInterstitialId(@NonNull String ironSourceInterstitialId) {
+        public Builder ironSourceId(@NonNull String ironSourceInterstitialId) {
             this.ironSourceInterstitialId = ironSourceInterstitialId;
             return this;
         }
@@ -261,7 +288,7 @@ public class InterstitialAd {
          * @return The configured Builder instance.
          */
         @NonNull
-        public Builder setWortiseInterstitialId(@NonNull String wortiseInterstitialId) {
+        public Builder wortiseId(@NonNull String wortiseInterstitialId) {
             this.wortiseInterstitialId = wortiseInterstitialId;
             return this;
         }
@@ -273,7 +300,7 @@ public class InterstitialAd {
          * @return The configured Builder instance.
          */
         @NonNull
-        public Builder setPlacementStatus(int placementStatus) {
+        public Builder placement(int placementStatus) {
             this.placementStatus = placementStatus;
             return this;
         }
@@ -285,7 +312,7 @@ public class InterstitialAd {
          * @return The configured Builder instance.
          */
         @NonNull
-        public Builder setInterval(int interval) {
+        public Builder interval(int interval) {
             this.interval = interval;
             return this;
         }
@@ -297,7 +324,7 @@ public class InterstitialAd {
          * @return The configured Builder instance.
          */
         @NonNull
-        public Builder setLegacyGDPR(boolean legacyGDPR) {
+        public Builder legacyGDPR(boolean legacyGDPR) {
             this.legacyGDPR = legacyGDPR;
             return this;
         }
@@ -312,7 +339,7 @@ public class InterstitialAd {
 
         public void showInterstitialAd() {
             try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
+                if (adStatus && placementStatus != 0) {
                     if (counter == interval) {
                         switch (adNetwork) {
                             case ADMOB:
@@ -423,7 +450,7 @@ public class InterstitialAd {
 
         public void showBackupInterstitialAd() {
             try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
+                if (adStatus && placementStatus != 0) {
                     Log.d(TAG,
                             "Show Backup Interstitial Ad [" + backupAdNetwork.toUpperCase(java.util.Locale.ROOT) + "]");
                     switch (backupAdNetwork) {
@@ -491,7 +518,7 @@ public class InterstitialAd {
 
         public void loadInterstitialAd(OnInterstitialAdDismissedListener onInterstitialAdDismissedListener) {
             try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
+                if (adStatus && placementStatus != 0) {
                     if (waterfallManager != null) {
                         waterfallManager.reset();
                     }
@@ -507,7 +534,7 @@ public class InterstitialAd {
 
         public void loadBackupInterstitialAd(OnInterstitialAdDismissedListener onInterstitialAdDismissedListener) {
             try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
+                if (adStatus && placementStatus != 0) {
                     if (waterfallManager == null) {
                         if (backupAdNetwork != null && !backupAdNetwork.isEmpty()) {
                             waterfallManager = new WaterfallManager(backupAdNetwork);
@@ -840,7 +867,7 @@ public class InterstitialAd {
         public void showInterstitialAd(OnInterstitialAdShowedListener onInterstitialAdShowedListener,
                 OnInterstitialAdDismissedListener onInterstitialAdDismissedListener) {
             try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
+                if (adStatus && placementStatus != 0) {
                     if (counter == interval) {
                         switch (adNetwork) {
                             case ADMOB:
@@ -969,7 +996,7 @@ public class InterstitialAd {
         public void showBackupInterstitialAd(OnInterstitialAdShowedListener onInterstitialAdShowedListener,
                 OnInterstitialAdDismissedListener onInterstitialAdDismissedListener) {
             try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
+                if (adStatus && placementStatus != 0) {
                     Log.d(TAG,
                             "Show Backup Interstitial Ad [" + backupAdNetwork.toUpperCase(java.util.Locale.ROOT) + "]");
                     switch (backupAdNetwork) {

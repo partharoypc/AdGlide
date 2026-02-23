@@ -1,7 +1,8 @@
 package com.partharoypc.adglide.format;
 
+import com.partharoypc.adglide.AdGlideNetwork;
+
 import static com.partharoypc.adglide.util.Constant.ADMOB;
-import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
 
 import android.app.Activity;
@@ -35,7 +36,7 @@ public class RewardedInterstitialAd {
         private final Activity activity;
         private com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd adMobRewardedInterstitialAd;
 
-        private String adStatus = "";
+        private boolean adStatus = true;
         private String adNetwork = "";
         private String backupAdNetwork = "";
         private WaterfallManager waterfallManager;
@@ -63,19 +64,24 @@ public class RewardedInterstitialAd {
         }
 
         @androidx.annotation.NonNull
-        public Builder setAdStatus(@androidx.annotation.NonNull String adStatus) {
+        public Builder status(boolean adStatus) {
             this.adStatus = adStatus;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setAdNetwork(@androidx.annotation.NonNull String adNetwork) {
+        public Builder network(@androidx.annotation.NonNull String adNetwork) {
             this.adNetwork = adNetwork;
             return this;
         }
 
+        @androidx.annotation.NonNull
+        public Builder network(AdGlideNetwork network) {
+            return network(network.getValue());
+        }
+
         @androidx.annotation.Nullable
-        public Builder setBackupAdNetwork(@androidx.annotation.Nullable String backupAdNetwork) {
+        public Builder backup(@androidx.annotation.Nullable String backupAdNetwork) {
             this.backupAdNetwork = backupAdNetwork;
             if (!backupAdNetwork.isEmpty()) {
                 this.waterfallManager = new WaterfallManager(backupAdNetwork);
@@ -84,7 +90,12 @@ public class RewardedInterstitialAd {
         }
 
         @androidx.annotation.Nullable
-        public Builder setBackupAdNetworks(String... backupAdNetworks) {
+        public Builder backup(AdGlideNetwork backupAdNetwork) {
+            return backup(backupAdNetwork.getValue());
+        }
+
+        @androidx.annotation.Nullable
+        public Builder backups(String... backupAdNetworks) {
             this.waterfallManager = new WaterfallManager(backupAdNetworks);
             if (backupAdNetworks.length > 0) {
                 this.backupAdNetwork = backupAdNetworks[0];
@@ -92,20 +103,25 @@ public class RewardedInterstitialAd {
             return this;
         }
 
+        @androidx.annotation.Nullable
+        public Builder backups(AdGlideNetwork... backupAdNetworks) {
+            return backups(AdGlideNetwork.toStringArray(backupAdNetworks));
+        }
+
         @androidx.annotation.NonNull
-        public Builder setAdMobRewardedInterstitialId(@androidx.annotation.NonNull String adMobRewardedInterstitialId) {
+        public Builder adMobId(@androidx.annotation.NonNull String adMobRewardedInterstitialId) {
             this.adMobRewardedInterstitialId = adMobRewardedInterstitialId;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setPlacementStatus(int placementStatus) {
+        public Builder placement(int placementStatus) {
             this.placementStatus = placementStatus;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setLegacyGDPR(boolean legacyGDPR) {
+        public Builder legacyGDPR(boolean legacyGDPR) {
             this.legacyGDPR = legacyGDPR;
             return this;
         }
@@ -113,19 +129,26 @@ public class RewardedInterstitialAd {
         public void loadRewardedInterstitialAd(OnRewardedAdCompleteListener onComplete,
                 OnRewardedAdDismissedListener onDismiss) {
             try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
+                if (adStatus && placementStatus != 0) {
                     if (waterfallManager != null) {
                         waterfallManager.reset();
                     }
                     switch (adNetwork) {
                         case ADMOB:
                         case META_BIDDING_ADMOB:
+                            if (!com.partharoypc.adglide.util.AdMobRateLimiter
+                                    .isRequestAllowed(adMobRewardedInterstitialId)) {
+                                loadRewardedBackupAd(onComplete, onDismiss);
+                                return;
+                            }
                             com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd.load(activity,
                                     adMobRewardedInterstitialId,
                                     Tools.getAdRequest(activity, legacyGDPR), new RewardedInterstitialAdLoadCallback() {
                                         @Override
                                         public void onAdLoaded(
                                                 @NonNull com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd ad) {
+                                            com.partharoypc.adglide.util.AdMobRateLimiter
+                                                    .resetCooldown(adMobRewardedInterstitialId);
                                             adMobRewardedInterstitialAd = ad;
                                             adMobRewardedInterstitialAd
                                                     .setFullScreenContentCallback(new FullScreenContentCallback() {
@@ -149,6 +172,11 @@ public class RewardedInterstitialAd {
 
                                         @Override
                                         public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                                            if (loadAdError
+                                                    .getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
+                                                com.partharoypc.adglide.util.AdMobRateLimiter
+                                                        .recordFailure(adMobRewardedInterstitialId);
+                                            }
                                             adMobRewardedInterstitialAd = null;
                                             loadRewardedBackupAd(onComplete, onDismiss);
                                             Log.d(TAG,
@@ -172,7 +200,7 @@ public class RewardedInterstitialAd {
         public void loadRewardedBackupAd(OnRewardedAdCompleteListener onComplete,
                 OnRewardedAdDismissedListener onDismiss) {
             try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
+                if (adStatus && placementStatus != 0) {
                     if (waterfallManager == null) {
                         if (!backupAdNetwork.isEmpty()) {
                             waterfallManager = new WaterfallManager(backupAdNetwork);
@@ -241,7 +269,7 @@ public class RewardedInterstitialAd {
         public void showRewardedInterstitialAd(OnRewardedAdCompleteListener onComplete,
                 OnRewardedAdDismissedListener onDismiss, OnRewardedAdErrorListener onError) {
             try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
+                if (adStatus && placementStatus != 0) {
                     switch (adNetwork) {
                         case ADMOB:
                         case META_BIDDING_ADMOB:
@@ -271,7 +299,7 @@ public class RewardedInterstitialAd {
         public void showBackupRewardedInterstitialAd(OnRewardedAdCompleteListener onComplete,
                 OnRewardedAdDismissedListener onDismiss, OnRewardedAdErrorListener onError) {
             try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
+                if (adStatus && placementStatus != 0) {
                     switch (backupAdNetwork) {
                         case ADMOB:
                         case META_BIDDING_ADMOB:

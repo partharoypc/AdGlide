@@ -1,7 +1,6 @@
 package com.partharoypc.adglide.format;
 
 import static com.partharoypc.adglide.util.Constant.ADMOB;
-import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
@@ -16,6 +15,7 @@ import static com.partharoypc.adglide.util.Constant.UNITY;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import android.app.Activity;
+import com.partharoypc.adglide.AdGlideNetwork;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -63,7 +63,7 @@ public class RewardedAd {
         private StartAppAd startAppRewardedAd;
         private com.wortise.ads.rewarded.RewardedAd wortiseRewardedAd;
 
-        private String adStatus = "";
+        private boolean adStatus = true;
         private String adNetwork = "";
         private String backupAdNetwork = "";
         private WaterfallManager waterfallManager;
@@ -128,51 +128,37 @@ public class RewardedAd {
             return this;
         }
 
-        /**
-         * Sets the ad status (e.g., ON/OFF).
-         * 
-         * @param adStatus The status string.
-         * @return The configured Builder instance.
-         */
         @NonNull
-        public Builder setAdStatus(@NonNull String adStatus) {
+        public Builder status(boolean adStatus) {
             this.adStatus = adStatus;
             return this;
         }
 
-        /**
-         * Sets the primary ad network to use.
-         * 
-         * @param adNetwork The primary network key.
-         * @return The configured Builder instance.
-         */
         @NonNull
-        public Builder setAdNetwork(@NonNull String adNetwork) {
+        public Builder network(@NonNull String adNetwork) {
             this.adNetwork = adNetwork;
             return this;
         }
 
-        /**
-         * Sets a single backup ad network.
-         * 
-         * @param backupAdNetwork The backup network key.
-         * @return The configured Builder instance.
-         */
         @NonNull
-        public Builder setBackupAdNetwork(@Nullable String backupAdNetwork) {
+        public Builder network(AdGlideNetwork network) {
+            return network(network.getValue());
+        }
+
+        @NonNull
+        public Builder backup(@Nullable String backupAdNetwork) {
             this.backupAdNetwork = backupAdNetwork;
             this.waterfallManager = new WaterfallManager(backupAdNetwork);
             return this;
         }
 
-        /**
-         * Sets multiple backup ad networks for a waterfall fallback.
-         * 
-         * @param backupAdNetworks An array or varargs of backup network keys.
-         * @return The configured Builder instance.
-         */
         @NonNull
-        public Builder setBackupAdNetworks(@Nullable String... backupAdNetworks) {
+        public Builder backup(AdGlideNetwork backupAdNetwork) {
+            return backup(backupAdNetwork.getValue());
+        }
+
+        @NonNull
+        public Builder backups(@Nullable String... backupAdNetworks) {
             this.waterfallManager = new WaterfallManager(backupAdNetworks);
             if (backupAdNetworks.length > 0) {
                 this.backupAdNetwork = backupAdNetworks[0];
@@ -180,67 +166,31 @@ public class RewardedAd {
             return this;
         }
 
-        /** @deprecated Use {@link #setAdNetwork(String)} instead. */
-        @Deprecated
-        @androidx.annotation.NonNull
-        public Builder setMainAds(@androidx.annotation.NonNull String mainAds) {
-            this.adNetwork = mainAds;
-            return this;
-        }
-
-        /** @deprecated Use {@link #setBackupAdNetwork(String)} instead. */
-        @Deprecated
-        @androidx.annotation.NonNull
-        public Builder setBackupAds(@androidx.annotation.NonNull String backupAds) {
-            this.backupAdNetwork = backupAds;
-            this.waterfallManager = new WaterfallManager(backupAds);
-            return this;
-        }
-
-        /**
-         * Sets the AdMobRewarded Ad Unit ID.
-         * 
-         * @param adMobRewardedId The placement ID.
-         * @return The configured Builder instance.
-         */
         @NonNull
-        public Builder setAdMobRewardedId(@NonNull String adMobRewardedId) {
+        public Builder backups(AdGlideNetwork... backupAdNetworks) {
+            return backups(AdGlideNetwork.toStringArray(backupAdNetworks));
+        }
+
+        @NonNull
+        public Builder adMobId(@NonNull String adMobRewardedId) {
             this.adMobRewardedId = adMobRewardedId;
             return this;
         }
 
-        /**
-         * Sets the MetaRewarded Ad Unit ID.
-         * 
-         * @param metaRewardedId The placement ID.
-         * @return The configured Builder instance.
-         */
         @NonNull
-        public Builder setMetaRewardedId(@NonNull String metaRewardedId) {
+        public Builder metaId(@NonNull String metaRewardedId) {
             this.metaRewardedId = metaRewardedId;
             return this;
         }
 
-        /**
-         * Sets the UnityRewarded Ad Unit ID.
-         * 
-         * @param unityRewardedId The placement ID.
-         * @return The configured Builder instance.
-         */
         @NonNull
-        public Builder setUnityRewardedId(@NonNull String unityRewardedId) {
+        public Builder unityId(@NonNull String unityRewardedId) {
             this.unityRewardedId = unityRewardedId;
             return this;
         }
 
-        /**
-         * Sets the ApplovinMaxRewarded Ad Unit ID.
-         * 
-         * @param appLovinMaxRewardedId The placement ID.
-         * @return The configured Builder instance.
-         */
         @NonNull
-        public Builder setApplovinMaxRewardedId(@NonNull String appLovinMaxRewardedId) {
+        public Builder appLovinId(@NonNull String appLovinMaxRewardedId) {
             this.appLovinMaxRewardedId = appLovinMaxRewardedId;
             return this;
         }
@@ -252,31 +202,19 @@ public class RewardedAd {
          * @return The configured Builder instance.
          */
         @NonNull
-        public Builder setApplovinDiscRewardedZoneId(@NonNull String applovinDiscRewardedZoneId) {
+        public Builder zoneId(@NonNull String applovinDiscRewardedZoneId) {
             this.applovinDiscRewardedZoneId = applovinDiscRewardedZoneId;
             return this;
         }
 
-        /**
-         * Sets the ironSourceRewarded Ad Unit ID.
-         * 
-         * @param ironSourceRewardedId The placement ID.
-         * @return The configured Builder instance.
-         */
         @NonNull
-        public Builder setironSourceRewardedId(@NonNull String ironSourceRewardedId) {
+        public Builder ironSourceId(@NonNull String ironSourceRewardedId) {
             this.ironSourceRewardedId = ironSourceRewardedId;
             return this;
         }
 
-        /**
-         * Sets the WortiseRewarded Ad Unit ID.
-         * 
-         * @param wortiseRewardedId The placement ID.
-         * @return The configured Builder instance.
-         */
         @NonNull
-        public Builder setWortiseRewardedId(@NonNull String wortiseRewardedId) {
+        public Builder wortiseId(@NonNull String wortiseRewardedId) {
             this.wortiseRewardedId = wortiseRewardedId;
             return this;
         }
@@ -288,7 +226,7 @@ public class RewardedAd {
          * @return The configured Builder instance.
          */
         @NonNull
-        public Builder setPlacementStatus(int placementStatus) {
+        public Builder placement(int placementStatus) {
             this.placementStatus = placementStatus;
             return this;
         }
@@ -300,14 +238,14 @@ public class RewardedAd {
          * @return The configured Builder instance.
          */
         @NonNull
-        public Builder setLegacyGDPR(boolean legacyGDPR) {
+        public Builder legacyGDPR(boolean legacyGDPR) {
             this.legacyGDPR = legacyGDPR;
             return this;
         }
 
         public void loadRewardedAd(OnRewardedAdCompleteListener onComplete, OnRewardedAdDismissedListener onDismiss) {
             try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
+                if (adStatus && placementStatus != 0) {
                     if (waterfallManager != null) {
                         waterfallManager.reset();
                     }
@@ -324,7 +262,7 @@ public class RewardedAd {
         public void loadRewardedBackupAd(OnRewardedAdCompleteListener onComplete,
                 OnRewardedAdDismissedListener onDismiss) {
             try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
+                if (adStatus && placementStatus != 0) {
                     if (waterfallManager == null) {
                         if (backupAdNetwork != null && !backupAdNetwork.isEmpty()) {
                             waterfallManager = new WaterfallManager(backupAdNetwork);
@@ -575,7 +513,7 @@ public class RewardedAd {
         public void showRewardedAd(OnRewardedAdCompleteListener onComplete, OnRewardedAdDismissedListener onDismiss,
                 OnRewardedAdErrorListener onError) {
             try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
+                if (adStatus && placementStatus != 0) {
                     switch (adNetwork) {
                         case ADMOB:
                         case META_BIDDING_ADMOB: {
@@ -713,7 +651,7 @@ public class RewardedAd {
         public void showRewardedBackupAd(OnRewardedAdCompleteListener onComplete,
                 OnRewardedAdDismissedListener onDismiss, OnRewardedAdErrorListener onError) {
             try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
+                if (adStatus && placementStatus != 0) {
                     Log.d(TAG, "Show Backup Rewarded Ad [" + backupAdNetwork.toUpperCase(java.util.Locale.ROOT) + "]");
                     switch (backupAdNetwork) {
                         case ADMOB:
@@ -773,7 +711,7 @@ public class RewardedAd {
         public void loadAndShowRewardedAd(OnRewardedAdLoadedListener onLoaded, OnRewardedAdErrorListener onError,
                 OnRewardedAdDismissedListener onDismiss, OnRewardedAdCompleteListener onComplete) {
             try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
+                if (adStatus && placementStatus != 0) {
                     if (waterfallManager != null) {
                         waterfallManager.reset();
                     }
@@ -916,7 +854,7 @@ public class RewardedAd {
         public void loadAndShowRewardedBackupAd(OnRewardedAdLoadedListener onLoaded, OnRewardedAdErrorListener onError,
                 OnRewardedAdDismissedListener onDismiss, OnRewardedAdCompleteListener onComplete) {
             try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
+                if (adStatus && placementStatus != 0) {
                     if (waterfallManager == null) {
                         if (!backupAdNetwork.isEmpty()) {
                             waterfallManager = new WaterfallManager(backupAdNetwork);

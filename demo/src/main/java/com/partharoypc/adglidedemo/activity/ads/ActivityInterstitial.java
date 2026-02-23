@@ -48,18 +48,17 @@ public class ActivityInterstitial extends AppCompatActivity {
     private void loadInterstitialAd() {
         appendLog("Loading Interstitial Ad...");
         interstitialAd = new InterstitialAd.Builder(this)
-                .setAdStatus(Constant.AD_STATUS)
-                .setAdNetwork(Constant.AD_NETWORK)
-                .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
-                .setAdMobInterstitialId(Constant.ADMOB_INTERSTITIAL_ID)
-                // .setGoogleAdManagerInterstitialId(Constant.GOOGLE_AD_MANAGER_INTERSTITIAL_ID)
-                .setMetaInterstitialId(Constant.META_INTERSTITIAL_ID)
-                .setUnityInterstitialId(Constant.UNITY_INTERSTITIAL_ID)
-                .setAppLovinInterstitialId(Constant.APPLOVIN_INTERSTITIAL_ID)
-                .setAppLovinInterstitialZoneId(Constant.APPLOVIN_INTERSTITIAL_ZONE_ID)
-                .setironSourceInterstitialId(Constant.IRONSOURCE_INTERSTITIAL_ID)
-                .setWortiseInterstitialId(Constant.WORTISE_INTERSTITIAL_ID)
-                .setInterval(Constant.INTERSTITIAL_AD_INTERVAL)
+                .status(Constant.AD_STATUS)
+                .network(Constant.AD_NETWORK)
+                .backup(Constant.BACKUP_AD_NETWORK)
+                .adMobId(Constant.ADMOB_INTERSTITIAL_ID)
+                .metaId(Constant.META_INTERSTITIAL_ID)
+                .unityId(Constant.UNITY_GAME_ID)
+                .appLovinId(Constant.APPLOVIN_INTERSTITIAL_ID)
+                .zoneId(Constant.APPLOVIN_INTERSTITIAL_ZONE_ID)
+                .ironSourceId(Constant.IRONSOURCE_INTERSTITIAL_ID)
+                .wortiseId(Constant.WORTISE_INTERSTITIAL_ID)
+                .interval(Constant.INTERSTITIAL_AD_INTERVAL)
                 .build().load(() -> {
                     appendLog("Interstitial Ad Dismissed");
                     Log.d(TAG, "onAdDismissed");

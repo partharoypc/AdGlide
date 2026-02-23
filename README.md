@@ -5,7 +5,7 @@
 # AdGlide SDK 🚀
 ### *The Premium Mediation Wrapper for High-Performance Android Apps*
 
-[![Version](https://img.shields.io/badge/Version-1.0.0-blue.svg)](https://github.com/partharoypc/AdGlide)
+[![Version](https://img.shields.io/badge/Version-1.1.0-blue.svg)](https://github.com/partharoypc/AdGlide)
 [![SDK Support](https://img.shields.io/badge/Android-21%2B-green.svg)](https://developer.android.com)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -19,7 +19,8 @@ AdGlide supports three distinct integration patterns to maximize your yield:
 
 1.  **Direct Use**: Target a specific network exclusively.
 2.  **Bidding Mediation**: Utilize real-time header bidding for supported networks (AdMob, AppLovin MAX, IronSource).
-3.  **Sequential Waterfall**: A fail-safe manager that cycles through backup networks instantly if the primary fails to fill.
+3.  **Sequential Waterfall**: A fail-safe `WaterfallManager` that cycles through unlimited backup arrays instantly if the primary fails to fill.
+4.  **Intelligent Rate Limiting**: Built-in `AdMobRateLimiter` ensures failing AdMob units don't loop endlessly or trigger Google penalties on "No Fill" errors.
 
 ### 📊 Comprehensive Capability Matrix
 
@@ -56,7 +57,7 @@ dependencyResolutionManagement {
 ### 2. Add dependencies (`build.gradle`)
 ```gradle
 dependencies {
-    implementation 'com.github.partharoypc:adglide:1.0.0'
+    implementation 'com.github.partharoypc:adglide:1.1.0'
     
     // 🚀 SELECT YOUR NETWORKS:
     implementation 'com.google.android.gms:play-services-ads:23.6.0'
@@ -72,13 +73,14 @@ dependencies {
 
 ### 3. Global Initialization
 ```java
-new AdNetwork.Initialize(this)
-    .setAdStatus("1") 
-    .setAdNetwork("admob") 
-    .setBackupAdNetworks("meta", "applovin") 
-    .setAdMobAppId("ca-app-pub-3940256099942544~3347511713")
-    .setDebug(true)
-    .build(); // Global initialization is handled via .build()
+AdGlide.init(this)
+    .status(true) 
+    .testMode(false)
+    .network(AdGlideNetwork.ADMOB) // ❤️ Type-safe Enums 
+    .backups(AdGlideNetwork.META, AdGlideNetwork.APPLOVIN, AdGlideNetwork.STARTAPP) // 🚀 Multi-network Waterfall
+    .adMobId("ca-app-pub-3940256099942544~3347511713")
+    .debug(true)
+    .build();
 ```
 
 ---
@@ -89,9 +91,10 @@ AdGlide provides a highly optimized `AppOpenAd` manager that supports both manua
 ### Manual Implementation
 ```java
 new AppOpenAd.Builder(this)
-    .setAdStatus("1")
-    .setAdNetwork("admob")
-    .setAdMobAppOpenId("YOUR_ID")
+    .status(true)
+    .network(AdGlideNetwork.ADMOB)
+    .backups(AdGlideNetwork.META, AdGlideNetwork.STARTAPP)
+    .adMobId("YOUR_ID")
     .build()
     .load(new OnShowAdCompleteListener() {
         @Override
@@ -105,9 +108,8 @@ new AppOpenAd.Builder(this)
 Register AdGlide to automatically show ads on app restarts and resumes:
 ```java
 // In your Application class or Splash
-appOpenAd.setPlacementStatus(true)
-    .setOnStartLifecycleObserver() // Monitor app foregrounding
-    .setOnStartActivityLifecycleCallbacks(activity); // Monitor activity states
+appOpenAd.setLifecycleObserver() // Monitor app foregrounding
+    .setActivityLifecycleCallbacks(activity); // Monitor activity states
 ```
 
 ---
@@ -123,9 +125,9 @@ Supports **Adaptive Sizing** and **Collapsible Banners**.
 
 ```java
 new BannerAd.Builder(this)
-    .setAdMobBannerId("YOUR_ID")
-    .setIsCollapsibleBanner(true) // AdMob High-CTR format
-    .setDarkTheme(true) // Auto-styling for native-style banners
+    .adMobId("YOUR_ID")
+    .collapsible(true) // AdMob High-CTR format
+    .darkTheme(true) // Auto-styling for native-style banners
     .build()
     .load();
 ```
@@ -135,8 +137,11 @@ Protect User Experience with built-in interval controls.
 
 ```java
 new InterstitialAd.Builder(this)
-    .setAdMobInterstitialId("YOUR_ID")
-    .setInterval(3) // Shows on every 3rd call to .show()
+    .network(AdGlideNetwork.ADMOB)
+    .backups(AdGlideNetwork.META, AdGlideNetwork.APPLOVIN, AdGlideNetwork.STARTAPP)
+    .adMobId("YOUR_ID")
+    .metaId("YOUR_ID")
+    .interval(3) // Shows on every 3rd call to .show()
     .build()
     .load() // Load the ad
     .show(); // Show it (subject to interval check)
@@ -145,15 +150,17 @@ new InterstitialAd.Builder(this)
 ### 3. Native Ads (Fluid Templates)
 AdGlide features a "Unified Native" system that maps complex layouts into simple templates.
 
-**Supported Styles:** `news`, `medium`, `small`, `radio`, `stream`.
+**Supported Styles:** Use `AdGlideNativeStyle` enum (`STYLE_NEWS`, `STYLE_MEDIUM`, `STYLE_SMALL`, etc.)
 
 ```java
 new NativeAd.Builder(this)
-    .setAdMobNativeId("YOUR_ID")
-    .setNativeAdStyle("news") 
-    .setNativeAdBackgroundColor("#FFFFFF", "#212121") // Light & Dark support
-    .setPadding(10, 10, 10, 10)
-    .setMargin(5, 5, 5, 5)
+    .network(AdGlideNetwork.ADMOB)
+    .backups(AdGlideNetwork.META, AdGlideNetwork.STARTAPP)
+    .adMobId("YOUR_ID")
+    .style(AdGlideNativeStyle.STYLE_NEWS) // Type-safe Native Styles
+    .backgroundColor("#FFFFFF", "#212121") // Light & Dark support
+    .padding(10, 10, 10, 10)
+    .margin(5, 5, 5, 5)
     .build()
     .load();
 ```
@@ -163,9 +170,9 @@ Handle user rewards with full lifecycle callbacks.
 
 ```java
 new RewardedAd.Builder(this)
-    .setAdMobRewardedId("YOUR_ID")
+    .adMobId("YOUR_ID")
     .build()
-    .load() // Load the rewarded ad
+    .load()
     .show(new OnRewardedAdCompleteListener() {
         @Override
         public void onRewardedAdComplete() {
@@ -196,7 +203,7 @@ Eliminate "loading..." spinners by background caching ads.
 AdRepository.getInstance().preloadInterstitial(context, "admob", "YOUR_ID");
 
 // The builder will automatically use the cached ad
-new InterstitialAd.Builder(this).setAdMobInterstitialId("YOUR_ID").build().load();
+new InterstitialAd.Builder(this).adMobId("YOUR_ID").build().load();
 ```
 
 ### 🛡️ Triple-Base64 Security
@@ -216,12 +223,14 @@ String safeId = Tools.decode("TWpZNE5UYzVOekk1TkRRME5nPT0=");
 | :--- | :--- | :--- |
 | **Common** | `.build()` | Finalizes configuration and returns the core instance. |
 | **Common** | `.load()` | Initiates the electrical request to Fetch/Preload ads. |
-| **Banner** | `.setIsCollapsibleBanner(bool)` | Native AdMob Collapsible Banner. |
-| **Banner** | `.setDarkTheme(bool)` | Enables dark UI for native banners. |
-| **Interstitial**| `.setInterval(int)` | Controls frequency (e.g., 3 = 1 ad every 3 actions). |
-| **Native** | `.setNativeAdStyle(String)` | `news`, `medium`, `small`, `radio`, `stream`. |
-| **Native** | `.setBackgroundResource(int)` | Custom drawable background. |
-| **App Open** | `.setOnStartLifecycleObserver()`| Monitor app-wide start events. |
+| **Common** | `.network(AdGlideNetwork)` | Sets the primary ad network via type-safe enum. |
+| **Common** | `.backups(AdGlideNetwork...)` | Variadic backups for robust WaterfallManager integration. |
+| **Banner** | `.collapsible(bool)` | Native AdMob Collapsible Banner. |
+| **Banner** | `.darkTheme(bool)` | Enables dark UI for native banners. |
+| **Interstitial**| `.interval(int)` | Controls frequency (e.g., 3 = 1 ad every 3 actions). |
+| **Native** | `.style(AdGlideNativeStyle)` | Encapsulates native template structures. |
+| **Native** | `.background(int)` | Custom drawable background. |
+| **App Open** | `.setLifecycleObserver()`| Monitor app-wide start events. |
 
 ### Callback Listener Matrix
 Listen to every event in the ad lifecycle:
@@ -259,5 +268,5 @@ Developed with ❤️ by **[Partha Roy](https://github.com/partharoypc)**.
 For bugs, feature requests, or custom mediation integrations, please open an issue or contact the developer directly.
 
 ---
-*AdGlide is MIT Licensed. © 2024 Partha Roy.*
+*AdGlide is MIT Licensed. © 2025 Partha Roy.*
 

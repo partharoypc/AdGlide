@@ -54,17 +54,17 @@ public class ActivityNative extends AppCompatActivity {
         setNativeAdStyle(nativeAdContainer);
 
         nativeAd = new NativeAd.Builder(this)
-                .setAdStatus(Constant.AD_STATUS)
-                .setAdNetwork(Constant.AD_NETWORK)
-                .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
-                .setAdMobNativeId(Constant.ADMOB_NATIVE_ID)
-                .setMetaNativeId(Constant.META_NATIVE_ID)
-                .setAppLovinNativeId(Constant.APPLOVIN_NATIVE_MANUAL_ID)
-                .setWortiseNativeId(Constant.WORTISE_NATIVE_ID)
-                .setNativeAdStyle(Constant.NATIVE_STYLE)
-                .setNativeAdBackgroundColor(R.color.colorNativeBackgroundLight, R.color.colorNativeBackgroundDark)
-                .setPadding(0, 0, 0, 0)
-                .setDarkTheme(sharedPref.getIsDarkTheme())
+                .status(Constant.AD_STATUS)
+                .network(Constant.AD_NETWORK)
+                .backup(Constant.BACKUP_AD_NETWORK)
+                .adMobId(Constant.ADMOB_NATIVE_ID)
+                .metaId(Constant.META_NATIVE_ID)
+                .appLovinId(Constant.APPLOVIN_NATIVE_MANUAL_ID)
+                .wortiseId(Constant.WORTISE_NATIVE_ID)
+                .style(Constant.NATIVE_STYLE)
+                .backgroundColor(R.color.colorNativeBackgroundLight, R.color.colorNativeBackgroundDark)
+                .padding(0, 0, 0, 0)
+                .darkTheme(sharedPref.getIsDarkTheme())
                 .build().load();
     }
 

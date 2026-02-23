@@ -50,16 +50,16 @@ public class ActivityRewarded extends AppCompatActivity {
     private void loadRewardedAd() {
         appendLog("Loading Rewarded Ad...");
         rewardedAd = new RewardedAd.Builder(this)
-                .setAdStatus(Constant.AD_STATUS)
-                .setMainAds(Constant.AD_NETWORK)
-                .setBackupAds(Constant.BACKUP_AD_NETWORK)
-                .setAdMobRewardedId(Constant.ADMOB_REWARDED_ID)
-                .setMetaRewardedId(Constant.META_REWARDED_ID)
-                .setUnityRewardedId(Constant.UNITY_REWARDED_ID)
-                .setApplovinMaxRewardedId(Constant.APPLOVIN_MAX_REWARDED_ID)
-                .setApplovinDiscRewardedZoneId(Constant.APPLOVIN_DISC_REWARDED_ZONE_ID)
-                .setironSourceRewardedId(Constant.IRONSOURCE_REWARDED_ID)
-                .setWortiseRewardedId(Constant.WORTISE_REWARDED_ID)
+                .status(Constant.AD_STATUS)
+                .network(Constant.AD_NETWORK)
+                .backup(Constant.BACKUP_AD_NETWORK)
+                .adMobId(Constant.ADMOB_REWARDED_ID)
+                .metaId(Constant.META_REWARDED_ID)
+                .unityId(Constant.UNITY_REWARDED_ID)
+                .appLovinId(Constant.APPLOVIN_MAX_REWARDED_ID)
+                .zoneId(Constant.APPLOVIN_DISC_REWARDED_ZONE_ID)
+                .ironSourceId(Constant.IRONSOURCE_REWARDED_ID)
+                .wortiseId(Constant.WORTISE_REWARDED_ID)
                 .build().load(() -> appendLog("Rewarded Ad Loaded"),
                         () -> appendLog("Rewarded Ad Error"),
                         () -> appendLog("Rewarded Ad Dismissed"),

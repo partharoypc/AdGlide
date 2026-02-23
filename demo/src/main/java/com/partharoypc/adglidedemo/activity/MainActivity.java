@@ -26,6 +26,7 @@ import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.format.AdNetwork;
 import com.partharoypc.adglide.format.AppOpenAd;
 import com.partharoypc.adglide.gdpr.GDPR;
@@ -120,17 +121,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initAds() {
-        new AdNetwork.Initialize(this)
-                .setAdStatus(Constant.AD_STATUS)
-                .setAdNetwork(Constant.AD_NETWORK)
-                .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
-                .setAdMobAppId(null)
-                .setStartappAppId(Constant.STARTAPP_APP_ID)
-                .setUnityGameId(Constant.UNITY_GAME_ID)
-                .setAppLovinSdkKey(getResources().getString(R.string.app_lovin_sdk_key))
-                .setironSourceAppKey(Constant.IRONSOURCE_APP_KEY)
-                .setWortiseAppId(Constant.WORTISE_APP_ID)
-                .setDebug(BuildConfig.DEBUG)
+        AdGlide.init(this)
+                .status(Constant.AD_STATUS)
+                .network(Constant.AD_NETWORK)
+                .backup(Constant.BACKUP_AD_NETWORK)
+                .adMobId(null)
+                .startAppId(Constant.STARTAPP_APP_ID)
+                .unityId(Constant.UNITY_GAME_ID)
+                .appLovinId(getResources().getString(R.string.app_lovin_sdk_key))
+                .ironSourceId(Constant.IRONSOURCE_APP_KEY)
+                .wortiseId(Constant.WORTISE_APP_ID)
+                .debug(BuildConfig.DEBUG)
                 .build();
     }
 
@@ -142,12 +143,12 @@ public class MainActivity extends AppCompatActivity {
     private void loadOpenAds() {
         if (Constant.OPEN_ADS_ON_RESUME) {
             appOpenAdBuilder = new AppOpenAd.Builder(this)
-                    .setAdStatus(Constant.AD_STATUS)
-                    .setAdNetwork(Constant.AD_NETWORK)
-                    .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
-                    .setAdMobAppOpenId(Constant.ADMOB_APP_OPEN_AD_ID)
-                    .setAppLovinAppOpenId(Constant.APPLOVIN_APP_OPEN_AP_ID)
-                    .setWortiseAppOpenId(Constant.WORTISE_APP_OPEN_AD_ID)
+                    .status(Constant.AD_STATUS)
+                    .network(Constant.AD_NETWORK)
+                    .backup(Constant.BACKUP_AD_NETWORK)
+                    .adMobId(Constant.ADMOB_APP_OPEN_AD_ID)
+                    .appLovinId(Constant.APPLOVIN_APP_OPEN_AP_ID)
+                    .wortiseId(Constant.WORTISE_APP_OPEN_AD_ID)
                     .build().load();
         }
     }

@@ -2,7 +2,7 @@ package com.partharoypc.adglidedemo.data;
 
 public class Constant {
 
-    public static final String AD_STATUS = "1";
+    public static final boolean AD_STATUS = true;
 
     public static String AD_NETWORK = "admob";
     public static String BACKUP_AD_NETWORK = "none";

@@ -6,9 +6,6 @@ public class Constant {
         // Utility class — prevent instantiation
     }
 
-    // ad status
-    public static final String AD_STATUS_ON = "1";
-
     // ad option
     public static final String ADMOB = "admob";
     public static final String META = "meta";
@@ -51,7 +48,3 @@ public class Constant {
     public static final String VALUE = "";
 
 }
-
-
-
-

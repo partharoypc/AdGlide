@@ -1,7 +1,7 @@
 package com.partharoypc.adglidedemo.application;
 
 import static com.partharoypc.adglide.util.Constant.ADMOB;
-import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
+
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 // import static com.partharoypc.adglide.util.Constant.GOOGLE_AD_MANAGER;
@@ -61,7 +61,7 @@ public class MyApplication extends Application {
             DefaultLifecycleObserver.super.onStart(owner);
             if (Constant.isAppOpen) {
                 if (Constant.OPEN_ADS_ON_RESUME) {
-                    if (Constant.AD_STATUS.equals(AD_STATUS_ON)) {
+                    if (Constant.AD_STATUS) {
                         switch (Constant.AD_NETWORK) {
                             case ADMOB:
                                 if (!Constant.ADMOB_APP_OPEN_AD_ID.equals("0")) {
@@ -113,7 +113,7 @@ public class MyApplication extends Application {
         @Override
         public void onActivityStarted(@NonNull Activity activity) {
             if (Constant.OPEN_ADS_ON_START) {
-                if (Constant.AD_STATUS.equals(AD_STATUS_ON)) {
+                if (Constant.AD_STATUS) {
                     switch (Constant.AD_NETWORK) {
                         case ADMOB:
                             if (!Constant.ADMOB_APP_OPEN_AD_ID.equals("0")) {
@@ -175,7 +175,7 @@ public class MyApplication extends Application {
     public void showAdIfAvailable(@NonNull Activity activity,
             @NonNull OnShowAdCompleteListener onShowAdCompleteListener) {
         if (Constant.OPEN_ADS_ON_START) {
-            if (Constant.AD_STATUS.equals(AD_STATUS_ON)) {
+            if (Constant.AD_STATUS) {
                 switch (Constant.AD_NETWORK) {
                     case ADMOB:
                         if (!Constant.ADMOB_APP_OPEN_AD_ID.equals("0")) {

@@ -1,7 +1,7 @@
 package com.partharoypc.adglidedemo.activity;
 
 import static com.partharoypc.adglide.util.Constant.ADMOB;
-import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
+
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
@@ -16,6 +16,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.format.AdNetwork;
 import com.partharoypc.adglide.format.AppOpenAd;
 import com.partharoypc.adglidedemo.BuildConfig;
@@ -44,7 +45,7 @@ public class ActivitySplash extends AppCompatActivity {
         sharedPref = new SharedPref(this);
         initAds();
 
-        if (Constant.AD_STATUS.equals(AD_STATUS_ON) && Constant.OPEN_ADS_ON_START) {
+        if (Constant.AD_STATUS && Constant.OPEN_ADS_ON_START) {
             if (!Constant.FORCE_TO_SHOW_APP_OPEN_AD_ON_START) {
                 new Handler(Looper.getMainLooper()).postDelayed(() -> {
                     switch (Constant.AD_NETWORK) {
@@ -88,29 +89,29 @@ public class ActivitySplash extends AppCompatActivity {
     }
 
     private void initAds() {
-        adNetwork = new AdNetwork.Initialize(this)
-                .setAdStatus(Constant.AD_STATUS)
-                .setAdNetwork(Constant.AD_NETWORK)
-                .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
-                .setAdMobAppId(null)
-                .setStartappAppId(Constant.STARTAPP_APP_ID)
-                .setUnityGameId(Constant.UNITY_GAME_ID)
-                .setAppLovinSdkKey(getResources().getString(R.string.app_lovin_sdk_key))
-                .setironSourceAppKey(Constant.IRONSOURCE_APP_KEY)
-                .setWortiseAppId(Constant.WORTISE_APP_ID)
-                .setDebug(BuildConfig.DEBUG)
+        AdGlide.init(this)
+                .status(Constant.AD_STATUS)
+                .network(Constant.AD_NETWORK)
+                .backup(Constant.BACKUP_AD_NETWORK)
+                .adMobId(null)
+                .startAppId(Constant.STARTAPP_APP_ID)
+                .unityId(Constant.UNITY_GAME_ID)
+                .appLovinId(getResources().getString(R.string.app_lovin_sdk_key))
+                .ironSourceId(Constant.IRONSOURCE_APP_KEY)
+                .wortiseId(Constant.WORTISE_APP_ID)
+                .debug(BuildConfig.DEBUG)
                 .build();
     }
 
     private void loadOpenAds() {
         if (Constant.FORCE_TO_SHOW_APP_OPEN_AD_ON_START && Constant.OPEN_ADS_ON_START) {
             appOpenAdBuilder = new AppOpenAd.Builder(this)
-                    .setAdStatus(Constant.AD_STATUS)
-                    .setAdNetwork(Constant.AD_NETWORK)
-                    .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
-                    .setAdMobAppOpenId(Constant.ADMOB_APP_OPEN_AD_ID)
-                    .setAppLovinAppOpenId(Constant.APPLOVIN_APP_OPEN_AP_ID)
-                    .setWortiseAppOpenId(Constant.WORTISE_APP_OPEN_AD_ID)
+                    .status(Constant.AD_STATUS)
+                    .network(Constant.AD_NETWORK)
+                    .backup(Constant.BACKUP_AD_NETWORK)
+                    .adMobId(Constant.ADMOB_APP_OPEN_AD_ID)
+                    .appLovinId(Constant.APPLOVIN_APP_OPEN_AP_ID)
+                    .wortiseId(Constant.WORTISE_APP_OPEN_AD_ID)
                     .build().load(this::startMainActivity);
         } else {
             startMainActivity();

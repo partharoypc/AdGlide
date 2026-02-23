@@ -7,7 +7,6 @@ import static com.partharoypc.adglide.util.Constant.STARTAPP;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import static com.partharoypc.adglide.util.Constant.ADMOB;
-import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
@@ -141,7 +140,7 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
 
     }
 
-    public void loadNativeAd(Context context, String adStatus, int placementStatus, String adNetwork,
+    public void loadNativeAd(Context context, boolean adStatus, int placementStatus, String adNetwork,
             String backupAdNetwork, String adMobNativeId, String metaNativeId,
             String appLovinNativeId, String appLovinDiscMrecZoneId, String wortiseNativeId,
             boolean darkTheme, boolean legacyGDPR, String nativeAdStyle, int nativeBackgroundLight,
@@ -151,7 +150,7 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
                 nativeBackgroundLight, nativeBackgroundDark, false);
     }
 
-    public void loadBackupNativeAd(Context context, String adStatus, int placementStatus, String backupAdNetwork,
+    public void loadBackupNativeAd(Context context, boolean adStatus, int placementStatus, String backupAdNetwork,
             String adMobNativeId, String metaNativeId, String appLovinNativeId,
             String appLovinDiscMrecZoneId, String wortiseNativeId, boolean darkTheme,
             boolean legacyGDPR, String nativeAdStyle, int nativeBackgroundLight, int nativeBackgroundDark) {
@@ -455,14 +454,14 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
             fallback.run();
     }
 
-    private void loadNativeAdMain(Context context, String adStatus, int placementStatus, String adNetwork,
+    private void loadNativeAdMain(Context context, boolean adStatus, int placementStatus, String adNetwork,
             String backupAdNetwork, String adMobNativeId, String metaNativeId,
             String appLovinNativeId, String appLovinDiscMrecZoneId, String wortiseNativeId,
             boolean darkTheme, boolean legacyGDPR, String nativeAdStyle, int backgroundLight,
             int backgroundDark, boolean isBackup) {
 
         try {
-            if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
+            if (adStatus && placementStatus != 0) {
                 String network = isBackup ? backupAdNetwork : adNetwork;
                 Runnable fallbackAction = isBackup ? () -> {
                     // Final fallback: hide everything

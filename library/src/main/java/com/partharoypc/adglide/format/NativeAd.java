@@ -1,9 +1,7 @@
 package com.partharoypc.adglide.format;
 
 import static com.partharoypc.adglide.util.Constant.ADMOB;
-import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
-
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.NONE;
 import static com.partharoypc.adglide.util.Constant.META;
@@ -13,6 +11,8 @@ import static com.partharoypc.adglide.util.Constant.STARTAPP;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import android.app.Activity;
+import com.partharoypc.adglide.AdGlideNetwork;
+import com.partharoypc.adglide.AdGlideNativeStyle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -90,7 +90,7 @@ public class NativeAd {
 
         private StartAppNativeAd startAppNativeAd;
 
-        private String adStatus = "";
+        private boolean adStatus = true;
         private String adNetwork = "";
         private String backupAdNetwork = "";
         private WaterfallManager waterfallManager;
@@ -123,44 +123,54 @@ public class NativeAd {
         }
 
         @androidx.annotation.NonNull
-        public Builder setPadding(int left, int top, int right, int bottom) {
+        public Builder padding(int left, int top, int right, int bottom) {
             setNativeAdPadding(left, top, right, bottom);
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setMargin(int left, int top, int right, int bottom) {
+        public Builder margin(int left, int top, int right, int bottom) {
             setNativeAdMargin(left, top, right, bottom);
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setBackgroundResource(int drawableBackground) {
+        public Builder background(int drawableBackground) {
             setNativeAdBackgroundResource(drawableBackground);
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setAdStatus(@androidx.annotation.NonNull String adStatus) {
+        public Builder status(boolean adStatus) {
             this.adStatus = adStatus;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setAdNetwork(@androidx.annotation.NonNull String adNetwork) {
+        public Builder network(@androidx.annotation.NonNull String adNetwork) {
             this.adNetwork = adNetwork;
             return this;
         }
 
+        @androidx.annotation.NonNull
+        public Builder network(AdGlideNetwork network) {
+            return network(network.getValue());
+        }
+
         @androidx.annotation.Nullable
-        public Builder setBackupAdNetwork(@androidx.annotation.Nullable String backupAdNetwork) {
+        public Builder backup(@androidx.annotation.Nullable String backupAdNetwork) {
             this.backupAdNetwork = backupAdNetwork;
             this.waterfallManager = new WaterfallManager(backupAdNetwork);
             return this;
         }
 
         @androidx.annotation.Nullable
-        public Builder setBackupAdNetworks(String... backupAdNetworks) {
+        public Builder backup(AdGlideNetwork backupAdNetwork) {
+            return backup(backupAdNetwork.getValue());
+        }
+
+        @androidx.annotation.Nullable
+        public Builder backups(String... backupAdNetworks) {
             this.waterfallManager = new WaterfallManager(backupAdNetworks);
             if (backupAdNetworks.length > 0) {
                 this.backupAdNetwork = backupAdNetworks[0];
@@ -168,62 +178,72 @@ public class NativeAd {
             return this;
         }
 
+        @androidx.annotation.Nullable
+        public Builder backups(AdGlideNetwork... backupAdNetworks) {
+            return backups(AdGlideNetwork.toStringArray(backupAdNetworks));
+        }
+
         @androidx.annotation.NonNull
-        public Builder setAdMobNativeId(@androidx.annotation.NonNull String adMobNativeId) {
+        public Builder adMobId(@androidx.annotation.NonNull String adMobNativeId) {
             this.adMobNativeId = adMobNativeId;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setMetaNativeId(@androidx.annotation.NonNull String metaNativeId) {
+        public Builder metaId(@androidx.annotation.NonNull String metaNativeId) {
             this.metaNativeId = metaNativeId;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setAppLovinNativeId(@androidx.annotation.NonNull String appLovinNativeId) {
+        public Builder appLovinId(@androidx.annotation.NonNull String appLovinNativeId) {
             this.appLovinNativeId = appLovinNativeId;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setAppLovinDiscMrecZoneId(@androidx.annotation.NonNull String appLovinDiscMrecZoneId) {
+        public Builder zoneId(@androidx.annotation.NonNull String appLovinDiscMrecZoneId) {
             this.appLovinDiscMrecZoneId = appLovinDiscMrecZoneId;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setWortiseNativeId(@androidx.annotation.NonNull String wortiseNativeId) {
+        public Builder wortiseId(@androidx.annotation.NonNull String wortiseNativeId) {
             this.wortiseNativeId = wortiseNativeId;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setPlacementStatus(int placementStatus) {
+        public Builder placement(int placementStatus) {
             this.placementStatus = placementStatus;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setDarkTheme(boolean darkTheme) {
+        public Builder darkTheme(boolean darkTheme) {
             this.darkTheme = darkTheme;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setLegacyGDPR(boolean legacyGDPR) {
+        public Builder legacyGDPR(boolean legacyGDPR) {
             this.legacyGDPR = legacyGDPR;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setNativeAdStyle(@androidx.annotation.NonNull String nativeAdStyle) {
+        public Builder style(@androidx.annotation.NonNull String nativeAdStyle) {
             this.nativeAdStyle = nativeAdStyle;
             return this;
         }
 
         @androidx.annotation.NonNull
-        public Builder setNativeAdBackgroundColor(int colorLight, int colorDark) {
+        public Builder style(AdGlideNativeStyle nativeAdStyle) {
+            return style(nativeAdStyle.getValue());
+        }
+
+        @androidx.annotation.NonNull
+        public Builder backgroundColor(int colorLight, int colorDark) {
             this.nativeBackgroundLight = colorLight;
             this.nativeBackgroundDark = colorDark;
             return this;
@@ -239,7 +259,7 @@ public class NativeAd {
 
         private void loadNativeAdMain(boolean isBackup) {
             try {
-                if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
+                if (adStatus && placementStatus != 0) {
                     if (isBackup) {
                         if (waterfallManager == null) {
                             if (!backupAdNetwork.isEmpty()) {
@@ -332,10 +352,16 @@ public class NativeAd {
         private void handleAdMobLoad(Runnable fallback) {
             try {
                 if (adMobNativeAdView.getVisibility() != View.VISIBLE) {
+                    if (!com.partharoypc.adglide.util.AdMobRateLimiter.isRequestAllowed(adMobNativeId)) {
+                        if (fallback != null)
+                            fallback.run();
+                        return;
+                    }
                     adMobNativeAdView.setVisibility(View.VISIBLE);
                     nativeAdViewContainer.setVisibility(View.VISIBLE);
                     AdLoader adLoader = new AdLoader.Builder(activity, adMobNativeId)
                             .forNativeAd(nativeAd -> {
+                                com.partharoypc.adglide.util.AdMobRateLimiter.resetCooldown(adMobNativeId);
                                 if (adMobNativeAd != null) {
                                     adMobNativeAd.destroy();
                                 }
@@ -352,6 +378,9 @@ public class NativeAd {
                             .withAdListener(new com.google.android.gms.ads.AdListener() {
                                 @Override
                                 public void onAdFailedToLoad(@NonNull com.google.android.gms.ads.LoadAdError adError) {
+                                    if (adError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
+                                        com.partharoypc.adglide.util.AdMobRateLimiter.recordFailure(adMobNativeId);
+                                    }
                                     if (fallback != null)
                                         fallback.run();
                                 }
@@ -434,7 +463,9 @@ public class NativeAd {
                             nativeAdSocialContext.setTextColor(textColor);
                             sponsoredLabel.setTextColor(secondaryColor);
                             nativeAdBody.setTextColor(secondaryColor);
-                            metaNativeBackground.setBackgroundResource(R.color.adglide_color_native_background_dark);
+                            metaNativeBackground.setBackgroundResource(nativeBackgroundDark);
+                        } else {
+                            metaNativeBackground.setBackgroundResource(nativeBackgroundLight);
                         }
 
                         nativeAdTitle.setText(metaNativeAd.getAdvertiserName());
