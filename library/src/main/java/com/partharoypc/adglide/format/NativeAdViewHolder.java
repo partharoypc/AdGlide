@@ -42,6 +42,7 @@ import com.partharoypc.adglide.util.Constant;
 import com.partharoypc.adglide.util.NativeTemplateStyle;
 import com.partharoypc.adglide.util.TemplateView;
 import com.partharoypc.adglide.util.Tools;
+import com.partharoypc.adglide.util.WaterfallManager;
 
 import com.applovin.mediation.MaxAd;
 import com.applovin.mediation.MaxError;
@@ -94,8 +95,7 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
     // Ad Loaders
     private MaxNativeAdLoader nativeAdLoader;
     private MaxAd maxNativeAd;
-    // removed
-    // removed
+    private WaterfallManager waterfallManager;
 
     public NativeAdViewHolder(View view) {
         super(view);
@@ -145,6 +145,7 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
             String appLovinNativeId, String appLovinDiscMrecZoneId, String wortiseNativeId,
             boolean darkTheme, boolean legacyGDPR, String nativeAdStyle, int nativeBackgroundLight,
             int nativeBackgroundDark) {
+        this.waterfallManager = new WaterfallManager(backupAdNetwork);
         loadNativeAdMain(context, adStatus, placementStatus, adNetwork, backupAdNetwork, adMobNativeId, metaNativeId,
                 appLovinNativeId, appLovinDiscMrecZoneId, wortiseNativeId, darkTheme, legacyGDPR, nativeAdStyle,
                 nativeBackgroundLight, nativeBackgroundDark, false);
@@ -199,11 +200,18 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
 
     private void handleAdMobLoad(Context context, String adMobNativeId, boolean darkTheme, int backgroundLight,
             int backgroundDark, boolean legacyGDPR, Runnable fallback) {
-        if (adMobNativeAdView.getVisibility() != View.VISIBLE) {
+        if (adMobNativeAdView != null && adMobNativeId != null && !adMobNativeId.isEmpty()) {
+            if (!com.partharoypc.adglide.util.AdMobRateLimiter.isRequestAllowed(adMobNativeId)) {
+                adMobNativeAdView.setVisibility(View.GONE);
+                if (fallback != null)
+                    fallback.run();
+                return;
+            }
             adMobNativeAdView.setVisibility(View.VISIBLE);
             nativeAdViewContainer.setVisibility(View.VISIBLE);
             AdLoader adLoader = new AdLoader.Builder(context, adMobNativeId)
                     .forNativeAd(nativeAd -> {
+                        com.partharoypc.adglide.util.AdMobRateLimiter.resetCooldown(adMobNativeId);
                         if (adMobNativeAd != null) {
                             adMobNativeAd.destroy();
                         }
@@ -215,6 +223,9 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
                     .withAdListener(new AdListener() {
                         @Override
                         public void onAdFailedToLoad(@NonNull LoadAdError adError) {
+                            if (adError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
+                                com.partharoypc.adglide.util.AdMobRateLimiter.recordFailure(adMobNativeId);
+                            }
                             if (fallback != null) {
                                 fallback.run();
                             } else {
@@ -225,8 +236,8 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
                     })
                     .build();
             adLoader.loadAd(Tools.getAdRequest((Activity) context, legacyGDPR));
-        } else {
-            Log.d(TAG, "AdMob native ads has been loaded");
+        } else if (fallback != null) {
+            fallback.run();
         }
     }
 
@@ -462,15 +473,29 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
 
         try {
             if (adStatus && placementStatus != 0) {
-                String network = isBackup ? backupAdNetwork : adNetwork;
-                Runnable fallbackAction = isBackup ? () -> {
-                    // Final fallback: hide everything
+                String network;
+                if (!isBackup) {
+                    if (waterfallManager != null)
+                        waterfallManager.reset();
+                    network = adNetwork;
+                } else {
+                    network = waterfallManager != null ? waterfallManager.getNextBackupNetwork() : backupAdNetwork;
+                }
+
+                if (network == null || network.isEmpty() || network.equals("none")) {
                     nativeAdViewContainer.setVisibility(View.GONE);
-                } : () -> {
-                    loadBackupNativeAd(context, adStatus, placementStatus, backupAdNetwork,
-                            adMobNativeId, metaNativeId, appLovinNativeId,
-                            appLovinDiscMrecZoneId, wortiseNativeId, darkTheme, legacyGDPR,
-                            nativeAdStyle, backgroundLight, backgroundDark);
+                    return;
+                }
+
+                Runnable fallbackAction = () -> {
+                    if (waterfallManager != null && waterfallManager.hasNextBackupNetwork()) {
+                        loadBackupNativeAd(context, adStatus, placementStatus, backupAdNetwork,
+                                adMobNativeId, metaNativeId, appLovinNativeId,
+                                appLovinDiscMrecZoneId, wortiseNativeId, darkTheme, legacyGDPR,
+                                nativeAdStyle, backgroundLight, backgroundDark);
+                    } else {
+                        nativeAdViewContainer.setVisibility(View.GONE);
+                    }
                 };
 
                 switch (network) {

@@ -223,13 +223,19 @@ String safeId = Tools.decode("TWpZNE5UYzVOekk1TkRRME5nPT0=");
 | :--- | :--- | :--- |
 | **Common** | `.build()` | Finalizes configuration and returns the core instance. |
 | **Common** | `.load()` | Initiates the electrical request to Fetch/Preload ads. |
+| **Common** | `.status(boolean)` | Master toggle to enable/disable ads dynamically. |
 | **Common** | `.network(AdGlideNetwork)` | Sets the primary ad network via type-safe enum. |
 | **Common** | `.backups(AdGlideNetwork...)` | Variadic backups for robust WaterfallManager integration. |
-| **Banner** | `.collapsible(bool)` | Native AdMob Collapsible Banner. |
-| **Banner** | `.darkTheme(bool)` | Enables dark UI for native banners. |
+| **Common** | `.[network]Id(String)` | Set IDs: `adMobId`, `metaId`, `appLovinId`, `startAppId`, `unityId`, `ironSourceId`, `wortiseId`. |
+| **Common** | `.legacyGDPR(boolean)` | Toggles legacy GDPR consent flow for EU users. |
+| **Banner** | `.collapsible(boolean)` | Native AdMob Collapsible Banner. |
+| **Banner** | `.darkTheme(boolean)` | Enables dark UI for native banners. |
 | **Interstitial**| `.interval(int)` | Controls frequency (e.g., 3 = 1 ad every 3 actions). |
 | **Native** | `.style(AdGlideNativeStyle)` | Encapsulates native template structures. |
-| **Native** | `.background(int)` | Custom drawable background. |
+| **Native** | `.background(int)` | Custom drawable background resource ID. |
+| **Native** | `.backgroundColor(String, String)`| Hex colors for Light & Dark mode native backgrounds. |
+| **Native** | `.padding(l, t, r, b)` | Sets layout padding for Native ad containers. |
+| **Native** | `.margin(l, t, r, b)` | Sets layout margins for Native ad containers. |
 | **App Open** | `.setLifecycleObserver()`| Monitor app-wide start events. |
 
 ### Callback Listener Matrix
@@ -268,5 +274,5 @@ Developed with ❤️ by **[Partha Roy](https://github.com/partharoypc)**.
 For bugs, feature requests, or custom mediation integrations, please open an issue or contact the developer directly.
 
 ---
-*AdGlide is MIT Licensed. © 2025 Partha Roy.*
+*AdGlide is MIT Licensed. © 2026 Partha Roy.*
 
