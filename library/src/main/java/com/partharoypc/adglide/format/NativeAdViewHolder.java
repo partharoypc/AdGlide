@@ -479,7 +479,7 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
                         waterfallManager.reset();
                     network = adNetwork;
                 } else {
-                    network = waterfallManager != null ? waterfallManager.getNextBackupNetwork() : backupAdNetwork;
+                    network = waterfallManager != null ? waterfallManager.getNext() : backupAdNetwork;
                 }
 
                 if (network == null || network.isEmpty() || network.equals("none")) {
@@ -488,7 +488,7 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
                 }
 
                 Runnable fallbackAction = () -> {
-                    if (waterfallManager != null && waterfallManager.hasNextBackupNetwork()) {
+                    if (waterfallManager != null && waterfallManager.hasNext()) {
                         loadBackupNativeAd(context, adStatus, placementStatus, backupAdNetwork,
                                 adMobNativeId, metaNativeId, appLovinNativeId,
                                 appLovinDiscMrecZoneId, wortiseNativeId, darkTheme, legacyGDPR,

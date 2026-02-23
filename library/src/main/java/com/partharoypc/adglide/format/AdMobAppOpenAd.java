@@ -48,11 +48,16 @@ public class AdMobAppOpenAd {
                 return;
             }
 
+            if (!com.partharoypc.adglide.util.AdMobRateLimiter.isRequestAllowed(adMobAppOpenAdUnitId)) {
+                return;
+            }
+
             isLoadingAd = true;
             AdRequest request = new AdRequest.Builder().build();
             AppOpenAd.load(context, adMobAppOpenAdUnitId, request, new AppOpenAd.AppOpenAdLoadCallback() {
                 @Override
                 public void onAdLoaded(@NonNull AppOpenAd ad) {
+                    com.partharoypc.adglide.util.AdMobRateLimiter.resetCooldown(adMobAppOpenAdUnitId);
                     appOpenAd = ad;
                     isLoadingAd = false;
                     loadTime = (new Date()).getTime();
@@ -62,6 +67,9 @@ public class AdMobAppOpenAd {
 
                 @Override
                 public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                    if (loadAdError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
+                        com.partharoypc.adglide.util.AdMobRateLimiter.recordFailure(adMobAppOpenAdUnitId);
+                    }
                     isLoadingAd = false;
                     Log.d(TAG, "onAdFailedToLoad: " + loadAdError.getMessage());
                 }
@@ -150,7 +158,3 @@ public class AdMobAppOpenAd {
         }
     }
 }
-
-
-
-
