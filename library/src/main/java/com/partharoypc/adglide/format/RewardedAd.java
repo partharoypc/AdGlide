@@ -110,6 +110,12 @@ public class RewardedAd {
         }
 
         @androidx.annotation.NonNull
+        public Builder load() {
+            loadRewardedAd(null, null);
+            return this;
+        }
+
+        @androidx.annotation.NonNull
         public Builder load(OnRewardedAdCompleteListener onComplete, OnRewardedAdDismissedListener onDismiss) {
             loadRewardedAd(onComplete, onDismiss);
             return this;
@@ -363,7 +369,9 @@ public class RewardedAd {
                                             public void onAdDismissedFullScreenContent() {
                                                 adMobRewardedAd = null;
                                                 loadRewardedAd(onComplete, onDismiss);
-                                                onDismiss.onRewardedAdDismissed();
+                                                if (onDismiss != null) {
+                                                    onDismiss.onRewardedAdDismissed();
+                                                }
                                             }
 
                                             @Override
@@ -397,12 +405,16 @@ public class RewardedAd {
                                 .withAdListener(new RewardedVideoAdListener() {
                                     @Override
                                     public void onRewardedVideoCompleted() {
-                                        onComplete.onRewardedAdComplete();
+                                        if (onComplete != null) {
+                                            onComplete.onRewardedAdComplete();
+                                        }
                                     }
 
                                     @Override
                                     public void onRewardedVideoClosed() {
-                                        onDismiss.onRewardedAdDismissed();
+                                        if (onDismiss != null) {
+                                            onDismiss.onRewardedAdDismissed();
+                                        }
                                     }
 
                                     @Override
@@ -451,7 +463,9 @@ public class RewardedAd {
                         appLovinMaxRewardedAd.setListener(new MaxRewardedAdListener() {
                             @Override
                             public void onUserRewarded(MaxAd ad, MaxReward reward) {
-                                onComplete.onRewardedAdComplete();
+                                if (onComplete != null) {
+                                    onComplete.onRewardedAdComplete();
+                                }
                             }
 
                             @Override
@@ -466,7 +480,9 @@ public class RewardedAd {
                             @Override
                             public void onAdHidden(MaxAd ad) {
                                 loadRewardedAd(onComplete, onDismiss);
-                                onDismiss.onRewardedAdDismissed();
+                                if (onDismiss != null) {
+                                    onDismiss.onRewardedAdDismissed();
+                                }
                             }
 
                             @Override
@@ -513,7 +529,9 @@ public class RewardedAd {
 
                             @Override
                             public void onAdClosed(AdInfo adInfo) {
-                                onDismiss.onRewardedAdDismissed();
+                                if (onDismiss != null) {
+                                    onDismiss.onRewardedAdDismissed();
+                                }
                             }
 
                             @Override
@@ -531,7 +549,9 @@ public class RewardedAd {
 
                             @Override
                             public void onAdRewarded(Placement placement, AdInfo adInfo) {
-                                onComplete.onRewardedAdComplete();
+                                if (onComplete != null) {
+                                    onComplete.onRewardedAdComplete();
+                                }
                             }
 
                             @Override
@@ -587,7 +607,9 @@ public class RewardedAd {
                                     if (state == UnityAds.UnityAdsShowCompletionState.COMPLETED) {
                                         onComplete.onRewardedAdComplete();
                                     }
-                                    onDismiss.onRewardedAdDismissed();
+                                    if (onDismiss != null) {
+                                        onDismiss.onRewardedAdDismissed();
+                                    }
                                 }
 
                                 @Override

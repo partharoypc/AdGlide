@@ -78,7 +78,7 @@ new AdNetwork.Initialize(this)
     .setBackupAdNetworks("meta", "applovin") 
     .setAdMobAppId("ca-app-pub-3940256099942544~3347511713")
     .setDebug(true)
-    .build();
+    .build(); // Global initialization is handled via .build()
 ```
 
 ---
@@ -92,7 +92,8 @@ new AppOpenAd.Builder(this)
     .setAdStatus("1")
     .setAdNetwork("admob")
     .setAdMobAppOpenId("YOUR_ID")
-    .build(new OnShowAdCompleteListener() {
+    .build()
+    .load(new OnShowAdCompleteListener() {
         @Override
         public void onShowAdComplete() {
             // Proceed to next screen
@@ -125,7 +126,8 @@ new BannerAd.Builder(this)
     .setAdMobBannerId("YOUR_ID")
     .setIsCollapsibleBanner(true) // AdMob High-CTR format
     .setDarkTheme(true) // Auto-styling for native-style banners
-    .build();
+    .build()
+    .load();
 ```
 
 ### 2. Interstitial Ads (With Frequency Capping)
@@ -136,7 +138,8 @@ new InterstitialAd.Builder(this)
     .setAdMobInterstitialId("YOUR_ID")
     .setInterval(3) // Shows on every 3rd call to .show()
     .build()
-    .show();
+    .load() // Load the ad
+    .show(); // Show it (subject to interval check)
 ```
 
 ### 3. Native Ads (Fluid Templates)
@@ -151,7 +154,8 @@ new NativeAd.Builder(this)
     .setNativeAdBackgroundColor("#FFFFFF", "#212121") // Light & Dark support
     .setPadding(10, 10, 10, 10)
     .setMargin(5, 5, 5, 5)
-    .build();
+    .build()
+    .load();
 ```
 
 ### 4. Rewarded & Rewarded Interstitial
@@ -160,7 +164,9 @@ Handle user rewards with full lifecycle callbacks.
 ```java
 new RewardedAd.Builder(this)
     .setAdMobRewardedId("YOUR_ID")
-    .build(new OnRewardedAdCompleteListener() {
+    .build()
+    .load() // Load the rewarded ad
+    .show(new OnRewardedAdCompleteListener() {
         @Override
         public void onRewardedAdComplete() {
             // Grant item/coins here
@@ -170,36 +176,12 @@ new RewardedAd.Builder(this)
         public void onRewardedAdDismissed() {
             // Handle ad close
         }
+    }, new OnRewardedAdErrorListener() {
+        @Override
+        public void onRewardedAdError() {
+            // Handle load/show errors
+        }
     });
-```
-
----
-
-## 🌐 Remote Configuration (Server JSON)
-Toggle ads or change networks remotely using the `RemoteConfigHelper`. Use the following JSON schema on your server:
-
-```json
-{
-  "ad_status": "1",
-  "ad_network": "admob",
-  "backup_ads": "meta,applovin,unity",
-  "admob_banner_id": "YOUR_ID",
-  "admob_interstitial_id": "YOUR_ID"
-}
-```
-
-**Implementation:**
-```java
-new RemoteConfigHelper().fetchConfig("https://your-api.com/config.json", new RemoteConfigHelper.ConfigListener() {
-    @Override
-    public void onConfigFetched(JSONObject config) {
-        // Parse and pass to AdNetwork.Initialize
-    }
-    @Override
-    public void onConfigFailed(String error) {
-        // Use local defaults
-    }
-});
 ```
 
 ---
@@ -214,7 +196,7 @@ Eliminate "loading..." spinners by background caching ads.
 AdRepository.getInstance().preloadInterstitial(context, "admob", "YOUR_ID");
 
 // The builder will automatically use the cached ad
-new InterstitialAd.Builder(this).setAdMobInterstitialId("YOUR_ID").build();
+new InterstitialAd.Builder(this).setAdMobInterstitialId("YOUR_ID").build().load();
 ```
 
 ### 🛡️ Triple-Base64 Security
@@ -232,6 +214,8 @@ String safeId = Tools.decode("TWpZNE5UYzVOekk1TkRRME5nPT0=");
 
 | Builder | Method | Description |
 | :--- | :--- | :--- |
+| **Common** | `.build()` | Finalizes configuration and returns the core instance. |
+| **Common** | `.load()` | Initiates the electrical request to Fetch/Preload ads. |
 | **Banner** | `.setIsCollapsibleBanner(bool)` | Native AdMob Collapsible Banner. |
 | **Banner** | `.setDarkTheme(bool)` | Enables dark UI for native banners. |
 | **Interstitial**| `.setInterval(int)` | Controls frequency (e.g., 3 = 1 ad every 3 actions). |
@@ -248,7 +232,6 @@ Listen to every event in the ad lifecycle:
 4.  **`OnRewardedAdErrorListener`**: `onAdError()`
 5.  **`OnInterstitialAdDismissedListener`**: `onDismissed()`
 6.  **`OnInterstitialAdShowedListener`**: `onShowed()`
-7.  **`ConfigListener`**: `onConfigFetched(JSONObject)`, `onConfigFailed(String)`
 
 ---
 

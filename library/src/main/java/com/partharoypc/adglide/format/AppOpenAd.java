@@ -291,7 +291,9 @@ public class AppOpenAd {
                         if (!adMobAppOpenId.equals("0")) {
                             showAdIfAvailable(activity, onShowAdCompleteListener);
                         } else {
-                            onShowAdCompleteListener.onShowAdComplete();
+                            if (onShowAdCompleteListener != null) {
+                                onShowAdCompleteListener.onShowAdComplete();
+                            }
                         }
                         break;
                     case APPLOVIN:
@@ -300,14 +302,18 @@ public class AppOpenAd {
                         if (!appLovinAppOpenId.equals("0")) {
                             showAdIfAvailable(activity, onShowAdCompleteListener);
                         } else {
-                            onShowAdCompleteListener.onShowAdComplete();
+                            if (onShowAdCompleteListener != null) {
+                                onShowAdCompleteListener.onShowAdComplete();
+                            }
                         }
                         break;
                     case WORTISE:
                         if (!wortiseAppOpenId.equals("0")) {
                             showAdIfAvailable(activity, onShowAdCompleteListener);
                         } else {
-                            onShowAdCompleteListener.onShowAdComplete();
+                            if (onShowAdCompleteListener != null) {
+                                onShowAdCompleteListener.onShowAdComplete();
+                            }
                         }
                         break;
                     default:
@@ -355,7 +361,9 @@ public class AppOpenAd {
             }
         } catch (Exception e) {
             Log.e(TAG, "Error in showAdIfAvailable: " + e.getMessage());
-            onShowAdCompleteListener.onShowAdComplete();
+            if (onShowAdCompleteListener != null) {
+                onShowAdCompleteListener.onShowAdComplete();
+            }
         }
     }
 
@@ -512,7 +520,9 @@ public class AppOpenAd {
                             break;
 
                         default:
-                            onShowAdCompleteListener.onShowAdComplete();
+                            if (onShowAdCompleteListener != null) {
+                                onShowAdCompleteListener.onShowAdComplete();
+                            }
                             break;
                     }
                 } else {
@@ -553,7 +563,9 @@ public class AppOpenAd {
                             });
                             appOpenAd.show(activity);
                         } else {
-                            onShowAdCompleteListener.onShowAdComplete();
+                            if (onShowAdCompleteListener != null) {
+                                onShowAdCompleteListener.onShowAdComplete();
+                            }
                         }
                         break;
 
@@ -757,7 +769,9 @@ public class AppOpenAd {
                             });
                             appOpenAd.show(activity);
                         } else {
-                            onShowAdCompleteListener.onShowAdComplete();
+                            if (onShowAdCompleteListener != null) {
+                                onShowAdCompleteListener.onShowAdComplete();
+                            }
                         }
                         break;
 

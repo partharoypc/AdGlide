@@ -21,10 +21,8 @@ import com.partharoypc.adglide.format.AppOpenAd;
 import com.partharoypc.adglidedemo.BuildConfig;
 import com.partharoypc.adglidedemo.R;
 import com.partharoypc.adglidedemo.application.MyApplication;
-import com.partharoypc.adglidedemo.callback.CallbackConfig;
 import com.partharoypc.adglidedemo.data.Constant;
 import com.partharoypc.adglidedemo.database.SharedPref;
-import com.partharoypc.adglidedemo.rest.RestAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
