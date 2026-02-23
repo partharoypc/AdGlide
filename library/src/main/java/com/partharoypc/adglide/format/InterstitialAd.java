@@ -119,15 +119,29 @@ public class InterstitialAd {
         }
 
         /**
-         * Shows the ad if it is loaded.
+         * Shows the ad if it is loaded, using the originally provided Activity.
          */
         public void show() {
-            showInterstitialAd();
+            showInterstitialAd(null, null, null);
+        }
+
+        /**
+         * Shows the ad if it is loaded, using a specifically provided Activity.
+         * Crucial for showing pre-loaded ads in different Activities/Fragments.
+         */
+        public void show(@NonNull Activity displayActivity) {
+            showInterstitialAd(displayActivity, null, null);
         }
 
         public void show(OnInterstitialAdShowedListener onInterstitialAdShowedListener,
                 OnInterstitialAdDismissedListener onInterstitialAdDismissedListener) {
-            showInterstitialAd(onInterstitialAdShowedListener, onInterstitialAdDismissedListener);
+            showInterstitialAd(null, onInterstitialAdShowedListener, onInterstitialAdDismissedListener);
+        }
+
+        public void show(@NonNull Activity displayActivity,
+                OnInterstitialAdShowedListener onInterstitialAdShowedListener,
+                OnInterstitialAdDismissedListener onInterstitialAdDismissedListener) {
+            showInterstitialAd(displayActivity, onInterstitialAdShowedListener, onInterstitialAdDismissedListener);
         }
 
         /**
@@ -337,18 +351,20 @@ public class InterstitialAd {
             loadBackupInterstitialAd(null);
         }
 
-        public void showInterstitialAd() {
+        public void showInterstitialAd(Activity displayActivity, OnInterstitialAdShowedListener showedListener,
+                OnInterstitialAdDismissedListener dismissedListener) {
             try {
+                Activity targetActivity = displayActivity != null ? displayActivity : activity;
                 if (adStatus && placementStatus != 0) {
                     if (counter == interval) {
                         switch (adNetwork) {
                             case ADMOB:
                             case META_BIDDING_ADMOB: {
                                 if (adMobInterstitialAd != null) {
-                                    adMobInterstitialAd.show(activity);
+                                    adMobInterstitialAd.show(targetActivity);
                                     Log.d(TAG, "admob interstitial not null");
                                 } else {
-                                    showBackupInterstitialAd();
+                                    showBackupInterstitialAd(targetActivity, showedListener, dismissedListener);
                                     Log.d(TAG, "admob interstitial null");
                                 }
                                 break;
@@ -359,7 +375,7 @@ public class InterstitialAd {
                                     metaInterstitialAd.show();
                                     Log.d(TAG, "meta interstitial not null");
                                 } else {
-                                    showBackupInterstitialAd();
+                                    showBackupInterstitialAd(targetActivity, showedListener, dismissedListener);
                                     Log.d(TAG, "meta interstitial null");
                                 }
                                 break;
@@ -367,11 +383,11 @@ public class InterstitialAd {
 
                             case UNITY: {
                                 if (UnityAds.isInitialized()) {
-                                    UnityAds.show(activity, unityInterstitialId, new IUnityAdsShowListener() {
+                                    UnityAds.show(targetActivity, unityInterstitialId, new IUnityAdsShowListener() {
                                         @Override
                                         public void onUnityAdsShowFailure(String placementId,
                                                 UnityAds.UnityAdsShowError error, String message) {
-                                            showBackupInterstitialAd();
+                                            showBackupInterstitialAd(targetActivity, showedListener, dismissedListener);
                                             Log.d(TAG, "Unity Interstitial Failed to show: " + message);
                                         }
 
@@ -389,7 +405,7 @@ public class InterstitialAd {
                                         }
                                     });
                                 } else {
-                                    showBackupInterstitialAd();
+                                    showBackupInterstitialAd(targetActivity, showedListener, dismissedListener);
                                 }
                                 break;
                             }
@@ -400,7 +416,7 @@ public class InterstitialAd {
                                 if (appLovinMaxInterstitialAd != null && appLovinMaxInterstitialAd.isReady()) {
                                     appLovinMaxInterstitialAd.showAd();
                                 } else {
-                                    showBackupInterstitialAd();
+                                    showBackupInterstitialAd(targetActivity, showedListener, dismissedListener);
                                 }
                                 break;
                             }
@@ -410,7 +426,7 @@ public class InterstitialAd {
                                 if (IronSource.isInterstitialReady()) {
                                     IronSource.showInterstitial();
                                 } else {
-                                    showBackupInterstitialAd();
+                                    showBackupInterstitialAd(targetActivity, showedListener, dismissedListener);
                                 }
                                 break;
                             }
@@ -419,7 +435,7 @@ public class InterstitialAd {
                                 if (startAppInterstitialAd != null && startAppInterstitialAd.isReady()) {
                                     startAppInterstitialAd.showAd();
                                 } else {
-                                    showBackupInterstitialAd();
+                                    showBackupInterstitialAd(targetActivity, showedListener, dismissedListener);
                                 }
                                 break;
                             }
@@ -428,13 +444,13 @@ public class InterstitialAd {
                                 if (wortiseInterstitialAd != null && wortiseInterstitialAd.isAvailable()) {
                                     wortiseInterstitialAd.showAd();
                                 } else {
-                                    showBackupInterstitialAd();
+                                    showBackupInterstitialAd(targetActivity, showedListener, dismissedListener);
                                 }
                                 break;
                             }
 
                             default:
-                                showBackupInterstitialAd();
+                                showBackupInterstitialAd(targetActivity, showedListener, dismissedListener);
                                 break;
                         }
                         counter = 1;
@@ -449,7 +465,13 @@ public class InterstitialAd {
         }
 
         public void showBackupInterstitialAd() {
+            showBackupInterstitialAd(null, null, null);
+        }
+
+        public void showBackupInterstitialAd(Activity displayActivity, OnInterstitialAdShowedListener showedListener,
+                OnInterstitialAdDismissedListener dismissedListener) {
             try {
+                Activity targetActivity = displayActivity != null ? displayActivity : activity;
                 if (adStatus && placementStatus != 0) {
                     Log.d(TAG,
                             "Show Backup Interstitial Ad [" + backupAdNetwork.toUpperCase(java.util.Locale.ROOT) + "]");
@@ -457,7 +479,7 @@ public class InterstitialAd {
                         case ADMOB:
                         case META_BIDDING_ADMOB: {
                             if (adMobInterstitialAd != null) {
-                                adMobInterstitialAd.show(activity);
+                                adMobInterstitialAd.show(targetActivity);
                             }
                             break;
                         }
@@ -471,7 +493,7 @@ public class InterstitialAd {
 
                         case UNITY: {
                             if (UnityAds.isInitialized()) {
-                                UnityAds.show(activity, unityInterstitialId);
+                                UnityAds.show(targetActivity, unityInterstitialId);
                             }
                             break;
                         }

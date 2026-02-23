@@ -59,7 +59,15 @@ public class RewardedInterstitialAd {
         @androidx.annotation.NonNull
         public Builder show(OnRewardedAdCompleteListener onComplete, OnRewardedAdDismissedListener onDismiss,
                 OnRewardedAdErrorListener onError) {
-            showRewardedInterstitialAd(onComplete, onDismiss, onError);
+            showRewardedInterstitialAd(null, onComplete, onDismiss, onError);
+            return this;
+        }
+
+        @androidx.annotation.NonNull
+        public Builder show(@NonNull Activity displayActivity, OnRewardedAdCompleteListener onComplete,
+                OnRewardedAdDismissedListener onDismiss,
+                OnRewardedAdErrorListener onError) {
+            showRewardedInterstitialAd(displayActivity, onComplete, onDismiss, onError);
             return this;
         }
 
@@ -268,43 +276,55 @@ public class RewardedInterstitialAd {
 
         public void showRewardedInterstitialAd(OnRewardedAdCompleteListener onComplete,
                 OnRewardedAdDismissedListener onDismiss, OnRewardedAdErrorListener onError) {
+            showRewardedInterstitialAd(null, onComplete, onDismiss, onError);
+        }
+
+        public void showRewardedInterstitialAd(Activity displayActivity, OnRewardedAdCompleteListener onComplete,
+                OnRewardedAdDismissedListener onDismiss, OnRewardedAdErrorListener onError) {
             try {
+                Activity targetActivity = displayActivity != null ? displayActivity : activity;
                 if (adStatus && placementStatus != 0) {
                     switch (adNetwork) {
                         case ADMOB:
                         case META_BIDDING_ADMOB:
                             if (adMobRewardedInterstitialAd != null) {
-                                adMobRewardedInterstitialAd.show(activity, new OnUserEarnedRewardListener() {
+                                adMobRewardedInterstitialAd.show(targetActivity, new OnUserEarnedRewardListener() {
                                     @Override
                                     public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
                                         onComplete.onRewardedAdComplete();
                                     }
                                 });
                             } else {
-                                showBackupRewardedInterstitialAd(onComplete, onDismiss, onError);
+                                showBackupRewardedInterstitialAd(targetActivity, onComplete, onDismiss, onError);
                             }
                             break;
 
                         default:
-                            showBackupRewardedInterstitialAd(onComplete, onDismiss, onError);
+                            showBackupRewardedInterstitialAd(targetActivity, onComplete, onDismiss, onError);
                             break;
                     }
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Error in showRewardedInterstitialAd: " + e.getMessage());
-                showBackupRewardedInterstitialAd(onComplete, onDismiss, onError);
+                showBackupRewardedInterstitialAd(displayActivity, onComplete, onDismiss, onError);
             }
         }
 
         public void showBackupRewardedInterstitialAd(OnRewardedAdCompleteListener onComplete,
                 OnRewardedAdDismissedListener onDismiss, OnRewardedAdErrorListener onError) {
+            showBackupRewardedInterstitialAd(null, onComplete, onDismiss, onError);
+        }
+
+        public void showBackupRewardedInterstitialAd(Activity displayActivity, OnRewardedAdCompleteListener onComplete,
+                OnRewardedAdDismissedListener onDismiss, OnRewardedAdErrorListener onError) {
             try {
+                Activity targetActivity = displayActivity != null ? displayActivity : activity;
                 if (adStatus && placementStatus != 0) {
                     switch (backupAdNetwork) {
                         case ADMOB:
                         case META_BIDDING_ADMOB:
                             if (adMobRewardedInterstitialAd != null) {
-                                adMobRewardedInterstitialAd.show(activity, new OnUserEarnedRewardListener() {
+                                adMobRewardedInterstitialAd.show(targetActivity, new OnUserEarnedRewardListener() {
                                     @Override
                                     public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
                                         onComplete.onRewardedAdComplete();

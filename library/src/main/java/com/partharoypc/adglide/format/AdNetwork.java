@@ -17,6 +17,7 @@ import static com.partharoypc.adglide.util.Constant.UNITY;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
 import com.partharoypc.adglide.AdGlideNetwork;
 
@@ -42,6 +43,7 @@ public class AdNetwork {
     public static class Initialize {
 
         private static final String TAG = "AdGlide";
+        private final Context context;
         private final Activity activity;
         private boolean adStatus = true;
         private String adNetwork = "";
@@ -56,8 +58,9 @@ public class AdNetwork {
         private boolean debug = true;
         private boolean testMode = false;
 
-        public Initialize(Activity activity) {
-            this.activity = activity;
+        public Initialize(Context context) {
+            this.context = context;
+            this.activity = context instanceof Activity ? (Activity) context : null;
         }
 
         public Initialize build() {
@@ -180,7 +183,7 @@ public class AdNetwork {
                 switch (network) {
                     case ADMOB:
                     case META_BIDDING_ADMOB:
-                        MobileAds.initialize(activity, initializationStatus -> {
+                        MobileAds.initialize(context, initializationStatus -> {
                             Map<String, AdapterStatus> statusMap = initializationStatus.getAdapterStatusMap();
                             for (String adapterClass : statusMap.keySet()) {
                                 AdapterStatus adapterStatus = statusMap.get(adapterClass);
@@ -190,13 +193,13 @@ public class AdNetwork {
                                 }
                             }
                         });
-                        AudienceNetworkInitializeHelper.initializeAd(activity, debug || testMode);
+                        AudienceNetworkInitializeHelper.initializeAd(context, debug || testMode);
                         break;
                     case META:
-                        AudienceNetworkInitializeHelper.initializeAd(activity, debug || testMode);
+                        AudienceNetworkInitializeHelper.initializeAd(context, debug || testMode);
                         break;
                     case UNITY:
-                        UnityAds.initialize(activity, unityGameId, debug || testMode,
+                        UnityAds.initialize(context, unityGameId, debug || testMode,
                                 new IUnityAdsInitializationListener() {
                                     @Override
                                     public void onInitializationComplete() {
@@ -213,26 +216,31 @@ public class AdNetwork {
                     case APPLOVIN:
                     case APPLOVIN_MAX:
                     case META_BIDDING_APPLOVIN_MAX:
-                        AppLovinSdk.getInstance(activity).setMediationProvider(AppLovinMediationProvider.MAX);
-                        AppLovinSdk.getInstance(activity).initializeSdk(config -> {
+                        AppLovinSdk.getInstance(context).setMediationProvider(AppLovinMediationProvider.MAX);
+                        AppLovinSdk.getInstance(context).initializeSdk(config -> {
                         });
-                        AudienceNetworkInitializeHelper.initializeAd(activity, debug || testMode);
+                        AudienceNetworkInitializeHelper.initializeAd(context, debug || testMode);
                         break;
 
                     case IRONSOURCE:
                     case META_BIDDING_IRONSOURCE:
-                        IronSource.init(activity, ironSourceAppKey, IronSource.AD_UNIT.REWARDED_VIDEO,
-                                IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.BANNER);
-                        AudienceNetworkInitializeHelper.initializeAd(activity, debug || testMode);
+                        if (activity != null) {
+                            IronSource.init(activity, ironSourceAppKey, IronSource.AD_UNIT.REWARDED_VIDEO,
+                                    IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.BANNER);
+                        } else {
+                            Log.e(TAG,
+                                    "IronSource requires an Activity Context to initialize. Skipping IronSource init.");
+                        }
+                        AudienceNetworkInitializeHelper.initializeAd(context, debug || testMode);
                         break;
                     case STARTAPP:
-                        StartAppSDK.init(activity, startappAppId, true);
+                        StartAppSDK.init(context, startappAppId, true);
                         StartAppSDK.setTestAdsEnabled(debug || testMode);
                         StartAppAd.disableSplash();
                         StartAppSDK.enableReturnAds(false);
                         break;
                     case WORTISE:
-                        WortiseSdk.initialize(activity, wortiseAppId);
+                        WortiseSdk.initialize(context, wortiseAppId);
                         break;
                     case NONE:
                         // do nothing

@@ -105,7 +105,15 @@ public class RewardedAd {
         @androidx.annotation.NonNull
         public Builder show(OnRewardedAdCompleteListener onComplete, OnRewardedAdDismissedListener onDismiss,
                 OnRewardedAdErrorListener onError) {
-            showRewardedAd(onComplete, onDismiss, onError);
+            showRewardedAd(null, onComplete, onDismiss, onError);
+            return this;
+        }
+
+        @androidx.annotation.NonNull
+        public Builder show(@NonNull Activity displayActivity, OnRewardedAdCompleteListener onComplete,
+                OnRewardedAdDismissedListener onDismiss,
+                OnRewardedAdErrorListener onError) {
+            showRewardedAd(displayActivity, onComplete, onDismiss, onError);
             return this;
         }
 
@@ -512,18 +520,25 @@ public class RewardedAd {
 
         public void showRewardedAd(OnRewardedAdCompleteListener onComplete, OnRewardedAdDismissedListener onDismiss,
                 OnRewardedAdErrorListener onError) {
+            showRewardedAd(null, onComplete, onDismiss, onError);
+        }
+
+        public void showRewardedAd(Activity displayActivity, OnRewardedAdCompleteListener onComplete,
+                OnRewardedAdDismissedListener onDismiss,
+                OnRewardedAdErrorListener onError) {
             try {
+                Activity targetActivity = displayActivity != null ? displayActivity : activity;
                 if (adStatus && placementStatus != 0) {
                     switch (adNetwork) {
                         case ADMOB:
                         case META_BIDDING_ADMOB: {
                             if (adMobRewardedAd != null) {
-                                adMobRewardedAd.show(activity, rewardItem -> {
+                                adMobRewardedAd.show(targetActivity, rewardItem -> {
                                     onComplete.onRewardedAdComplete();
                                     Log.d(TAG, "The user earned the reward.");
                                 });
                             } else {
-                                showRewardedBackupAd(onComplete, onDismiss, onError);
+                                showRewardedBackupAd(targetActivity, onComplete, onDismiss, onError);
                             }
                             break;
                         }
@@ -532,13 +547,13 @@ public class RewardedAd {
                             if (metaRewardedVideoAd != null && metaRewardedVideoAd.isAdLoaded()) {
                                 metaRewardedVideoAd.show();
                             } else {
-                                showRewardedBackupAd(onComplete, onDismiss, onError);
+                                showRewardedBackupAd(targetActivity, onComplete, onDismiss, onError);
                             }
                             break;
                         }
 
                         case UNITY: {
-                            UnityAds.show(activity, unityRewardedId, new IUnityAdsShowListener() {
+                            UnityAds.show(targetActivity, unityRewardedId, new IUnityAdsShowListener() {
                                 @Override
                                 public void onUnityAdsShowComplete(String placementId,
                                         UnityAds.UnityAdsShowCompletionState state) {
@@ -553,7 +568,7 @@ public class RewardedAd {
                                 @Override
                                 public void onUnityAdsShowFailure(String placementId, UnityAds.UnityAdsShowError error,
                                         String message) {
-                                    showRewardedBackupAd(onComplete, onDismiss, onError);
+                                    showRewardedBackupAd(targetActivity, onComplete, onDismiss, onError);
                                 }
 
                                 @Override
@@ -573,7 +588,7 @@ public class RewardedAd {
                             if (appLovinMaxRewardedAd != null && appLovinMaxRewardedAd.isReady()) {
                                 appLovinMaxRewardedAd.showAd();
                             } else {
-                                showRewardedBackupAd(onComplete, onDismiss, onError);
+                                showRewardedBackupAd(targetActivity, onComplete, onDismiss, onError);
                             }
                             break;
                         }
@@ -584,7 +599,9 @@ public class RewardedAd {
                                     startAppRewardedAd.showAd(new AdDisplayListener() {
                                         @Override
                                         public void adHidden(com.startapp.sdk.adsbase.Ad ad) {
-                                            onDismiss.onRewardedAdDismissed();
+                                            if (onDismiss != null) {
+                                                onDismiss.onRewardedAdDismissed();
+                                            }
                                         }
 
                                         @Override
@@ -597,15 +614,15 @@ public class RewardedAd {
 
                                         @Override
                                         public void adNotDisplayed(com.startapp.sdk.adsbase.Ad ad) {
-                                            showRewardedBackupAd(onComplete, onDismiss, onError);
+                                            showRewardedBackupAd(targetActivity, onComplete, onDismiss, onError);
                                         }
                                     });
                                 } else {
-                                    showRewardedBackupAd(onComplete, onDismiss, onError);
+                                    showRewardedBackupAd(targetActivity, onComplete, onDismiss, onError);
                                 }
                             } catch (NoClassDefFoundError | Exception e) {
                                 Log.e(TAG, "Failed to load backup rewarded for StartApp. Error: " + e.getMessage());
-                                showRewardedBackupAd(onComplete, onDismiss, onError);
+                                showRewardedBackupAd(targetActivity, onComplete, onDismiss, onError);
                             }
                             break;
                         }
@@ -616,11 +633,11 @@ public class RewardedAd {
                                 if (IronSource.isRewardedVideoAvailable()) {
                                     IronSource.showRewardedVideo();
                                 } else {
-                                    showRewardedBackupAd(onComplete, onDismiss, onError);
+                                    showRewardedBackupAd(targetActivity, onComplete, onDismiss, onError);
                                 }
                             } catch (NoClassDefFoundError | Exception e) {
                                 Log.e(TAG, "Failed to load backup rewarded for IronSource. Error: " + e.getMessage());
-                                showRewardedBackupAd(onComplete, onDismiss, onError);
+                                showRewardedBackupAd(targetActivity, onComplete, onDismiss, onError);
                             }
                             break;
                         }
@@ -630,11 +647,11 @@ public class RewardedAd {
                                 if (wortiseRewardedAd != null && wortiseRewardedAd.isAvailable()) {
                                     wortiseRewardedAd.showAd();
                                 } else {
-                                    showRewardedBackupAd(onComplete, onDismiss, onError);
+                                    showRewardedBackupAd(targetActivity, onComplete, onDismiss, onError);
                                 }
                             } catch (NoClassDefFoundError | Exception e) {
                                 Log.e(TAG, "Failed to load backup rewarded for Wortise. Error: " + e.getMessage());
-                                showRewardedBackupAd(onComplete, onDismiss, onError);
+                                showRewardedBackupAd(targetActivity, onComplete, onDismiss, onError);
                             }
                             break;
                         }
@@ -650,14 +667,20 @@ public class RewardedAd {
 
         public void showRewardedBackupAd(OnRewardedAdCompleteListener onComplete,
                 OnRewardedAdDismissedListener onDismiss, OnRewardedAdErrorListener onError) {
+            showRewardedBackupAd(null, onComplete, onDismiss, onError);
+        }
+
+        public void showRewardedBackupAd(Activity displayActivity, OnRewardedAdCompleteListener onComplete,
+                OnRewardedAdDismissedListener onDismiss, OnRewardedAdErrorListener onError) {
             try {
+                Activity targetActivity = displayActivity != null ? displayActivity : activity;
                 if (adStatus && placementStatus != 0) {
                     Log.d(TAG, "Show Backup Rewarded Ad [" + backupAdNetwork.toUpperCase(java.util.Locale.ROOT) + "]");
                     switch (backupAdNetwork) {
                         case ADMOB:
                         case META_BIDDING_ADMOB: {
                             if (adMobRewardedAd != null) {
-                                adMobRewardedAd.show(activity, rewardItem -> {
+                                adMobRewardedAd.show(targetActivity, rewardItem -> {
                                     onComplete.onRewardedAdComplete();
                                 });
                             }
@@ -672,7 +695,7 @@ public class RewardedAd {
                         }
 
                         case UNITY: {
-                            UnityAds.show(activity, unityRewardedId);
+                            UnityAds.show(targetActivity, unityRewardedId);
                             break;
                         }
 
