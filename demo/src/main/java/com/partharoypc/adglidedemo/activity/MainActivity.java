@@ -1,7 +1,7 @@
 package com.partharoypc.adglidedemo.activity;
 
 import static com.partharoypc.adglide.util.Constant.ADMOB;
-import static com.partharoypc.adglide.util.Constant.APPLOVIN_DISCOVERY;
+
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.IRONSOURCE;
@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
                     .setAdMobAppOpenId(Constant.ADMOB_APP_OPEN_AD_ID)
                     .setAppLovinAppOpenId(Constant.APPLOVIN_APP_OPEN_AP_ID)
                     .setWortiseAppOpenId(Constant.WORTISE_APP_OPEN_AD_ID)
-                    .build();
+                    .build().load();
         }
     }
 

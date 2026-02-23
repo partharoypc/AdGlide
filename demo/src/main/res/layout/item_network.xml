@@ -14,7 +14,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Ad Network Name"
+        android:text="@string/ad_network_name"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
         android:textColor="?attr/colorOnSurface" />
 

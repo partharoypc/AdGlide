@@ -3,7 +3,7 @@ package com.partharoypc.adglide.format;
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
-import static com.partharoypc.adglide.util.Constant.APPLOVIN_DISCOVERY;
+
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.NONE;
 import static com.partharoypc.adglide.util.Constant.META;
@@ -113,6 +113,11 @@ public class NativeAd {
 
         @androidx.annotation.NonNull
         public Builder build() {
+            return this;
+        }
+
+        @androidx.annotation.NonNull
+        public Builder load() {
             loadNativeAd();
             return this;
         }
@@ -278,15 +283,11 @@ public class NativeAd {
                             handleWortiseLoad(fallback);
                             break;
                         case NONE:
-                            if (!isBackup)
+                            if (!isBackup) {
                                 fallback.run();
-                            break;
-                        case APPLOVIN_DISCOVERY:
-                        default:
-                            if (!isBackup)
-                                fallback.run();
-                            else
+                            } else {
                                 loadBackupNativeAd();
+                            }
                             break;
                     }
                 }

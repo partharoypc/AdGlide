@@ -70,21 +70,23 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center">
+                    android:gravity="center"
+                    style="?android:attr/buttonBarStyle">
 
                     <Button
                         android:id="@+id/btn_refresh"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/load_banner"
-                        android:layout_marginEnd="8dp"/>
+                        android:layout_marginEnd="8dp"
+                        style="?android:attr/buttonBarButtonStyle"/>
 
                     <Button
                         android:id="@+id/btn_destroy"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/destroy"
-                        style="@style/Widget.Material3.Button.OutlinedButton"/>
+                        style="?android:attr/buttonBarButtonStyle"/>
 
                 </LinearLayout>
 

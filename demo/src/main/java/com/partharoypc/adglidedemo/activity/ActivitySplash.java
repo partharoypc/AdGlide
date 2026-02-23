@@ -26,18 +26,14 @@ import com.partharoypc.adglidedemo.data.Constant;
 import com.partharoypc.adglidedemo.database.SharedPref;
 import com.partharoypc.adglidedemo.rest.RestAdapter;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 @SuppressWarnings("ConstantConditions")
 public class ActivitySplash extends AppCompatActivity {
 
     private static final String TAG = "ActivitySplash";
-    Call<CallbackConfig> callbackConfigCall = null;
     public static int DELAY_PROGRESS = 1500;
     AdNetwork.Initialize adNetwork;
     AppOpenAd.Builder appOpenAdBuilder;
@@ -57,85 +53,40 @@ public class ActivitySplash extends AppCompatActivity {
                         case ADMOB:
                             if (!Constant.ADMOB_APP_OPEN_AD_ID.equals("0")) {
                                 ((MyApplication) getApplication()).showAdIfAvailable(ActivitySplash.this,
-                                        this::requestConfig);
+                                        this::loadOpenAds);
                             } else {
-                                requestConfig();
+                                loadOpenAds();
                             }
                             break;
-                        // case GOOGLE_AD_MANAGER:
-                        // if (!Constant.GOOGLE_AD_MANAGER_APP_OPEN_AD_ID.equals("0")) {
-                        // ((MyApplication) getApplication()).showAdIfAvailable(ActivitySplash.this,
-                        // this::requestConfig);
-                        // } else {
-                        // requestConfig();
-                        // }
-                        // break;
                         case APPLOVIN:
                         case APPLOVIN_MAX:
                             if (!Constant.APPLOVIN_APP_OPEN_AP_ID.equals("0")) {
                                 ((MyApplication) getApplication()).showAdIfAvailable(ActivitySplash.this,
-                                        this::requestConfig);
+                                        this::loadOpenAds);
                             } else {
-                                requestConfig();
+                                loadOpenAds();
                             }
                             break;
                         case WORTISE:
                             if (!Constant.WORTISE_APP_OPEN_AD_ID.equals("0")) {
                                 ((MyApplication) getApplication()).showAdIfAvailable(ActivitySplash.this,
-                                        this::requestConfig);
+                                        this::loadOpenAds);
                             } else {
-                                requestConfig();
+                                loadOpenAds();
                             }
                             break;
                         default:
-                            requestConfig();
+                            loadOpenAds();
                             break;
                     }
                 }, DELAY_PROGRESS);
             } else {
-                requestConfig();
-            }
-        } else {
-            requestConfig();
-        }
-
-    }
-
-    private void requestConfig() {
-        requestAPI("https://raw.githubusercontent.com/partharoypc/content/uploads/json/android.json");
-    }
-
-    private void requestAPI(@SuppressWarnings("SameParameterValue") String url) {
-        if (url.startsWith("http://") || url.startsWith("https://")) {
-            if (url.contains("https://drive.google.com")) {
-                String driveUrl = url.replace("https://", "").replace("http://", "");
-                List<String> data = Arrays.asList(driveUrl.split("/"));
-                String googleDriveFileId = data.get(3);
-                callbackConfigCall = RestAdapter.createApi().getDriveJsonFileId(googleDriveFileId);
-            } else {
-                callbackConfigCall = RestAdapter.createApi().getJsonUrl(url);
-            }
-        } else {
-            callbackConfigCall = RestAdapter.createApi().getDriveJsonFileId(url);
-        }
-        callbackConfigCall.enqueue(new Callback<CallbackConfig>() {
-            public void onResponse(@NonNull Call<CallbackConfig> call, @NonNull Response<CallbackConfig> response) {
-                CallbackConfig resp = response.body();
-                if (resp != null) {
-                    sharedPref.savePostList(resp.android);
-                    loadOpenAds();
-                    Log.d(TAG, "responses success");
-                } else {
-                    loadOpenAds();
-                    Log.d(TAG, "responses null");
-                }
-            }
-
-            public void onFailure(@NonNull Call<CallbackConfig> call, @NonNull Throwable th) {
-                Log.d(TAG, "responses failed: " + th.getMessage());
                 loadOpenAds();
             }
-        });
+        } else {
+            loadOpenAds();
+        }
+
     }
 
     private void initAds() {
@@ -162,7 +113,7 @@ public class ActivitySplash extends AppCompatActivity {
                     .setAdMobAppOpenId(Constant.ADMOB_APP_OPEN_AD_ID)
                     .setAppLovinAppOpenId(Constant.APPLOVIN_APP_OPEN_AP_ID)
                     .setWortiseAppOpenId(Constant.WORTISE_APP_OPEN_AD_ID)
-                    .build(this::startMainActivity);
+                    .build().load(this::startMainActivity);
         } else {
             startMainActivity();
         }

@@ -60,7 +60,7 @@ public class ActivityRewarded extends AppCompatActivity {
                 .setApplovinDiscRewardedZoneId(Constant.APPLOVIN_DISC_REWARDED_ZONE_ID)
                 .setironSourceRewardedId(Constant.IRONSOURCE_REWARDED_ID)
                 .setWortiseRewardedId(Constant.WORTISE_REWARDED_ID)
-                .build(() -> appendLog("Rewarded Ad Loaded"),
+                .build().load(() -> appendLog("Rewarded Ad Loaded"),
                         () -> appendLog("Rewarded Ad Error"),
                         () -> appendLog("Rewarded Ad Dismissed"),
                         () -> appendLog("Rewarded Ad Complete - GIVE REWARD"));

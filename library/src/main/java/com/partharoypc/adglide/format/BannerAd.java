@@ -3,7 +3,7 @@ package com.partharoypc.adglide.format;
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
-import static com.partharoypc.adglide.util.Constant.APPLOVIN_DISCOVERY;
+
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
@@ -67,7 +67,7 @@ public class BannerAd {
         private com.facebook.ads.AdView metaAdView;
         private BannerView unityBannerAd;
         private MaxAdView appLovinMaxBannerAd;
-        private AppLovinAdView appLovinDiscoveryBannerAd;
+
         private IronSourceBannerLayout ironSourceBannerLayout;
         private Banner startAppBannerAd;
         private com.wortise.ads.banner.BannerAd wortiseBannerAd;
@@ -97,6 +97,11 @@ public class BannerAd {
 
         @androidx.annotation.NonNull
         public Builder build() {
+            return this;
+        }
+
+        @androidx.annotation.NonNull
+        public Builder load() {
             loadBannerAd();
             return this;
         }
@@ -425,29 +430,6 @@ public class BannerAd {
                         break;
                     }
 
-                    case APPLOVIN_DISCOVERY: {
-                        RelativeLayout appLovinDiscoveryAdContainerView = activity
-                                .findViewById(R.id.app_lovin_discovery_banner_view_container);
-                        appLovinDiscoveryBannerAd = new AppLovinAdView(AppLovinAdSize.BANNER, appLovinBannerZoneId,
-                                activity);
-                        appLovinDiscoveryBannerAd.setAdLoadListener(new AppLovinAdLoadListener() {
-                            @Override
-                            public void adReceived(AppLovinAd ad) {
-                                appLovinDiscoveryAdContainerView.setVisibility(View.VISIBLE);
-                            }
-
-                            @Override
-                            public void failedToReceiveAd(int errorCode) {
-                                appLovinDiscoveryAdContainerView.setVisibility(View.GONE);
-                                loadBackupBannerAd();
-                            }
-                        });
-                        appLovinDiscoveryAdContainerView.removeAllViews();
-                        appLovinDiscoveryAdContainerView.addView(appLovinDiscoveryBannerAd);
-                        appLovinDiscoveryBannerAd.loadNextAd();
-                        break;
-                    }
-
                     case IRONSOURCE:
                     case META_BIDDING_IRONSOURCE: {
                         ironSourceBannerView = activity.findViewById(R.id.iron_source_banner_view_container);
@@ -586,10 +568,7 @@ public class BannerAd {
                 appLovinMaxBannerAd.destroy();
                 appLovinMaxBannerAd = null;
             }
-            if (appLovinDiscoveryBannerAd != null) {
-                appLovinDiscoveryBannerAd.destroy();
-                appLovinDiscoveryBannerAd = null;
-            }
+
             if (ironSourceBannerLayout != null) {
                 IronSource.destroyBanner(ironSourceBannerLayout);
                 ironSourceBannerLayout = null;

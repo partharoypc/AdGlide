@@ -60,33 +60,37 @@ public class ActivityNative extends AppCompatActivity {
                 .setAdMobNativeId(Constant.ADMOB_NATIVE_ID)
                 .setMetaNativeId(Constant.META_NATIVE_ID)
                 .setAppLovinNativeId(Constant.APPLOVIN_NATIVE_MANUAL_ID)
-//                 .setAppLovinDiscoveryMrecZoneId(Constant.APPLOVIN_BANNER_MREC_ZONE_ID)
                 .setWortiseNativeId(Constant.WORTISE_NATIVE_ID)
                 .setNativeAdStyle(Constant.NATIVE_STYLE)
                 .setNativeAdBackgroundColor(R.color.colorNativeBackgroundLight, R.color.colorNativeBackgroundDark)
                 .setPadding(0, 0, 0, 0)
                 .setDarkTheme(sharedPref.getIsDarkTheme())
-                .build();
+                .build().load();
     }
 
     private void setNativeAdStyle(LinearLayout nativeAdView) {
         switch (Constant.NATIVE_STYLE) {
             case STYLE_NEWS:
-                nativeAdView.addView(View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_news, null));
+                nativeAdView.addView(
+                        View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_news, null));
                 break;
             case STYLE_RADIO:
-                nativeAdView.addView(View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_radio, null));
+                nativeAdView.addView(
+                        View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_radio, null));
                 break;
             case STYLE_VIDEO_SMALL:
                 nativeAdView
-                        .addView(View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_video_small, null));
+                        .addView(View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_video_small,
+                                null));
                 break;
             case STYLE_VIDEO_LARGE:
                 nativeAdView
-                        .addView(View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_video_large, null));
+                        .addView(View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_video_large,
+                                null));
                 break;
             default:
-                nativeAdView.addView(View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_medium, null));
+                nativeAdView.addView(
+                        View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_medium, null));
                 break;
         }
     }

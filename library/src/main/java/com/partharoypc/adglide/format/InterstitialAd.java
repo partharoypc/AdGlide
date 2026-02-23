@@ -8,7 +8,7 @@ import java.util.Arrays;
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
-import static com.partharoypc.adglide.util.Constant.APPLOVIN_DISCOVERY;
+
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
@@ -61,7 +61,7 @@ public class InterstitialAd {
         private com.google.android.gms.ads.interstitial.InterstitialAd adMobInterstitialAd;
         private com.facebook.ads.InterstitialAd metaInterstitialAd;
         private MaxInterstitialAd appLovinMaxInterstitialAd;
-        private com.applovin.adview.AppLovinInterstitialAd appLovinDiscoveryInterstitialAd;
+
         private StartAppAd startAppInterstitialAd;
         private com.wortise.ads.interstitial.InterstitialAd wortiseInterstitialAd;
         private int retryAttempt;
@@ -98,12 +98,22 @@ public class InterstitialAd {
          */
         @NonNull
         public Builder build() {
-            loadInterstitialAd();
             return this;
         }
 
         @androidx.annotation.NonNull
         public Builder build(OnInterstitialAdDismissedListener onInterstitialAdDismissedListener) {
+            return this;
+        }
+
+        @androidx.annotation.NonNull
+        public Builder load() {
+            loadInterstitialAd();
+            return this;
+        }
+
+        @androidx.annotation.NonNull
+        public Builder load(OnInterstitialAdDismissedListener onInterstitialAdDismissedListener) {
             loadInterstitialAd(onInterstitialAdDismissedListener);
             return this;
         }
@@ -368,10 +378,6 @@ public class InterstitialAd {
                                 break;
                             }
 
-                            case APPLOVIN_DISCOVERY: {
-                                break;
-                            }
-
                             case IRONSOURCE:
                             case META_BIDDING_IRONSOURCE: {
                                 if (IronSource.isInterstitialReady()) {
@@ -449,10 +455,6 @@ public class InterstitialAd {
                             if (appLovinMaxInterstitialAd != null && appLovinMaxInterstitialAd.isReady()) {
                                 appLovinMaxInterstitialAd.showAd();
                             }
-                            break;
-                        }
-
-                        case APPLOVIN_DISCOVERY: {
                             break;
                         }
 
@@ -645,11 +647,6 @@ public class InterstitialAd {
                             }
                         });
                         appLovinMaxInterstitialAd.loadAd();
-                        break;
-                    }
-
-                    case APPLOVIN_DISCOVERY: {
-                        loadBackupInterstitialAd(onInterstitialAdDismissedListener);
                         break;
                     }
 
@@ -917,10 +914,6 @@ public class InterstitialAd {
                                 break;
                             }
 
-                            case APPLOVIN_DISCOVERY: {
-                                break;
-                            }
-
                             case IRONSOURCE:
                             case META_BIDDING_IRONSOURCE: {
                                 if (IronSource.isInterstitialReady()) {
@@ -1034,10 +1027,6 @@ public class InterstitialAd {
                             break;
                         }
 
-                        case APPLOVIN_DISCOVERY: {
-                            break;
-                        }
-
                         case IRONSOURCE:
                         case META_BIDDING_IRONSOURCE: {
                             if (IronSource.isInterstitialReady()) {
@@ -1084,9 +1073,6 @@ public class InterstitialAd {
             if (appLovinMaxInterstitialAd != null) {
                 appLovinMaxInterstitialAd.destroy();
                 appLovinMaxInterstitialAd = null;
-            }
-            if (appLovinDiscoveryInterstitialAd != null) {
-                appLovinDiscoveryInterstitialAd = null;
             }
             if (wortiseInterstitialAd != null) {
                 wortiseInterstitialAd.destroy();

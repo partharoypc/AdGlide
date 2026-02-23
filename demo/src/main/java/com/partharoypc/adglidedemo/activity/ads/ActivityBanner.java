@@ -64,7 +64,7 @@ public class ActivityBanner extends AppCompatActivity {
                 .setAdNetwork(Constant.AD_NETWORK)
                 .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
                 .setAdMobBannerId(Constant.ADMOB_BANNER_ID)
-//                 .setGoogleAdManagerBannerId(Constant.GOOGLE_AD_MANAGER_BANNER_ID)
+                // .setGoogleAdManagerBannerId(Constant.GOOGLE_AD_MANAGER_BANNER_ID)
                 .setMetaBannerId(Constant.META_BANNER_ID)
                 .setUnityBannerId(Constant.UNITY_BANNER_ID)
                 .setAppLovinBannerId(Constant.APPLOVIN_BANNER_ID)
@@ -73,7 +73,7 @@ public class ActivityBanner extends AppCompatActivity {
                 .setWortiseBannerId(Constant.WORTISE_BANNER_ID)
                 .setDarkTheme(sharedPref.getIsDarkTheme())
                 .setIsCollapsibleBanner(switchCollapsible.isChecked())
-                .build();
+                .build().load();
     }
 
     private void destroyBanner() {

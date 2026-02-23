@@ -57,17 +57,27 @@ public class AdapterNetwork extends RecyclerView.Adapter<AdapterNetwork.ViewHold
         holder.name.setText(item.name);
         holder.radioSelected.setChecked(item.adNetworkId.equals(selectedNetwork));
 
-        holder.itemView.setOnClickListener(v -> {
+        View.OnClickListener clickListener = v -> {
+            int previousSelectedIndex = getSelectedIndex();
             selectedNetwork = item.adNetworkId;
-            notifyDataSetChanged();
+            int newSelectedIndex = getSelectedIndex();
+            if (previousSelectedIndex >= 0)
+                notifyItemChanged(previousSelectedIndex);
+            if (newSelectedIndex >= 0)
+                notifyItemChanged(newSelectedIndex);
             onItemClickListener.onItemClick(item);
-        });
+        };
 
-        holder.radioSelected.setOnClickListener(v -> {
-            selectedNetwork = item.adNetworkId;
-            notifyDataSetChanged();
-            onItemClickListener.onItemClick(item);
-        });
+        holder.itemView.setOnClickListener(clickListener);
+        holder.radioSelected.setOnClickListener(clickListener);
+    }
+
+    private int getSelectedIndex() {
+        for (int i = 0; i < items.size(); i++) {
+            if (items.get(i).adNetworkId.equals(selectedNetwork))
+                return i;
+        }
+        return -1;
     }
 
     @Override
@@ -76,8 +86,13 @@ public class AdapterNetwork extends RecyclerView.Adapter<AdapterNetwork.ViewHold
     }
 
     public void setSelectedNetwork(String selectedNetwork) {
+        int previousSelectedIndex = getSelectedIndex();
         this.selectedNetwork = selectedNetwork;
-        notifyDataSetChanged();
+        int newSelectedIndex = getSelectedIndex();
+        if (previousSelectedIndex >= 0)
+            notifyItemChanged(previousSelectedIndex);
+        if (newSelectedIndex >= 0)
+            notifyItemChanged(newSelectedIndex);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

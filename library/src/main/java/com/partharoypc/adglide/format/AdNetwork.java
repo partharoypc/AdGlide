@@ -5,7 +5,7 @@ import static com.partharoypc.adglide.util.Constant.IRONSOURCE;
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
-import static com.partharoypc.adglide.util.Constant.APPLOVIN_DISCOVERY;
+
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.META;
@@ -198,9 +198,7 @@ public class AdNetwork {
                         });
                         AudienceNetworkInitializeHelper.initializeAd(activity, debug);
                         break;
-                    case APPLOVIN_DISCOVERY:
-                        AppLovinSdk.initializeSdk(activity);
-                        break;
+
                     case IRONSOURCE:
                     case META_BIDDING_IRONSOURCE:
                         IronSource.init(activity, ironSourceAppKey, IronSource.AD_UNIT.REWARDED_VIDEO,

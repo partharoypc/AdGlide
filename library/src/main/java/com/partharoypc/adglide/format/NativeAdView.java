@@ -95,6 +95,11 @@ public class NativeAdView {
 
         @androidx.annotation.NonNull
         public Builder build() {
+            return this;
+        }
+
+        @androidx.annotation.NonNull
+        public Builder load() {
             loadNativeAd();
             return this;
         }
@@ -305,7 +310,8 @@ public class NativeAdView {
                                         case Constant.STYLE_NEWS:
                                         case Constant.STYLE_MEDIUM:
                                             nativeAdView = (LinearLayout) inflater
-                                                    .inflate(R.layout.adglide_meta_news_template_view, metaNativeAdLayout,
+                                                    .inflate(R.layout.adglide_meta_news_template_view,
+                                                            metaNativeAdLayout,
                                                             false);
                                             break;
                                         case Constant.STYLE_VIDEO_SMALL:
@@ -321,11 +327,13 @@ public class NativeAdView {
                                         case Constant.STYLE_RADIO:
                                         case Constant.STYLE_SMALL:
                                             nativeAdView = (LinearLayout) inflater.inflate(
-                                                    R.layout.adglide_meta_radio_template_view, metaNativeAdLayout, false);
+                                                    R.layout.adglide_meta_radio_template_view, metaNativeAdLayout,
+                                                    false);
                                             break;
                                         default:
                                             nativeAdView = (LinearLayout) inflater.inflate(
-                                                    R.layout.adglide_meta_medium_template_view, metaNativeAdLayout, false);
+                                                    R.layout.adglide_meta_medium_template_view, metaNativeAdLayout,
+                                                    false);
                                             break;
                                     }
                                     metaNativeAdLayout.addView(nativeAdView);
@@ -595,7 +603,3 @@ public class NativeAdView {
     }
 
 }
-
-
-
-

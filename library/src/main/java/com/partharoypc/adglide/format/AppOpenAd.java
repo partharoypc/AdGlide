@@ -1,7 +1,6 @@
 package com.partharoypc.adglide.format;
 
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX;
-
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
@@ -378,12 +377,22 @@ public class AppOpenAd {
 
         @androidx.annotation.NonNull
         public Builder build() {
-            loadAppOpenAd();
             return this;
         }
 
         @androidx.annotation.NonNull
         public Builder build(OnShowAdCompleteListener onShowAdCompleteListener) {
+            return this;
+        }
+
+        @androidx.annotation.NonNull
+        public Builder load() {
+            loadAppOpenAd();
+            return this;
+        }
+
+        @androidx.annotation.NonNull
+        public Builder load(OnShowAdCompleteListener onShowAdCompleteListener) {
             loadAppOpenAd(onShowAdCompleteListener);
             return this;
         }
@@ -475,7 +484,8 @@ public class AppOpenAd {
                         case META_BIDDING_ADMOB:
                             try {
                                 AdRequest adRequest = new AdRequest.Builder().build();
-                                com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
+                                com.google.android.gms.ads.appopen.AppOpenAd.load(activity.getApplicationContext(),
+                                        adMobAppOpenId, adRequest,
                                         new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
                                             @Override
                                             public void onAdLoaded(
@@ -568,7 +578,8 @@ public class AppOpenAd {
                         case META_BIDDING_ADMOB:
                             try {
                                 AdRequest adRequest = new AdRequest.Builder().build();
-                                com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
+                                com.google.android.gms.ads.appopen.AppOpenAd.load(activity.getApplicationContext(),
+                                        adMobAppOpenId, adRequest,
                                         new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
                                             @Override
                                             public void onAdLoaded(
@@ -675,7 +686,8 @@ public class AppOpenAd {
                         case META_BIDDING_ADMOB:
                             try {
                                 AdRequest adRequest = new AdRequest.Builder().build();
-                                com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
+                                com.google.android.gms.ads.appopen.AppOpenAd.load(activity.getApplicationContext(),
+                                        adMobAppOpenId, adRequest,
                                         new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
                                             @Override
                                             public void onAdLoaded(
@@ -785,7 +797,8 @@ public class AppOpenAd {
                         case META_BIDDING_ADMOB:
                             try {
                                 AdRequest adRequest = new AdRequest.Builder().build();
-                                com.google.android.gms.ads.appopen.AppOpenAd.load(activity, adMobAppOpenId, adRequest,
+                                com.google.android.gms.ads.appopen.AppOpenAd.load(activity.getApplicationContext(),
+                                        adMobAppOpenId, adRequest,
                                         new com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback() {
                                             @Override
                                             public void onAdLoaded(

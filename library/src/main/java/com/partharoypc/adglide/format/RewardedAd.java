@@ -3,7 +3,7 @@ package com.partharoypc.adglide.format;
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.AD_STATUS_ON;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
-import static com.partharoypc.adglide.util.Constant.APPLOVIN_DISCOVERY;
+
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
@@ -87,8 +87,18 @@ public class RewardedAd {
         }
 
         @androidx.annotation.NonNull
+        public Builder build() {
+            return this;
+        }
+
+        @androidx.annotation.NonNull
         public Builder build(OnRewardedAdCompleteListener onComplete, OnRewardedAdDismissedListener onDismiss) {
-            loadRewardedAd(onComplete, onDismiss);
+            return this;
+        }
+
+        @androidx.annotation.NonNull
+        public Builder build(OnRewardedAdLoadedListener onLoaded, OnRewardedAdErrorListener onError,
+                OnRewardedAdDismissedListener onDismiss, OnRewardedAdCompleteListener onComplete) {
             return this;
         }
 
@@ -100,7 +110,13 @@ public class RewardedAd {
         }
 
         @androidx.annotation.NonNull
-        public Builder build(OnRewardedAdLoadedListener onLoaded, OnRewardedAdErrorListener onError,
+        public Builder load(OnRewardedAdCompleteListener onComplete, OnRewardedAdDismissedListener onDismiss) {
+            loadRewardedAd(onComplete, onDismiss);
+            return this;
+        }
+
+        @androidx.annotation.NonNull
+        public Builder load(OnRewardedAdLoadedListener onLoaded, OnRewardedAdErrorListener onError,
                 OnRewardedAdDismissedListener onDismiss, OnRewardedAdCompleteListener onComplete) {
             loadAndShowRewardedAd(onLoaded, onError, onDismiss, onComplete);
             return this;

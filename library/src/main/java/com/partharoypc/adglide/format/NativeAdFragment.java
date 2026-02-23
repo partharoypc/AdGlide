@@ -112,6 +112,11 @@ public class NativeAdFragment {
 
         @androidx.annotation.NonNull
         public Builder build() {
+            return this;
+        }
+
+        @androidx.annotation.NonNull
+        public Builder load() {
             loadNativeAd();
             return this;
         }

@@ -52,7 +52,7 @@ public class ActivityInterstitial extends AppCompatActivity {
                 .setAdNetwork(Constant.AD_NETWORK)
                 .setBackupAdNetwork(Constant.BACKUP_AD_NETWORK)
                 .setAdMobInterstitialId(Constant.ADMOB_INTERSTITIAL_ID)
-//                 .setGoogleAdManagerInterstitialId(Constant.GOOGLE_AD_MANAGER_INTERSTITIAL_ID)
+                // .setGoogleAdManagerInterstitialId(Constant.GOOGLE_AD_MANAGER_INTERSTITIAL_ID)
                 .setMetaInterstitialId(Constant.META_INTERSTITIAL_ID)
                 .setUnityInterstitialId(Constant.UNITY_INTERSTITIAL_ID)
                 .setAppLovinInterstitialId(Constant.APPLOVIN_INTERSTITIAL_ID)
@@ -60,7 +60,7 @@ public class ActivityInterstitial extends AppCompatActivity {
                 .setironSourceInterstitialId(Constant.IRONSOURCE_INTERSTITIAL_ID)
                 .setWortiseInterstitialId(Constant.WORTISE_INTERSTITIAL_ID)
                 .setInterval(Constant.INTERSTITIAL_AD_INTERVAL)
-                .build(() -> {
+                .build().load(() -> {
                     appendLog("Interstitial Ad Dismissed");
                     Log.d(TAG, "onAdDismissed");
                     loadInterstitialAd(); // Auto reload

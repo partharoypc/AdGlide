@@ -55,6 +55,11 @@ public class MediumRectangleAd {
 
         @androidx.annotation.NonNull
         public Builder build() {
+            return this;
+        }
+
+        @androidx.annotation.NonNull
+        public Builder load() {
             loadBannerAd();
             return this;
         }
@@ -131,7 +136,6 @@ public class MediumRectangleAd {
             return this;
         }
 
-
         public void loadBannerAd() {
             try {
                 if (adStatus.equals(AD_STATUS_ON) && placementStatus != 0) {
@@ -166,7 +170,8 @@ public class MediumRectangleAd {
                     case ADMOB:
                     case META_BIDDING_ADMOB:
                         if (!com.partharoypc.adglide.util.AdMobRateLimiter.isRequestAllowed(adMobBannerId)) {
-                            if(networkToLoad.equals(adNetwork)) loadBackupBannerAd();
+                            if (networkToLoad.equals(adNetwork))
+                                loadBackupBannerAd();
                             break;
                         }
                         FrameLayout adContainerView = activity.findViewById(R.id.ad_mob_banner_view_container);
@@ -187,16 +192,19 @@ public class MediumRectangleAd {
 
                                     @Override
                                     public void onAdFailedToLoad(@NonNull LoadAdError adError) {
-                                        if (adError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
+                                        if (adError
+                                                .getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
                                             com.partharoypc.adglide.util.AdMobRateLimiter.recordFailure(adMobBannerId);
                                         }
                                         adContainerView.setVisibility(View.GONE);
-                                        if(networkToLoad.equals(adNetwork)) loadBackupBannerAd();
+                                        if (networkToLoad.equals(adNetwork))
+                                            loadBackupBannerAd();
                                     }
                                 });
                             } catch (Exception e) {
                                 Log.e(TAG, "Error inside adContainerView.post: " + e.getMessage());
-                                if(networkToLoad.equals(adNetwork)) loadBackupBannerAd();
+                                if (networkToLoad.equals(adNetwork))
+                                    loadBackupBannerAd();
                             }
                         });
                         Log.d(TAG, networkToLoad + " Banner Ad unit Id : " + adMobBannerId);
@@ -211,7 +219,8 @@ public class MediumRectangleAd {
                             public void onError(Ad ad, com.facebook.ads.AdError adError) {
                                 metaAdViewContainer.setVisibility(View.GONE);
                                 Log.d(TAG, "Error load FAN : " + adError.getErrorMessage());
-                                if(networkToLoad.equals(adNetwork)) loadBackupBannerAd();
+                                if (networkToLoad.equals(adNetwork))
+                                    loadBackupBannerAd();
                             }
 
                             @Override
@@ -220,10 +229,12 @@ public class MediumRectangleAd {
                             }
 
                             @Override
-                            public void onAdClicked(Ad ad) {}
+                            public void onAdClicked(Ad ad) {
+                            }
 
                             @Override
-                            public void onLoggingImpression(Ad ad) {}
+                            public void onLoggingImpression(Ad ad) {
+                            }
                         };
                         com.facebook.ads.AdView.AdViewLoadConfig loadAdConfig = metaAdView.buildLoadAdConfig()
                                 .withAdListener(adListener).build();
@@ -232,7 +243,8 @@ public class MediumRectangleAd {
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Error in loadAdFromNetwork: " + e.getMessage());
-                if(networkToLoad.equals(adNetwork)) loadBackupBannerAd();
+                if (networkToLoad.equals(adNetwork))
+                    loadBackupBannerAd();
             }
         }
 
