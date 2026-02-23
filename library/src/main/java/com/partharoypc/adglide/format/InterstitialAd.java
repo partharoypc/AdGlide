@@ -541,6 +541,10 @@ public class InterstitialAd {
         public void loadInterstitialAd(OnInterstitialAdDismissedListener onInterstitialAdDismissedListener) {
             try {
                 if (adStatus && placementStatus != 0) {
+                    if (!Tools.isNetworkAvailable(activity)) {
+                        Log.e(TAG, "Internet connection not available. Skipping Primary Interstitial Ad load.");
+                        return;
+                    }
                     if (waterfallManager != null) {
                         waterfallManager.reset();
                     }
@@ -557,6 +561,10 @@ public class InterstitialAd {
         public void loadBackupInterstitialAd(OnInterstitialAdDismissedListener onInterstitialAdDismissedListener) {
             try {
                 if (adStatus && placementStatus != 0) {
+                    if (!Tools.isNetworkAvailable(activity)) {
+                        Log.e(TAG, "Internet connection not available. Skipping Backup Interstitial Ad load.");
+                        return;
+                    }
                     if (waterfallManager == null) {
                         if (backupAdNetwork != null && !backupAdNetwork.isEmpty()) {
                             waterfallManager = new WaterfallManager(backupAdNetwork);

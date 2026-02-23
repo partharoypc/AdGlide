@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 import com.partharoypc.adglide.AdGlideNetwork;
+import com.partharoypc.adglide.util.Tools;
 
 import com.applovin.sdk.AppLovinMediationProvider;
 import com.applovin.sdk.AppLovinSdk;
@@ -158,6 +159,10 @@ public class AdNetwork {
 
         public void initAds() {
             if (adStatus) {
+                if (!Tools.isNetworkAvailable(context)) {
+                    Log.e(TAG, "Internet connection not available. Skipping Primary Ads initialization.");
+                    return;
+                }
                 initializeSdk(adNetwork);
                 Log.d(TAG, "[" + adNetwork + "] is selected as Primary Ads");
             }
@@ -165,6 +170,10 @@ public class AdNetwork {
 
         public void initBackupAds() {
             if (adStatus) {
+                if (!Tools.isNetworkAvailable(context)) {
+                    Log.e(TAG, "Internet connection not available. Skipping Backup Ads initialization.");
+                    return;
+                }
                 // Initialize legacy single backup if set and list is empty (backward
                 // compatibility)
                 if (backupAdNetworks.isEmpty() && !backupAdNetwork.isEmpty()) {

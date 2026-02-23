@@ -254,6 +254,10 @@ public class RewardedAd {
         public void loadRewardedAd(OnRewardedAdCompleteListener onComplete, OnRewardedAdDismissedListener onDismiss) {
             try {
                 if (adStatus && placementStatus != 0) {
+                    if (!Tools.isNetworkAvailable(activity)) {
+                        Log.e(TAG, "Internet connection not available. Skipping Primary Rewarded Ad load.");
+                        return;
+                    }
                     if (waterfallManager != null) {
                         waterfallManager.reset();
                     }
@@ -271,6 +275,10 @@ public class RewardedAd {
                 OnRewardedAdDismissedListener onDismiss) {
             try {
                 if (adStatus && placementStatus != 0) {
+                    if (!Tools.isNetworkAvailable(activity)) {
+                        Log.e(TAG, "Internet connection not available. Skipping Backup Rewarded Ad load.");
+                        return;
+                    }
                     if (waterfallManager == null) {
                         if (backupAdNetwork != null && !backupAdNetwork.isEmpty()) {
                             waterfallManager = new WaterfallManager(backupAdNetwork);
@@ -735,6 +743,10 @@ public class RewardedAd {
                 OnRewardedAdDismissedListener onDismiss, OnRewardedAdCompleteListener onComplete) {
             try {
                 if (adStatus && placementStatus != 0) {
+                    if (!Tools.isNetworkAvailable(activity)) {
+                        Log.e(TAG, "Internet connection not available. Skipping Primary Rewarded Ad load and show.");
+                        return;
+                    }
                     if (waterfallManager != null) {
                         waterfallManager.reset();
                     }
@@ -878,6 +890,10 @@ public class RewardedAd {
                 OnRewardedAdDismissedListener onDismiss, OnRewardedAdCompleteListener onComplete) {
             try {
                 if (adStatus && placementStatus != 0) {
+                    if (!Tools.isNetworkAvailable(activity)) {
+                        Log.e(TAG, "Internet connection not available. Skipping Backup Rewarded Ad load and show.");
+                        return;
+                    }
                     if (waterfallManager == null) {
                         if (!backupAdNetwork.isEmpty()) {
                             waterfallManager = new WaterfallManager(backupAdNetwork);

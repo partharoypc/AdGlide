@@ -171,6 +171,10 @@ public class MediumRectangleAd {
             try {
                 if (adStatus && placementStatus != 0) {
                     if (isBackup) {
+                        if (!Tools.isNetworkAvailable(activity)) {
+                            Log.e(TAG, "Internet connection not available. Skipping Backup Medium Rectangle Ad load.");
+                            return;
+                        }
                         if (waterfallManager == null) {
                             if (backupAdNetwork != null && !backupAdNetwork.isEmpty()) {
                                 waterfallManager = new WaterfallManager(backupAdNetwork);
@@ -184,8 +188,14 @@ public class MediumRectangleAd {
                             return;
                         }
                         backupAdNetwork = networkToLoad;
-                    } else if (waterfallManager != null) {
-                        waterfallManager.reset();
+                    } else {
+                        if (!Tools.isNetworkAvailable(activity)) {
+                            Log.e(TAG, "Internet connection not available. Skipping Primary Medium Rectangle Ad load.");
+                            return;
+                        }
+                        if (waterfallManager != null) {
+                            waterfallManager.reset();
+                        }
                     }
 
                     String network = isBackup ? backupAdNetwork : adNetwork;

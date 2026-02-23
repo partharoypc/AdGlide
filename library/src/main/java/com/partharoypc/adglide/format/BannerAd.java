@@ -222,6 +222,10 @@ public class BannerAd {
         public void loadBannerAd() {
             try {
                 if (adStatus && placementStatus != 0) {
+                    if (!Tools.isNetworkAvailable(activity)) {
+                        Log.e(TAG, "Internet connection not available. Skipping Primary Banner Ad load.");
+                        return;
+                    }
                     if (waterfallManager != null) {
                         waterfallManager.reset();
                     }
@@ -238,6 +242,10 @@ public class BannerAd {
         public void loadBackupBannerAd() {
             try {
                 if (adStatus && placementStatus != 0) {
+                    if (!Tools.isNetworkAvailable(activity)) {
+                        Log.e(TAG, "Internet connection not available. Skipping Backup Banner Ad load.");
+                        return;
+                    }
                     if (waterfallManager == null) {
                         if (backupAdNetwork != null && !backupAdNetwork.isEmpty()) {
                             waterfallManager = new WaterfallManager(backupAdNetwork);

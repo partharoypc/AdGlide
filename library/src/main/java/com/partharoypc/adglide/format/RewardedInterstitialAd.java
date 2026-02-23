@@ -138,6 +138,11 @@ public class RewardedInterstitialAd {
                 OnRewardedAdDismissedListener onDismiss) {
             try {
                 if (adStatus && placementStatus != 0) {
+                    if (!Tools.isNetworkAvailable(activity)) {
+                        Log.e(TAG,
+                                "Internet connection not available. Skipping Primary Rewarded Interstitial Ad load.");
+                        return;
+                    }
                     if (waterfallManager != null) {
                         waterfallManager.reset();
                     }
@@ -209,6 +214,10 @@ public class RewardedInterstitialAd {
                 OnRewardedAdDismissedListener onDismiss) {
             try {
                 if (adStatus && placementStatus != 0) {
+                    if (!Tools.isNetworkAvailable(activity)) {
+                        Log.e(TAG, "Internet connection not available. Skipping Backup Rewarded Interstitial Ad load.");
+                        return;
+                    }
                     if (waterfallManager == null) {
                         if (!backupAdNetwork.isEmpty()) {
                             waterfallManager = new WaterfallManager(backupAdNetwork);

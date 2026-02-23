@@ -11,6 +11,7 @@ import com.applovin.mediation.MaxAdListener;
 import com.applovin.mediation.MaxError;
 import com.applovin.mediation.ads.MaxAppOpenAd;
 import com.partharoypc.adglide.util.OnShowAdCompleteListener;
+import com.partharoypc.adglide.util.Tools;
 
 import java.util.Date;
 
@@ -38,6 +39,10 @@ public class AppLovinAppOpenAd implements MaxAdListener {
 
     public void loadAd(Context context, String maxAppOpenAdUnitId) {
         if (isLoadingAd || isAdAvailable()) {
+            return;
+        }
+        if (!Tools.isNetworkAvailable(context)) {
+            Log.e(TAG, "Internet connection not available. Skipping AppLovin App Open ad load.");
             return;
         }
         isLoadingAd = true;
@@ -124,7 +129,3 @@ public class AppLovinAppOpenAd implements MaxAdListener {
     public void onAdClicked(MaxAd ad) {
     }
 }
-
-
-
-

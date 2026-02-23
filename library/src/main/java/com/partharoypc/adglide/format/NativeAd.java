@@ -261,6 +261,10 @@ public class NativeAd {
             try {
                 if (adStatus && placementStatus != 0) {
                     if (isBackup) {
+                        if (!Tools.isNetworkAvailable(activity)) {
+                            Log.e(TAG, "Internet connection not available. Skipping Backup Native Ad load.");
+                            return;
+                        }
                         if (waterfallManager == null) {
                             if (!backupAdNetwork.isEmpty()) {
                                 waterfallManager = new WaterfallManager(backupAdNetwork);
@@ -274,8 +278,14 @@ public class NativeAd {
                             return;
                         }
                         backupAdNetwork = networkToLoad;
-                    } else if (waterfallManager != null) {
-                        waterfallManager.reset();
+                    } else {
+                        if (!Tools.isNetworkAvailable(activity)) {
+                            Log.e(TAG, "Internet connection not available. Skipping Primary Native Ad load.");
+                            return;
+                        }
+                        if (waterfallManager != null) {
+                            waterfallManager.reset();
+                        }
                     }
 
                     String network = isBackup ? backupAdNetwork : adNetwork;

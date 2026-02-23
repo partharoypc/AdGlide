@@ -7,6 +7,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.partharoypc.adglide.util.OnShowAdCompleteListener;
+import com.partharoypc.adglide.util.Tools;
 import com.wortise.ads.AdError;
 import com.wortise.ads.appopen.AppOpenAd;
 
@@ -27,7 +28,11 @@ public class WortiseAppOpenAd implements AppOpenAd.Listener {
     private AppOpenAd appOpenAd;
     private boolean isLoadingAd = false;
     private boolean isShowingAd = false;
-    public boolean isShowingAd() { return isShowingAd; }
+
+    public boolean isShowingAd() {
+        return isShowingAd;
+    }
+
     private long loadTime = 0;
     private OnShowAdCompleteListener onShowAdCompleteListener;
 
@@ -36,6 +41,10 @@ public class WortiseAppOpenAd implements AppOpenAd.Listener {
 
     public void loadAd(Context context, String wortiseAppOpenId) {
         if (isLoadingAd || isAdAvailable()) {
+            return;
+        }
+        if (!Tools.isNetworkAvailable(context)) {
+            Log.e(TAG, "Internet connection not available. Skipping Wortise App Open ad load.");
             return;
         }
         isLoadingAd = true;
@@ -126,7 +135,3 @@ public class WortiseAppOpenAd implements AppOpenAd.Listener {
         isShowingAd = true;
     }
 }
-
-
-
-

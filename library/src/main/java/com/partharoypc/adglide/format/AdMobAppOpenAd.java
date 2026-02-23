@@ -12,6 +12,7 @@ import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.appopen.AppOpenAd;
 import com.partharoypc.adglide.util.OnShowAdCompleteListener;
+import com.partharoypc.adglide.util.Tools;
 
 import java.util.Date;
 
@@ -45,6 +46,11 @@ public class AdMobAppOpenAd {
     public void loadAd(Context context, String adMobAppOpenAdUnitId) {
         try {
             if (isLoadingAd || isAdAvailable()) {
+                return;
+            }
+
+            if (!Tools.isNetworkAvailable(context)) {
+                Log.e(TAG, "Internet connection not available. Skipping AdMob App Open ad load.");
                 return;
             }
 

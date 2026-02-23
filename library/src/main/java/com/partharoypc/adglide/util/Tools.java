@@ -20,6 +20,10 @@ import com.google.android.gms.ads.AdSize;
 
 import com.partharoypc.adglide.gdpr.LegacyGDPR;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -29,6 +33,44 @@ import java.nio.charset.StandardCharsets;
 public class Tools {
 
     private static final String TAG = "AdGlide";
+
+    /**
+     * Checks if the device is currently connected to the internet.
+     *
+     * @param context the application context
+     * @return true if network is available, false otherwise
+     */
+    public static boolean isNetworkAvailable(Context context) {
+        if (context == null)
+            return false;
+        ConnectivityManager connectivityManager = (ConnectivityManager) context
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                NetworkCapabilities capabilities = connectivityManager
+                        .getNetworkCapabilities(connectivityManager.getActiveNetwork());
+                if (capabilities != null) {
+                    if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                        return true;
+                    } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                        return true;
+                    } else
+                        return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET);
+                }
+            } else {
+                try {
+                    NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+                    if (activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
+                        return true;
+                    }
+                } catch (Exception e) {
+                    Log.i(TAG, "Exception in isNetworkAvailable: " + e.getMessage());
+                }
+            }
+        }
+        Log.i(TAG, "No internet connection available.");
+        return false;
+    }
 
     /**
      * Calculates the adaptive banner ad size based on the device screen width.

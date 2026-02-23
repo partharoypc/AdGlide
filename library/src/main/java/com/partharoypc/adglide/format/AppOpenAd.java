@@ -21,6 +21,7 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.partharoypc.adglide.util.OnShowAdCompleteListener;
+import com.partharoypc.adglide.util.Tools;
 import com.partharoypc.adglide.util.WaterfallManager;
 
 /**
@@ -416,6 +417,13 @@ public class AppOpenAd {
         public void loadAppOpenAd(OnShowAdCompleteListener onShowAdCompleteListener) {
             try {
                 if (adStatus) {
+                    if (!Tools.isNetworkAvailable(activity)) {
+                        Log.e(TAG, "Internet connection not available. Skipping Primary App Open Ad load.");
+                        if (onShowAdCompleteListener != null) {
+                            onShowAdCompleteListener.onShowAdComplete();
+                        }
+                        return;
+                    }
                     if (waterfallManager != null) {
                         waterfallManager.reset();
                     }
@@ -525,6 +533,10 @@ public class AppOpenAd {
         public void loadAppOpenAd() {
             try {
                 if (adStatus) {
+                    if (!Tools.isNetworkAvailable(activity)) {
+                        Log.e(TAG, "Internet connection not available. Skipping App Open Ad load (on resume).");
+                        return;
+                    }
                     if (waterfallManager != null) {
                         waterfallManager.reset();
                     }
@@ -616,6 +628,13 @@ public class AppOpenAd {
         public void loadBackupAppOpenAd(OnShowAdCompleteListener onShowAdCompleteListener) {
             try {
                 if (adStatus) {
+                    if (!Tools.isNetworkAvailable(activity)) {
+                        Log.e(TAG, "Internet connection not available. Skipping Backup App Open Ad load.");
+                        if (onShowAdCompleteListener != null) {
+                            onShowAdCompleteListener.onShowAdComplete();
+                        }
+                        return;
+                    }
                     if (waterfallManager == null) {
                         if (backupAdNetwork != null && !backupAdNetwork.isEmpty()) {
                             waterfallManager = new WaterfallManager(backupAdNetwork);
@@ -731,6 +750,10 @@ public class AppOpenAd {
         public void loadBackupAppOpenAd() {
             try {
                 if (adStatus) {
+                    if (!Tools.isNetworkAvailable(activity)) {
+                        Log.e(TAG, "Internet connection not available. Skipping Backup App Open Ad load (on resume).");
+                        return;
+                    }
                     if (waterfallManager == null) {
                         if (backupAdNetwork != null && !backupAdNetwork.isEmpty()) {
                             waterfallManager = new WaterfallManager(backupAdNetwork);

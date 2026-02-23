@@ -264,6 +264,10 @@ public class NativeAdFragment {
         private void loadNativeAdMain(boolean isBackup) {
             try {
                 if (adStatus && placementStatus != 0) {
+                    if (!Tools.isNetworkAvailable(activity)) {
+                        Log.e(TAG, "Internet connection not available. Skipping Native Ad load.");
+                        return;
+                    }
                     if (isBackup) {
                         if (waterfallManager == null) {
                             if (!backupAdNetwork.isEmpty()) {
