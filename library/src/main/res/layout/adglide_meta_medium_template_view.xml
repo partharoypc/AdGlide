@@ -6,29 +6,29 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="10dp">
+    android:padding="@dimen/adglide_padding_standard">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/adglide_spacing_small">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_toStartOf="@+id/ad_choices_container"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <include layout="@layout/adglide_view_native_ad_label" />
 
             <TextView
                 android:id="@+id/native_ad_sponsored_label"
+                style="@style/AdGlide.Body"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="1dp"
-                android:ellipsize="end"
-                android:lines="1"
+                android:layout_marginStart="@dimen/adglide_spacing_tiny"
                 android:text="@string/adglide_txt_advertiser" />
 
         </LinearLayout>
@@ -47,20 +47,20 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/adglide_item_post_padding_small"
+        android:layout_marginTop="@dimen/adglide_spacing_small"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <androidx.cardview.widget.CardView
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            card_view:cardCornerRadius="@dimen/adglide_corner_radius"
-            card_view:cardElevation="0dp">
+            android:layout_width="@dimen/adglide_native_icon_size"
+            android:layout_height="@dimen/adglide_native_icon_size"
+            app:cardCornerRadius="@dimen/adglide_corner_radius"
+            app:cardElevation="0dp">
 
             <com.facebook.ads.MediaView
                 android:id="@+id/native_ad_icon"
-                android:layout_width="48dp"
-                android:layout_height="48dp" />
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
         </androidx.cardview.widget.CardView>
 
@@ -69,26 +69,21 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="vertical"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp">
+            android:paddingStart="@dimen/adglide_spacing_medium"
+            android:paddingEnd="@dimen/adglide_spacing_medium">
 
             <TextView
                 android:id="@+id/native_ad_title"
+                style="@style/AdGlide.Headline"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:lines="1"
-                android:text=""
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Body2"
-                android:textSize="@dimen/adglide_post_primary_font_size"
-                android:textStyle="bold" />
+                android:text="" />
 
             <TextView
                 android:id="@+id/native_ad_social_context"
+                style="@style/AdGlide.Body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:lines="1"
                 android:text="" />
 
         </LinearLayout>
@@ -98,7 +93,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/adglide_item_post_padding_small">
+        android:layout_marginTop="@dimen/adglide_spacing_medium">
 
         <RelativeLayout
             android:layout_width="0dp"
@@ -111,8 +106,8 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                card_view:cardCornerRadius="@dimen/adglide_corner_radius"
-                card_view:cardElevation="0dp">
+                app:cardCornerRadius="@dimen/adglide_corner_radius"
+                app:cardElevation="0dp">
 
                 <com.facebook.ads.MediaView
                     android:id="@+id/native_ad_media"
@@ -129,33 +124,23 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/adglide_item_post_padding_small"
-        android:orientation="vertical"
-        android:visibility="visible">
+        android:layout_marginTop="@dimen/adglide_spacing_medium"
+        android:orientation="vertical">
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/native_ad_body"
+            style="@style/AdGlide.Body"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:text="" />
 
-            <TextView
-                android:id="@+id/native_ad_body"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:gravity="center_vertical"
-                android:lines="1"
-                android:text="" />
-
-        </LinearLayout>
-
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/native_ad_call_to_action"
+            style="@style/AdGlide.ButtonText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/adglide_item_post_padding_small"
-            android:textColor="@color/adglide_white"
-            android:textStyle="bold" />
+            android:layout_height="@dimen/adglide_video_cta_button_height"
+            android:layout_marginTop="@dimen/adglide_spacing_medium"
+            android:background="@drawable/adglide_ad_button" />
 
     </LinearLayout>
 

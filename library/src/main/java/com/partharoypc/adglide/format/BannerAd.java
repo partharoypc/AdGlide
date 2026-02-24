@@ -326,7 +326,10 @@ public class BannerAd {
                     }
 
                     case META: {
-                        metaAdView = new com.facebook.ads.AdView(activity, metaBannerId, AdSize.BANNER_HEIGHT_50);
+                        com.facebook.ads.AdSize adSize = com.partharoypc.adglide.util.Tools.isTablet(activity)
+                                ? com.facebook.ads.AdSize.BANNER_HEIGHT_90
+                                : com.facebook.ads.AdSize.BANNER_HEIGHT_50;
+                        metaAdView = new com.facebook.ads.AdView(activity, metaBannerId, adSize);
                         RelativeLayout metaAdViewContainer = activity.findViewById(R.id.meta_banner_view_container);
                         metaAdViewContainer.addView(metaAdView);
                         com.facebook.ads.AdListener adListener = new com.facebook.ads.AdListener() {
@@ -360,7 +363,9 @@ public class BannerAd {
                     case UNITY: {
                         RelativeLayout unityAdContainerView = activity
                                 .findViewById(R.id.unity_banner_view_container);
-                        unityBannerAd = new BannerView(activity, unityBannerId, new UnityBannerSize(320, 50));
+                        unityBannerAd = new BannerView(activity, unityBannerId,
+                                new UnityBannerSize(com.partharoypc.adglide.util.Constant.UNITY_ADS_BANNER_WIDTH_MEDIUM,
+                                        com.partharoypc.adglide.util.Constant.UNITY_ADS_BANNER_HEIGHT_MEDIUM));
                         unityBannerAd.setListener(new BannerView.IListener() {
                             @Override
                             public void onBannerLoaded(BannerView bannerAdView) {
@@ -435,7 +440,8 @@ public class BannerAd {
                             }
                         });
                         int width = ViewGroup.LayoutParams.MATCH_PARENT;
-                        int heightPx = AppLovinSdkUtils.dpToPx(activity, 50);
+                        int bannerHeight = com.partharoypc.adglide.util.Tools.isTablet(activity) ? 90 : 50;
+                        int heightPx = AppLovinSdkUtils.dpToPx(activity, bannerHeight);
                         appLovinMaxBannerAd.setLayoutParams(new FrameLayout.LayoutParams(width, heightPx));
                         appLovinMaxAdContainerView.removeAllViews();
                         appLovinMaxAdContainerView.addView(appLovinMaxBannerAd);

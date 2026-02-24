@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="adglide_color_primary_text">@color/adglide_color_primary_text_dark</color>
+    <color name="adglide_color_secondary_text">@color/adglide_color_secondary_text_dark</color>
+    <color name="adglide_outline">@color/adglide_outline_dark</color>
+</resources>

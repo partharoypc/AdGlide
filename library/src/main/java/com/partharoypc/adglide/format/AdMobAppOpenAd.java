@@ -29,7 +29,7 @@ public class AdMobAppOpenAd {
     private long loadTime = 0;
 
     private long lastAdShowTime = 0;
-    private static final long MIN_TIME_BETWEEN_ADS_MS = 1000 * 60 * 60 * 4;
+    private static final long MIN_TIME_BETWEEN_ADS_MS = 0;
 
     /**
      * Returns whether an app open ad is currently being shown.

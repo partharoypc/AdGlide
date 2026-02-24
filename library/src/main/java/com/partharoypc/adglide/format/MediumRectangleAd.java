@@ -199,6 +199,16 @@ public class MediumRectangleAd {
                     }
 
                     String network = isBackup ? backupAdNetwork : adNetwork;
+                    AdGlideNetwork glideNetwork = AdGlideNetwork.fromString(network);
+                    if (glideNetwork == AdGlideNetwork.NONE && !network.isEmpty()) {
+                        Log.w(TAG, "Unknown Network for Medium Rectangle: [" + network + "]. Skipping.");
+                        if (isBackup) {
+                            loadBackupMediumRectangleAd();
+                        } else {
+                            loadBackupMediumRectangleAd();
+                        }
+                        return;
+                    }
                     loadAdFromNetwork(network);
                 }
             } catch (Exception e) {

@@ -4,7 +4,6 @@ import static com.partharoypc.adglide.util.Constant.ADMOB;
 
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
-// import static com.partharoypc.adglide.util.Constant.GOOGLE_AD_MANAGER;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import android.app.Activity;
@@ -21,8 +20,8 @@ import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.multidex.MultiDex;
 
 import com.partharoypc.adglide.format.AppLovinAppOpenAd;
-// import com.partharoypc.adglide.format.AppOpenAdManager;
 import com.partharoypc.adglide.format.AdMobAppOpenAd;
+import com.partharoypc.adglide.format.AppOpenAd;
 import com.partharoypc.adglide.format.WortiseAppOpenAd;
 import com.partharoypc.adglide.util.OnShowAdCompleteListener;
 import com.partharoypc.adglidedemo.data.Constant;
@@ -30,10 +29,7 @@ import com.partharoypc.adglidedemo.data.Constant;
 @SuppressWarnings("ConstantConditions")
 public class MyApplication extends Application {
 
-    private AdMobAppOpenAd appOpenAdMob;
-    // private AppOpenAdManager appOpenAdManager;
-    private AppLovinAppOpenAd appOpenAdAppLovin;
-    private WortiseAppOpenAd appOpenAdWortise;
+    private AppOpenAd.Builder appOpenAdBuilder;
     Activity currentActivity;
 
     @Override
@@ -42,10 +38,6 @@ public class MyApplication extends Application {
         if (!Constant.FORCE_TO_SHOW_APP_OPEN_AD_ON_START) {
             registerActivityLifecycleCallbacks(activityLifecycleCallbacks);
             ProcessLifecycleOwner.get().getLifecycle().addObserver(lifecycleObserver);
-            appOpenAdMob = new AdMobAppOpenAd();
-            // appOpenAdManager = new AppOpenAdManager();
-            appOpenAdAppLovin = new AppLovinAppOpenAd();
-            appOpenAdWortise = new WortiseAppOpenAd();
         }
     }
 
@@ -62,48 +54,29 @@ public class MyApplication extends Application {
             if (Constant.isAppOpen) {
                 if (Constant.OPEN_ADS_ON_RESUME) {
                     if (Constant.AD_STATUS) {
-                        switch (Constant.AD_NETWORK) {
-                            case ADMOB:
-                                if (!Constant.ADMOB_APP_OPEN_AD_ID.equals("0")) {
-                                    if (!currentActivity.getIntent().hasExtra("unique_id")) {
-                                        appOpenAdMob.showAdIfAvailable(currentActivity, Constant.ADMOB_APP_OPEN_AD_ID);
-                                    }
-                                }
-                                break;
-                            /*
-                             * case GOOGLE_AD_MANAGER:
-                             * if (!Constant.GOOGLE_AD_MANAGER_APP_OPEN_AD_ID.equals("0")) {
-                             * if (!currentActivity.getIntent().hasExtra("unique_id")) {
-                             * appOpenAdManager.showAdIfAvailable(currentActivity,
-                             * Constant.GOOGLE_AD_MANAGER_APP_OPEN_AD_ID);
-                             * }
-                             * }
-                             * break;
-                             */
-                            case APPLOVIN:
-                            case APPLOVIN_MAX:
-                                if (!Constant.APPLOVIN_APP_OPEN_AP_ID.equals("0")) {
-                                    if (!currentActivity.getIntent().hasExtra("unique_id")) {
-                                        appOpenAdAppLovin.showAdIfAvailable(currentActivity,
-                                                Constant.APPLOVIN_APP_OPEN_AP_ID);
-                                    }
-                                }
-                                break;
-
-                            case WORTISE:
-                                if (!Constant.WORTISE_APP_OPEN_AD_ID.equals("0")) {
-                                    if (!currentActivity.getIntent().hasExtra("unique_id")) {
-                                        appOpenAdWortise.showAdIfAvailable(currentActivity,
-                                                Constant.WORTISE_APP_OPEN_AD_ID);
-                                    }
-                                }
-                                break;
+                        if (currentActivity != null && !currentActivity.getIntent().hasExtra("unique_id")) {
+                            if (appOpenAdBuilder != null) {
+                                appOpenAdBuilder.showAppOpenAd();
+                            } else {
+                                loadAndShowAd(currentActivity);
+                            }
                         }
                     }
                 }
             }
         }
     };
+
+    private void loadAndShowAd(Activity activity) {
+        appOpenAdBuilder = new AppOpenAd.Builder(activity)
+                .status(Constant.AD_STATUS)
+                .network(Constant.AD_NETWORK)
+                .backup(Constant.BACKUP_AD_NETWORK)
+                .adMobId(Constant.ADMOB_APP_OPEN_AD_ID)
+                .appLovinId(Constant.APPLOVIN_APP_OPEN_AP_ID)
+                .wortiseId(Constant.WORTISE_APP_OPEN_AD_ID)
+                .load();
+    }
 
     ActivityLifecycleCallbacks activityLifecycleCallbacks = new ActivityLifecycleCallbacks() {
         @Override
@@ -114,39 +87,7 @@ public class MyApplication extends Application {
         public void onActivityStarted(@NonNull Activity activity) {
             if (Constant.OPEN_ADS_ON_START) {
                 if (Constant.AD_STATUS) {
-                    switch (Constant.AD_NETWORK) {
-                        case ADMOB:
-                            if (!Constant.ADMOB_APP_OPEN_AD_ID.equals("0")) {
-                                if (!appOpenAdMob.isShowingAd()) {
-                                    currentActivity = activity;
-                                }
-                            }
-                            break;
-                        /*
-                         * case GOOGLE_AD_MANAGER:
-                         * if (!Constant.GOOGLE_AD_MANAGER_APP_OPEN_AD_ID.equals("0")) {
-                         * if (!appOpenAdManager.isShowingAd()) {
-                         * currentActivity = activity;
-                         * }
-                         * }
-                         * break;
-                         */
-                        case APPLOVIN:
-                        case APPLOVIN_MAX:
-                            if (!Constant.APPLOVIN_APP_OPEN_AP_ID.equals("0")) {
-                                if (!appOpenAdAppLovin.isShowingAd()) {
-                                    currentActivity = activity;
-                                }
-                            }
-                            break;
-                        case WORTISE:
-                            if (!Constant.WORTISE_APP_OPEN_AD_ID.equals("0")) {
-                                if (!appOpenAdWortise.isShowingAd()) {
-                                    currentActivity = activity;
-                                }
-                            }
-                            break;
-                    }
+                    currentActivity = activity;
                 }
             }
         }
@@ -176,43 +117,20 @@ public class MyApplication extends Application {
             @NonNull OnShowAdCompleteListener onShowAdCompleteListener) {
         if (Constant.OPEN_ADS_ON_START) {
             if (Constant.AD_STATUS) {
-                switch (Constant.AD_NETWORK) {
-                    case ADMOB:
-                        if (!Constant.ADMOB_APP_OPEN_AD_ID.equals("0")) {
-                            appOpenAdMob.showAdIfAvailable(activity, Constant.ADMOB_APP_OPEN_AD_ID,
-                                    onShowAdCompleteListener);
-                            Constant.isAppOpen = true;
-                        }
-                        break;
-                    /*
-                     * case GOOGLE_AD_MANAGER:
-                     * if (!Constant.GOOGLE_AD_MANAGER_APP_OPEN_AD_ID.equals("0")) {
-                     * appOpenAdManager.showAdIfAvailable(activity,
-                     * Constant.GOOGLE_AD_MANAGER_APP_OPEN_AD_ID,
-                     * onShowAdCompleteListener);
-                     * Constant.isAppOpen = true;
-                     * }
-                     * break;
-                     */
-                    case APPLOVIN:
-                    case APPLOVIN_MAX:
-                        if (!Constant.APPLOVIN_APP_OPEN_AP_ID.equals("0")) {
-                            appOpenAdAppLovin.showAdIfAvailable(activity,
-                                    Constant.APPLOVIN_APP_OPEN_AP_ID,
-                                    onShowAdCompleteListener);
-                            Constant.isAppOpen = true;
-                        }
-                        break;
-                    case WORTISE:
-                        if (!Constant.WORTISE_APP_OPEN_AD_ID.equals("0")) {
-                            appOpenAdWortise.showAdIfAvailable(activity, Constant.WORTISE_APP_OPEN_AD_ID,
-                                    onShowAdCompleteListener);
-                            Constant.isAppOpen = true;
-                        }
-                        break;
-
-                }
+                Constant.isAppOpen = true;
+                new AppOpenAd.Builder(activity)
+                        .status(Constant.AD_STATUS)
+                        .network(Constant.AD_NETWORK)
+                        .backup(Constant.BACKUP_AD_NETWORK)
+                        .adMobId(Constant.ADMOB_APP_OPEN_AD_ID)
+                        .appLovinId(Constant.APPLOVIN_APP_OPEN_AP_ID)
+                        .wortiseId(Constant.WORTISE_APP_OPEN_AD_ID)
+                        .load(onShowAdCompleteListener);
+            } else {
+                onShowAdCompleteListener.onShowAdComplete();
             }
+        } else {
+            onShowAdCompleteListener.onShowAdComplete();
         }
     }
 

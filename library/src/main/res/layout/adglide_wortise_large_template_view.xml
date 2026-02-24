@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="10dp">
+        android:padding="@dimen/adglide_spacing_medium">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -21,34 +21,35 @@
             <RelativeLayout
                 android:id="@+id/view_sponsored"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/adglide_spacing_small">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="10dp"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="@dimen/adglide_spacing_small"
                     android:layout_toStartOf="@+id/ad_options_view"
+                    android:gravity="center_vertical"
                     android:orientation="horizontal">
 
                     <include layout="@layout/adglide_view_native_ad_label" />
 
                     <TextView
                         android:id="@+id/advertiser_textView"
+                        style="@style/AdGlide.Body"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginTop="1dp"
-                        android:ellipsize="end"
+                        android:layout_marginStart="@dimen/adglide_spacing_tiny"
                         android:gravity="start"
-                        android:maxLines="1"
                         android:text="@string/adglide_txt_advertiser" />
 
                 </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/ad_options_view"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
+                    android:layout_width="@dimen/adglide_ad_options_size"
+                    android:layout_height="@dimen/adglide_ad_options_size"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:orientation="vertical"
@@ -94,15 +95,10 @@
 
                         <TextView
                             android:id="@+id/primary"
+                            style="@style/AdGlide.Headline"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:ellipsize="end"
-                            android:gravity="start"
-                            android:maxLines="2"
-                            android:text=""
-                            android:textAppearance="@style/Base.TextAppearance.AppCompat.Body2"
-                            android:textSize="@dimen/adglide_post_primary_font_size"
-                            android:textStyle="bold" />
+                            android:text="" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -114,11 +110,9 @@
                                 style="?android:attr/ratingBarStyleSmall"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="3dp"
+                                android:layout_marginTop="@dimen/adglide_spacing_tiny"
                                 android:numStars="5"
-                                android:rating="4.5"
-                                android:textColor="@color/adglide_gray"
-                                android:textSize="@dimen/adglide_text_size_small" />
+                                android:rating="4.5" />
 
                         </LinearLayout>
 
@@ -159,37 +153,27 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/adglide_item_post_padding_medium"
+                    android:layout_marginTop="@dimen/adglide_spacing_small"
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/secondary"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:text=""
-                        android:visibility="gone" />
-
-                    <TextView
                         android:id="@+id/body"
+                        style="@style/AdGlide.Body"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:ellipsize="end"
-                        android:maxLines="2"
                         android:text="" />
 
                 </LinearLayout>
 
             </LinearLayout>
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/cta"
+                style="@style/AdGlide.ButtonText"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/adglide_video_cta_button_height"
                 android:layout_alignParentBottom="true"
-                android:textColor="@color/adglide_white"
-                android:textStyle="bold" />
+                android:background="@drawable/adglide_ad_button" />
 
         </RelativeLayout>
 

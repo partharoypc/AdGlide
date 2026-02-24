@@ -1,45 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <dimen name="adglide_corner_radius">8dp</dimen>
+    <dimen name="adglide_corner_radius">12dp</dimen>
     <dimen name="adglide_app_lovin_banner_height">50dp</dimen>
-    <item name="adglide_medium_template_bottom_weight" format="float" type="dimen">0.4</item>
-    <item name="adglide_text_row_weight" format="float" type="dimen">0.25</item>
-    <item name="adglide_media_view_weight" format="float" type="dimen">1.0</item>
-    <item name="adglide_medium_template_top_weight" format="float" type="dimen">0.2</item>
-    <dimen name="adglide_default_margin">10dp</dimen>
-    <dimen name="adglide_text_size_small">12sp</dimen>
-    <dimen name="adglide_text_size_large">15sp</dimen>
+
+    <dimen name="adglide_default_margin">12dp</dimen>
+    <dimen name="adglide_text_size_small">14sp</dimen>
+    <dimen name="adglide_text_size_large">16sp</dimen>
+
     <dimen name="adglide_ad_indicator_width">28dp</dimen>
-    <dimen name="adglide_ad_indicator_height">21dp</dimen>
-    <dimen name="adglide_ad_indicator_bar_height">30dp</dimen>
-    <dimen name="adglide_ad_indicator_top_margin">0dp</dimen>
-    <dimen name="adglide_ad_indicator_bottom_margin">10dp</dimen>
+    <dimen name="adglide_ad_indicator_height">18dp</dimen>
     <dimen name="adglide_ad_indicator_text_size">12sp</dimen>
-    <dimen name="adglide_small_cta_button_height">30dp</dimen>
-    <dimen name="adglide_medium_cta_button_height">50dp</dimen>
-    <dimen name="adglide_native_icon_size">48dp</dimen>
-    <dimen name="adglide_no_margin">0dp</dimen>
-    <dimen name="adglide_no_size">0dp</dimen>
 
-    <dimen name="adglide_item_post_padding_medium">14dp</dimen>
-    <dimen name="adglide_item_post_padding_small">7dp</dimen>
-    <dimen name="adglide_post_thumbnail_width">108dp</dimen>
-    <dimen name="adglide_post_thumbnail_height">108dp</dimen>
-    <dimen name="adglide_post_primary_font_size">16sp</dimen>
-    <dimen name="adglide_post_secondary_font_size">12sp</dimen>
+    <dimen name="adglide_spacing_tiny">4dp</dimen>
+    <dimen name="adglide_spacing_small">8dp</dimen>
+    <dimen name="adglide_spacing_medium">12dp</dimen>
+    <dimen name="adglide_spacing_large">16dp</dimen>
 
-    <dimen name="adglide_video_thumbnail_width">128dp</dimen>
-    <dimen name="adglide_video_thumbnail_height">96dp</dimen>
-    <dimen name="adglide_video_primary_font_size">16sp</dimen>
-    <dimen name="adglide_video_secondary_font_size">13sp</dimen>
+    <dimen name="adglide_padding_standard">@dimen/adglide_spacing_small</dimen>
+    <dimen name="adglide_margin_standard">@dimen/adglide_spacing_small</dimen>
+    
+    <dimen name="adglide_radio_padding_medium">@dimen/adglide_spacing_medium</dimen>
+    <dimen name="adglide_video_padding_medium">@dimen/adglide_spacing_medium</dimen>
+    <dimen name="adglide_video_padding_small">@dimen/adglide_spacing_small</dimen>
+    <dimen name="adglide_item_post_padding_medium">@dimen/adglide_spacing_medium</dimen>
+    <dimen name="adglide_item_post_padding_small">@dimen/adglide_spacing_small</dimen>
+    
+    <dimen name="adglide_video_primary_font_size">@dimen/adglide_text_size_large</dimen>
+    <dimen name="adglide_video_secondary_font_size">@dimen/adglide_text_size_small</dimen>
+    <dimen name="adglide_post_primary_font_size">@dimen/adglide_text_size_large</dimen>
+    <dimen name="adglide_post_secondary_font_size">@dimen/adglide_text_size_small</dimen>
 
-    <dimen name="adglide_radio_padding_small">5dp</dimen>
-    <dimen name="adglide_radio_padding_medium">10dp</dimen>
-    <dimen name="adglide_radio_thumbnail_width">60dp</dimen>
-    <dimen name="adglide_radio_thumbnail_height">60dp</dimen>
-    <dimen name="adglide_radio_primary_font_size">15sp</dimen>
-    <dimen name="adglide_radio_secondary_font_size">13sp</dimen>
+    <dimen name="adglide_news_cta_button_height">44dp</dimen>
+    <dimen name="adglide_video_cta_button_height">44dp</dimen>
+    <dimen name="adglide_radio_cta_button_height">44dp</dimen>
+    <dimen name="adglide_cta_button_height">44dp</dimen>
 
+    <dimen name="adglide_native_icon_size">56dp</dimen>
+    <dimen name="adglide_icon_size_medium">64dp</dimen>
+    <dimen name="adglide_ad_options_size">18dp</dimen>
+
+    <!-- Compatibility Constants -->
+    <dimen name="adglide_cta_button_min_width">100dp</dimen>
+    <dimen name="adglide_video_thumbnail_width">120dp</dimen>
+    <dimen name="adglide_video_thumbnail_height">68dp</dimen>
+    <dimen name="adglide_post_thumbnail_width">80dp</dimen>
+    <dimen name="adglide_post_thumbnail_height">80dp</dimen>
 </resources>
 

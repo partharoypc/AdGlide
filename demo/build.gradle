@@ -79,13 +79,5 @@ dependencies {
     implementation 'com.applovin.mediation:facebook-adapter:6.18.0.0'
     implementation 'com.applovin.mediation:google-adapter:23.6.0.0'
 
-    // Force updated Pangle SDK and Adapter versions to resolve 16KB page size alignment issues
-    constraints {
-        implementation('com.pangle.global:ads-sdk:6.4.0.6') {
-            because 'Version 6.4+ is compiled with 16KB ELF page size alignment for Android 15+'
-        }
-        implementation('com.google.ads.mediation:pangle:6.4.0.6.0') {
-            because 'Adapter must match the Pangle SDK version'
-        }
-    }
+
 }

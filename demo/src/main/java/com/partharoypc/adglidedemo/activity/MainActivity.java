@@ -52,21 +52,6 @@ public class MainActivity extends AppCompatActivity {
     private DashboardAdapter adapter;
     private AppOpenAd.Builder appOpenAdBuilder;
     private GDPR gdpr;
-    private LifecycleObserver lifecycleObserver = new DefaultLifecycleObserver() {
-        @Override
-        public void onStart(@NonNull LifecycleOwner owner) {
-            DefaultLifecycleObserver.super.onStart(owner);
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                if (Constant.OPEN_ADS_ON_RESUME) {
-                    if (AppOpenAd.isAppOpenAdLoaded) {
-                        if (appOpenAdBuilder != null) {
-                            appOpenAdBuilder.show();
-                        }
-                    }
-                }
-            }, 100);
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,10 +65,6 @@ public class MainActivity extends AppCompatActivity {
         initAds();
         loadGdpr();
         loadOpenAds();
-
-        if (Constant.FORCE_TO_SHOW_APP_OPEN_AD_ON_START) {
-            ProcessLifecycleOwner.get().getLifecycle().addObserver(lifecycleObserver);
-        }
 
         setupDashboard();
     }
@@ -149,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
                     .adMobId(Constant.ADMOB_APP_OPEN_AD_ID)
                     .appLovinId(Constant.APPLOVIN_APP_OPEN_AP_ID)
                     .wortiseId(Constant.WORTISE_APP_OPEN_AD_ID)
-                    .build().load();
+                    .load();
         }
     }
 
@@ -188,11 +169,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (Constant.FORCE_TO_SHOW_APP_OPEN_AD_ON_START) {
-            if (appOpenAdBuilder != null) {
-                appOpenAdBuilder.destroyOpenAd();
-            }
-            ProcessLifecycleOwner.get().getLifecycle().removeObserver(lifecycleObserver);
+        if (appOpenAdBuilder != null) {
+            appOpenAdBuilder.destroyOpenAd();
         }
     }
 }

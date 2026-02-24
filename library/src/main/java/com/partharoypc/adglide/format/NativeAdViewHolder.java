@@ -8,7 +8,6 @@ import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.META;
-import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
 
 import android.app.Activity;
@@ -195,7 +194,15 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
         NativeTemplateStyle styles = new NativeTemplateStyle.Builder()
                 .withMainBackgroundColor(colorDrawable).build();
         adMobNativeAdView.setStyles(styles);
-        adMobNativeBackground.setBackgroundResource(colorRes);
+        adMobNativeBackground.setBackgroundResource(android.R.color.transparent);
+    }
+
+    private void animateIn(View view) {
+        if (view != null) {
+            view.setAlpha(0f);
+            view.setVisibility(View.VISIBLE);
+            view.animate().alpha(1f).setDuration(400).start();
+        }
     }
 
     private void handleAdMobLoad(Context context, String adMobNativeId, boolean darkTheme, int backgroundLight,
@@ -219,6 +226,8 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
                         setAdMobStyle(context, darkTheme, backgroundLight, backgroundDark);
                         mediaView.setImageScaleType(ImageView.ScaleType.CENTER_CROP);
                         adMobNativeAdView.setNativeAd(nativeAd);
+                        animateIn(adMobNativeAdView);
+                        animateIn(nativeAdViewContainer);
                     })
                     .withAdListener(new AdListener() {
                         @Override
@@ -262,8 +271,8 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
                     if (metaNativeAd != ad) {
                         return;
                     }
-                    metaNativeAdLayout.setVisibility(View.VISIBLE);
-                    nativeAdViewContainer.setVisibility(View.VISIBLE);
+                    animateIn(metaNativeAdLayout);
+                    animateIn(nativeAdViewContainer);
                     metaNativeAd.unregisterView();
 
                     LayoutInflater inflater = LayoutInflater.from(context);
@@ -306,17 +315,9 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
                     LinearLayout metaNativeBackground = nativeAdView.findViewById(R.id.ad_unit);
 
                     if (darkTheme) {
-                        int textColor = ContextCompat.getColor(context,
-                                R.color.adglide_app_lovin_dark_primary_text_color);
-                        int secondaryColor = ContextCompat.getColor(context,
-                                R.color.adglide_app_lovin_dark_secondary_text_color);
-                        nativeAdTitle.setTextColor(textColor);
-                        nativeAdSocialContext.setTextColor(textColor);
-                        sponsoredLabel.setTextColor(secondaryColor);
-                        nativeAdBody.setTextColor(secondaryColor);
-                        metaNativeBackground.setBackgroundResource(backgroundDark);
+                        metaNativeBackground.setBackgroundResource(android.R.color.transparent);
                     } else {
-                        metaNativeBackground.setBackgroundResource(backgroundLight);
+                        metaNativeBackground.setBackgroundResource(android.R.color.transparent);
                     }
 
                     nativeAdTitle.setText(metaNativeAd.getAdvertiserName());
@@ -366,8 +367,8 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
                     maxNativeAd = ad;
                     appLovinNativeAd.removeAllViews();
                     appLovinNativeAd.addView(nativeAdView);
-                    appLovinNativeAd.setVisibility(View.VISIBLE);
-                    nativeAdViewContainer.setVisibility(View.VISIBLE);
+                    animateIn(appLovinNativeAd);
+                    animateIn(nativeAdViewContainer);
                 }
 
                 @Override
@@ -399,8 +400,8 @@ public class NativeAdViewHolder extends RecyclerView.ViewHolder {
                     if (ads != null && !ads.isEmpty()) {
                         com.startapp.sdk.ads.nativead.NativeAdDetails nativeAdDetails = ads.get(0);
                         populateStartAppNativeAdView(context, nativeAdDetails, darkTheme);
-                        startAppNativeAdView.setVisibility(View.VISIBLE);
-                        nativeAdViewContainer.setVisibility(View.VISIBLE);
+                        animateIn(startAppNativeAdView);
+                        animateIn(nativeAdViewContainer);
                     } else {
                         if (fallback != null)
                             fallback.run();

@@ -70,6 +70,10 @@ public class ActivityNative extends AppCompatActivity {
 
     private void setNativeAdStyle(LinearLayout nativeAdView) {
         switch (Constant.NATIVE_STYLE) {
+            case STYLE_SMALL:
+                nativeAdView.addView(
+                        View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_radio, null));
+                break;
             case STYLE_NEWS:
                 nativeAdView.addView(
                         View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_news, null));
@@ -96,25 +100,28 @@ public class ActivityNative extends AppCompatActivity {
     }
 
     private void showStyleDialog() {
-        final String[] styles = { "Default", "News", "Radio", "Video Small", "Video Large" };
+        final String[] styles = { "Medium (Default)", "Small", "News", "Radio", "Video Small", "Video Large" };
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Select Native Style");
         builder.setItems(styles, (dialog, which) -> {
             switch (which) {
                 case 1:
-                    Constant.NATIVE_STYLE = STYLE_NEWS;
+                    Constant.NATIVE_STYLE = STYLE_SMALL;
                     break;
                 case 2:
-                    Constant.NATIVE_STYLE = STYLE_RADIO;
+                    Constant.NATIVE_STYLE = STYLE_NEWS;
                     break;
                 case 3:
-                    Constant.NATIVE_STYLE = STYLE_VIDEO_SMALL;
+                    Constant.NATIVE_STYLE = STYLE_RADIO;
                     break;
                 case 4:
+                    Constant.NATIVE_STYLE = STYLE_VIDEO_SMALL;
+                    break;
+                case 5:
                     Constant.NATIVE_STYLE = STYLE_VIDEO_LARGE;
                     break;
                 default:
-                    Constant.NATIVE_STYLE = STYLE_DEFAULT;
+                    Constant.NATIVE_STYLE = STYLE_MEDIUM;
                     break;
             }
             loadNativeAd();

@@ -19,9 +19,9 @@ public class Constant {
     public static final String NONE = "none";
 
     // ad bidding
-    public static final String META_BIDDING_ADMOB = "META_BIDDING_ADMOB";
-    public static final String META_BIDDING_APPLOVIN_MAX = "META_BIDDING_APPLOVIN_MAX";
-    public static final String META_BIDDING_IRONSOURCE = "META_BIDDING_IRONSOURCE";
+    public static final String META_BIDDING_ADMOB = "meta_bidding_admob";
+    public static final String META_BIDDING_APPLOVIN_MAX = "meta_bidding_applovin_max";
+    public static final String META_BIDDING_IRONSOURCE = "meta_bidding_ironsource";
 
     // native ad styles
     public static final String STYLE_SMALL = "small";

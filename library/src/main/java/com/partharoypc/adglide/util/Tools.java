@@ -180,4 +180,15 @@ public class Tools {
         return new String(valueDecoded);
     }
 
+    /**
+     * Checks if the current device is a tablet.
+     *
+     * @param context the application context
+     * @return true if the device is a tablet, false otherwise
+     */
+    public static boolean isTablet(@NonNull Context context) {
+        return (context.getResources().getConfiguration().screenLayout
+                & android.content.res.Configuration.SCREENLAYOUT_SIZE_MASK) >= android.content.res.Configuration.SCREENLAYOUT_SIZE_LARGE;
+    }
+
 }

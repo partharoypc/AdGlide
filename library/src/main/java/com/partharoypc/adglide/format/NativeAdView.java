@@ -465,17 +465,9 @@ public class NativeAdView {
                             Button nativeAdCallToAction = nativeAdView.findViewById(R.id.native_ad_call_to_action);
                             LinearLayout metaNativeBackground = nativeAdView.findViewById(R.id.ad_unit);
                             if (darkTheme) {
-                                int color = ContextCompat.getColor(activity,
-                                        R.color.adglide_app_lovin_dark_primary_text_color);
-                                nativeAdTitle.setTextColor(color);
-                                nativeAdSocialContext.setTextColor(color);
-                                int secondaryColor = ContextCompat.getColor(activity,
-                                        R.color.adglide_app_lovin_dark_secondary_text_color);
-                                sponsoredLabel.setTextColor(secondaryColor);
-                                nativeAdBody.setTextColor(secondaryColor);
-                                metaNativeBackground.setBackgroundResource(nativeBackgroundDark);
+                                metaNativeBackground.setBackgroundResource(android.R.color.transparent);
                             } else {
-                                metaNativeBackground.setBackgroundResource(nativeBackgroundLight);
+                                metaNativeBackground.setBackgroundResource(android.R.color.transparent);
                             }
                             nativeAdTitle.setText(metaNativeAd.getAdvertiserName());
                             nativeAdBody.setText(metaNativeAd.getAdBodyText());

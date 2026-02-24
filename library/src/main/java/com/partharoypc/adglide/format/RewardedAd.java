@@ -144,7 +144,7 @@ public class RewardedAd {
 
         @NonNull
         public Builder network(@NonNull String adNetwork) {
-            this.adNetwork = adNetwork;
+            this.adNetwork = AdGlideNetwork.fromString(adNetwork).getValue();
             return this;
         }
 
@@ -305,7 +305,7 @@ public class RewardedAd {
         private void loadAdFromNetwork(String networkToLoad, OnRewardedAdCompleteListener onComplete,
                 OnRewardedAdDismissedListener onDismiss) {
             try {
-                switch (networkToLoad) {
+                switch (AdGlideNetwork.fromString(networkToLoad)) {
                     case ADMOB:
                     case META_BIDDING_ADMOB: {
                         if (!com.partharoypc.adglide.util.AdMobRateLimiter.isRequestAllowed(adMobRewardedId)) {
@@ -537,7 +537,7 @@ public class RewardedAd {
             try {
                 Activity targetActivity = displayActivity != null ? displayActivity : activity;
                 if (adStatus && placementStatus != 0) {
-                    switch (adNetwork) {
+                    switch (AdGlideNetwork.fromString(adNetwork)) {
                         case ADMOB:
                         case META_BIDDING_ADMOB: {
                             if (adMobRewardedAd != null) {
@@ -684,7 +684,7 @@ public class RewardedAd {
                 Activity targetActivity = displayActivity != null ? displayActivity : activity;
                 if (adStatus && placementStatus != 0) {
                     Log.d(TAG, "Show Backup Rewarded Ad [" + backupAdNetwork.toUpperCase(java.util.Locale.ROOT) + "]");
-                    switch (backupAdNetwork) {
+                    switch (AdGlideNetwork.fromString(backupAdNetwork)) {
                         case ADMOB:
                         case META_BIDDING_ADMOB: {
                             if (adMobRewardedAd != null) {
@@ -750,7 +750,7 @@ public class RewardedAd {
                     if (waterfallManager != null) {
                         waterfallManager.reset();
                     }
-                    switch (adNetwork) {
+                    switch (AdGlideNetwork.fromString(adNetwork)) {
                         case ADMOB:
                         case META_BIDDING_ADMOB: {
                             com.google.android.gms.ads.rewarded.RewardedAd.load(activity, adMobRewardedId,
@@ -906,7 +906,7 @@ public class RewardedAd {
                         return;
                     backupAdNetwork = networkToLoad;
 
-                    switch (backupAdNetwork) {
+                    switch (AdGlideNetwork.fromString(backupAdNetwork)) {
                         case ADMOB:
                         case META_BIDDING_ADMOB: {
                             com.google.android.gms.ads.rewarded.RewardedAd.load(activity, adMobRewardedId,

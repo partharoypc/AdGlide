@@ -112,7 +112,7 @@ public class ActivitySplash extends AppCompatActivity {
                     .adMobId(Constant.ADMOB_APP_OPEN_AD_ID)
                     .appLovinId(Constant.APPLOVIN_APP_OPEN_AP_ID)
                     .wortiseId(Constant.WORTISE_APP_OPEN_AD_ID)
-                    .build().load(this::startMainActivity);
+                    .load(this::startMainActivity);
         } else {
             startMainActivity();
         }

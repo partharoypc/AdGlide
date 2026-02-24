@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Headline: Bold, Premium size -->
+    <style name="AdGlide.Headline" parent="Widget.AppCompat.TextView">
+        <item name="android:textSize">@dimen/adglide_text_size_large</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:letterSpacing">0.02</item>
+    </style>
+
+    <!-- Body: Clean, readable -->
+    <style name="AdGlide.Body" parent="Widget.AppCompat.TextView">
+        <item name="android:textSize">@dimen/adglide_text_size_small</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:lineSpacingMultiplier">1.2</item>
+    </style>
+
+    <!-- Button Text: Uppercase, spaced -->
+    <style name="AdGlide.ButtonText" parent="Widget.AppCompat.TextView">
+        <item name="android:textSize">@dimen/adglide_text_size_small</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/adglide_white</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.05</item>
+    </style>
+
+    <!-- Ad Indicator: Small, subtle -->
+    <style name="AdGlide.AdIndicator" parent="Widget.AppCompat.TextView">
+        <item name="android:textSize">@dimen/adglide_ad_indicator_text_size</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/adglide_white</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/adglide_ad_icon</item>
+    </style>
+
+</resources>

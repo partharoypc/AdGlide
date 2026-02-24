@@ -7,7 +7,6 @@ import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.META;
-import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_IRONSOURCE;
@@ -163,8 +162,13 @@ public class AdNetwork {
                     Log.e(TAG, "Internet connection not available. Skipping Primary Ads initialization.");
                     return;
                 }
-                initializeSdk(adNetwork);
-                Log.d(TAG, "[" + adNetwork + "] is selected as Primary Ads");
+                AdGlideNetwork primaryNetwork = AdGlideNetwork.fromString(adNetwork);
+                if (primaryNetwork == AdGlideNetwork.NONE && !adNetwork.isEmpty()) {
+                    Log.w(TAG, "Unknown Primary Ad Network: [" + adNetwork + "]. Skipping initialization.");
+                } else {
+                    initializeSdk(adNetwork);
+                    Log.d(TAG, "[" + adNetwork + "] is selected as Primary Ads");
+                }
             }
         }
 
@@ -181,6 +185,11 @@ public class AdNetwork {
                 }
 
                 for (String network : backupAdNetworks) {
+                    AdGlideNetwork backupNetwork = AdGlideNetwork.fromString(network);
+                    if (backupNetwork == AdGlideNetwork.NONE && !network.isEmpty()) {
+                        Log.w(TAG, "Unknown Backup Ad Network: [" + network + "]. Skipping initialization.");
+                        continue;
+                    }
                     initializeSdk(network);
                     Log.d(TAG, "[" + network + "] is selected as Backup Ads");
                 }

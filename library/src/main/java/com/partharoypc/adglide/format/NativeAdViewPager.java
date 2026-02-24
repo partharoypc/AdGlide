@@ -442,11 +442,11 @@ public class NativeAdViewPager {
                             LinearLayout metaNativeBackground = nativeAdView.findViewById(R.id.ad_unit);
                             if (darkTheme) {
                                 int color = ContextCompat.getColor(activity,
-                                        R.color.adglide_app_lovin_dark_primary_text_color);
+                                        R.color.adglide_color_primary_text_dark);
                                 nativeAdTitle.setTextColor(color);
                                 nativeAdSocialContext.setTextColor(color);
                                 int secondaryColor = ContextCompat.getColor(activity,
-                                        R.color.adglide_app_lovin_dark_secondary_text_color);
+                                        R.color.adglide_color_secondary_text_dark);
                                 sponsoredLabel.setTextColor(secondaryColor);
                                 nativeAdBody.setTextColor(secondaryColor);
                                 metaNativeBackground.setBackgroundResource(nativeBackgroundDark);

@@ -61,6 +61,14 @@ import java.util.List;
  */
 public class NativeAdFragment {
 
+    private static void animateIn(View view) {
+        if (view != null) {
+            view.setAlpha(0f);
+            view.setVisibility(View.VISIBLE);
+            view.animate().alpha(1f).setDuration(400).start();
+        }
+    }
+
     public static class Builder {
 
         private static final String TAG = "AdGlide";
@@ -331,8 +339,8 @@ public class NativeAdFragment {
                             maxNativeAd = ad;
                             appLovinNativeAd.removeAllViews();
                             appLovinNativeAd.addView(nativeAdView);
-                            appLovinNativeAd.setVisibility(View.VISIBLE);
-                            nativeAdViewContainer.setVisibility(View.VISIBLE);
+                            animateIn(appLovinNativeAd);
+                            animateIn(nativeAdViewContainer);
                         }
 
                         @Override
@@ -365,8 +373,8 @@ public class NativeAdFragment {
                         if (ads != null && !ads.isEmpty()) {
                             NativeAdDetails nativeAdDetails = ads.get(0);
                             populateStartAppNativeAdView(nativeAdDetails);
-                            startAppNativeAdView.setVisibility(View.VISIBLE);
-                            nativeAdViewContainer.setVisibility(View.VISIBLE);
+                            animateIn(startAppNativeAdView);
+                            animateIn(nativeAdViewContainer);
                         } else {
                             if (fallback != null)
                                 fallback.run();
@@ -395,8 +403,6 @@ public class NativeAdFragment {
                         fallback.run();
                     return;
                 }
-                adMobNativeAdView.setVisibility(View.VISIBLE);
-                nativeAdViewContainer.setVisibility(View.VISIBLE);
                 AdLoader adLoader = new AdLoader.Builder(activity, adMobNativeId)
                         .forNativeAd(NativeAd -> {
                             com.partharoypc.adglide.util.AdMobRateLimiter.resetCooldown(adMobNativeId);
@@ -421,6 +427,8 @@ public class NativeAdFragment {
                             adMobNativeAd = NativeAd;
                             mediaView.setImageScaleType(ImageView.ScaleType.CENTER_CROP);
                             adMobNativeAdView.setNativeAd(NativeAd);
+                            animateIn(adMobNativeAdView);
+                            animateIn(nativeAdViewContainer);
                         })
                         .withAdListener(new AdListener() {
                             @Override
@@ -459,8 +467,8 @@ public class NativeAdFragment {
 
                     @Override
                     public void onAdLoaded(com.facebook.ads.Ad ad) {
-                        metaNativeAdLayout.setVisibility(View.VISIBLE);
-                        nativeAdViewContainer.setVisibility(View.VISIBLE);
+                        animateIn(metaNativeAdLayout);
+                        animateIn(nativeAdViewContainer);
                         if (metaNativeAd != ad) {
                             return;
                         }
@@ -508,19 +516,7 @@ public class NativeAdFragment {
                         Button nativeAdCallToAction = nativeAdView.findViewById(R.id.native_ad_call_to_action);
                         LinearLayout metaNativeBackground = nativeAdView.findViewById(R.id.ad_unit);
 
-                        if (darkTheme) {
-                            nativeAdTitle.setTextColor(ContextCompat.getColor(activity,
-                                    R.color.adglide_app_lovin_dark_primary_text_color));
-                            nativeAdSocialContext.setTextColor(ContextCompat.getColor(activity,
-                                    R.color.adglide_app_lovin_dark_primary_text_color));
-                            sponsoredLabel.setTextColor(ContextCompat.getColor(activity,
-                                    R.color.adglide_app_lovin_dark_secondary_text_color));
-                            nativeAdBody.setTextColor(ContextCompat.getColor(activity,
-                                    R.color.adglide_app_lovin_dark_secondary_text_color));
-                            metaNativeBackground.setBackgroundResource(nativeBackgroundDark);
-                        } else {
-                            metaNativeBackground.setBackgroundResource(nativeBackgroundLight);
-                        }
+                        metaNativeBackground.setBackgroundResource(android.R.color.transparent);
 
                         nativeAdTitle.setText(metaNativeAd.getAdvertiserName());
                         nativeAdBody.setText(metaNativeAd.getAdBodyText());

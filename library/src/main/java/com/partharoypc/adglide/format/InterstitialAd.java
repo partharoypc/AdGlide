@@ -164,7 +164,7 @@ public class InterstitialAd {
          */
         @NonNull
         public Builder network(@NonNull String adNetwork) {
-            this.adNetwork = adNetwork;
+            this.adNetwork = AdGlideNetwork.fromString(adNetwork).getValue();
             return this;
         }
 
@@ -357,7 +357,7 @@ public class InterstitialAd {
                 Activity targetActivity = displayActivity != null ? displayActivity : activity;
                 if (adStatus && placementStatus != 0) {
                     if (counter == interval) {
-                        switch (adNetwork) {
+                        switch (AdGlideNetwork.fromString(adNetwork)) {
                             case ADMOB:
                             case META_BIDDING_ADMOB: {
                                 if (adMobInterstitialAd != null) {
@@ -475,7 +475,7 @@ public class InterstitialAd {
                 if (adStatus && placementStatus != 0) {
                     Log.d(TAG,
                             "Show Backup Interstitial Ad [" + backupAdNetwork.toUpperCase(java.util.Locale.ROOT) + "]");
-                    switch (backupAdNetwork) {
+                    switch (AdGlideNetwork.fromString(backupAdNetwork)) {
                         case ADMOB:
                         case META_BIDDING_ADMOB: {
                             if (adMobInterstitialAd != null) {
@@ -592,7 +592,7 @@ public class InterstitialAd {
         private void loadAdFromNetwork(String networkToLoad,
                 OnInterstitialAdDismissedListener onInterstitialAdDismissedListener) {
             try {
-                switch (networkToLoad) {
+                switch (AdGlideNetwork.fromString(networkToLoad)) {
                     case ADMOB:
                     case META_BIDDING_ADMOB: {
                         if (!com.partharoypc.adglide.util.AdMobRateLimiter.isRequestAllowed(adMobInterstitialId)) {
@@ -899,7 +899,7 @@ public class InterstitialAd {
             try {
                 if (adStatus && placementStatus != 0) {
                     if (counter == interval) {
-                        switch (adNetwork) {
+                        switch (AdGlideNetwork.fromString(adNetwork)) {
                             case ADMOB:
                             case META_BIDDING_ADMOB: {
                                 if (adMobInterstitialAd != null) {
@@ -1029,7 +1029,7 @@ public class InterstitialAd {
                 if (adStatus && placementStatus != 0) {
                     Log.d(TAG,
                             "Show Backup Interstitial Ad [" + backupAdNetwork.toUpperCase(java.util.Locale.ROOT) + "]");
-                    switch (backupAdNetwork) {
+                    switch (AdGlideNetwork.fromString(backupAdNetwork)) {
                         case ADMOB:
                         case META_BIDDING_ADMOB: {
                             if (adMobInterstitialAd != null) {
