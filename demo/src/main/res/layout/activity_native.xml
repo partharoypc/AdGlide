@@ -22,60 +22,52 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:gravity="center_horizontal"
         android:orientation="vertical"
         android:padding="16dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:gravity="center_horizontal">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_marginBottom="16dp"
             android:gravity="center"
-            android:layout_marginBottom="16dp">
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/btn_style"
+                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/change_style"
                 android:layout_marginEnd="8dp"
-                style="@style/Widget.Material3.Button.OutlinedButton"/>
+                android:text="@string/change_style" />
 
             <Button
                 android:id="@+id/btn_refresh"
+                style="@style/Widget.Material3.Button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/refresh_ad"
-                style="@style/Widget.Material3.Button"/>
+                android:text="@string/refresh_ad" />
 
         </LinearLayout>
 
-        <com.google.android.material.card.MaterialCardView
+
+        <LinearLayout
+            android:id="@+id/native_ad_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="2dp"
-            app:contentPadding="0dp"
-            android:clipChildren="true">
+            android:gravity="center"
+            android:minHeight="100dp"
+            android:orientation="vertical">
 
-            <LinearLayout
-                android:id="@+id/native_ad_container"
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:minHeight="100dp"
-                android:gravity="center">
+                android:text="@string/native_ad_area"
+                android:textColor="@color/grey_600" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/native_ad_area"
-                    android:textColor="@color/grey_600"/>
+        </LinearLayout>
 
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 
