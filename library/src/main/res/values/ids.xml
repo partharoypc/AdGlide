@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Native Ad Container ID -->
+    <item name="native_ad_view_container" type="id" />
+
+    <!-- Banner Ad Container IDs -->
+    <item name="ad_mob_banner_view_container" type="id" />
+    <item name="meta_banner_view_container" type="id" />
+    <item name="start_app_banner_view_container" type="id" />
+    <item name="unity_banner_view_container" type="id" />
+    <item name="app_lovin_banner_view_container" type="id" />
+    <item name="app_lovin_discovery_banner_view_container" type="id" />
+    <item name="iron_source_banner_view_container" type="id" />
+    <item name="wortise_banner_view_container" type="id" />
+</resources>

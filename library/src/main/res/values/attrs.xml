@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <declare-styleable name="adglide_TemplateView">
-        <attr name="adglide_template_type" format="reference"/>
-    </declare-styleable>
 
     <declare-styleable name="adglide_NativeAdView">
         <attr name="adMobNativeButton" format="reference"/>

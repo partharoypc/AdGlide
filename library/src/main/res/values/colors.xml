@@ -12,16 +12,10 @@
 
     <!-- Premium Brand Colors -->
     <color name="adglide_color_primary">#2962FF</color> <!-- Vibrant Blue -->
-    <color name="adglide_color_primary_variant">#0039CB</color>
-    <color name="adglide_color_accent">#FFAB00</color>
 
-    <color name="adglide_black">#000000</color>
     <color name="adglide_white">#FFFFFF</color>
     <color name="adglide_ad_yellow">#FBB828</color>
     <color name="adglide_outline">#EEEEEE</color>
     <color name="adglide_outline_dark">#2C2C2C</color>
-    
-    <color name="adglide_app_lovin_button_color">@color/adglide_color_primary</color>
-    <color name="adglide_gray">#757575</color>
 </resources>
 
