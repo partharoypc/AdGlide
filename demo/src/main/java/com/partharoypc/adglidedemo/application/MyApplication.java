@@ -19,10 +19,7 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.multidex.MultiDex;
 
-import com.partharoypc.adglide.format.AppLovinAppOpenAd;
-import com.partharoypc.adglide.format.AdMobAppOpenAd;
 import com.partharoypc.adglide.format.AppOpenAd;
-import com.partharoypc.adglide.format.WortiseAppOpenAd;
 import com.partharoypc.adglide.util.OnShowAdCompleteListener;
 import com.partharoypc.adglidedemo.data.Constant;
 

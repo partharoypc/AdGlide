@@ -15,14 +15,15 @@
 
 ---
 
-## ✨ What's New in v1.2.0
+## ✨ What's New in v1.3.0
 
-- **Unified App Open Architecture** — Static helper instances (`AdMobAppOpenAd`, `AppLovinAppOpenAd`, `WortiseAppOpenAd`) with centralized waterfall logic.
-- **Smooth Native Ad Transitions** — 400ms fade-in animations (`animateIn`) across all native ad formats for a premium feel.
-- **Intelligent Rate Limiting** — `AdMobRateLimiter` prevents failing AdMob units from creating endless request loops with exponential cooldown.
-- **Theme-Aware Backgrounds** — All ad backgrounds default to `transparent`, inheriting the host app's theme seamlessly.
-- **Centralized Design System** — All layout dimensions, typography, and CTA button styles flow from `dimens.xml`, `styles.xml`, and `colors.xml`.
-- **GDPR Compliance** — Built-in `GDPR` and `LegacyGDPR` modules for consent management via Google UMP.
+- **Optional Dependencies Architecture** — Drastically shrink your APK! AdGlide now uses reflection to load ad networks dynamically. You only need to compile the networks you actually use; the SDK safely ignores missing ones.
+- **Dynamic Provider Pattern** — True separation of concerns. Format modules like `BannerAd`, `InterstitialAd`, and `RewardedAd` now securely delegate to modular `ProviderFactory` engines.
+- **Smart Readiness Checks** — Added defensive `isAdLoaded()` and `isAdAvailable()` pre-show validations for Interstitial, Rewarded, and App Open ads to eliminate misfired impressions and maximize valid fill rates.
+- **100% Match Rate Optimization & Fast-Fail Cascades** — Re-architected `WaterfallManager` to immediately bypass primary networks when invalid or empty Ad Unit IDs are supplied. By bypassing sluggish internal timeout cycles from disabled placements, AdGlide smoothly cascades to backup networks dynamically with literally zero millisecond delay, guaranteeing maximized revenue fill-rates.
+- **Unified App Open Architecture** — Centralized waterfall logic for App Open models across AdMob, AppLovin, and Wortise.
+- **Intelligent Rate Limiting** — `AdMobRateLimiter` prevents failing AdMob units from creating endless request loops.
+- **Memory Leak Protection** — Stronger static decoupling ensures activity contexts are rapidly released after ad dismissal.
 
 ---
 
@@ -129,19 +130,22 @@ In your app-level `build.gradle`:
 
 ```gradle
 dependencies {
-    implementation 'com.github.partharoypc:adglide:1.2.0'
+    implementation 'com.github.partharoypc:adglide:1.3.0'
     
-    // Choose your desired Ad Networks:
-    implementation 'com.google.android.gms:play-services-ads:25.0.0'   // AdMob
-    implementation 'com.facebook.android:audience-network-sdk:6.21.0'  // Meta
-    implementation 'com.applovin:applovin-sdk:13.6.0'                  // AppLovin
-    implementation 'com.startapp:inapp-sdk:5.2.6'                      // StartApp
-    implementation 'com.wortise:android-sdk:1.7.2'                     // Wortise
-    implementation 'com.unity3d.ads:unity-ads:4.16.5'                  // Unity
-    implementation 'com.ironsource.sdk:mediationsdk:8.4.0'             // IronSource
+    // 🔥 OPTIONAL DEPENDENCIES 🔥
+    // AdGlide automatically detects which SDKs you include via reflection.
+    // Choose ONLY the Ad Networks you want to use to keep your app size small:
+    
+    implementation 'com.google.android.gms:play-services-ads:23.0.0'   // AdMob
+    // implementation 'com.facebook.android:audience-network-sdk:6.17.0'  // Meta
+    // implementation 'com.applovin:applovin-sdk:12.4.0'                  // AppLovin
+    // implementation 'com.startapp:inapp-sdk:5.1.0'                      // StartApp
+    // implementation 'com.wortise:android-sdk:1.5.0'                     // Wortise
+    // implementation 'com.unity3d.ads:unity-ads:4.10.0'                  // Unity
+    // implementation 'com.ironsource.sdk:mediationsdk:8.0.0'             // IronSource
     
     // GDPR (Required for EU compliance)
-    implementation 'com.google.android.ump:user-messaging-platform:4.0.0'
+    implementation 'com.google.android.ump:user-messaging-platform:2.2.0'
 }
 ```
 
@@ -298,7 +302,7 @@ new InterstitialAd.Builder(this)
             // Navigate to next screen
         }
     })
-    .show(this);
+    .show(this); // Internally checks isAdLoaded() before displaying
 ```
 
 ---
@@ -402,28 +406,6 @@ new RewardedInterstitialAd.Builder(this)
 
 ## 🚀 Pro Performance Features
 
-### Pre-Fetching (AdRepository)
-Silently pre-fetch ads in your Splash screen so they're instantly available later:
-
-```java
-// Splash Activity — download ad to memory
-AdRepository.getInstance().preloadInterstitial(
-    this, AdGlideNetwork.ADMOB.getValue(), "YOUR_ADMOB_AD_UNIT_ID");
-
-// Main Activity — instant display from cache
-new InterstitialAd.Builder(this)
-    .network(AdGlideNetwork.ADMOB)
-    .adMobId("YOUR_ADMOB_AD_UNIT_ID")
-    .build().load().show(this);
-
-// Memory cleanup
-@Override
-protected void onDestroy() {
-    super.onDestroy();
-    AdRepository.getInstance().clearCache();
-}
-```
-
 ### Triple-Base64 Security
 Protect your Ad Unit IDs from APK decompilation:
 
@@ -450,6 +432,7 @@ AdGlide follows a **"Network-First"** approach with automatic connectivity check
 
 - **SDK Initialization** — `AdNetwork.initAds()` skips initialization if offline.
 - **Ad Loading** — All formats check for internet before sending requests.
+- **Fast-Fail Bypassing** — Gracefully instantly bypasses networks displaying empty or invalid Ad Unit IDs.
 - **Waterfall Fail-Safe** — If a device goes offline mid-waterfall, the SDK gracefully stops.
 - **Rate Limiting** — `AdMobRateLimiter` applies exponential cooldown to failing ad units.
 
@@ -460,9 +443,18 @@ AdGlide follows a **"Network-First"** approach with automatic connectivity check
 Add these to your `proguard-rules.pro` for production builds:
 
 ```proguard
-# AdGlide SDK
+# AdGlide SDK Core & Dynamic Providers
 -keep public class com.partharoypc.adglide.** { *; }
 -keep interface com.partharoypc.adglide.util.On*Listener { *; }
+
+# Prevent ProGuard from stripping absent network SDKs used in Reflection
+-dontwarn com.google.android.gms.ads.**
+-dontwarn com.facebook.ads.**
+-dontwarn com.applovin.**
+-dontwarn com.startapp.**
+-dontwarn com.wortise.**
+-dontwarn com.unity3d.ads.**
+-dontwarn com.ironsource.mediationsdk.**
 
 # AdMob
 -keep class com.google.android.gms.ads.** { *; }
@@ -475,8 +467,7 @@ Add these to your `proguard-rules.pro` for production builds:
 
 # StartApp
 -keep class com.startapp.** { *; }
--keepattributes Exceptions, InnerClasses, Signature, Deprecated, SourceFile,
-    LineNumberTable, *Annotation*, EnclosingMethod
+-keepattributes Exceptions, InnerClasses, Signature, Deprecated, SourceFile, LineNumberTable, *Annotation*, EnclosingMethod
 
 # Wortise
 -keep class com.wortise.** { *; }
@@ -488,14 +479,14 @@ Add these to your `proguard-rules.pro` for production builds:
 
 | Property | Value |
 | :--- | :--- |
-| **SDK Version** | 1.2.0 |
-| **Min SDK** | 21 (Android 5.0) |
+| **SDK Version** | 1.3.0 |
+| **Min SDK** | 23 (Android 6.0) |
 | **Target SDK** | 35 |
 | **Compile SDK** | 35 |
 | **Java Version** | 17 |
 | **Build System** | Gradle 9.3.0 |
 | **AndroidX** | Required |
-| **Distribution** | JitPack (`com.github.partharoypc:adglide:1.2.0`) |
+| **Distribution** | JitPack (`com.github.partharoypc:adglide:1.3.0`) |
 
 ---
 

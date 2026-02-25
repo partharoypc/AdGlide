@@ -1,7 +1,6 @@
 package com.partharoypc.adglide;
 
 import android.content.Context;
-import com.partharoypc.adglide.format.AdNetwork;
 
 public class AdGlide {
 
@@ -11,7 +10,9 @@ public class AdGlide {
      * @param context The Application or Activity context.
      * @return An Initialize builder instance for fluent configuration.
      */
-    public static AdNetwork.Initialize init(Context context) {
-        return new AdNetwork.Initialize(context);
+
+    public static com.partharoypc.adglide.format.AdNetwork.Initialize init(Context context) {
+        return new com.partharoypc.adglide.format.AdNetwork.Initialize(context);
     }
+
 }

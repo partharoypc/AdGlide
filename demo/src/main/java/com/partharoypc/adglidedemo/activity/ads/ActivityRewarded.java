@@ -60,6 +60,7 @@ public class ActivityRewarded extends AppCompatActivity {
                 .zoneId(Constant.APPLOVIN_DISC_REWARDED_ZONE_ID)
                 .ironSourceId(Constant.IRONSOURCE_REWARDED_ID)
                 .wortiseId(Constant.WORTISE_REWARDED_ID)
+                .startAppId(Constant.STARTAPP_APP_ID)
                 .build().load(() -> appendLog("Rewarded Ad Loaded"),
                         () -> appendLog("Rewarded Ad Error"),
                         () -> appendLog("Rewarded Ad Dismissed"),
@@ -67,7 +68,7 @@ public class ActivityRewarded extends AppCompatActivity {
     }
 
     private void showRewardedAd() {
-        if (rewardedAd != null) {
+        if (rewardedAd != null && rewardedAd.isAdAvailable()) {
             rewardedAd.show(new OnRewardedAdCompleteListener() {
                 @Override
                 public void onRewardedAdComplete() {
@@ -98,7 +99,7 @@ public class ActivityRewarded extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (rewardedAd != null) {
-            rewardedAd.destroyRewardedAd();
+            rewardedAd.destroy();
         }
     }
 }

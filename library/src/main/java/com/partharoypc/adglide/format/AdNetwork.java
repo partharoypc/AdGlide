@@ -1,46 +1,20 @@
 package com.partharoypc.adglide.format;
 
-import static com.partharoypc.adglide.util.Constant.IRONSOURCE;
-
-import static com.partharoypc.adglide.util.Constant.ADMOB;
-import static com.partharoypc.adglide.util.Constant.APPLOVIN;
-
-import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
-import static com.partharoypc.adglide.util.Constant.META;
-import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
-import static com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX;
-import static com.partharoypc.adglide.util.Constant.META_BIDDING_IRONSOURCE;
-import static com.partharoypc.adglide.util.Constant.NONE;
-import static com.partharoypc.adglide.util.Constant.STARTAPP;
-import static com.partharoypc.adglide.util.Constant.UNITY;
-import static com.partharoypc.adglide.util.Constant.WORTISE;
-
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 import com.partharoypc.adglide.AdGlideNetwork;
 import com.partharoypc.adglide.util.Tools;
-
-import com.applovin.sdk.AppLovinMediationProvider;
-import com.applovin.sdk.AppLovinSdk;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.AdapterStatus;
-import com.ironsource.mediationsdk.IronSource;
-import com.partharoypc.adglide.helper.AudienceNetworkInitializeHelper;
-import com.startapp.sdk.adsbase.StartAppAd;
-import com.startapp.sdk.adsbase.StartAppSDK;
-import com.unity3d.ads.IUnityAdsInitializationListener;
-import com.unity3d.ads.UnityAds;
-import com.wortise.ads.WortiseSdk;
+import com.partharoypc.adglide.provider.NetworkInitializer;
+import com.partharoypc.adglide.provider.NetworkInitializerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class AdNetwork {
 
-    public static class Initialize {
+    public static class Initialize implements NetworkInitializer.InitializerConfig {
 
         private static final String TAG = "AdGlide";
         private final Context context;
@@ -63,6 +37,65 @@ public class AdNetwork {
             this.activity = context instanceof Activity ? (Activity) context : null;
         }
 
+        @Override
+        public String getAppId() {
+            AdGlideNetwork network = AdGlideNetwork.fromString(adNetwork);
+            switch (network) {
+                case ADMOB:
+                case META_BIDDING_ADMOB:
+                    return adMobAppId;
+                case UNITY:
+                    return unityGameId;
+                case APPLOVIN:
+                case APPLOVIN_MAX:
+                case META_BIDDING_APPLOVIN_MAX:
+                    return appLovinSdkKey;
+                case IRONSOURCE:
+                case META_BIDDING_IRONSOURCE:
+                    return ironSourceAppKey;
+                case STARTAPP:
+                    return startappAppId;
+                case WORTISE:
+                    return wortiseAppId;
+                default:
+                    return "";
+            }
+        }
+
+        private String getAppIdForNetwork(String networkName) {
+            AdGlideNetwork network = AdGlideNetwork.fromString(networkName);
+            switch (network) {
+                case ADMOB:
+                case META_BIDDING_ADMOB:
+                    return adMobAppId;
+                case UNITY:
+                    return unityGameId;
+                case APPLOVIN:
+                case APPLOVIN_MAX:
+                case META_BIDDING_APPLOVIN_MAX:
+                    return appLovinSdkKey;
+                case IRONSOURCE:
+                case META_BIDDING_IRONSOURCE:
+                    return ironSourceAppKey;
+                case STARTAPP:
+                    return startappAppId;
+                case WORTISE:
+                    return wortiseAppId;
+                default:
+                    return "";
+            }
+        }
+
+        @Override
+        public boolean isDebug() {
+            return debug;
+        }
+
+        @Override
+        public boolean isTestMode() {
+            return testMode;
+        }
+
         public Initialize build() {
             initAds();
             initBackupAds();
@@ -75,7 +108,7 @@ public class AdNetwork {
         }
 
         public Initialize network(String adNetwork) {
-            this.adNetwork = adNetwork;
+            this.adNetwork = AdGlideNetwork.fromString(adNetwork).getValue();
             return this;
         }
 
@@ -108,7 +141,9 @@ public class AdNetwork {
         public Initialize backups(AdGlideNetwork... backupAdNetworks) {
             this.backupAdNetworks.clear();
             for (AdGlideNetwork network : backupAdNetworks) {
-                this.backupAdNetworks.add(network.getValue());
+                if (network != null) {
+                    this.backupAdNetworks.add(network.getValue());
+                }
             }
             if (!this.backupAdNetworks.isEmpty()) {
                 this.backupAdNetwork = this.backupAdNetworks.get(0);
@@ -190,6 +225,12 @@ public class AdNetwork {
                         Log.w(TAG, "Unknown Backup Ad Network: [" + network + "]. Skipping initialization.");
                         continue;
                     }
+
+                    // Skip if it's the same as the primary network (already initialized)
+                    if (network.equals(adNetwork)) {
+                        continue;
+                    }
+
                     initializeSdk(network);
                     Log.d(TAG, "[" + network + "] is selected as Backup Ads");
                 }
@@ -198,77 +239,27 @@ public class AdNetwork {
 
         private void initializeSdk(String network) {
             try {
-                switch (network) {
-                    case ADMOB:
-                    case META_BIDDING_ADMOB:
-                        MobileAds.initialize(context, initializationStatus -> {
-                            Map<String, AdapterStatus> statusMap = initializationStatus.getAdapterStatusMap();
-                            for (String adapterClass : statusMap.keySet()) {
-                                AdapterStatus adapterStatus = statusMap.get(adapterClass);
-                                if (adapterStatus != null) {
-                                    Log.d(TAG, String.format("Adapter name: %s, Description: %s, Latency: %d",
-                                            adapterClass, adapterStatus.getDescription(), adapterStatus.getLatency()));
-                                }
-                            }
-                        });
-                        AudienceNetworkInitializeHelper.initializeAd(context, debug || testMode);
-                        break;
-                    case META:
-                        AudienceNetworkInitializeHelper.initializeAd(context, debug || testMode);
-                        break;
-                    case UNITY:
-                        UnityAds.initialize(context, unityGameId, debug || testMode,
-                                new IUnityAdsInitializationListener() {
-                                    @Override
-                                    public void onInitializationComplete() {
-                                        Log.d(TAG, "Unity Ads Initialization Complete");
-                                    }
-
-                                    @Override
-                                    public void onInitializationFailed(UnityAds.UnityAdsInitializationError error,
-                                            String message) {
-                                        Log.d(TAG, "Unity Ads Initialization Failed: " + error + " - " + message);
-                                    }
-                                });
-                        break;
-                    case APPLOVIN:
-                    case APPLOVIN_MAX:
-                    case META_BIDDING_APPLOVIN_MAX:
-                        AppLovinSdk.getInstance(context).setMediationProvider(AppLovinMediationProvider.MAX);
-                        AppLovinSdk.getInstance(context).initializeSdk(config -> {
-                        });
-                        AudienceNetworkInitializeHelper.initializeAd(context, debug || testMode);
-                        break;
-
-                    case IRONSOURCE:
-                    case META_BIDDING_IRONSOURCE:
-                        if (activity != null) {
-                            IronSource.init(activity, ironSourceAppKey, IronSource.AD_UNIT.REWARDED_VIDEO,
-                                    IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.BANNER);
-                        } else {
-                            Log.e(TAG,
-                                    "IronSource requires an Activity Context to initialize. Skipping IronSource init.");
+                NetworkInitializer initializer = NetworkInitializerFactory.getInitializer(network);
+                if (initializer != null) {
+                    initializer.initialize(context, new NetworkInitializer.InitializerConfig() {
+                        @Override
+                        public String getAppId() {
+                            return getAppIdForNetwork(network);
                         }
-                        AudienceNetworkInitializeHelper.initializeAd(context, debug || testMode);
-                        break;
-                    case STARTAPP:
-                        StartAppSDK.init(context, startappAppId, true);
-                        StartAppSDK.setTestAdsEnabled(debug || testMode);
-                        StartAppAd.disableSplash();
-                        StartAppSDK.enableReturnAds(false);
-                        break;
-                    case WORTISE:
-                        WortiseSdk.initialize(context, wortiseAppId);
-                        break;
-                    case NONE:
-                        // do nothing
-                        break;
-                    default:
-                        break;
+
+                        @Override
+                        public boolean isDebug() {
+                            return debug;
+                        }
+
+                        @Override
+                        public boolean isTestMode() {
+                            return testMode;
+                        }
+                    });
                 }
-            } catch (NoClassDefFoundError | Exception e) {
-                Log.e(TAG, "Failed to initialize " + network + " SDK. Are you sure you added the dependency? Error: "
-                        + e.getMessage());
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to initialize " + network + " SDK. Error: " + e.getMessage());
             }
         }
 

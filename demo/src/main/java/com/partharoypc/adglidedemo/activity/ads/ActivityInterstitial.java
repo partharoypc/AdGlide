@@ -53,11 +53,12 @@ public class ActivityInterstitial extends AppCompatActivity {
                 .backup(Constant.BACKUP_AD_NETWORK)
                 .adMobId(Constant.ADMOB_INTERSTITIAL_ID)
                 .metaId(Constant.META_INTERSTITIAL_ID)
-                .unityId(Constant.UNITY_GAME_ID)
+                .unityId(Constant.UNITY_INTERSTITIAL_ID)
                 .appLovinId(Constant.APPLOVIN_INTERSTITIAL_ID)
                 .zoneId(Constant.APPLOVIN_INTERSTITIAL_ZONE_ID)
                 .ironSourceId(Constant.IRONSOURCE_INTERSTITIAL_ID)
                 .wortiseId(Constant.WORTISE_INTERSTITIAL_ID)
+                .startAppId(Constant.STARTAPP_APP_ID)
                 .interval(Constant.INTERSTITIAL_AD_INTERVAL)
                 .build().load(() -> {
                     appendLog("Interstitial Ad Dismissed");
@@ -67,7 +68,7 @@ public class ActivityInterstitial extends AppCompatActivity {
     }
 
     private void showInterstitialAd() {
-        if (interstitialAd != null) {
+        if (interstitialAd != null && interstitialAd.isAdLoaded()) {
             interstitialAd.show(() -> {
                 appendLog("Interstitial Ad Shown");
                 Log.d(TAG, "onAdShowed");

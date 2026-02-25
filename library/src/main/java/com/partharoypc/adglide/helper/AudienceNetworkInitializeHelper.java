@@ -21,13 +21,13 @@ public class AudienceNetworkInitializeHelper implements AudienceNetworkAds.InitL
      * @param context Application or Activity.
      */
     public static void initialize(Context context) {
-        if (!AudienceNetworkAds.isInitialized(context)) {
-            if (BuildConfig.DEBUG) {
-                AdSettings.turnOnSDKDebugger(context);
-                AdSettings.setTestMode(true);
-                AdSettings.setIntegrationErrorMode(AdSettings.IntegrationErrorMode.INTEGRATION_ERROR_CRASH_DEBUG_MODE);
-            }
+        if (BuildConfig.DEBUG) {
+            AdSettings.turnOnSDKDebugger(context);
+            AdSettings.setTestMode(true);
+            AdSettings.setIntegrationErrorMode(AdSettings.IntegrationErrorMode.INTEGRATION_ERROR_CRASH_DEBUG_MODE);
+        }
 
+        if (!AudienceNetworkAds.isInitialized(context)) {
             AudienceNetworkAds
                     .buildInitSettings(context)
                     .withInitListener(new AudienceNetworkInitializeHelper())
@@ -36,13 +36,13 @@ public class AudienceNetworkInitializeHelper implements AudienceNetworkAds.InitL
     }
 
     public static void initializeAd(Context context, boolean debug) {
-        if (!AudienceNetworkAds.isInitialized(context)) {
-            if (debug) {
-                AdSettings.turnOnSDKDebugger(context);
-                AdSettings.setTestMode(true);
-                AdSettings.setIntegrationErrorMode(AdSettings.IntegrationErrorMode.INTEGRATION_ERROR_CRASH_DEBUG_MODE);
-            }
+        if (debug) {
+            AdSettings.turnOnSDKDebugger(context);
+            AdSettings.setTestMode(true);
+            AdSettings.setIntegrationErrorMode(AdSettings.IntegrationErrorMode.INTEGRATION_ERROR_CRASH_DEBUG_MODE);
+        }
 
+        if (!AudienceNetworkAds.isInitialized(context)) {
             AudienceNetworkAds
                     .buildInitSettings(context)
                     .withInitListener(new AudienceNetworkInitializeHelper())
@@ -55,7 +55,3 @@ public class AudienceNetworkInitializeHelper implements AudienceNetworkAds.InitL
         Log.d(AudienceNetworkAds.TAG, result.getMessage());
     }
 }
-
-
-
-

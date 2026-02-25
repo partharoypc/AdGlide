@@ -14,10 +14,6 @@ import android.view.WindowMetrics;
 
 import androidx.annotation.NonNull;
 
-import com.google.ads.mediation.admob.AdMobAdapter;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
-
 import com.partharoypc.adglide.gdpr.LegacyGDPR;
 
 import android.content.Context;
@@ -70,78 +66,6 @@ public class Tools {
         }
         Log.i(TAG, "No internet connection available.");
         return false;
-    }
-
-    /**
-     * Calculates the adaptive banner ad size based on the device screen width.
-     *
-     * @param activity the current Activity used to determine screen dimensions
-     * @return the adaptive banner {@link AdSize} for the current orientation
-     */
-    @NonNull
-    @SuppressWarnings("deprecation")
-    public static AdSize getAdSize(@NonNull Activity activity) {
-        int adWidth;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            WindowMetrics windowMetrics = activity.getWindowManager().getCurrentWindowMetrics();
-            float widthPixels = windowMetrics.getBounds().width();
-            float density = activity.getResources().getDisplayMetrics().density;
-            adWidth = (int) (widthPixels / density);
-        } else {
-            DisplayMetrics outMetrics = new DisplayMetrics();
-            activity.getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
-            float widthPixels = outMetrics.widthPixels;
-            float density = outMetrics.density;
-            adWidth = (int) (widthPixels / density);
-        }
-        return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(activity, adWidth);
-    }
-
-    /**
-     * Returns the medium rectangle (300x250) ad size.
-     *
-     * @return the {@link AdSize#MEDIUM_RECTANGLE} constant
-     */
-    @NonNull
-    public static AdSize getAdSizeMREC() {
-        return AdSize.MEDIUM_RECTANGLE;
-    }
-
-    /**
-     * Builds an {@link AdRequest} with optional legacy GDPR consent bundle.
-     *
-     * @param activity   the current Activity
-     * @param legacyGDPR whether to attach legacy GDPR consent extras
-     * @return a configured {@link AdRequest}
-     */
-    @NonNull
-    public static AdRequest getAdRequest(@NonNull Activity activity, boolean legacyGDPR) {
-        if (legacyGDPR) {
-            return new AdRequest.Builder()
-                    .addNetworkExtrasBundle(AdMobAdapter.class, LegacyGDPR.getBundleAd(activity))
-                    .build();
-        } else {
-            return new AdRequest.Builder().build();
-        }
-    }
-
-    /**
-     * Builds an {@link AdRequest}, optionally configured for collapsible banners.
-     *
-     * @param isCollapsibleBanner whether to enable collapsible banner mode
-     * @return a configured {@link AdRequest}
-     */
-    @NonNull
-    public static AdRequest getAdRequest(boolean isCollapsibleBanner) {
-        if (isCollapsibleBanner) {
-            Log.d(TAG, "Loading collapsible banner");
-            Bundle extras = new Bundle();
-            extras.putString("collapsible", "bottom");
-            return new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build();
-        } else {
-            Log.d(TAG, "Loading default banner");
-            return new AdRequest.Builder().build();
-        }
     }
 
     /**

@@ -1,49 +1,48 @@
 package com.partharoypc.adglide.format;
 
-import static com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
+import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import android.annotation.SuppressLint;
-import com.partharoypc.adglide.AdGlideNetwork;
 import android.app.Activity;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.partharoypc.adglide.AdGlideNetwork;
+import com.partharoypc.adglide.provider.AppOpenProvider;
+import com.partharoypc.adglide.provider.AppOpenProviderFactory;
 import com.partharoypc.adglide.util.OnShowAdCompleteListener;
 import com.partharoypc.adglide.util.Tools;
 import com.partharoypc.adglide.util.WaterfallManager;
 
-/**
- * Manages app open ads with primary and backup network support.
- * Supports AdMob, AppLovin, and Wortise networks.
- */
+import java.util.HashMap;
+import java.util.Map;
+
 @SuppressLint("StaticFieldLeak")
 public class AppOpenAd {
     private static final String TAG = "AdGlide";
 
     public static boolean isAppOpenAdLoaded = false;
-
-    // Configuration fields
     private boolean adStatus = true;
     private String adNetwork = "";
     private String backupAdNetwork = "";
     private WaterfallManager waterfallManager;
     private String adMobAppOpenId = "";
+    private String metaAppOpenId = "";
     private String appLovinAppOpenId = "";
     private String wortiseAppOpenId = "";
     private Activity currentActivity;
     private int placementStatus = 1;
 
-    // Helper instances (static so the inner Builder class can access them)
-    private static AdMobAppOpenAd adMobAppOpenAd = new AdMobAppOpenAd();
-    private static AppLovinAppOpenAd appLovinAppOpenAd = new AppLovinAppOpenAd();
-    private static WortiseAppOpenAd appOpenAdWortise = new WortiseAppOpenAd();
+    // Provider management
+    private static final Map<String, AppOpenProvider> providers = new HashMap<>();
 
     public AppOpenAd() {
     }
@@ -54,8 +53,20 @@ public class AppOpenAd {
         this.backupAdNetwork = builder.backupAdNetwork;
         this.waterfallManager = builder.waterfallManager;
         this.adMobAppOpenId = builder.adMobAppOpenId;
+        this.metaAppOpenId = builder.metaAppOpenId;
         this.appLovinAppOpenId = builder.appLovinAppOpenId;
         this.wortiseAppOpenId = builder.wortiseAppOpenId;
+    }
+
+    private static synchronized AppOpenProvider getProvider(String network) {
+        AppOpenProvider provider = providers.get(network);
+        if (provider == null) {
+            provider = AppOpenProviderFactory.getProvider(network);
+            if (provider != null) {
+                providers.put(network, provider);
+            }
+        }
+        return provider;
     }
 
     @NonNull
@@ -84,7 +95,7 @@ public class AppOpenAd {
 
     @NonNull
     public AppOpenAd backup(@Nullable String backupAdNetwork) {
-        this.backupAdNetwork = backupAdNetwork;
+        this.backupAdNetwork = AdGlideNetwork.fromString(backupAdNetwork).getValue();
         this.waterfallManager = new WaterfallManager(backupAdNetwork);
         return this;
     }
@@ -93,7 +104,7 @@ public class AppOpenAd {
     public AppOpenAd backups(@Nullable String... backupAdNetworks) {
         this.waterfallManager = new WaterfallManager(backupAdNetworks);
         if (backupAdNetworks != null && backupAdNetworks.length > 0) {
-            this.backupAdNetwork = backupAdNetworks[0];
+            this.backupAdNetwork = AdGlideNetwork.fromString(backupAdNetworks[0]).getValue();
         }
         return this;
     }
@@ -101,6 +112,12 @@ public class AppOpenAd {
     @NonNull
     public AppOpenAd adMobId(@NonNull String adMobAppOpenId) {
         this.adMobAppOpenId = adMobAppOpenId;
+        return this;
+    }
+
+    @NonNull
+    public AppOpenAd metaId(@NonNull String metaAppOpenId) {
+        this.metaAppOpenId = metaAppOpenId;
         return this;
     }
 
@@ -144,21 +161,8 @@ public class AppOpenAd {
     public void onStartActivityLifecycleCallbacks(Activity activity) {
         try {
             if (placementStatus != 0 && adStatus) {
-                boolean isShowing = false;
-                switch (AdGlideNetwork.fromString(adNetwork)) {
-                    case ADMOB:
-                    case META_BIDDING_ADMOB:
-                        isShowing = adMobAppOpenAd.isShowingAd();
-                        break;
-                    case APPLOVIN:
-                    case APPLOVIN_MAX:
-                    case META_BIDDING_APPLOVIN_MAX:
-                        isShowing = appLovinAppOpenAd.isShowingAd();
-                        break;
-                    case WORTISE:
-                        isShowing = appOpenAdWortise.isShowingAd();
-                        break;
-                }
+                AppOpenProvider provider = getProvider(adNetwork);
+                boolean isShowing = provider != null && provider.isShowingAd();
                 if (!isShowing) {
                     currentActivity = activity;
                 }
@@ -178,28 +182,39 @@ public class AppOpenAd {
             @Nullable OnShowAdCompleteListener onShowAdCompleteListener) {
         try {
             if (placementStatus != 0 && adStatus) {
-                switch (AdGlideNetwork.fromString(adNetwork)) {
-                    case ADMOB:
-                    case META_BIDDING_ADMOB:
-                        if (!adMobAppOpenId.equals("0")) {
-                            adMobAppOpenAd.showAdIfAvailable(activity, adMobAppOpenId,
-                                    onShowAdCompleteListener);
+                AppOpenProvider provider = getProvider(adNetwork);
+                String adUnitId = getAdUnitIdForNetwork(adNetwork);
+
+                if (provider != null && !adUnitId.equals("0")) {
+                    provider.showAppOpenAd(activity, new AppOpenProvider.AppOpenListener() {
+                        @Override
+                        public void onAdLoaded() {
                         }
-                        break;
-                    case APPLOVIN:
-                    case APPLOVIN_MAX:
-                    case META_BIDDING_APPLOVIN_MAX:
-                        if (!appLovinAppOpenId.equals("0")) {
-                            appLovinAppOpenAd.showAdIfAvailable(activity, appLovinAppOpenId,
-                                    onShowAdCompleteListener);
+
+                        @Override
+                        public void onAdFailedToLoad(String error) {
+                            if (onShowAdCompleteListener != null)
+                                onShowAdCompleteListener.onShowAdComplete();
                         }
-                        break;
-                    case WORTISE:
-                        if (!wortiseAppOpenId.equals("0")) {
-                            appOpenAdWortise.showAdIfAvailable(activity, wortiseAppOpenId,
-                                    onShowAdCompleteListener);
+
+                        @Override
+                        public void onAdDismissed() {
+                            if (onShowAdCompleteListener != null)
+                                onShowAdCompleteListener.onShowAdComplete();
                         }
-                        break;
+
+                        @Override
+                        public void onAdShowFailed(String error) {
+                            if (onShowAdCompleteListener != null)
+                                onShowAdCompleteListener.onShowAdComplete();
+                        }
+
+                        @Override
+                        public void onAdShowed() {
+                        }
+                    });
+                } else if (onShowAdCompleteListener != null) {
+                    onShowAdCompleteListener.onShowAdComplete();
                 }
             } else if (onShowAdCompleteListener != null) {
                 onShowAdCompleteListener.onShowAdComplete();
@@ -212,6 +227,16 @@ public class AppOpenAd {
         }
     }
 
+    private String getAdUnitIdForNetwork(String network) {
+        return switch (network) {
+            case ADMOB, META_BIDDING_ADMOB -> adMobAppOpenId;
+            case META -> metaAppOpenId;
+            case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> appLovinAppOpenId;
+            case WORTISE -> wortiseAppOpenId;
+            default -> "0";
+        };
+    }
+
     // ── Builder ──────────────────────────────────────────────────────────
 
     public static class Builder {
@@ -222,6 +247,7 @@ public class AppOpenAd {
         private String backupAdNetwork = "";
         private WaterfallManager waterfallManager;
         private String adMobAppOpenId = "";
+        private String metaAppOpenId = "";
         private String appLovinAppOpenId = "";
         private String wortiseAppOpenId = "";
 
@@ -249,7 +275,7 @@ public class AppOpenAd {
 
         @NonNull
         public Builder backup(@Nullable String backupAdNetwork) {
-            this.backupAdNetwork = backupAdNetwork;
+            this.backupAdNetwork = AdGlideNetwork.fromString(backupAdNetwork).getValue();
             this.waterfallManager = new WaterfallManager(backupAdNetwork);
             return this;
         }
@@ -263,7 +289,7 @@ public class AppOpenAd {
         public Builder backups(String... backupAdNetworks) {
             this.waterfallManager = new WaterfallManager(backupAdNetworks);
             if (backupAdNetworks.length > 0) {
-                this.backupAdNetwork = backupAdNetworks[0];
+                this.backupAdNetwork = AdGlideNetwork.fromString(backupAdNetworks[0]).getValue();
             }
             return this;
         }
@@ -276,6 +302,12 @@ public class AppOpenAd {
         @NonNull
         public Builder adMobId(@NonNull String adMobAppOpenId) {
             this.adMobAppOpenId = adMobAppOpenId;
+            return this;
+        }
+
+        @NonNull
+        public Builder metaId(@NonNull String metaAppOpenId) {
+            this.metaAppOpenId = metaAppOpenId;
             return this;
         }
 
@@ -332,40 +364,53 @@ public class AppOpenAd {
         private void loadAdFromNetwork(String network,
                 OnShowAdCompleteListener onShowAdCompleteListener) {
             try {
-                switch (AdGlideNetwork.fromString(network)) {
-                    case ADMOB:
-                    case META_BIDDING_ADMOB:
-                        if (!com.partharoypc.adglide.util.AdMobRateLimiter
-                                .isRequestAllowed(adMobAppOpenId)) {
-                            loadBackupAppOpenAd(onShowAdCompleteListener);
-                            return;
+                String adUnitId = getAdUnitIdForNetwork(network);
+                if (adUnitId == null || adUnitId.trim().isEmpty()
+                        || (adUnitId.equals("0") && !network.equals("startapp"))) {
+                    Log.d(TAG, "Ad unit ID for " + network + " is invalid. Trying backup.");
+                    loadBackupAppOpenAd(onShowAdCompleteListener);
+                    return;
+                }
+
+                AppOpenProvider provider = getProvider(network);
+                if (provider != null) {
+                    provider.loadAppOpenAd(activity, adUnitId, new AppOpenProvider.AppOpenListener() {
+                        @Override
+                        public void onAdLoaded() {
+                            isAppOpenAdLoaded = true;
                         }
-                        adMobAppOpenAd.loadAd(activity, adMobAppOpenId);
-                        showAppOpenAd(onShowAdCompleteListener);
-                        break;
-                    case APPLOVIN:
-                    case APPLOVIN_MAX:
-                    case META_BIDDING_APPLOVIN_MAX:
-                        appLovinAppOpenAd.loadAd(activity, appLovinAppOpenId);
-                        showAppOpenAd(onShowAdCompleteListener);
-                        break;
-                    case WORTISE:
-                        appOpenAdWortise.loadAd(activity, wortiseAppOpenId);
-                        showAppOpenAd(onShowAdCompleteListener);
-                        break;
-                    default:
-                        loadBackupAppOpenAd(onShowAdCompleteListener);
-                        break;
+
+                        @Override
+                        public void onAdFailedToLoad(String error) {
+                            loadBackupAppOpenAd(onShowAdCompleteListener);
+                        }
+
+                        @Override
+                        public void onAdDismissed() {
+                            if (onShowAdCompleteListener != null)
+                                onShowAdCompleteListener.onShowAdComplete();
+                        }
+
+                        @Override
+                        public void onAdShowFailed(String error) {
+                            if (onShowAdCompleteListener != null)
+                                onShowAdCompleteListener.onShowAdComplete();
+                        }
+
+                        @Override
+                        public void onAdShowed() {
+                        }
+                    });
+                } else {
+                    loadBackupAppOpenAd(onShowAdCompleteListener);
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Failed loading AppOpen from " + network + ": "
-                        + e.getMessage());
+                Log.e(TAG, "Failed loading AppOpen from " + network + ": " + e.getMessage());
                 loadBackupAppOpenAd(onShowAdCompleteListener);
             }
         }
 
-        private void loadBackupAppOpenAd(
-                OnShowAdCompleteListener onShowAdCompleteListener) {
+        private void loadBackupAppOpenAd(OnShowAdCompleteListener onShowAdCompleteListener) {
             if (waterfallManager != null && waterfallManager.hasNext()) {
                 String nextNetwork = waterfallManager.getNext();
                 Log.d(TAG, "Loading backup AppOpen from: " + nextNetwork);
@@ -377,32 +422,59 @@ public class AppOpenAd {
             }
         }
 
+        private String getAdUnitIdForNetwork(String network) {
+            switch (network) {
+                case ADMOB:
+                case META_BIDDING_ADMOB:
+                    return adMobAppOpenId;
+                case "meta":
+                    return metaAppOpenId;
+                case APPLOVIN:
+                case APPLOVIN_MAX:
+                case META_BIDDING_APPLOVIN_MAX:
+                    return appLovinAppOpenId;
+                case WORTISE:
+                    return wortiseAppOpenId;
+                default:
+                    return "0";
+            }
+        }
+
         public void showAppOpenAd() {
             showAppOpenAd(null);
         }
 
         public void showAppOpenAd(OnShowAdCompleteListener onShowAdCompleteListener) {
             try {
-                switch (AdGlideNetwork.fromString(adNetwork)) {
-                    case ADMOB:
-                    case META_BIDDING_ADMOB:
-                        adMobAppOpenAd.showAdIfAvailable(activity, adMobAppOpenId,
-                                onShowAdCompleteListener);
-                        break;
-                    case APPLOVIN:
-                    case APPLOVIN_MAX:
-                    case META_BIDDING_APPLOVIN_MAX:
-                        appLovinAppOpenAd.showAdIfAvailable(activity, appLovinAppOpenId,
-                                onShowAdCompleteListener);
-                        break;
-                    case WORTISE:
-                        appOpenAdWortise.showAdIfAvailable(activity, wortiseAppOpenId,
-                                onShowAdCompleteListener);
-                        break;
-                    default:
-                        if (onShowAdCompleteListener != null)
-                            onShowAdCompleteListener.onShowAdComplete();
-                        break;
+                AppOpenProvider provider = getProvider(adNetwork);
+                if (provider != null && provider.isAdAvailable()) {
+                    provider.showAppOpenAd(activity, new AppOpenProvider.AppOpenListener() {
+                        @Override
+                        public void onAdLoaded() {
+                        }
+
+                        @Override
+                        public void onAdFailedToLoad(String error) {
+                        }
+
+                        @Override
+                        public void onAdDismissed() {
+                            if (onShowAdCompleteListener != null)
+                                onShowAdCompleteListener.onShowAdComplete();
+                        }
+
+                        @Override
+                        public void onAdShowFailed(String error) {
+                            if (onShowAdCompleteListener != null)
+                                onShowAdCompleteListener.onShowAdComplete();
+                        }
+
+                        @Override
+                        public void onAdShowed() {
+                        }
+                    });
+                } else if (onShowAdCompleteListener != null) {
+                    onShowAdCompleteListener.onShowAdComplete();
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Error in showAppOpenAd: " + e.getMessage());
@@ -415,9 +487,13 @@ public class AppOpenAd {
             AppOpenAd.isAppOpenAdLoaded = false;
         }
 
+        public boolean isAdAvailable() {
+            AppOpenProvider provider = getProvider(adNetwork);
+            return provider != null && provider.isAdAvailable();
+        }
+
         public AppOpenAd build() {
             return new AppOpenAd(this);
         }
     }
-
 }

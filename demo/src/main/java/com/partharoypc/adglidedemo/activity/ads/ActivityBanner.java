@@ -70,6 +70,7 @@ public class ActivityBanner extends AppCompatActivity {
                 .zoneId(Constant.APPLOVIN_BANNER_ZONE_ID)
                 .ironSourceId(Constant.IRONSOURCE_BANNER_ID)
                 .wortiseId(Constant.WORTISE_BANNER_ID)
+                .startAppId(Constant.STARTAPP_APP_ID)
                 .darkTheme(sharedPref.getIsDarkTheme())
                 .collapsible(switchCollapsible.isChecked())
                 .build().load();

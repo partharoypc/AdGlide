@@ -16,10 +16,10 @@ public class Constant {
     public static final String ADMOB_APP_OPEN_AD_ID = "ca-app-pub-3940256099942544/3419835294";
 
     // Meta Audience Network
-    public static final String META_BANNER_ID = "YOUR_PLACEMENT_ID";
-    public static final String META_INTERSTITIAL_ID = "YOUR_PLACEMENT_ID";
-    public static final String META_REWARDED_ID = "YOUR_PLACEMENT_ID";
-    public static final String META_NATIVE_ID = "YOUR_PLACEMENT_ID";
+    public static final String META_BANNER_ID = "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID";
+    public static final String META_INTERSTITIAL_ID = "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID";
+    public static final String META_REWARDED_ID = "VID_HD_9_16_39S_APP_INSTALL#YOUR_PLACEMENT_ID";
+    public static final String META_NATIVE_ID = "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID";
 
     // StartApp
     public static final String STARTAPP_APP_ID = "0";

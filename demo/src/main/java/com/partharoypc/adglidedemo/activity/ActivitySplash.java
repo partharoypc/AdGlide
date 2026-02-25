@@ -17,7 +17,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.partharoypc.adglide.AdGlide;
-import com.partharoypc.adglide.format.AdNetwork;
 import com.partharoypc.adglide.format.AppOpenAd;
 import com.partharoypc.adglidedemo.BuildConfig;
 import com.partharoypc.adglidedemo.R;
@@ -34,7 +33,6 @@ public class ActivitySplash extends AppCompatActivity {
 
     private static final String TAG = "ActivitySplash";
     public static int DELAY_PROGRESS = 1500;
-    AdNetwork.Initialize adNetwork;
     AppOpenAd.Builder appOpenAdBuilder;
     SharedPref sharedPref;
 

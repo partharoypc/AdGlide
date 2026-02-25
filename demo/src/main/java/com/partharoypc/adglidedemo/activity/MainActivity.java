@@ -27,7 +27,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.partharoypc.adglide.AdGlide;
-import com.partharoypc.adglide.format.AdNetwork;
 import com.partharoypc.adglide.format.AppOpenAd;
 import com.partharoypc.adglide.gdpr.GDPR;
 import com.partharoypc.adglidedemo.BuildConfig;
