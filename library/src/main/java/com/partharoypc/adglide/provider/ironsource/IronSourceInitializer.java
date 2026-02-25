@@ -15,7 +15,7 @@ public class IronSourceInitializer implements NetworkInitializer {
         if (context instanceof Activity) {
             Activity activity = (Activity) context;
             IronSource.init(activity, config.getAppId(), IronSource.AD_UNIT.REWARDED_VIDEO,
-                    IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.BANNER);
+                    IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.BANNER, IronSource.AD_UNIT.NATIVE_AD);
         } else {
             Log.e(TAG, "IronSource requires an Activity Context to initialize. Skipping IronSource init.");
         }

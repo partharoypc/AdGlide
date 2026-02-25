@@ -171,6 +171,12 @@ public class NativeAd {
         }
 
         @NonNull
+        public Builder ironSourceId(@NonNull String ironSourcePlacementName) {
+            adUnitIds.put("ironsource", ironSourcePlacementName);
+            return this;
+        }
+
+        @NonNull
         public Builder placement(int placementStatus) {
             this.placementStatus = placementStatus;
             return this;

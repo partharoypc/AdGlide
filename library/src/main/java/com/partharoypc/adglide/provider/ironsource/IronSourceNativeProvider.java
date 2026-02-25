@@ -25,8 +25,10 @@ public class IronSourceNativeProvider implements NativeProvider {
                 .withListener(new LevelPlayNativeAdListener() {
                     @Override
                     public void onAdLoaded(LevelPlayNativeAd ad, AdInfo adInfo) {
-                        View adView = inflateAndPopulateAdView(activity, ad, config);
-                        listener.onAdLoaded(adView);
+                        activity.runOnUiThread(() -> {
+                            View adView = inflateAndPopulateAdView(activity, ad, config);
+                            listener.onAdLoaded(adView);
+                        });
                     }
 
                     @Override
@@ -48,41 +50,65 @@ public class IronSourceNativeProvider implements NativeProvider {
     }
 
     private View inflateAndPopulateAdView(Activity activity, LevelPlayNativeAd ad, NativeConfig config) {
-        LayoutInflater inflater = LayoutInflater.from(activity);
         int layoutRes = getLayoutForStyle(config.getStyle());
 
-        View nativeAdView = inflater.inflate(layoutRes, null);
+        FrameLayout container = new FrameLayout(activity);
+        LayoutInflater.from(activity).inflate(layoutRes, container, true);
 
-        // Populate assets manually as per LevelPlay SDK 7.9.0+ guidelines
-        TextView title = nativeAdView.findViewById(R.id.native_ad_title);
-        TextView body = nativeAdView.findViewById(R.id.native_ad_body);
-        Button cta = nativeAdView.findViewById(R.id.native_ad_call_to_action);
-        ImageView icon = nativeAdView.findViewById(R.id.native_ad_icon);
+        // Detach root view from temp container and return it directly
+        View adView = container.getChildAt(0);
+        container.removeAllViews();
 
-        if (title != null)
+        // Populate assets
+        TextView title = adView.findViewById(R.id.native_ad_title);
+        TextView body = adView.findViewById(R.id.native_ad_body);
+        Button cta = adView.findViewById(R.id.native_ad_call_to_action);
+        ImageView icon = adView.findViewById(R.id.native_ad_icon);
+
+        if (title != null && ad.getTitle() != null)
             title.setText(ad.getTitle());
-        if (body != null)
-            body.setText(ad.getBody());
-        if (cta != null)
-            cta.setText(ad.getCallToAction());
 
-        // Icon and MediaView require more specific handling in LevelPlay
-        // For now, we populate what we can.
+        if (body != null) {
+            if (ad.getBody() != null) {
+                body.setVisibility(View.VISIBLE);
+                body.setText(ad.getBody());
+            } else {
+                body.setVisibility(View.GONE);
+            }
+        }
 
-        return nativeAdView;
+        if (cta != null) {
+            if (ad.getCallToAction() != null) {
+                cta.setVisibility(View.VISIBLE);
+                cta.setText(ad.getCallToAction());
+            } else {
+                cta.setVisibility(View.GONE);
+            }
+        }
+
+        if (icon != null) {
+            if (ad.getIcon() != null && ad.getIcon().getDrawable() != null) {
+                icon.setImageDrawable(ad.getIcon().getDrawable());
+                icon.setVisibility(View.VISIBLE);
+            } else {
+                icon.setVisibility(View.GONE);
+            }
+        }
+
+        return adView;
     }
 
     private int getLayoutForStyle(String style) {
         switch (style) {
-            case "medium":
             case "banner":
-            case "large":
-                return R.layout.adglide_start_app_news_template_view;
-            case "video":
-                return R.layout.adglide_start_app_video_large_template_view;
+                return R.layout.adglide_ironsource_news_template_view;
             case "small":
+                return R.layout.adglide_ironsource_radio_template_view;
+            case "medium":
+            case "large":
+            case "video":
             default:
-                return R.layout.adglide_start_app_radio_template_view;
+                return R.layout.adglide_ironsource_medium_template_view;
         }
     }
 

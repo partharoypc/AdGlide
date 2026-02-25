@@ -62,6 +62,7 @@ public class ActivityNative extends AppCompatActivity {
                 .appLovinId(Constant.APPLOVIN_NATIVE_MANUAL_ID)
                 .wortiseId(Constant.WORTISE_NATIVE_ID)
                 .startAppId(Constant.STARTAPP_APP_ID)
+                .ironSourceId(Constant.IRONSOURCE_NATIVE_ID)
                 .style(Constant.NATIVE_STYLE)
                 .backgroundColor(R.color.colorNativeBackgroundLight, R.color.colorNativeBackgroundDark)
                 .padding(0, 0, 0, 0)

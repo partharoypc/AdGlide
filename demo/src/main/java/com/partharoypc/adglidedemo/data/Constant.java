@@ -48,6 +48,7 @@ public class Constant {
     public static final String IRONSOURCE_BANNER_ID = "DefaultBanner";
     public static final String IRONSOURCE_INTERSTITIAL_ID = "DefaultInterstitial";
     public static final String IRONSOURCE_REWARDED_ID = "DefaultRewardedVideo";
+    public static final String IRONSOURCE_NATIVE_ID = "DefaultNative";
 
     // Wortise
     public static final String WORTISE_APP_ID = "test-app-id";
