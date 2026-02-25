@@ -39,6 +39,7 @@ public class UnityRewardedProvider implements RewardedProvider {
             UnityAds.show(activity, placementId, new IUnityAdsShowListener() {
                 @Override
                 public void onUnityAdsShowComplete(String placementId, UnityAds.UnityAdsShowCompletionState state) {
+                    isAvailable = false;
                     if (state == UnityAds.UnityAdsShowCompletionState.COMPLETED) {
                         listener.onAdCompleted();
                     }
@@ -50,6 +51,7 @@ public class UnityRewardedProvider implements RewardedProvider {
                         String message) {
                     Log.e(TAG, "Rewarded Ad failed to show: [" + error + "] " + message);
                     isAvailable = false;
+                    listener.onAdShowFailed(message);
                 }
 
                 @Override
@@ -60,6 +62,8 @@ public class UnityRewardedProvider implements RewardedProvider {
                 public void onUnityAdsShowClick(String placementId) {
                 }
             });
+        } else {
+            listener.onAdShowFailed("Unity Rewarded Ad is not available");
         }
     }
 

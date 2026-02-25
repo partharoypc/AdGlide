@@ -9,6 +9,7 @@ import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.NONE;
 import static com.partharoypc.adglide.util.Constant.STARTAPP;
+import static com.partharoypc.adglide.util.Constant.UNITY;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import android.app.Activity;
@@ -331,6 +332,8 @@ public class NativeAd {
                 case IRONSOURCE:
                 case com.partharoypc.adglide.util.Constant.META_BIDDING_IRONSOURCE:
                     return adUnitIds.get(com.partharoypc.adglide.util.Constant.IRONSOURCE);
+                case UNITY:
+                    return null; // Unity does not support Native Ads
                 default:
                     return "0";
             }

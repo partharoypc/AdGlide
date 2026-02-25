@@ -3,6 +3,7 @@ package com.partharoypc.adglide.provider;
 import android.util.Log;
 import com.partharoypc.adglide.util.ReflectionUtils;
 import static com.partharoypc.adglide.util.Constant.*;
+import static com.partharoypc.adglide.util.Constant.UNITY;
 
 public class NativeProviderFactory {
     private static final String TAG = "AdGlide.NativeFactory";
@@ -40,6 +41,9 @@ public class NativeProviderFactory {
                 className = "com.partharoypc.adglide.provider.ironsource.IronSourceNativeProvider";
                 checkClass = "com.ironsource.mediationsdk.IronSource";
                 break;
+            case UNITY:
+                Log.w(TAG, "Unity Ads does not support Native Ad format. Trying backup.");
+                return null;
         }
 
         if (className != null && (checkClass == null || ReflectionUtils.isClassAvailable(checkClass))) {

@@ -253,7 +253,7 @@ public class BannerAd {
 
         private void loadAdFromNetwork(String networkToLoad) {
             try {
-                destroyAndDetachBanner(); // Added this line
+                destroyAndDetachBanner();
                 String adUnitId = getAdUnitIdForNetwork(networkToLoad);
                 Log.d(TAG, "Loading [" + networkToLoad.toUpperCase(java.util.Locale.ROOT) + "] Banner Ad with ID: "
                         + adUnitId);
@@ -266,7 +266,6 @@ public class BannerAd {
 
                 BannerProvider provider = BannerProviderFactory.getProvider(networkToLoad);
                 if (provider != null) {
-                    destroyAndDetachBanner(); // Clean up previous attempt
                     currentProvider = provider;
                     provider.loadBanner(activity, adUnitId, this, new BannerProvider.BannerListener() {
                         @Override
@@ -356,8 +355,7 @@ public class BannerAd {
                 case APPLOVIN:
                 case APPLOVIN_MAX:
                 case META_BIDDING_APPLOVIN_MAX:
-                    // AppLovin implementation in original code created its own RelativeLayout
-                    containerId = R.id.ad_mob_banner_view_container; // Fallback or use a generic one
+                    containerId = R.id.app_lovin_banner_view_container;
                     break;
             }
             return containerId != -1 ? activity.findViewById(containerId) : null;

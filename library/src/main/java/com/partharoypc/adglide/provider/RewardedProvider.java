@@ -25,5 +25,9 @@ public interface RewardedProvider {
         void onAdDismissed();
 
         void onAdCompleted();
+
+        default void onAdShowFailed(String error) {
+            // Default no-op: override to handle show failures
+        }
     }
 }
