@@ -17,7 +17,11 @@ public class WortiseAppOpenProvider implements AppOpenProvider, AppOpenAd.Listen
 
     @Override
     public void loadAppOpenAd(Context context, String adUnitId, AppOpenListener listener) {
-        if (isLoadingAd || isAdAvailable()) {
+        if (isAdAvailable()) {
+            listener.onAdLoaded();
+            return;
+        }
+        if (isLoadingAd) {
             return;
         }
         this.listener = listener;
@@ -84,6 +88,9 @@ public class WortiseAppOpenProvider implements AppOpenProvider, AppOpenAd.Listen
         isShowingAd = false;
         if (listener != null)
             listener.onAdDismissed();
+        // Clear listener BEFORE prefetch so the stale show-listener
+        // is not called when the next ad loads automatically.
+        listener = null;
         ad.loadAd();
     }
 

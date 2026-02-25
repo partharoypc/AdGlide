@@ -24,6 +24,7 @@ public class AppOpenProviderFactory {
                 className = ADMOB_PROV;
                 checkClass = "com.google.android.gms.ads.appopen.AppOpenAd";
                 break;
+            case APPLOVIN:
             case APPLOVIN_MAX:
             case META_BIDDING_APPLOVIN_MAX:
                 className = APPLOVIN_PROV;

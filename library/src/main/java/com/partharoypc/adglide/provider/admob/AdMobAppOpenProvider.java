@@ -19,7 +19,11 @@ public class AdMobAppOpenProvider implements AppOpenProvider {
 
     @Override
     public void loadAppOpenAd(Context context, String adUnitId, AppOpenListener listener) {
-        if (isLoadingAd || isAdAvailable()) {
+        if (isAdAvailable()) {
+            listener.onAdLoaded();
+            return;
+        }
+        if (isLoadingAd) {
             return;
         }
 

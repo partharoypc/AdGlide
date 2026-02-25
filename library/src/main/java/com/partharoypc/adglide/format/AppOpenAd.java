@@ -30,6 +30,20 @@ public class AppOpenAd {
     private static final String TAG = "AdGlide";
 
     public static boolean isAppOpenAdLoaded = false;
+
+    /**
+     * Timestamp (ms) of the last time an App Open Ad was shown. 0 = never shown.
+     */
+    private static long lastShownTimeMs = 0;
+
+    /** Cooldown between App Open Ad impressions: 30 minutes. */
+    private static final long COOLDOWN_MS = 30 * 60 * 1000L;
+
+    /** Returns {@code true} if enough time has passed since the last impression. */
+    public static boolean isCooldownElapsed() {
+        return lastShownTimeMs == 0 || (System.currentTimeMillis() - lastShownTimeMs) >= COOLDOWN_MS;
+    }
+
     private boolean adStatus = true;
     private String adNetwork = "";
     private String backupAdNetwork = "";
@@ -182,6 +196,14 @@ public class AppOpenAd {
             @Nullable OnShowAdCompleteListener onShowAdCompleteListener) {
         try {
             if (placementStatus != 0 && adStatus) {
+                // ── 30-minute cooldown check ──────────────────────────────
+                if (!isCooldownElapsed()) {
+                    Log.d(TAG, "App Open Ad skipped — cooldown not elapsed yet.");
+                    if (onShowAdCompleteListener != null)
+                        onShowAdCompleteListener.onShowAdComplete();
+                    return;
+                }
+
                 AppOpenProvider provider = getProvider(adNetwork);
                 String adUnitId = getAdUnitIdForNetwork(adNetwork);
 
@@ -211,6 +233,8 @@ public class AppOpenAd {
 
                         @Override
                         public void onAdShowed() {
+                            // Record the time the ad was displayed
+                            lastShownTimeMs = System.currentTimeMillis();
                         }
                     });
                 } else if (onShowAdCompleteListener != null) {
@@ -378,27 +402,47 @@ public class AppOpenAd {
                         @Override
                         public void onAdLoaded() {
                             isAppOpenAdLoaded = true;
+                            Log.d(TAG, "AppOpen ad loaded from [" + network.toUpperCase(java.util.Locale.ROOT)
+                                    + "]. Showing now.");
+                            // ── 30-minute cooldown check (splash path) ────
+                            if (!isCooldownElapsed()) {
+                                Log.d(TAG, "App Open Ad skipped — cooldown not elapsed yet.");
+                                if (onShowAdCompleteListener != null)
+                                    onShowAdCompleteListener.onShowAdComplete();
+                                return;
+                            }
+                            // Show the ad immediately — onAdDismissed / onAdShowFailed
+                            // will call onShowAdCompleteListener to continue the splash flow.
+                            provider.showAppOpenAd(activity, this);
                         }
 
                         @Override
                         public void onAdFailedToLoad(String error) {
+                            Log.e(TAG, "AppOpen failed to load from [" + network.toUpperCase(java.util.Locale.ROOT)
+                                    + "]: " + error);
                             loadBackupAppOpenAd(onShowAdCompleteListener);
                         }
 
                         @Override
                         public void onAdDismissed() {
+                            isAppOpenAdLoaded = false;
                             if (onShowAdCompleteListener != null)
                                 onShowAdCompleteListener.onShowAdComplete();
                         }
 
                         @Override
                         public void onAdShowFailed(String error) {
+                            Log.e(TAG, "AppOpen failed to show from [" + network.toUpperCase(java.util.Locale.ROOT)
+                                    + "]: " + error);
                             if (onShowAdCompleteListener != null)
                                 onShowAdCompleteListener.onShowAdComplete();
                         }
 
                         @Override
                         public void onAdShowed() {
+                            Log.d(TAG, "AppOpen ad showed from [" + network.toUpperCase(java.util.Locale.ROOT) + "]");
+                            // Record the time the ad was displayed
+                            lastShownTimeMs = System.currentTimeMillis();
                         }
                     });
                 } else {
@@ -446,6 +490,14 @@ public class AppOpenAd {
 
         public void showAppOpenAd(OnShowAdCompleteListener onShowAdCompleteListener) {
             try {
+                // ── 30-minute cooldown check ──────────────────────────────
+                if (!isCooldownElapsed()) {
+                    Log.d(TAG, "App Open Ad skipped — cooldown not elapsed yet.");
+                    if (onShowAdCompleteListener != null)
+                        onShowAdCompleteListener.onShowAdComplete();
+                    return;
+                }
+
                 AppOpenProvider provider = getProvider(adNetwork);
                 if (provider != null && provider.isAdAvailable()) {
                     provider.showAppOpenAd(activity, new AppOpenProvider.AppOpenListener() {
@@ -471,6 +523,8 @@ public class AppOpenAd {
 
                         @Override
                         public void onAdShowed() {
+                            // Record the time the ad was displayed
+                            lastShownTimeMs = System.currentTimeMillis();
                         }
                     });
                 } else if (onShowAdCompleteListener != null) {

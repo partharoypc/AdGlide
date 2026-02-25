@@ -14,20 +14,26 @@ public class MetaAppOpenProvider implements AppOpenProvider {
     private boolean isShowing = false;
     private static final String TAG = "AdGlide.Meta";
 
+    // Kept as field so showAppOpenAd() can update it before show() fires events
+    private AppOpenListener activeListener;
+
     @Override
     public void loadAppOpenAd(Context context, String adUnitId, AppOpenListener listener) {
+        this.activeListener = listener;
         interstitialAd = new InterstitialAd(context, adUnitId);
         InterstitialAdListener interstitialAdListener = new InterstitialAdListener() {
             @Override
             public void onInterstitialDisplayed(Ad ad) {
                 isShowing = true;
-                listener.onAdShowed();
+                if (activeListener != null)
+                    activeListener.onAdShowed();
             }
 
             @Override
             public void onInterstitialDismissed(Ad ad) {
                 isShowing = false;
-                listener.onAdDismissed();
+                if (activeListener != null)
+                    activeListener.onAdDismissed();
                 if (interstitialAd != null) {
                     interstitialAd.destroy();
                     interstitialAd = null;
@@ -37,13 +43,15 @@ public class MetaAppOpenProvider implements AppOpenProvider {
             @Override
             public void onError(Ad ad, AdError adError) {
                 Log.e(TAG, "Meta AppOpen failed: " + adError.getErrorMessage());
-                listener.onAdFailedToLoad(adError.getErrorMessage());
+                if (activeListener != null)
+                    activeListener.onAdFailedToLoad(adError.getErrorMessage());
             }
 
             @Override
             public void onAdLoaded(Ad ad) {
                 Log.d(TAG, "Meta AppOpen loaded");
-                listener.onAdLoaded();
+                if (activeListener != null)
+                    activeListener.onAdLoaded();
             }
 
             @Override
@@ -69,6 +77,9 @@ public class MetaAppOpenProvider implements AppOpenProvider {
     @Override
     public void showAppOpenAd(Activity activity, AppOpenListener listener) {
         if (isAdAvailable()) {
+            // Update activeListener so the already-registered InterstitialAdListener
+            // forwards events to the show-time listener, not the stale load-time one.
+            this.activeListener = listener;
             interstitialAd.show();
         } else {
             listener.onAdShowFailed("Ad not available");

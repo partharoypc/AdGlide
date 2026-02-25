@@ -13,7 +13,7 @@ public class Constant {
     public static final String ADMOB_REWARDED_ID = "ca-app-pub-3940256099942544/5224354917";
     public static final String ADMOB_REWARDED_INTERSTITIAL_ID = "ca-app-pub-3940256099942544/5354046379";
     public static final String ADMOB_NATIVE_ID = "ca-app-pub-3940256099942544/2247696110";
-    public static final String ADMOB_APP_OPEN_AD_ID = "ca-app-pub-3940256099942544/3419835294";
+    public static final String ADMOB_APP_OPEN_AD_ID = "ca-app-pub-3940256099942544/9257395921";
 
     // Meta Audience Network
     public static final String META_BANNER_ID = "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID";

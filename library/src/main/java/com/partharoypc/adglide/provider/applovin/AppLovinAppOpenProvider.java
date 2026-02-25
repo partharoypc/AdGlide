@@ -19,7 +19,11 @@ public class AppLovinAppOpenProvider implements AppOpenProvider, MaxAdListener {
 
     @Override
     public void loadAppOpenAd(Context context, String adUnitId, AppOpenListener listener) {
-        if (isLoadingAd || isAdAvailable()) {
+        if (isAdAvailable()) {
+            listener.onAdLoaded();
+            return;
+        }
+        if (isLoadingAd) {
             return;
         }
         this.listener = listener;
@@ -97,7 +101,9 @@ public class AppLovinAppOpenProvider implements AppOpenProvider, MaxAdListener {
         isShowingAd = false;
         if (listener != null)
             listener.onAdDismissed();
-        // Prefetch next
+        // Clear listener BEFORE prefetch so the stale show-listener
+        // is not called when the next ad loads automatically.
+        listener = null;
         appOpenAd.loadAd();
     }
 
