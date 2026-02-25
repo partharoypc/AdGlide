@@ -83,14 +83,12 @@ public class AdMobNativeProvider implements NativeProvider {
                 return R.layout.adglide_ad_mob_radio_template_view;
             case "medium":
                 return R.layout.adglide_ad_mob_medium_template_view;
-            case "video_small":
-                return R.layout.adglide_ad_mob_video_small_template_view;
-            case "video_large":
-                return R.layout.adglide_ad_mob_video_large_template_view;
-            case "news":
+            case "banner":
                 return R.layout.adglide_ad_mob_news_template_view;
+            case "video":
+                return R.layout.adglide_ad_mob_video_large_template_view;
             default:
-                return R.layout.adglide_ad_mob_large_template_view;
+                return R.layout.adglide_ad_mob_medium_template_view;
         }
     }
 

@@ -258,9 +258,15 @@ public class RewardedInterstitialAd {
 
         private String getAdUnitIdForNetwork(String network) {
             switch (network) {
-                case "admob":
-                case "meta_bidding_admob":
-                    return adUnitIds.get("admob");
+                case com.partharoypc.adglide.util.Constant.ADMOB:
+                case com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB:
+                    return adUnitIds.get(com.partharoypc.adglide.util.Constant.ADMOB);
+                case com.partharoypc.adglide.util.Constant.APPLOVIN:
+                case com.partharoypc.adglide.util.Constant.APPLOVIN_MAX:
+                case com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX:
+                    return adUnitIds.get(com.partharoypc.adglide.util.Constant.APPLOVIN);
+                case com.partharoypc.adglide.util.Constant.WORTISE:
+                    return adUnitIds.get(com.partharoypc.adglide.util.Constant.WORTISE);
                 default:
                     return "0";
             }

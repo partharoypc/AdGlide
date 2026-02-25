@@ -35,6 +35,11 @@ public class NativeProviderFactory {
                 className = "com.partharoypc.adglide.provider.wortise.WortiseNativeProvider";
                 checkClass = "com.wortise.ads.WortiseSdk";
                 break;
+            case IRONSOURCE:
+            case META_BIDDING_IRONSOURCE:
+                className = "com.partharoypc.adglide.provider.ironsource.IronSourceNativeProvider";
+                checkClass = "com.ironsource.mediationsdk.IronSource";
+                break;
         }
 
         if (className != null && (checkClass == null || ReflectionUtils.isClassAvailable(checkClass))) {

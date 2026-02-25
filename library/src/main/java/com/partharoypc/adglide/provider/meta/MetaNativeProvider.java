@@ -113,14 +113,11 @@ public class MetaNativeProvider implements NativeProvider {
 
     private int getLayoutForStyle(String style) {
         switch (style) {
-            case "news":
             case "medium":
+            case "banner":
                 return R.layout.adglide_meta_news_template_view;
-            case "video_small":
-                return R.layout.adglide_meta_video_small_template_view;
-            case "video_large":
+            case "video":
                 return R.layout.adglide_meta_video_large_template_view;
-            case "radio":
             case "small":
             default:
                 return R.layout.adglide_meta_radio_template_view;

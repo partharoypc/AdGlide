@@ -88,7 +88,7 @@ public class MediumRectangleAd {
 
         @NonNull
         public Builder network(@NonNull String adNetwork) {
-            this.adNetwork = adNetwork;
+            this.adNetwork = AdGlideNetwork.fromString(adNetwork).getValue();
             return this;
         }
 
@@ -245,7 +245,8 @@ public class MediumRectangleAd {
         private void loadAdFromNetwork(String networkToLoad) {
             try {
                 String adUnitId = getAdUnitIdForNetwork(networkToLoad);
-                if (adUnitId.equals("0") || adUnitId.isEmpty()) {
+                if (adUnitId == null || adUnitId.trim().isEmpty()
+                        || (adUnitId.equals("0") && !networkToLoad.equals(STARTAPP))) {
                     loadBackupMediumRectangleAd();
                     return;
                 }

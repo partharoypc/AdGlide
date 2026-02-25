@@ -52,14 +52,12 @@ public class AppLovinNativeProvider implements NativeProvider {
                 return "radio";
             case "medium":
                 return "medium";
-            case "video_small":
-                return "video_small";
-            case "video_large":
-                return "video_large";
-            case "news":
+            case "banner":
                 return "news";
+            case "video":
+                return "video_large";
             default:
-                return "large";
+                return "medium";
         }
     }
 
@@ -70,8 +68,12 @@ public class AppLovinNativeProvider implements NativeProvider {
                 return com.partharoypc.adglide.R.layout.adglide_app_lovin_radio_template_view;
             case "medium":
                 return com.partharoypc.adglide.R.layout.adglide_app_lovin_medium_template_view;
+            case "banner":
+                return com.partharoypc.adglide.R.layout.adglide_app_lovin_news_template_view;
+            case "video":
+                return com.partharoypc.adglide.R.layout.adglide_app_lovin_video_large_template_view;
             default:
-                return com.partharoypc.adglide.R.layout.adglide_app_lovin_large_template_view;
+                return com.partharoypc.adglide.R.layout.adglide_app_lovin_medium_template_view;
         }
     }
 

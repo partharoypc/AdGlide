@@ -427,7 +427,7 @@ public class AppOpenAd {
                 case ADMOB:
                 case META_BIDDING_ADMOB:
                     return adMobAppOpenId;
-                case "meta":
+                case META:
                     return metaAppOpenId;
                 case APPLOVIN:
                 case APPLOVIN_MAX:

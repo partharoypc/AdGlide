@@ -6,11 +6,8 @@ package com.partharoypc.adglide;
 public enum AdGlideNativeStyle {
     SMALL("small"),
     MEDIUM("medium"),
-    RADIO("radio"),
-    NEWS("news"),
-    VIDEO_SMALL("video_small"),
-    VIDEO_LARGE("video_large"),
-    STREAM("stream");
+    BANNER("banner"),
+    VIDEO("video");
 
     private final String value;
 

@@ -75,24 +75,15 @@ public class ActivityNative extends AppCompatActivity {
                 nativeAdView.addView(
                         View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_radio, null));
                 break;
-            case STYLE_NEWS:
+            case STYLE_BANNER:
                 nativeAdView.addView(
                         View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_news, null));
                 break;
-            case STYLE_RADIO:
+            case STYLE_VIDEO:
                 nativeAdView.addView(
-                        View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_radio, null));
+                        View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_video_large, null));
                 break;
-            case STYLE_VIDEO_SMALL:
-                nativeAdView
-                        .addView(View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_video_small,
-                                null));
-                break;
-            case STYLE_VIDEO_LARGE:
-                nativeAdView
-                        .addView(View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_video_large,
-                                null));
-                break;
+            case STYLE_MEDIUM:
             default:
                 nativeAdView.addView(
                         View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_medium, null));
@@ -101,7 +92,7 @@ public class ActivityNative extends AppCompatActivity {
     }
 
     private void showStyleDialog() {
-        final String[] styles = { "Medium (Default)", "Small", "News", "Radio", "Video Small", "Video Large" };
+        final String[] styles = { "Medium (Default)", "Small", "Banner", "Video" };
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Select Native Style");
         builder.setItems(styles, (dialog, which) -> {
@@ -110,16 +101,10 @@ public class ActivityNative extends AppCompatActivity {
                     Constant.NATIVE_STYLE = STYLE_SMALL;
                     break;
                 case 2:
-                    Constant.NATIVE_STYLE = STYLE_NEWS;
+                    Constant.NATIVE_STYLE = STYLE_BANNER;
                     break;
                 case 3:
-                    Constant.NATIVE_STYLE = STYLE_RADIO;
-                    break;
-                case 4:
-                    Constant.NATIVE_STYLE = STYLE_VIDEO_SMALL;
-                    break;
-                case 5:
-                    Constant.NATIVE_STYLE = STYLE_VIDEO_LARGE;
+                    Constant.NATIVE_STYLE = STYLE_VIDEO;
                     break;
                 default:
                     Constant.NATIVE_STYLE = STYLE_MEDIUM;

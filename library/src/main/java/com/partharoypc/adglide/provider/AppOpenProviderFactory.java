@@ -24,14 +24,14 @@ public class AppOpenProviderFactory {
                 className = ADMOB_PROV;
                 checkClass = "com.google.android.gms.ads.appopen.AppOpenAd";
                 break;
-            case APPLOVIN:
             case APPLOVIN_MAX:
-                className = APPLOVIN_PROV;
-                checkClass = "com.applovin.mediation.ads.MaxAppOpenAd";
-                break;
             case META_BIDDING_APPLOVIN_MAX:
                 className = APPLOVIN_PROV;
                 checkClass = "com.applovin.mediation.ads.MaxAppOpenAd";
+                break;
+            case com.partharoypc.adglide.util.Constant.META:
+                className = "com.partharoypc.adglide.provider.meta.MetaAppOpenProvider";
+                checkClass = "com.facebook.ads.InterstitialAd";
                 break;
             case WORTISE:
                 className = WORTISE_PROV;

@@ -26,12 +26,8 @@ public class Constant {
     // native ad styles
     public static final String STYLE_SMALL = "small";
     public static final String STYLE_MEDIUM = "medium";
-
-    public static final String STYLE_RADIO = "radio";
-    public static final String STYLE_NEWS = "news";
-    public static final String STYLE_VIDEO_SMALL = "video_small";
-    public static final String STYLE_VIDEO_LARGE = "video_large";
-    public static final String STYLE_STREAM = "stream";
+    public static final String STYLE_BANNER = "banner";
+    public static final String STYLE_VIDEO = "video";
 
     // startapp native ad image parameters
     public static final int STARTAPP_IMAGE_XSMALL = 1; // for image size 100px X 100px

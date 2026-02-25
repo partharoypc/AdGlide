@@ -61,11 +61,8 @@ public class Constant {
     public static String NATIVE_STYLE = "medium";
     public static final String STYLE_SMALL = "small";
     public static final String STYLE_MEDIUM = "medium";
-    public static final String STYLE_NEWS = "news";
-    public static final String STYLE_RADIO = "radio";
-    public static final String STYLE_VIDEO_SMALL = "video_small";
-    public static final String STYLE_VIDEO_LARGE = "video_large";
-    public static final String STYLE_STREAM = "stream";
+    public static final String STYLE_BANNER = "banner";
+    public static final String STYLE_VIDEO = "video";
 
     // App Open Ad Config
     public static boolean isAppOpen = false;

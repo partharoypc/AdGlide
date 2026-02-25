@@ -78,14 +78,12 @@ public class WortiseNativeProvider implements NativeProvider {
                 return R.layout.adglide_wortise_radio_template_view;
             case "medium":
                 return R.layout.adglide_wortise_medium_template_view;
-            case "video_small":
-                return R.layout.adglide_wortise_video_small_template_view;
-            case "video_large":
-                return R.layout.adglide_wortise_video_large_template_view;
-            case "news":
+            case "banner":
                 return R.layout.adglide_wortise_news_template_view;
+            case "video":
+                return R.layout.adglide_wortise_video_large_template_view;
             default:
-                return R.layout.adglide_wortise_large_template_view;
+                return R.layout.adglide_wortise_medium_template_view;
         }
     }
 

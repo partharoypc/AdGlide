@@ -53,13 +53,10 @@ AdGlide supports four distinct integration patterns:
 
 | Enum Value | Description |
 | :--- | :--- |
-| `AdGlideNativeStyle.SMALL` | Compact inline format |
-| `AdGlideNativeStyle.MEDIUM` | Standard card format |
-| `AdGlideNativeStyle.RADIO` | Horizontal icon + text |
-| `AdGlideNativeStyle.NEWS` | Icon + headline + CTA |
-| `AdGlideNativeStyle.VIDEO_SMALL` | Small video thumbnail |
-| `AdGlideNativeStyle.VIDEO_LARGE` | Full-width video card |
-| `AdGlideNativeStyle.STREAM` | Stream/feed-optimized |
+| `AdGlideNativeStyle.SMALL` | Icon + Title (List items) |
+| `AdGlideNativeStyle.MEDIUM` | Image + Title + Body (Feed) |
+| `AdGlideNativeStyle.BANNER` | Horizontal / News style |
+| `AdGlideNativeStyle.VIDEO` | Large Media focus |
 
 ### 📦 SDK Module Structure
 
@@ -67,7 +64,7 @@ AdGlide supports four distinct integration patterns:
 com.partharoypc.adglide
 ├── AdGlide.java              # SDK entry point & initializer
 ├── AdGlideNetwork.java       # Enum: ADMOB, META, APPLOVIN, STARTAPP, WORTISE, UNITY, IRONSOURCE...
-├── AdGlideNativeStyle.java   # Enum: SMALL, MEDIUM, RADIO, NEWS, VIDEO_SMALL, VIDEO_LARGE, STREAM
+├── AdGlideNativeStyle.java   # Enum: SMALL, MEDIUM, BANNER, VIDEO
 ├── format/
 │   ├── AdNetwork.java            # Network initializer (AdMob, Meta, AppLovin, Unity, IronSource etc.)
 │   ├── AppOpenAd.java            # App Open ads (Builder + Lifecycle)
@@ -326,7 +323,7 @@ Use one of the predefined layout containers (automatically handles ViewStubs for
 ```
 
 Available layout variants:  
-`adglide_view_native_ad_small`, `adglide_view_native_ad_medium`, `adglide_view_native_ad_news`, `adglide_view_native_ad_radio`, `adglide_view_native_ad_video_small`, `adglide_view_native_ad_video_large`, `adglide_view_native_ad_large`
+`adglide_view_native_ad_small`, `adglide_view_native_ad_medium`, `adglide_view_native_ad_news`, `adglide_view_native_ad_video_large`
 
 **Activity Implementation:**
 ```java
@@ -352,7 +349,7 @@ new NativeAdFragment.Builder(getActivity())
     .status(true)
     .network(AdGlideNetwork.ADMOB)
     .adMobId("YOUR_ADMOB_NATIVE_ID")
-    .style(AdGlideNativeStyle.NEWS)
+    .style(AdGlideNativeStyle.BANNER)
     .darkTheme(false)
     .build()
     .load();

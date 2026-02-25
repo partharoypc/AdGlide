@@ -371,24 +371,24 @@ public class RewardedAd {
             switch (network) {
                 case ADMOB:
                 case META_BIDDING_ADMOB:
-                    return adUnitIds.get("admob");
+                    return adUnitIds.get(ADMOB);
                 case META:
-                    return adUnitIds.get("meta");
+                    return adUnitIds.get(META);
                 case UNITY:
-                    return adUnitIds.get("unity");
+                    return adUnitIds.get(UNITY);
                 case APPLOVIN:
                 case APPLOVIN_MAX:
                 case META_BIDDING_APPLOVIN_MAX:
-                    return adUnitIds.get("applovin_max");
+                    return adUnitIds.get(APPLOVIN_MAX);
                 case APPLOVIN_DISCOVERY:
-                    return adUnitIds.get("applovin_discovery");
+                    return adUnitIds.get(APPLOVIN_DISCOVERY);
                 case IRONSOURCE:
                 case META_BIDDING_IRONSOURCE:
-                    return adUnitIds.get("ironsource");
+                    return adUnitIds.get(IRONSOURCE);
                 case STARTAPP:
-                    return adUnitIds.get("startapp") != null ? adUnitIds.get("startapp") : "startapp_id";
+                    return adUnitIds.get(STARTAPP) != null ? adUnitIds.get(STARTAPP) : "startapp_id";
                 case WORTISE:
-                    return adUnitIds.get("wortise");
+                    return adUnitIds.get(WORTISE);
                 default:
                     return "0";
             }

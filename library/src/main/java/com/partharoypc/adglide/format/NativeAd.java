@@ -3,6 +3,7 @@ package com.partharoypc.adglide.format;
 import static com.partharoypc.adglide.util.Constant.ADMOB;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
+import static com.partharoypc.adglide.util.Constant.IRONSOURCE;
 import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX;
@@ -310,17 +311,20 @@ public class NativeAd {
             switch (network) {
                 case ADMOB:
                 case META_BIDDING_ADMOB:
-                    return adUnitIds.get("admob");
+                    return adUnitIds.get(ADMOB);
                 case META:
-                    return adUnitIds.get("meta");
+                    return adUnitIds.get(META);
                 case APPLOVIN:
                 case APPLOVIN_MAX:
                 case META_BIDDING_APPLOVIN_MAX:
-                    return adUnitIds.get("applovin");
+                    return adUnitIds.get(APPLOVIN);
                 case WORTISE:
-                    return adUnitIds.get("wortise");
+                    return adUnitIds.get(WORTISE);
                 case STARTAPP:
-                    return adUnitIds.get("startapp") != null ? adUnitIds.get("startapp") : "startapp_id";
+                    return adUnitIds.get(STARTAPP) != null ? adUnitIds.get(STARTAPP) : "startapp_id";
+                case IRONSOURCE:
+                case com.partharoypc.adglide.util.Constant.META_BIDDING_IRONSOURCE:
+                    return adUnitIds.get(com.partharoypc.adglide.util.Constant.IRONSOURCE);
                 default:
                     return "0";
             }
