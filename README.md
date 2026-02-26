@@ -5,9 +5,9 @@
 # AdGlide SDK 🚀
 ### *The Premium Mediation Wrapper for High-Performance Android Apps*
 
-[![Version](https://img.shields.io/badge/Version-1.2.0-blue.svg)](https://github.com/partharoypc/AdGlide)
-[![SDK Support](https://img.shields.io/badge/Android-21%2B-green.svg)](https://developer.android.com)
-[![Compile SDK](https://img.shields.io/badge/Compile_SDK-35-green.svg)](https://developer.android.com)
+[![Version](https://img.shields.io/badge/Version-1.3.0-blue.svg)](https://github.com/partharoypc/AdGlide)
+[![SDK Support](https://img.shields.io/badge/Android-23%2B-green.svg)](https://developer.android.com)
+[![Compile SDK](https://img.shields.io/badge/Compile_SDK-36-green.svg)](https://developer.android.com)
 [![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://developer.android.com)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -23,7 +23,8 @@
 - **100% Match Rate Optimization & Fast-Fail Cascades** — Re-architected `WaterfallManager` to immediately bypass primary networks when invalid or empty Ad Unit IDs are supplied. By bypassing sluggish internal timeout cycles from disabled placements, AdGlide smoothly cascades to backup networks dynamically with literally zero millisecond delay, guaranteeing maximized revenue fill-rates.
 - **Unified App Open Architecture** — Centralized waterfall logic for App Open models across AdMob, AppLovin, and Wortise.
 - **Intelligent Rate Limiting** — `AdMobRateLimiter` prevents failing AdMob units from creating endless request loops.
-- **Memory Leak Protection** — Stronger static decoupling ensures activity contexts are rapidly released after ad dismissal.
+- **Configurable App Open Cooldowns** — Added ability to customize the 30-minute default cooldown globally or per-instance.
+- **Modernized Core** — Refactored internal ad unit mapping with static logic and Java 17+ switch expressions for peak performance and safety.
 
 ---
 
@@ -204,6 +205,7 @@ AdGlide uses a **Builder** pattern. Every ad format shares these core methods:
 | `.network(AdGlideNetwork)` | Set the primary ad network |
 | `.backup(AdGlideNetwork)` | Set a single fallback network |
 | `.backups(AdGlideNetwork...)` | Set a waterfall of multiple backups |
+| `.cooldown(int)` | Set App Open Ad cooldown in minutes |
 | `.darkTheme(boolean)` | Match ad styles to dark mode |
 
 ---
@@ -234,6 +236,7 @@ new AppOpenAd.Builder(this)
     .adMobId("ca-app-pub-3940256099942544/9257395921")
     .appLovinId("YOUR_APPLOVIN_UNIT_ID")
     .wortiseId("YOUR_WORTISE_UNIT_ID")
+    .cooldown(15)                             // Optional: Override default 30-min cooldown
     .load(new OnShowAdCompleteListener() {
         @Override
         public void onShowAdComplete() {
@@ -478,8 +481,8 @@ Add these to your `proguard-rules.pro` for production builds:
 | :--- | :--- |
 | **SDK Version** | 1.3.0 |
 | **Min SDK** | 23 (Android 6.0) |
-| **Target SDK** | 35 |
-| **Compile SDK** | 35 |
+| **Target SDK** | 36 |
+| **Compile SDK** | 36 |
 | **Java Version** | 17 |
 | **Build System** | Gradle 9.3.0 |
 | **AndroidX** | Required |

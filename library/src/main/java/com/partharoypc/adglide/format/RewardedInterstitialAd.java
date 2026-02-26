@@ -1,6 +1,12 @@
 package com.partharoypc.adglide.format;
 
+import static com.partharoypc.adglide.util.Constant.ADMOB;
+import static com.partharoypc.adglide.util.Constant.APPLOVIN;
+import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.NONE;
+import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import android.app.Activity;
 import android.util.Log;
@@ -34,7 +40,9 @@ public class RewardedInterstitialAd {
         private String adNetwork = "";
         private String backupAdNetwork = "";
         private WaterfallManager waterfallManager;
-        private final Map<String, String> adUnitIds = new HashMap<>();
+        private String adMobRewardedIntId = "";
+        private String appLovinRewardedIntId = "";
+        private String wortiseRewardedIntId = "";
         private int placementStatus = 1;
         private boolean legacyGDPR = false;
 
@@ -95,7 +103,7 @@ public class RewardedInterstitialAd {
 
         @NonNull
         public Builder adMobId(@NonNull String id) {
-            adUnitIds.put("admob", id);
+            this.adMobRewardedIntId = id;
             return this;
         }
 
@@ -176,7 +184,7 @@ public class RewardedInterstitialAd {
             }
 
             this.currentProvider = provider;
-            String adUnitId = getAdUnitIdForNetwork(network);
+            String adUnitId = getAdUnitIdForNetwork(this, network);
 
             RewardedProvider.RewardedConfig config = new RewardedProvider.RewardedConfig() {
                 @Override
@@ -256,20 +264,13 @@ public class RewardedInterstitialAd {
             }
         }
 
-        private String getAdUnitIdForNetwork(String network) {
-            switch (network) {
-                case com.partharoypc.adglide.util.Constant.ADMOB:
-                case com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB:
-                    return adUnitIds.get(com.partharoypc.adglide.util.Constant.ADMOB);
-                case com.partharoypc.adglide.util.Constant.APPLOVIN:
-                case com.partharoypc.adglide.util.Constant.APPLOVIN_MAX:
-                case com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX:
-                    return adUnitIds.get(com.partharoypc.adglide.util.Constant.APPLOVIN);
-                case com.partharoypc.adglide.util.Constant.WORTISE:
-                    return adUnitIds.get(com.partharoypc.adglide.util.Constant.WORTISE);
-                default:
-                    return "0";
-            }
+        private static String getAdUnitIdForNetwork(Builder builder, String network) {
+            return switch (network) {
+                case ADMOB, META_BIDDING_ADMOB -> builder.adMobRewardedIntId;
+                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> builder.appLovinRewardedIntId;
+                case WORTISE -> builder.wortiseRewardedIntId;
+                default -> "0";
+            };
         }
     }
 }

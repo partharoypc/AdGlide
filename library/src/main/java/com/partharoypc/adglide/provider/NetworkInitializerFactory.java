@@ -12,38 +12,34 @@ public class NetworkInitializerFactory {
         String checkClass = null;
 
         switch (network) {
-            case ADMOB:
-            case META_BIDDING_ADMOB:
+            case ADMOB, META_BIDDING_ADMOB -> {
                 className = "com.partharoypc.adglide.provider.admob.AdMobInitializer";
                 checkClass = "com.google.android.gms.ads.MobileAds";
-                break;
-            case META:
+            }
+            case META -> {
                 className = "com.partharoypc.adglide.provider.meta.MetaInitializer";
                 checkClass = "com.facebook.ads.AudienceNetworkAds";
-                break;
-            case UNITY:
+            }
+            case UNITY -> {
                 className = "com.partharoypc.adglide.provider.unity.UnityInitializer";
                 checkClass = "com.unity3d.ads.UnityAds";
-                break;
-            case APPLOVIN:
-            case APPLOVIN_MAX:
-            case META_BIDDING_APPLOVIN_MAX:
+            }
+            case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> {
                 className = "com.partharoypc.adglide.provider.applovin.AppLovinInitializer";
                 checkClass = "com.applovin.sdk.AppLovinSdk";
-                break;
-            case IRONSOURCE:
-            case META_BIDDING_IRONSOURCE:
+            }
+            case IRONSOURCE, META_BIDDING_IRONSOURCE -> {
                 className = "com.partharoypc.adglide.provider.ironsource.IronSourceInitializer";
                 checkClass = "com.ironsource.mediationsdk.IronSource";
-                break;
-            case STARTAPP:
+            }
+            case STARTAPP -> {
                 className = "com.partharoypc.adglide.provider.startapp.StartAppInitializer";
                 checkClass = "com.startapp.sdk.adsbase.StartAppSDK";
-                break;
-            case WORTISE:
+            }
+            case WORTISE -> {
                 className = "com.partharoypc.adglide.provider.wortise.WortiseInitializer";
                 checkClass = "com.wortise.ads.WortiseSdk";
-                break;
+            }
         }
 
         if (className != null && (checkClass == null || ReflectionUtils.isClassAvailable(checkClass))) {

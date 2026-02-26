@@ -13,37 +13,34 @@ public class NativeProviderFactory {
         String checkClass = null;
 
         switch (network) {
-            case ADMOB:
-            case META_BIDDING_ADMOB:
+            case ADMOB, META_BIDDING_ADMOB -> {
                 className = "com.partharoypc.adglide.provider.admob.AdMobNativeProvider";
                 checkClass = "com.google.android.gms.ads.nativead.NativeAd";
-                break;
-            case META:
+            }
+            case META -> {
                 className = "com.partharoypc.adglide.provider.meta.MetaNativeProvider";
                 checkClass = "com.facebook.ads.NativeAd";
-                break;
-            case APPLOVIN:
-            case APPLOVIN_MAX:
-            case META_BIDDING_APPLOVIN_MAX:
+            }
+            case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> {
                 className = "com.partharoypc.adglide.provider.applovin.AppLovinNativeProvider";
                 checkClass = "com.applovin.mediation.nativeAds.MaxNativeAdLoader";
-                break;
-            case STARTAPP:
+            }
+            case STARTAPP -> {
                 className = "com.partharoypc.adglide.provider.startapp.StartAppNativeProvider";
                 checkClass = "com.startapp.sdk.ads.nativead.StartAppNativeAd";
-                break;
-            case WORTISE:
+            }
+            case WORTISE -> {
                 className = "com.partharoypc.adglide.provider.wortise.WortiseNativeProvider";
                 checkClass = "com.wortise.ads.WortiseSdk";
-                break;
-            case IRONSOURCE:
-            case META_BIDDING_IRONSOURCE:
+            }
+            case IRONSOURCE, META_BIDDING_IRONSOURCE -> {
                 className = "com.partharoypc.adglide.provider.ironsource.IronSourceNativeProvider";
                 checkClass = "com.ironsource.mediationsdk.IronSource";
-                break;
-            case UNITY:
+            }
+            case UNITY -> {
                 Log.w(TAG, "Unity Ads does not support Native Ad format. Trying backup.");
                 return null;
+            }
         }
 
         if (className != null && (checkClass == null || ReflectionUtils.isClassAvailable(checkClass))) {

@@ -19,25 +19,22 @@ public class AppOpenProviderFactory {
         String checkClass = null;
 
         switch (network) {
-            case ADMOB:
-            case META_BIDDING_ADMOB:
+            case ADMOB, META_BIDDING_ADMOB -> {
                 className = ADMOB_PROV;
                 checkClass = "com.google.android.gms.ads.appopen.AppOpenAd";
-                break;
-            case APPLOVIN:
-            case APPLOVIN_MAX:
-            case META_BIDDING_APPLOVIN_MAX:
+            }
+            case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> {
                 className = APPLOVIN_PROV;
                 checkClass = "com.applovin.mediation.ads.MaxAppOpenAd";
-                break;
-            case com.partharoypc.adglide.util.Constant.META:
+            }
+            case com.partharoypc.adglide.util.Constant.META -> {
                 className = "com.partharoypc.adglide.provider.meta.MetaAppOpenProvider";
                 checkClass = "com.facebook.ads.InterstitialAd";
-                break;
-            case WORTISE:
+            }
+            case WORTISE -> {
                 className = WORTISE_PROV;
                 checkClass = "com.wortise.ads.appopen.AppOpenAd";
-                break;
+            }
         }
 
         if (className != null && (checkClass == null || ReflectionUtils.isClassAvailable(checkClass))) {

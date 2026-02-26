@@ -254,7 +254,7 @@ public class BannerAd {
         private void loadAdFromNetwork(String networkToLoad) {
             try {
                 destroyAndDetachBanner();
-                String adUnitId = getAdUnitIdForNetwork(networkToLoad);
+                String adUnitId = getAdUnitIdForNetwork(this, networkToLoad);
                 Log.d(TAG, "Loading [" + networkToLoad.toUpperCase(java.util.Locale.ROOT) + "] Banner Ad with ID: "
                         + adUnitId);
                 if (adUnitId == null || adUnitId.trim().isEmpty()
@@ -288,29 +288,17 @@ public class BannerAd {
             }
         }
 
-        private String getAdUnitIdForNetwork(String network) {
-            switch (network) {
-                case ADMOB:
-                case META_BIDDING_ADMOB:
-                    return adMobBannerId;
-                case META:
-                    return metaBannerId;
-                case UNITY:
-                    return unityBannerId;
-                case APPLOVIN:
-                case APPLOVIN_MAX:
-                case META_BIDDING_APPLOVIN_MAX:
-                    return appLovinBannerId;
-                case IRONSOURCE:
-                case META_BIDDING_IRONSOURCE:
-                    return ironSourceBannerId;
-                case STARTAPP:
-                    return !startAppId.isEmpty() ? startAppId : "startapp_id";
-                case WORTISE:
-                    return wortiseBannerId;
-                default:
-                    return "";
-            }
+        private static String getAdUnitIdForNetwork(Builder builder, String network) {
+            return switch (network) {
+                case ADMOB, META_BIDDING_ADMOB -> builder.adMobBannerId;
+                case META -> builder.metaBannerId;
+                case UNITY -> builder.unityBannerId;
+                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> builder.appLovinBannerId;
+                case IRONSOURCE, META_BIDDING_IRONSOURCE -> builder.ironSourceBannerId;
+                case STARTAPP -> !builder.startAppId.isEmpty() ? builder.startAppId : "startapp_id";
+                case WORTISE -> builder.wortiseBannerId;
+                default -> "";
+            };
         }
 
         private void displayAdView(String network, View adView) {

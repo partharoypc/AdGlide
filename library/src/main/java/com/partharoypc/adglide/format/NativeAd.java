@@ -7,6 +7,7 @@ import static com.partharoypc.adglide.util.Constant.IRONSOURCE;
 import static com.partharoypc.adglide.util.Constant.META;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_IRONSOURCE;
 import static com.partharoypc.adglide.util.Constant.NONE;
 import static com.partharoypc.adglide.util.Constant.STARTAPP;
 import static com.partharoypc.adglide.util.Constant.UNITY;
@@ -48,7 +49,13 @@ public class NativeAd {
         private String adNetwork = "";
         private String backupAdNetwork = "";
         private WaterfallManager waterfallManager;
-        private final Map<String, String> adUnitIds = new HashMap<>();
+        private String adMobNativeId = "";
+        private String metaNativeId = "";
+        private String appLovinNativeId = "";
+        private String appLovinDiscMrecZoneId = "";
+        private String wortiseNativeId = "";
+        private String startAppId = "";
+        private String ironSourceNativeId = "";
         private int placementStatus = 1;
         private boolean darkTheme = false;
         private boolean legacyGDPR = false;
@@ -136,44 +143,43 @@ public class NativeAd {
 
         @NonNull
         public Builder adMobId(@NonNull String adMobNativeId) {
-            adUnitIds.put("admob", adMobNativeId);
+            this.adMobNativeId = adMobNativeId;
             return this;
         }
 
         @NonNull
         public Builder metaId(@NonNull String metaNativeId) {
-            adUnitIds.put("meta", metaNativeId);
+            this.metaNativeId = metaNativeId;
             return this;
         }
 
         @NonNull
         public Builder appLovinId(@NonNull String appLovinNativeId) {
-            adUnitIds.put("applovin", appLovinNativeId);
-            adUnitIds.put("applovin_max", appLovinNativeId);
+            this.appLovinNativeId = appLovinNativeId;
             return this;
         }
 
         @NonNull
         public Builder zoneId(@NonNull String appLovinDiscMrecZoneId) {
-            adUnitIds.put("applovin_discovery", appLovinDiscMrecZoneId);
+            this.appLovinDiscMrecZoneId = appLovinDiscMrecZoneId;
             return this;
         }
 
         @NonNull
         public Builder wortiseId(@NonNull String wortiseNativeId) {
-            adUnitIds.put("wortise", wortiseNativeId);
+            this.wortiseNativeId = wortiseNativeId;
             return this;
         }
 
         @NonNull
         public Builder startAppId(@NonNull String startAppId) {
-            adUnitIds.put("startapp", startAppId);
+            this.startAppId = startAppId;
             return this;
         }
 
         @NonNull
         public Builder ironSourceId(@NonNull String ironSourcePlacementName) {
-            adUnitIds.put("ironsource", ironSourcePlacementName);
+            this.ironSourceNativeId = ironSourcePlacementName;
             return this;
         }
 
@@ -275,7 +281,7 @@ public class NativeAd {
             }
 
             this.currentProvider = provider;
-            String adUnitId = getAdUnitIdForNetwork(network);
+            String adUnitId = getAdUnitIdForNetwork(this, network);
             Log.d(TAG, "Loading [" + network.toUpperCase(java.util.Locale.ROOT) + "] Native Ad with ID: " + adUnitId);
             if (adUnitId == null || adUnitId.trim().isEmpty() || (adUnitId.equals("0") && !network.equals(STARTAPP))) {
                 Log.d(TAG, "Ad unit ID for " + network + " is invalid. Trying backup.");
@@ -314,29 +320,17 @@ public class NativeAd {
             });
         }
 
-        private String getAdUnitIdForNetwork(String network) {
-            switch (network) {
-                case ADMOB:
-                case META_BIDDING_ADMOB:
-                    return adUnitIds.get(ADMOB);
-                case META:
-                    return adUnitIds.get(META);
-                case APPLOVIN:
-                case APPLOVIN_MAX:
-                case META_BIDDING_APPLOVIN_MAX:
-                    return adUnitIds.get(APPLOVIN);
-                case WORTISE:
-                    return adUnitIds.get(WORTISE);
-                case STARTAPP:
-                    return adUnitIds.get(STARTAPP) != null ? adUnitIds.get(STARTAPP) : "startapp_id";
-                case IRONSOURCE:
-                case com.partharoypc.adglide.util.Constant.META_BIDDING_IRONSOURCE:
-                    return adUnitIds.get(com.partharoypc.adglide.util.Constant.IRONSOURCE);
-                case UNITY:
-                    return null; // Unity does not support Native Ads
-                default:
-                    return "0";
-            }
+        private static String getAdUnitIdForNetwork(Builder builder, String network) {
+            return switch (network) {
+                case ADMOB, META_BIDDING_ADMOB -> builder.adMobNativeId;
+                case META -> builder.metaNativeId;
+                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> builder.appLovinNativeId;
+                case WORTISE -> builder.wortiseNativeId;
+                case STARTAPP -> !builder.startAppId.isEmpty() ? builder.startAppId : "startapp_id";
+                case IRONSOURCE, META_BIDDING_IRONSOURCE -> builder.ironSourceNativeId;
+                case UNITY -> null; // Unity does not support Native Ads
+                default -> "0";
+            };
         }
 
         private void displayAdView(View adView) {

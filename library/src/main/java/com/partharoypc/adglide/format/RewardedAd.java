@@ -47,7 +47,14 @@ public class RewardedAd {
         private String adNetwork = "";
         private String backupAdNetwork = "";
         private WaterfallManager waterfallManager;
-        private final Map<String, String> adUnitIds = new HashMap<>();
+        private String adMobRewardedId = "";
+        private String metaRewardedId = "";
+        private String unityRewardedId = "";
+        private String appLovinRewardedId = "";
+        private String appLovinDiscRewardedZoneId = "";
+        private String ironSourceRewardedId = "";
+        private String startAppId = "";
+        private String wortiseRewardedId = "";
         private int placementStatus = 1;
         private boolean legacyGDPR = false;
 
@@ -154,50 +161,49 @@ public class RewardedAd {
 
         @NonNull
         public Builder adMobId(@NonNull String id) {
-            adUnitIds.put("admob", id);
+            this.adMobRewardedId = id;
             return this;
         }
 
         @NonNull
         public Builder metaId(@NonNull String id) {
-            adUnitIds.put("meta", id);
+            this.metaRewardedId = id;
             return this;
         }
 
         @NonNull
         public Builder unityId(@NonNull String id) {
-            adUnitIds.put("unity", id);
+            this.unityRewardedId = id;
             return this;
         }
 
         @NonNull
         public Builder appLovinId(@NonNull String id) {
-            adUnitIds.put("applovin", id);
-            adUnitIds.put("applovin_max", id);
+            this.appLovinRewardedId = id;
             return this;
         }
 
         @NonNull
         public Builder zoneId(@NonNull String id) {
-            adUnitIds.put("applovin_discovery", id);
+            this.appLovinDiscRewardedZoneId = id;
             return this;
         }
 
         @NonNull
         public Builder ironSourceId(@NonNull String id) {
-            adUnitIds.put("ironsource", id);
+            this.ironSourceRewardedId = id;
             return this;
         }
 
         @NonNull
         public Builder startAppId(@NonNull String id) {
-            adUnitIds.put("startapp", id);
+            this.startAppId = id;
             return this;
         }
 
         @NonNull
         public Builder wortiseId(@NonNull String id) {
-            adUnitIds.put("wortise", id);
+            this.wortiseRewardedId = id;
             return this;
         }
 
@@ -281,7 +287,7 @@ public class RewardedAd {
             }
 
             this.currentProvider = provider;
-            String adUnitId = getAdUnitIdForNetwork(network);
+            String adUnitId = getAdUnitIdForNetwork(this, network);
             Log.d(TAG, "Loading [" + network.toUpperCase(java.util.Locale.ROOT) + "] Rewarded Ad with ID: " + adUnitId);
             if (adUnitId == null || adUnitId.trim().isEmpty() || (adUnitId.equals("0") && !network.equals(STARTAPP))) {
                 Log.d(TAG, "Ad unit ID for " + network + " is invalid. Trying backup.");
@@ -367,31 +373,18 @@ public class RewardedAd {
             }
         }
 
-        private String getAdUnitIdForNetwork(String network) {
-            switch (network) {
-                case ADMOB:
-                case META_BIDDING_ADMOB:
-                    return adUnitIds.get(ADMOB);
-                case META:
-                    return adUnitIds.get(META);
-                case UNITY:
-                    return adUnitIds.get(UNITY);
-                case APPLOVIN:
-                case APPLOVIN_MAX:
-                case META_BIDDING_APPLOVIN_MAX:
-                    return adUnitIds.get(APPLOVIN_MAX);
-                case APPLOVIN_DISCOVERY:
-                    return adUnitIds.get(APPLOVIN_DISCOVERY);
-                case IRONSOURCE:
-                case META_BIDDING_IRONSOURCE:
-                    return adUnitIds.get(IRONSOURCE);
-                case STARTAPP:
-                    return adUnitIds.get(STARTAPP) != null ? adUnitIds.get(STARTAPP) : "startapp_id";
-                case WORTISE:
-                    return adUnitIds.get(WORTISE);
-                default:
-                    return "0";
-            }
+        private static String getAdUnitIdForNetwork(Builder builder, String network) {
+            return switch (network) {
+                case ADMOB, META_BIDDING_ADMOB -> builder.adMobRewardedId;
+                case META -> builder.metaRewardedId;
+                case UNITY -> builder.unityRewardedId;
+                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> builder.appLovinRewardedId;
+                case APPLOVIN_DISCOVERY -> builder.appLovinDiscRewardedZoneId;
+                case IRONSOURCE, META_BIDDING_IRONSOURCE -> builder.ironSourceRewardedId;
+                case STARTAPP -> !builder.startAppId.isEmpty() ? builder.startAppId : "startapp_id";
+                case WORTISE -> builder.wortiseRewardedId;
+                default -> "0";
+            };
         }
 
         public void destroy() {

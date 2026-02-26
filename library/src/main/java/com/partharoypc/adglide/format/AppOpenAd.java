@@ -401,7 +401,7 @@ public class AppOpenAd {
         private void loadAdFromNetwork(String network,
                 OnShowAdCompleteListener onShowAdCompleteListener) {
             try {
-                String adUnitId = getAdUnitIdForNetwork(network);
+                String adUnitId = getAdUnitIdForNetwork(this, network);
                 if (adUnitId == null || adUnitId.trim().isEmpty()
                         || (adUnitId.equals("0") && !network.equals("startapp"))) {
                     Log.d(TAG, "Ad unit ID for " + network + " is invalid. Trying backup.");

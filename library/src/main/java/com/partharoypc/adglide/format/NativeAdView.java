@@ -284,7 +284,7 @@ public class NativeAdView {
 
         private void loadAdFromNetwork(String networkToLoad) {
             try {
-                String adUnitId = getAdUnitIdForNetwork(networkToLoad);
+                String adUnitId = getAdUnitIdForNetwork(this, networkToLoad);
                 if (adUnitId.equals("0") || adUnitId.isEmpty()) {
                     loadBackupNativeAd();
                     return;
@@ -316,24 +316,15 @@ public class NativeAdView {
             }
         }
 
-        private String getAdUnitIdForNetwork(String network) {
-            switch (network) {
-                case ADMOB:
-                case META_BIDDING_ADMOB:
-                    return adMobNativeId;
-                case META:
-                    return metaNativeId;
-                case APPLOVIN:
-                case APPLOVIN_MAX:
-                case META_BIDDING_APPLOVIN_MAX:
-                    return appLovinNativeId;
-                case WORTISE:
-                    return wortiseNativeId;
-                case STARTAPP:
-                    return "startapp_native"; // StartApp usually doesn't need unit IDs for Native
-                default:
-                    return "";
-            }
+        private static String getAdUnitIdForNetwork(Builder builder, String network) {
+            return switch (network) {
+                case ADMOB, META_BIDDING_ADMOB -> builder.adMobNativeId;
+                case META -> builder.metaNativeId;
+                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> builder.appLovinNativeId;
+                case WORTISE -> builder.wortiseNativeId;
+                case STARTAPP -> "startapp_native"; // StartApp usually doesn't need unit IDs for Native
+                default -> "";
+            };
         }
 
         private void displayAdView(View adView) {

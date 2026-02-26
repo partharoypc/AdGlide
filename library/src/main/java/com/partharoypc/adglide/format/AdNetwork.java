@@ -40,50 +40,28 @@ public class AdNetwork {
         @Override
         public String getAppId() {
             AdGlideNetwork network = AdGlideNetwork.fromString(adNetwork);
-            switch (network) {
-                case ADMOB:
-                case META_BIDDING_ADMOB:
-                    return adMobAppId;
-                case UNITY:
-                    return unityGameId;
-                case APPLOVIN:
-                case APPLOVIN_MAX:
-                case META_BIDDING_APPLOVIN_MAX:
-                    return appLovinSdkKey;
-                case IRONSOURCE:
-                case META_BIDDING_IRONSOURCE:
-                    return ironSourceAppKey;
-                case STARTAPP:
-                    return startappAppId;
-                case WORTISE:
-                    return wortiseAppId;
-                default:
-                    return "";
-            }
+            return switch (network) {
+                case ADMOB, META_BIDDING_ADMOB -> adMobAppId;
+                case UNITY -> unityGameId;
+                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> appLovinSdkKey;
+                case IRONSOURCE, META_BIDDING_IRONSOURCE -> ironSourceAppKey;
+                case STARTAPP -> startappAppId;
+                case WORTISE -> wortiseAppId;
+                default -> "";
+            };
         }
 
         private String getAppIdForNetwork(String networkName) {
             AdGlideNetwork network = AdGlideNetwork.fromString(networkName);
-            switch (network) {
-                case ADMOB:
-                case META_BIDDING_ADMOB:
-                    return adMobAppId;
-                case UNITY:
-                    return unityGameId;
-                case APPLOVIN:
-                case APPLOVIN_MAX:
-                case META_BIDDING_APPLOVIN_MAX:
-                    return appLovinSdkKey;
-                case IRONSOURCE:
-                case META_BIDDING_IRONSOURCE:
-                    return ironSourceAppKey;
-                case STARTAPP:
-                    return startappAppId;
-                case WORTISE:
-                    return wortiseAppId;
-                default:
-                    return "";
-            }
+            return switch (network) {
+                case ADMOB, META_BIDDING_ADMOB -> adMobAppId;
+                case UNITY -> unityGameId;
+                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> appLovinSdkKey;
+                case IRONSOURCE, META_BIDDING_IRONSOURCE -> ironSourceAppKey;
+                case STARTAPP -> startappAppId;
+                case WORTISE -> wortiseAppId;
+                default -> "";
+            };
         }
 
         @Override

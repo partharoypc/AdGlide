@@ -12,38 +12,34 @@ public class BannerProviderFactory {
         String checkClass = null;
 
         switch (network) {
-            case ADMOB:
-            case META_BIDDING_ADMOB:
+            case ADMOB, META_BIDDING_ADMOB -> {
                 className = "com.partharoypc.adglide.provider.admob.AdMobBannerProvider";
                 checkClass = "com.google.android.gms.ads.AdView";
-                break;
-            case META:
+            }
+            case META -> {
                 className = "com.partharoypc.adglide.provider.meta.MetaBannerProvider";
                 checkClass = "com.facebook.ads.AdView";
-                break;
-            case UNITY:
+            }
+            case UNITY -> {
                 className = "com.partharoypc.adglide.provider.unity.UnityBannerProvider";
                 checkClass = "com.unity3d.services.banners.BannerView";
-                break;
-            case APPLOVIN:
-            case APPLOVIN_MAX:
-            case META_BIDDING_APPLOVIN_MAX:
+            }
+            case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> {
                 className = "com.partharoypc.adglide.provider.applovin.AppLovinBannerProvider";
                 checkClass = "com.applovin.mediation.ads.MaxAdView";
-                break;
-            case IRONSOURCE:
-            case META_BIDDING_IRONSOURCE:
+            }
+            case IRONSOURCE, META_BIDDING_IRONSOURCE -> {
                 className = "com.partharoypc.adglide.provider.ironsource.IronSourceBannerProvider";
                 checkClass = "com.ironsource.mediationsdk.IronSourceBannerLayout";
-                break;
-            case STARTAPP:
+            }
+            case STARTAPP -> {
                 className = "com.partharoypc.adglide.provider.startapp.StartAppBannerProvider";
                 checkClass = "com.startapp.sdk.ads.banner.Banner";
-                break;
-            case WORTISE:
+            }
+            case WORTISE -> {
                 className = "com.partharoypc.adglide.provider.wortise.WortiseBannerProvider";
                 checkClass = "com.wortise.ads.banner.BannerAd";
-                break;
+            }
         }
 
         if (className != null && (checkClass == null || ReflectionUtils.isClassAvailable(checkClass))) {
