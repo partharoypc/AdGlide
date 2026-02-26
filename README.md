@@ -49,10 +49,10 @@ AdGlide supports four distinct integration patterns:
 | **App Open** | ✅ | ❌ | ✅ | ❌ | ✅ | ❌ | ❌ |
 | **Medium Rectangle** | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ |
 | **Bidding** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ |
-|Direct Use| ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|Bidding Mediation| ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ |
-|Sequential Waterfall| ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-|Intelligent Rate Limiting| ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Direct Use** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Bidding Mediation** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ |
+| **Sequential Waterfall** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Intelligent Rate Limiting** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ### 🎨 Native Ad Styles
 
