@@ -49,6 +49,10 @@ AdGlide supports four distinct integration patterns:
 | **App Open** | ✅ | ❌ | ✅ | ❌ | ✅ | ❌ | ❌ |
 | **Medium Rectangle** | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ |
 | **Bidding** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ |
+|Direct Use| ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+|Bidding Mediation| ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ |
+|Sequential Waterfall| ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+|Intelligent Rate Limiting| ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ### 🎨 Native Ad Styles
 
@@ -59,50 +63,7 @@ AdGlide supports four distinct integration patterns:
 | `AdGlideNativeStyle.BANNER` | Horizontal / News style |
 | `AdGlideNativeStyle.VIDEO` | Large Media focus |
 
-### 📦 SDK Module Structure
 
-```
-com.partharoypc.adglide
-├── AdGlide.java              # SDK entry point & initializer
-├── AdGlideNetwork.java       # Enum: ADMOB, META, APPLOVIN, STARTAPP, WORTISE, UNITY, IRONSOURCE...
-├── AdGlideNativeStyle.java   # Enum: SMALL, MEDIUM, BANNER, VIDEO
-├── format/
-│   ├── AdNetwork.java            # Network initializer (AdMob, Meta, AppLovin, Unity, IronSource etc.)
-│   ├── AppOpenAd.java            # App Open ads (Builder + Lifecycle)
-│   ├── AdMobAppOpenAd.java       # AdMob App Open helper (load, cache, show, 4hr expiry)
-│   ├── AppLovinAppOpenAd.java    # AppLovin App Open helper
-│   ├── WortiseAppOpenAd.java     # Wortise App Open helper
-│   ├── BannerAd.java             # Banner ads (adaptive, collapsible)
-│   ├── MediumRectangleAd.java    # MREC 300x250 ads
-│   ├── InterstitialAd.java       # Full-screen interstitial ads
-│   ├── RewardedAd.java           # Rewarded video ads
-│   ├── RewardedInterstitialAd.java # Rewarded interstitial ads
-│   ├── NativeAd.java             # Native ads (Activity-based)
-│   ├── NativeAdFragment.java     # Native ads (Fragment-based)
-│   ├── NativeAdView.java         # Native ads (Custom View)
-│   ├── NativeAdViewHolder.java   # Native ads (RecyclerView)
-│   └── NativeAdViewPager.java    # Native ads (ViewPager)
-├── gdpr/
-│   ├── GDPR.java                 # Google UMP consent management
-│   └── LegacyGDPR.java          # Legacy GDPR consent handling
-├── helper/
-│   └── AudienceNetworkInitializeHelper.java
-├── ui/
-│   ├── BannerAdView.java         # Custom banner view
-│   ├── LargeNativeAdView.java    # Large native ad view
-│   ├── MediumNativeAdView.java   # Medium native ad view
-│   └── SmallNativeAdView.java    # Small native ad view
-└── util/
-    ├── AdMobRateLimiter.java     # Intelligent rate limiting for AdMob
-    ├── AdRepository.java         # Pre-fetching & caching engine
-    ├── WaterfallManager.java     # Sequential backup network manager
-    ├── NativeTemplateStyle.java  # Native ad template styling
-    ├── TemplateView.java         # Custom AdMob native template
-    ├── Tools.java                # Utility: network checks, Base64 decode, ad requests
-    └── Constant.java             # Network key constants
-```
-
----
 
 ## ⚡ Step-by-Step Setup Guide
 
