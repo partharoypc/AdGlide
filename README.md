@@ -47,7 +47,6 @@ AdGlide supports four distinct integration patterns:
 | **Rewarded** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Rewarded Interstitial** | ✅ | ❌ | ✅ | ❌ | ✅ | ❌ | ❌ |
 | **App Open** | ✅ | ❌ | ✅ | ❌ | ✅ | ❌ | ❌ |
-| **Medium Rectangle** | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ |
 | **Bidding** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ |
 | **Direct Use** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Bidding Mediation** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ |
@@ -63,23 +62,55 @@ AdGlide supports four distinct integration patterns:
 | `AdGlideNativeStyle.BANNER` | Horizontal / News style |
 | `AdGlideNativeStyle.VIDEO` | Large Media focus |
 
+### 📦 SDK Module Structure
 
+```
+com.partharoypc.adglide
+├── AdGlide.java              # SDK entry point & initializer
+├── AdGlideNetwork.java       # Enum: ADMOB, META, APPLOVIN, STARTAPP, WORTISE, UNITY, IRONSOURCE...
+├── AdGlideNativeStyle.java   # Enum: SMALL, MEDIUM, BANNER, VIDEO
+├── format/
+│   ├── AdNetwork.java            # Network initializer logic
+│   ├── AppOpenAd.java            # App Open ads (Builder + Lifecycle)
+│   ├── BannerAd.java             # Banner ads (adaptive, collapsible)
+│   ├── InterstitialAd.java       # Full-screen interstitial ads
+│   ├── RewardedAd.java           # Rewarded video ads
+│   ├── RewardedInterstitialAd.java # Rewarded interstitial ads
+│   ├── NativeAd.java             # Native ads (Activity loading)
+│   └── NativeAdView.java         # Native ads (Custom View integration)
+├── gdpr/
+│   ├── GDPR.java                 # Google UMP & Consent integration
+│   └── LegacyGDPR.java          # Legacy consent handling
+└── util/
+    ├── AdMobRateLimiter.java     # Intelligent rate limiting
+    ├── WaterfallManager.java     # Sequential backup manager
+    ├── Tools.java                # Utilities & Base64 decoding
+    └── Constant.java             # Network key constants
+```
+
+---
 
 ## ⚡ Step-by-Step Setup Guide
 
 ### Step 1: Configure Repositories
-In your `settings.gradle` (or project `build.gradle`), add the required maven repositories:
+In your `settings.gradle` (or project `build.gradle`), add the repositories. **Note:** Only add the repositories for the networks you actually plan to use.
 
 ```gradle
 dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
-        maven { url 'https://artifacts.applovin.com/android' }
-        maven { url 'https://artifact.bytedance.com/repository/pangle' }
-        maven { url 'https://maven.wortise.com/artifactory/public' }
-        maven { url 'https://android-sdk.is.com/' }
+        maven { url 'https://jitpack.io' } // Required for AdGlide
+        
+        // --- Optional repositories for specific networks ---
+        maven {
+            url 'https://artifacts.applovin.com/android' // AppLovin
+            content { includeGroup "com.applovin" }
+        }
+        maven { url 'https://artifact.bytedance.com/repository/pangle' }   // Meta Bidding/Pangle
+        maven { url 'https://maven.wortise.com/artifactory/public' }      // Wortise
+        maven { url 'https://android-sdk.is.com/' }                       // IronSource
     }
 }
 ```
@@ -92,19 +123,19 @@ dependencies {
     implementation 'com.github.partharoypc:adglide:1.3.0'
     
     // 🔥 OPTIONAL DEPENDENCIES 🔥
-    // AdGlide automatically detects which SDKs you include via reflection.
-    // Choose ONLY the Ad Networks you want to use to keep your app size small:
+    // You ONLY need to add repositories and dependencies for the networks you actually use.
+    // If you don't use a network, you can safely remove its implementation line AND its repository above.
     
-    implementation 'com.google.android.gms:play-services-ads:23.0.0'   // AdMob
-    // implementation 'com.facebook.android:audience-network-sdk:6.17.0'  // Meta
-    // implementation 'com.applovin:applovin-sdk:12.4.0'                  // AppLovin
-    // implementation 'com.startapp:inapp-sdk:5.1.0'                      // StartApp
-    // implementation 'com.wortise:android-sdk:1.5.0'                     // Wortise
-    // implementation 'com.unity3d.ads:unity-ads:4.10.0'                  // Unity
-    // implementation 'com.ironsource.sdk:mediationsdk:8.0.0'             // IronSource
+    implementation 'com.google.android.gms:play-services-ads:23.6.0'   // AdMob
+    // implementation 'com.facebook.android:audience-network-sdk:6.18.0'  // Meta
+    // implementation 'com.applovin:applovin-sdk:13.0.1'                  // AppLovin
+    // implementation 'com.startapp:inapp-sdk:5.3.0'                      // StartApp
+    // implementation 'com.wortise:android-sdk:1.7.0'                     // Wortise
+    // implementation 'com.unity3d.ads:unity-ads:4.12.5'                  // Unity
+    // implementation 'com.ironsource.sdk:mediationsdk:8.4.0'             // IronSource
     
     // GDPR (Required for EU compliance)
-    implementation 'com.google.android.ump:user-messaging-platform:2.2.0'
+    implementation 'com.google.android.ump:user-messaging-platform:4.0.0'
 }
 ```
 
@@ -136,7 +167,7 @@ public class MyApplication extends Application {
 
         AdGlide.init(this)
             .status(true)         // Master switch for ALL ads
-            .testMode(true)       // Development only — set false for production!
+            .testMode(false)      // Development only — set false for production!
             .debug(true)          // Verbose console logging
             .network(AdGlideNetwork.ADMOB)
             .backups(AdGlideNetwork.META, AdGlideNetwork.APPLOVIN)
@@ -209,43 +240,6 @@ new AppOpenAd.Builder(this)
 
 ---
 
-### 2. Banner & Medium Rectangle Ads
-
-**XML Layout:**
-```xml
-<FrameLayout
-    android:id="@+id/ad_mob_banner_view_container"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content" />
-```
-
-**Banner:**
-```java
-new BannerAd.Builder(this)
-    .status(true)
-    .network(AdGlideNetwork.ADMOB)
-    .backups(AdGlideNetwork.META, AdGlideNetwork.STARTAPP)
-    .adMobId("ca-app-pub-3940256099942544/2014213617")
-    .metaId("YOUR_META_PLACEMENT_ID")
-    .collapsible(true)    // High-CTR collapsible banners (AdMob only)
-    .darkTheme(true)
-    .build()
-    .load();
-```
-
-**Medium Rectangle (300×250):**
-```java
-new MediumRectangleAd.Builder(this)
-    .status(true)
-    .network(AdGlideNetwork.ADMOB)
-    .backups(AdGlideNetwork.META)
-    .adMobId("YOUR_ADMOB_MREC_ID")
-    .build()
-    .load();
-```
-
----
-
 ### 3. Interstitial Ads
 
 ```java
@@ -270,18 +264,15 @@ new InterstitialAd.Builder(this)
 
 ### 4. Native Ads
 
-AdGlide offers **5 specialized native ad builders** for different UI contexts:
+AdGlide offers **2 specialized native ad builders** for different UI contexts:
 
 | Builder | Use Case |
 | :--- | :--- |
 | `NativeAd.Builder` | Standard Activity layouts |
-| `NativeAdFragment.Builder` | Fragment-based layouts |
 | `NativeAdView.Builder` | Custom View integration |
-| `NativeAdViewHolder` | RecyclerView items |
-| `NativeAdViewPager.Builder` | ViewPager / TabLayout |
 
 **XML Layout:**
-Use one of the predefined layout containers (automatically handles ViewStubs for lazy inflation):
+Use one of the predefined layout containers:
 ```xml
 <include layout="@layout/adglide_view_native_ad_medium" />
 ```
@@ -411,11 +402,14 @@ Add these to your `proguard-rules.pro` for production builds:
 # Prevent ProGuard from stripping absent network SDKs used in Reflection
 -dontwarn com.google.android.gms.ads.**
 -dontwarn com.facebook.ads.**
+-dontwarn com.facebook.infer.annotation.**
 -dontwarn com.applovin.**
 -dontwarn com.startapp.**
 -dontwarn com.wortise.**
 -dontwarn com.unity3d.ads.**
--dontwarn com.ironsource.mediationsdk.**
+-dontwarn com.ironsource.**
+-dontwarn com.google.ads.mediation.**
+-dontwarn com.bytedance.**
 
 # AdMob
 -keep class com.google.android.gms.ads.** { *; }
@@ -432,6 +426,12 @@ Add these to your `proguard-rules.pro` for production builds:
 
 # Wortise
 -keep class com.wortise.** { *; }
+
+# Unity Ads
+-keep class com.unity3d.ads.** { *; }
+
+# IronSource
+-keep class com.ironsource.** { *; }
 ```
 
 ---
