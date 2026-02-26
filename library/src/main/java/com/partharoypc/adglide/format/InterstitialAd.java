@@ -280,7 +280,7 @@ public class InterstitialAd {
         private void loadAdFromNetwork(String networkToLoad, OnInterstitialAdDismissedListener listener) {
             try {
                 destroyInterstitialAd();
-                String adUnitId = getAdUnitIdForNetwork(networkToLoad);
+                String adUnitId = getAdUnitIdForNetwork(this, networkToLoad);
                 Log.d(TAG, "Loading [" + networkToLoad.toUpperCase(java.util.Locale.ROOT)
                         + "] Interstitial Ad with ID: " + adUnitId);
                 if (adUnitId == null || adUnitId.trim().isEmpty()
@@ -338,29 +338,17 @@ public class InterstitialAd {
             }
         }
 
-        private String getAdUnitIdForNetwork(String network) {
-            switch (network) {
-                case ADMOB:
-                case META_BIDDING_ADMOB:
-                    return adMobInterstitialId;
-                case META:
-                    return metaInterstitialId;
-                case UNITY:
-                    return unityInterstitialId;
-                case APPLOVIN:
-                case APPLOVIN_MAX:
-                case META_BIDDING_APPLOVIN_MAX:
-                    return appLovinInterstitialId;
-                case IRONSOURCE:
-                case META_BIDDING_IRONSOURCE:
-                    return ironSourceInterstitialId;
-                case STARTAPP:
-                    return !startAppId.isEmpty() ? startAppId : "startapp";
-                case WORTISE:
-                    return wortiseInterstitialId;
-                default:
-                    return "";
-            }
+        private static String getAdUnitIdForNetwork(Builder builder, String network) {
+            return switch (network) {
+                case ADMOB, META_BIDDING_ADMOB -> builder.adMobInterstitialId;
+                case META -> builder.metaInterstitialId;
+                case UNITY -> builder.unityInterstitialId;
+                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> builder.appLovinInterstitialId;
+                case IRONSOURCE, META_BIDDING_IRONSOURCE -> builder.ironSourceInterstitialId;
+                case STARTAPP -> !builder.startAppId.isEmpty() ? builder.startAppId : "startapp";
+                case WORTISE -> builder.wortiseInterstitialId;
+                default -> "";
+            };
         }
 
         public void showInterstitialAd(Activity displayActivity,

@@ -36,12 +36,21 @@ public class AppOpenAd {
      */
     private static long lastShownTimeMs = 0;
 
-    /** Cooldown between App Open Ad impressions: 30 minutes. */
-    private static final long COOLDOWN_MS = 30 * 60 * 1000L;
+    /** Cooldown between App Open Ad impressions: default 30 minutes. */
+    private static long cooldownMs = 30 * 60 * 1000L;
+
+    /**
+     * Sets the cooldown between App Open Ad impressions.
+     * 
+     * @param cooldownMinutes Cooldown in minutes.
+     */
+    public static void setCooldown(int cooldownMinutes) {
+        cooldownMs = (long) cooldownMinutes * 60 * 1000L;
+    }
 
     /** Returns {@code true} if enough time has passed since the last impression. */
     public static boolean isCooldownElapsed() {
-        return lastShownTimeMs == 0 || (System.currentTimeMillis() - lastShownTimeMs) >= COOLDOWN_MS;
+        return lastShownTimeMs == 0 || (System.currentTimeMillis() - lastShownTimeMs) >= cooldownMs;
     }
 
     private boolean adStatus = true;
@@ -70,6 +79,9 @@ public class AppOpenAd {
         this.metaAppOpenId = builder.metaAppOpenId;
         this.appLovinAppOpenId = builder.appLovinAppOpenId;
         this.wortiseAppOpenId = builder.wortiseAppOpenId;
+        if (builder.cooldownMinutes > 0) {
+            setCooldown(builder.cooldownMinutes);
+        }
     }
 
     private static synchronized AppOpenProvider getProvider(String network) {
@@ -252,13 +264,7 @@ public class AppOpenAd {
     }
 
     private String getAdUnitIdForNetwork(String network) {
-        return switch (network) {
-            case ADMOB, META_BIDDING_ADMOB -> adMobAppOpenId;
-            case META -> metaAppOpenId;
-            case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> appLovinAppOpenId;
-            case WORTISE -> wortiseAppOpenId;
-            default -> "0";
-        };
+        return Builder.getAdUnitIdForNetwork(this, network);
     }
 
     // ── Builder ──────────────────────────────────────────────────────────
@@ -274,6 +280,7 @@ public class AppOpenAd {
         private String metaAppOpenId = "";
         private String appLovinAppOpenId = "";
         private String wortiseAppOpenId = "";
+        private int cooldownMinutes = -1;
 
         public Builder(Activity activity) {
             this.activity = activity;
@@ -344,6 +351,12 @@ public class AppOpenAd {
         @NonNull
         public Builder wortiseId(@NonNull String wortiseAppOpenId) {
             this.wortiseAppOpenId = wortiseAppOpenId;
+            return this;
+        }
+
+        @NonNull
+        public Builder cooldown(int minutes) {
+            this.cooldownMinutes = minutes;
             return this;
         }
 
@@ -466,22 +479,24 @@ public class AppOpenAd {
             }
         }
 
-        private String getAdUnitIdForNetwork(String network) {
-            switch (network) {
-                case ADMOB:
-                case META_BIDDING_ADMOB:
-                    return adMobAppOpenId;
-                case META:
-                    return metaAppOpenId;
-                case APPLOVIN:
-                case APPLOVIN_MAX:
-                case META_BIDDING_APPLOVIN_MAX:
-                    return appLovinAppOpenId;
-                case WORTISE:
-                    return wortiseAppOpenId;
-                default:
-                    return "0";
-            }
+        private static String getAdUnitIdForNetwork(AppOpenAd ad, String network) {
+            return switch (network) {
+                case ADMOB, META_BIDDING_ADMOB -> ad.adMobAppOpenId;
+                case META -> ad.metaAppOpenId;
+                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> ad.appLovinAppOpenId;
+                case WORTISE -> ad.wortiseAppOpenId;
+                default -> "0";
+            };
+        }
+
+        private static String getAdUnitIdForNetwork(Builder builder, String network) {
+            return switch (network) {
+                case ADMOB, META_BIDDING_ADMOB -> builder.adMobAppOpenId;
+                case META -> builder.metaAppOpenId;
+                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> builder.appLovinAppOpenId;
+                case WORTISE -> builder.wortiseAppOpenId;
+                default -> "0";
+            };
         }
 
         public void showAppOpenAd() {
