@@ -49,6 +49,16 @@ public class AppLovinInterstitialProvider implements InterstitialProvider {
             public void onAdClicked(MaxAd ad) {
             }
         });
+
+        maxInterstitialAd.setRevenueListener(ad -> {
+            com.partharoypc.adglide.util.OnPaidEventListener paidListener = com.partharoypc.adglide.AdGlide
+                    .getConfig() != null ? com.partharoypc.adglide.AdGlide.getConfig().getOnPaidEventListener() : null;
+            if (paidListener != null) {
+                double valueMicros = ad.getRevenue() * 1000000;
+                paidListener.onPaidEvent(valueMicros, "USD", "ESTIMATED", "AppLovin Interstitial", adUnitId);
+            }
+        });
+
         Log.d(TAG, "Loading Interstitial Ad: " + adUnitId);
         maxInterstitialAd.loadAd();
     }

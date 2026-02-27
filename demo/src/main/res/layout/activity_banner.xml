@@ -62,6 +62,13 @@
                             android:layout_height="wrap_content"
                             android:text="@string/collapsible_banner" />
 
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switch_adaptive"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:text="Adaptive Banner (Optimized)" />
+
                     </LinearLayout>
 
                 </com.google.android.material.card.MaterialCardView>

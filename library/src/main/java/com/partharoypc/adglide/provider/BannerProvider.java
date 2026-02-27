@@ -16,6 +16,8 @@ public interface BannerProvider {
         boolean isCollapsible();
 
         boolean isMrec();
+
+        boolean isAdaptive();
     }
 
     interface BannerListener {

@@ -39,6 +39,15 @@ public class AdMobBannerProvider implements BannerProvider {
             @Override
             public void onAdLoaded() {
                 com.partharoypc.adglide.util.AdMobRateLimiter.resetCooldown(adUnitId);
+                adView.setOnPaidEventListener(adValue -> {
+                    com.partharoypc.adglide.util.OnPaidEventListener paidListener = com.partharoypc.adglide.AdGlide
+                            .getConfig() != null ? com.partharoypc.adglide.AdGlide.getConfig().getOnPaidEventListener()
+                                    : null;
+                    if (paidListener != null) {
+                        paidListener.onPaidEvent(adValue.getValueMicros(), adValue.getCurrencyCode(),
+                                String.valueOf(adValue.getPrecisionType()), "AdMob Banner", adUnitId);
+                    }
+                });
                 listener.onAdLoaded(adView);
             }
 
@@ -65,6 +74,9 @@ public class AdMobBannerProvider implements BannerProvider {
     private AdSize getAdSize(Activity activity, BannerConfig config) {
         if (config.isMrec()) {
             return AdSize.MEDIUM_RECTANGLE;
+        }
+        if (!config.isAdaptive()) {
+            return AdSize.BANNER;
         }
         // Simple implementation of adaptive banner for provider
         // Original logic is in Tools.java which we will refactor later

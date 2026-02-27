@@ -17,10 +17,16 @@ public class DashboardAdapter extends RecyclerView.Adapter<DashboardAdapter.View
 
     private Context context;
     private List<DashboardItem> items;
+    private OnItemClickListener listener;
 
-    public DashboardAdapter(Context context, List<DashboardItem> items) {
+    public interface OnItemClickListener {
+        void onItemClick(DashboardItem item);
+    }
+
+    public DashboardAdapter(Context context, List<DashboardItem> items, OnItemClickListener listener) {
         this.context = context;
         this.items = items;
+        this.listener = listener;
     }
 
     @NonNull
@@ -38,7 +44,9 @@ public class DashboardAdapter extends RecyclerView.Adapter<DashboardAdapter.View
         holder.icon.setImageResource(item.getIconResId());
 
         holder.itemView.setOnClickListener(v -> {
-            if (item.getActivityClass() != null) {
+            if (listener != null) {
+                listener.onItemClick(item);
+            } else if (item.getActivityClass() != null) {
                 context.startActivity(new Intent(context, item.getActivityClass()));
             }
         });

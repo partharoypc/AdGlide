@@ -55,6 +55,13 @@ public class ActivitySettings extends AppCompatActivity {
         setupToolbar();
         setupData();
         setupViews();
+
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                finish();
+            }
+        });
     }
 
     private void setupToolbar() {
@@ -116,6 +123,44 @@ public class ActivitySettings extends AppCompatActivity {
         switchAppOpenAd.setChecked(sharedPref.getIsAppOpenAdEnabled());
         switchAppOpenAd.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sharedPref.setIsAppOpenAdEnabled(isChecked);
+            Constant.OPEN_ADS_ON_START = isChecked;
+            initAds();
+        });
+
+        // Banner Ad Switch
+        SwitchMaterial switchBanner = findViewById(R.id.switch_banner_ad);
+        switchBanner.setChecked(sharedPref.getIsBannerEnabled());
+        switchBanner.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            sharedPref.setIsBannerEnabled(isChecked);
+            Constant.BANNER_STATUS = isChecked;
+            initAds();
+        });
+
+        // Interstitial Ad Switch
+        SwitchMaterial switchInterstitial = findViewById(R.id.switch_interstitial_ad);
+        switchInterstitial.setChecked(sharedPref.getIsInterstitialEnabled());
+        switchInterstitial.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            sharedPref.setIsInterstitialEnabled(isChecked);
+            Constant.INTERSTITIAL_STATUS = isChecked;
+            initAds();
+        });
+
+        // Native Ad Switch
+        SwitchMaterial switchNative = findViewById(R.id.switch_native_ad);
+        switchNative.setChecked(sharedPref.getIsNativeEnabled());
+        switchNative.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            sharedPref.setIsNativeEnabled(isChecked);
+            Constant.NATIVE_STATUS = isChecked;
+            initAds();
+        });
+
+        // Rewarded Ad Switch
+        SwitchMaterial switchRewarded = findViewById(R.id.switch_rewarded_ad);
+        switchRewarded.setChecked(sharedPref.getIsRewardedEnabled());
+        switchRewarded.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            sharedPref.setIsRewardedEnabled(isChecked);
+            Constant.REWARDED_STATUS = isChecked;
+            initAds();
         });
 
         Button btnGdpr = findViewById(R.id.btn_gdpr);
@@ -125,31 +170,55 @@ public class ActivitySettings extends AppCompatActivity {
     }
 
     private void initAds() {
-        // Re-trigger initialization in main activity or application if needed.
-        // Since logic is in MainActivity's initAds(), we might need to restart
-        // MainActivity or just update Constant.
-        // Constant is updated.
-        // If we go back to MainActivity, it doesn't re-run onCreate unless destroyed.
-        // But ad loading usually happens in 'loadBanner' etc. which uses
-        // Constant.AD_NETWORK at call time.
-        // So update here is enough for subsequent ad loads.
+        com.partharoypc.adglide.AdGlideConfig config = new com.partharoypc.adglide.AdGlideConfig.Builder()
+                .enableAds(Constant.AD_STATUS)
+                .primaryNetwork(Constant.AD_NETWORK)
+                .backupNetwork(Constant.BACKUP_AD_NETWORK)
+                .startAppId(Constant.STARTAPP_APP_ID)
+                .unityGameId(Constant.UNITY_GAME_ID)
+                .appLovinSdkKey(getResources().getString(R.string.app_lovin_sdk_key))
+                .ironSourceAppKey(Constant.IRONSOURCE_APP_KEY)
+                .wortiseAppId(Constant.WORTISE_APP_ID)
+                .debug(com.partharoypc.adglidedemo.BuildConfig.DEBUG)
+
+                .adMobInterstitialId(Constant.ADMOB_INTERSTITIAL_ID)
+                .appLovinInterstitialId(Constant.APPLOVIN_INTERSTITIAL_ID)
+                .wortiseInterstitialId(Constant.WORTISE_INTERSTITIAL_ID)
+                .adMobRewardedId(Constant.ADMOB_REWARDED_ID)
+                .appLovinRewardedId(Constant.APPLOVIN_MAX_REWARDED_ID)
+                .adMobAppOpenId(Constant.ADMOB_APP_OPEN_AD_ID)
+                .appLovinAppOpenId(Constant.APPLOVIN_APP_OPEN_AP_ID)
+                .wortiseAppOpenId(Constant.WORTISE_APP_OPEN_AD_ID)
+
+                .autoLoadInterstitial(true)
+                .autoLoadRewarded(true)
+                .enableAppOpenAd(Constant.OPEN_ADS_ON_START)
+                .appOpenStatus(Constant.OPEN_ADS_ON_START)
+                .bannerStatus(Constant.BANNER_STATUS)
+                .interstitialStatus(Constant.INTERSTITIAL_STATUS)
+                .nativeStatus(Constant.NATIVE_STATUS)
+                .rewardedStatus(Constant.REWARDED_STATUS)
+                .interstitialInterval(Constant.INTERSTITIAL_AD_INTERVAL)
+                .excludeOpenAdFrom(ActivitySplash.class, ActivitySettings.class)
+                .enableGDPR(true)
+                .debugGDPR(com.partharoypc.adglidedemo.BuildConfig.DEBUG)
+                .houseAdEnabled(Constant.HOUSE_AD_ENABLE)
+                .houseAdBannerImage(Constant.HOUSE_AD_BANNER_IMAGE)
+                .houseAdBannerClickUrl(Constant.HOUSE_AD_BANNER_URL)
+                .houseAdInterstitialImage(Constant.HOUSE_AD_INTERSTITIAL_IMAGE)
+                .houseAdInterstitialClickUrl(Constant.HOUSE_AD_INTERSTITIAL_URL)
+                .build();
+
+        com.partharoypc.adglide.AdGlide.initialize(getApplication(), config);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
+            getOnBackPressedDispatcher().onBackPressed();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onBackPressed() {
-        // Ensure MainActivity refreshes if needed, or simply finish.
-        // If theme changed, MainActivity needs recreate.
-        // Since we are finishing, MainActivity onResume is called.
-        // Better to just finish.
-        super.onBackPressed();
-    }
 }

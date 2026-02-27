@@ -2,28 +2,25 @@ package com.partharoypc.adglidedemo.activity.ads;
 
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import com.partharoypc.adglide.format.NativeAd;
+import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglidedemo.R;
 import com.partharoypc.adglidedemo.data.Constant;
-import com.partharoypc.adglidedemo.database.SharedPref;
 import static com.partharoypc.adglidedemo.data.Constant.*;
 
 public class ActivityNative extends AppCompatActivity {
 
     private LinearLayout nativeAdContainer;
-    private SharedPref sharedPref;
-    private NativeAd.Builder nativeAd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_native);
-        sharedPref = new SharedPref(this);
 
         setupToolbar();
         initViews();
@@ -50,45 +47,35 @@ public class ActivityNative extends AppCompatActivity {
     }
 
     private void loadNativeAd() {
-        nativeAdContainer.removeAllViews();
-        setNativeAdStyle(nativeAdContainer);
+        destroyNative();
 
-        nativeAd = new NativeAd.Builder(this)
-                .status(Constant.AD_STATUS)
-                .network(Constant.AD_NETWORK)
-                .backup(Constant.BACKUP_AD_NETWORK)
-                .adMobId(Constant.ADMOB_NATIVE_ID)
-                .metaId(Constant.META_NATIVE_ID)
-                .appLovinId(Constant.APPLOVIN_NATIVE_MANUAL_ID)
-                .wortiseId(Constant.WORTISE_NATIVE_ID)
-                .startAppId(Constant.STARTAPP_APP_ID)
-                .ironSourceId(Constant.IRONSOURCE_NATIVE_ID)
-                .style(Constant.NATIVE_STYLE)
-                .backgroundColor(R.color.colorNativeBackgroundLight, R.color.colorNativeBackgroundDark)
-                .padding(0, 0, 0, 0)
-                .darkTheme(sharedPref.getIsDarkTheme())
-                .build().load();
-    }
-
-    private void setNativeAdStyle(LinearLayout nativeAdView) {
+        com.partharoypc.adglide.AdGlideNativeStyle style;
         switch (Constant.NATIVE_STYLE) {
             case STYLE_SMALL:
-                nativeAdView.addView(
-                        View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_radio, null));
+                style = com.partharoypc.adglide.AdGlideNativeStyle.SMALL;
                 break;
             case STYLE_BANNER:
-                nativeAdView.addView(
-                        View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_news, null));
+                style = com.partharoypc.adglide.AdGlideNativeStyle.BANNER;
                 break;
             case STYLE_VIDEO:
-                nativeAdView.addView(
-                        View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_video_large, null));
+                style = com.partharoypc.adglide.AdGlideNativeStyle.VIDEO;
                 break;
             case STYLE_MEDIUM:
             default:
-                nativeAdView.addView(
-                        View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_native_ad_medium, null));
+                style = com.partharoypc.adglide.AdGlideNativeStyle.MEDIUM;
                 break;
+        }
+
+        // Flagship Elite Builder API:
+        new com.partharoypc.adglide.format.NativeAd.Builder(this)
+                .container(nativeAdContainer)
+                .style(style)
+                .load();
+    }
+
+    private void destroyNative() {
+        if (nativeAdContainer != null) {
+            nativeAdContainer.removeAllViews();
         }
     }
 
@@ -119,8 +106,5 @@ public class ActivityNative extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (nativeAd != null) {
-            nativeAd.destroyNativeAd();
-        }
     }
 }

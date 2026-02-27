@@ -6,14 +6,13 @@ import android.widget.Button;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import com.partharoypc.adglide.format.InterstitialAd;
+
+import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglidedemo.R;
-import com.partharoypc.adglidedemo.data.Constant;
 
 public class ActivityInterstitial extends AppCompatActivity {
 
     private static final String TAG = "ActivityInterstitial";
-    private InterstitialAd.Builder interstitialAd;
     private TextView logTextView;
 
     @Override
@@ -23,7 +22,10 @@ public class ActivityInterstitial extends AppCompatActivity {
 
         setupToolbar();
         initViews();
-        loadInterstitialAd();
+
+        // AdGlide automatically caches ads via AdGlideConfig,
+        // but if we want to manually trigger preloading we can use the facade:
+        AdGlide.preloadInterstitial(this);
     }
 
     private void setupToolbar() {
@@ -42,43 +44,18 @@ public class ActivityInterstitial extends AppCompatActivity {
         Button btnLoad = findViewById(R.id.btn_load);
 
         btnShow.setOnClickListener(v -> showInterstitialAd());
-        btnLoad.setOnClickListener(v -> loadInterstitialAd());
-    }
-
-    private void loadInterstitialAd() {
-        appendLog("Loading Interstitial Ad...");
-        interstitialAd = new InterstitialAd.Builder(this)
-                .status(Constant.AD_STATUS)
-                .network(Constant.AD_NETWORK)
-                .backup(Constant.BACKUP_AD_NETWORK)
-                .adMobId(Constant.ADMOB_INTERSTITIAL_ID)
-                .metaId(Constant.META_INTERSTITIAL_ID)
-                .unityId(Constant.UNITY_INTERSTITIAL_ID)
-                .appLovinId(Constant.APPLOVIN_INTERSTITIAL_ID)
-                .zoneId(Constant.APPLOVIN_INTERSTITIAL_ZONE_ID)
-                .ironSourceId(Constant.IRONSOURCE_INTERSTITIAL_ID)
-                .wortiseId(Constant.WORTISE_INTERSTITIAL_ID)
-                .startAppId(Constant.STARTAPP_APP_ID)
-                .interval(Constant.INTERSTITIAL_AD_INTERVAL)
-                .build().load(() -> {
-                    appendLog("Interstitial Ad Dismissed");
-                    Log.d(TAG, "onAdDismissed");
-                    loadInterstitialAd(); // Auto reload
-                });
+        btnLoad.setOnClickListener(v -> {
+            appendLog("Manually Loading Interstitial Ad...");
+            AdGlide.preloadInterstitial(this);
+        });
     }
 
     private void showInterstitialAd() {
-        if (interstitialAd != null && interstitialAd.isAdLoaded()) {
-            interstitialAd.show(() -> {
-                appendLog("Interstitial Ad Shown");
-                Log.d(TAG, "onAdShowed");
-            }, () -> {
-                appendLog("Interstitial Ad Dismissed");
-                Log.d(TAG, "onAdDismissed");
-            });
-        } else {
-            appendLog("Ad not initialized");
-        }
+        appendLog("Triggering Interstitial Ad Show...");
+        AdGlide.showInterstitial(this, () -> {
+            appendLog("Interstitial Ad Dismissed");
+            Log.d(TAG, "onAdDismissed");
+        });
     }
 
     private void appendLog(String text) {
@@ -88,8 +65,6 @@ public class ActivityInterstitial extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (interstitialAd != null) {
-            interstitialAd.destroyInterstitialAd();
-        }
+        // AdGlide manages the cache, no need to manually destroy.
     }
 }

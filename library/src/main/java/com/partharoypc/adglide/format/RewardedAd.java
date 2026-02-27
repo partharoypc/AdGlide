@@ -14,6 +14,7 @@ import static com.partharoypc.adglide.util.Constant.STARTAPP;
 import static com.partharoypc.adglide.util.Constant.UNITY;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
+import com.partharoypc.adglide.AdGlideConfig;
 import android.app.Activity;
 import android.util.Log;
 
@@ -41,9 +42,9 @@ public class RewardedAd {
 
     public static class Builder {
         private static final String TAG = "AdGlide.Rewarded";
-        private final Activity activity;
+        private final java.lang.ref.WeakReference<Activity> activityRef;
 
-        private boolean adStatus = true;
+        private boolean adStatus = false;
         private String adNetwork = "";
         private String backupAdNetwork = "";
         private WaterfallManager waterfallManager;
@@ -55,13 +56,32 @@ public class RewardedAd {
         private String ironSourceRewardedId = "";
         private String startAppId = "";
         private String wortiseRewardedId = "";
-        private int placementStatus = 1;
+        private int placementStatus = 0;
         private boolean legacyGDPR = false;
 
         private RewardedProvider currentProvider;
 
         public Builder(@NonNull Activity activity) {
-            this.activity = activity;
+            this.activityRef = new java.lang.ref.WeakReference<>(activity);
+            if (com.partharoypc.adglide.AdGlide.getConfig() != null) {
+                com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+                this.adStatus = config.getAdStatus();
+                this.adNetwork = config.getPrimaryNetwork();
+                if (!config.getBackupNetworks().isEmpty()) {
+                    this.backupAdNetwork = config.getBackupNetworks().get(0);
+                    this.waterfallManager = new com.partharoypc.adglide.util.WaterfallManager(
+                            config.getBackupNetworks().toArray(new String[0]));
+                }
+                this.adMobRewardedId = config.getAdMobRewardedId();
+                this.metaRewardedId = config.getMetaRewardedId();
+                this.unityRewardedId = config.getUnityRewardedId();
+                this.appLovinRewardedId = config.getAppLovinRewardedId();
+                this.appLovinDiscRewardedZoneId = config.getAppLovinDiscRewardedZoneId();
+                this.ironSourceRewardedId = config.getIronSourceRewardedId();
+                this.wortiseRewardedId = config.getWortiseRewardedId();
+                this.startAppId = config.getStartAppId();
+                this.legacyGDPR = config.isLegacyGDPR();
+            }
         }
 
         @NonNull
@@ -85,6 +105,7 @@ public class RewardedAd {
         @NonNull
         public Builder show(OnRewardedAdCompleteListener onComplete, OnRewardedAdDismissedListener onDismiss,
                 OnRewardedAdErrorListener onError) {
+            Activity activity = activityRef.get();
             showRewardedAd(activity, onComplete, onDismiss, onError);
             return this;
         }
@@ -231,8 +252,16 @@ public class RewardedAd {
         private void loadRewardedAdMain(boolean isBackup, OnRewardedAdCompleteListener onComplete,
                 OnRewardedAdDismissedListener onDismiss) {
             try {
-                if (!adStatus || placementStatus == 0) {
+                AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+                boolean isRewardedEnabled = config != null && config.isRewardedEnabled();
+                if (!adStatus || !isRewardedEnabled || placementStatus == 0) {
                     Log.d(TAG, "Rewarded Ad is disabled or placement status is 0.");
+                    return;
+                }
+
+                Activity activity = activityRef.get();
+                if (activity == null) {
+                    Log.e(TAG, "Activity is null. Cannot load Rewarded.");
                     return;
                 }
 
@@ -267,6 +296,7 @@ public class RewardedAd {
                     return;
                 }
 
+                com.partharoypc.adglide.util.PerformanceLogger.log("Rewarded", "Loading started: " + network);
                 loadAdFromNetwork(network, onComplete, onDismiss);
 
             } catch (Exception e) {
@@ -278,6 +308,12 @@ public class RewardedAd {
 
         private void loadAdFromNetwork(String network, OnRewardedAdCompleteListener onComplete,
                 OnRewardedAdDismissedListener onDismiss) {
+            Activity activity = activityRef.get();
+            if (activity == null) {
+                Log.e(TAG, "Activity is null. Cannot load Rewarded from network.");
+                return;
+            }
+
             destroy();
             RewardedProvider provider = RewardedProviderFactory.getProvider(network);
             if (provider == null) {
@@ -310,11 +346,14 @@ public class RewardedAd {
             provider.loadRewardedAd(activity, adUnitId, config, new RewardedProvider.RewardedListener() {
                 @Override
                 public void onAdLoaded() {
+                    com.partharoypc.adglide.util.PerformanceLogger.log("Rewarded", "Loaded: " + network);
                     Log.d(TAG, network + " Rewarded ad loaded");
                 }
 
                 @Override
                 public void onAdFailedToLoad(String error) {
+                    com.partharoypc.adglide.util.PerformanceLogger.error("Rewarded",
+                            "Failed [" + network + "]: " + error);
                     Log.e(TAG, network + " Rewarded ad failed to load: " + error);
                     loadRewardedBackupAd(onComplete, onDismiss);
                 }
@@ -336,12 +375,14 @@ public class RewardedAd {
 
         public void showRewardedAd(OnRewardedAdCompleteListener onComplete, OnRewardedAdDismissedListener onDismiss,
                 OnRewardedAdErrorListener onError) {
+            Activity activity = activityRef.get();
             showRewardedAd(activity, onComplete, onDismiss, onError);
         }
 
         public void showRewardedAd(Activity displayActivity, OnRewardedAdCompleteListener onComplete,
                 OnRewardedAdDismissedListener onDismiss, OnRewardedAdErrorListener onError) {
             if (currentProvider != null && currentProvider.isAdAvailable()) {
+                Activity activity = activityRef.get();
                 currentProvider.showRewardedAd(displayActivity != null ? displayActivity : activity,
                         new RewardedProvider.RewardedListener() {
                             @Override
@@ -362,6 +403,10 @@ public class RewardedAd {
 
                             @Override
                             public void onAdCompleted() {
+                                com.partharoypc.adglide.util.PerformanceLogger.log("Rewarded",
+                                        "Completed: "
+                                                + (currentProvider != null ? currentProvider.getClass().getSimpleName()
+                                                        : "Unknown"));
                                 if (onComplete != null)
                                     onComplete.onRewardedAdComplete();
                             }

@@ -13,6 +13,7 @@ import static com.partharoypc.adglide.util.Constant.STARTAPP;
 import static com.partharoypc.adglide.util.Constant.UNITY;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
+import com.partharoypc.adglide.AdGlideConfig;
 import android.app.Activity;
 import android.util.Log;
 import android.view.View;
@@ -42,10 +43,11 @@ public class NativeAd {
 
     public static class Builder {
         private static final String TAG = "AdGlide.Native";
-        private final Activity activity;
-        private LinearLayout nativeAdViewContainer;
+        private final java.lang.ref.WeakReference<Activity> activityRef;
+        private ViewGroup nativeAdViewContainer;
+        private ViewGroup customContainer;
 
-        private boolean adStatus = true;
+        private boolean adStatus = false;
         private String adNetwork = "";
         private String backupAdNetwork = "";
         private WaterfallManager waterfallManager;
@@ -56,7 +58,7 @@ public class NativeAd {
         private String wortiseNativeId = "";
         private String startAppId = "";
         private String ironSourceNativeId = "";
-        private int placementStatus = 1;
+        private int placementStatus = 0;
         private boolean darkTheme = false;
         private boolean legacyGDPR = false;
         private String nativeAdStyle = "large";
@@ -66,7 +68,25 @@ public class NativeAd {
         private NativeProvider currentProvider;
 
         public Builder(Activity activity) {
-            this.activity = activity;
+            this.activityRef = new java.lang.ref.WeakReference<>(activity);
+            if (com.partharoypc.adglide.AdGlide.getConfig() != null) {
+                com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+                this.adStatus = config.getAdStatus();
+                this.adNetwork = config.getPrimaryNetwork();
+                if (!config.getBackupNetworks().isEmpty()) {
+                    this.backupAdNetwork = config.getBackupNetworks().get(0);
+                    this.waterfallManager = new com.partharoypc.adglide.util.WaterfallManager(
+                            config.getBackupNetworks().toArray(new String[0]));
+                }
+                this.adMobNativeId = config.getAdMobNativeId();
+                this.metaNativeId = config.getMetaNativeId();
+                this.appLovinNativeId = config.getAppLovinNativeId();
+                this.appLovinDiscMrecZoneId = config.getAppLovinDiscNativeZoneId();
+                this.ironSourceNativeId = config.getIronSourceNativeId();
+                this.wortiseNativeId = config.getWortiseNativeId();
+                this.startAppId = config.getStartAppId();
+                this.legacyGDPR = config.isLegacyGDPR();
+            }
         }
 
         @NonNull
@@ -219,6 +239,12 @@ public class NativeAd {
             return this;
         }
 
+        @NonNull
+        public Builder container(ViewGroup container) {
+            this.customContainer = container;
+            return this;
+        }
+
         public void loadNativeAd() {
             loadNativeAdMain(false);
         }
@@ -229,8 +255,16 @@ public class NativeAd {
 
         private void loadNativeAdMain(boolean isBackup) {
             try {
-                if (!adStatus || placementStatus == 0)
+                AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+                boolean isNativeEnabled = config != null && config.isNativeEnabled();
+                if (!adStatus || !isNativeEnabled || placementStatus == 0)
                     return;
+
+                Activity activity = activityRef.get();
+                if (activity == null) {
+                    Log.e(TAG, "Activity is null. Cannot load Native.");
+                    return;
+                }
 
                 if (!Tools.isNetworkAvailable(activity)) {
                     Log.e(TAG, "Internet connection not available.");
@@ -306,6 +340,12 @@ public class NativeAd {
                 }
             };
 
+            Activity activity = activityRef.get();
+            if (activity == null) {
+                Log.e(TAG, "Activity is null. Cannot load Native from network.");
+                return;
+            }
+
             provider.loadNativeAd(activity, adUnitId, config, new NativeProvider.NativeListener() {
                 @Override
                 public void onAdLoaded(View adView) {
@@ -334,7 +374,16 @@ public class NativeAd {
         }
 
         private void displayAdView(View adView) {
-            nativeAdViewContainer = activity.findViewById(R.id.native_ad_view_container);
+            Activity activity = activityRef.get();
+            if (activity == null)
+                return;
+
+            if (customContainer != null) {
+                nativeAdViewContainer = customContainer;
+            } else {
+                nativeAdViewContainer = (ViewGroup) activity.findViewById(R.id.native_ad_view_container);
+            }
+
             if (nativeAdViewContainer != null && adView != null) {
                 nativeAdViewContainer.removeAllViews();
                 nativeAdViewContainer.addView(adView);
@@ -351,6 +400,9 @@ public class NativeAd {
         }
 
         public void setNativeAdPadding(int left, int top, int right, int bottom) {
+            Activity activity = activityRef.get();
+            if (activity == null)
+                return;
             nativeAdViewContainer = activity.findViewById(R.id.native_ad_view_container);
             if (nativeAdViewContainer != null) {
                 nativeAdViewContainer.setPadding(left, top, right, bottom);
@@ -360,6 +412,9 @@ public class NativeAd {
         }
 
         public void setNativeAdMargin(int left, int top, int right, int bottom) {
+            Activity activity = activityRef.get();
+            if (activity == null)
+                return;
             nativeAdViewContainer = activity.findViewById(R.id.native_ad_view_container);
             if (nativeAdViewContainer != null) {
                 if (nativeAdViewContainer.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
@@ -372,6 +427,9 @@ public class NativeAd {
         }
 
         public void setNativeAdBackgroundResource(int drawableBackground) {
+            Activity activity = activityRef.get();
+            if (activity == null)
+                return;
             nativeAdViewContainer = activity.findViewById(R.id.native_ad_view_container);
             if (nativeAdViewContainer != null) {
                 nativeAdViewContainer.setBackgroundResource(drawableBackground);

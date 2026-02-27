@@ -50,6 +50,20 @@ public class RewardedInterstitialAd {
 
         public Builder(Activity activity) {
             this.activity = activity;
+            if (com.partharoypc.adglide.AdGlide.getConfig() != null) {
+                com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+                this.adStatus = config.getAdStatus();
+                this.adNetwork = config.getPrimaryNetwork();
+                if (!config.getBackupNetworks().isEmpty()) {
+                    this.backupAdNetwork = config.getBackupNetworks().get(0);
+                    this.waterfallManager = new com.partharoypc.adglide.util.WaterfallManager(
+                            config.getBackupNetworks().toArray(new String[0]));
+                }
+                this.adMobRewardedIntId = config.getAdMobRewardedIntId();
+                this.appLovinRewardedIntId = config.getAppLovinRewardedIntId();
+                this.wortiseRewardedIntId = config.getWortiseRewardedIntId();
+                this.legacyGDPR = config.isLegacyGDPR();
+            }
         }
 
         @NonNull

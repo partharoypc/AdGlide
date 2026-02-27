@@ -52,6 +52,16 @@ public class AppLovinRewardedProvider implements RewardedProvider {
                 Log.e(TAG, "Rewarded Ad failed to display: [" + error.getCode() + "] " + error.getMessage());
             }
         });
+
+        rewardedAd.setRevenueListener(ad -> {
+            com.partharoypc.adglide.util.OnPaidEventListener paidListener = com.partharoypc.adglide.AdGlide
+                    .getConfig() != null ? com.partharoypc.adglide.AdGlide.getConfig().getOnPaidEventListener() : null;
+            if (paidListener != null) {
+                double valueMicros = ad.getRevenue() * 1000000;
+                paidListener.onPaidEvent(valueMicros, "USD", "ESTIMATED", "AppLovin Rewarded", adUnitId);
+            }
+        });
+
         Log.d(TAG, "Loading Rewarded Ad: " + adUnitId);
         rewardedAd.loadAd();
     }

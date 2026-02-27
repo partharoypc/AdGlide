@@ -16,6 +16,7 @@ public class Constant {
     public static final String APPLOVIN_DISCOVERY = "app_lovin_discovery";
     public static final String IRONSOURCE = "ironsource";
     public static final String WORTISE = "wortise";
+    public static final String HOUSE_AD = "house_ad";
     public static final String NONE = "none";
 
     // ad bidding

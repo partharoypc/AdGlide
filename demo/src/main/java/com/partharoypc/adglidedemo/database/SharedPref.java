@@ -55,4 +55,40 @@ public class SharedPref {
         editor.apply();
     }
 
+    public Boolean getIsBannerEnabled() {
+        return sharedPreferences.getBoolean("banner_enabled", true);
+    }
+
+    public void setIsBannerEnabled(Boolean isEnabled) {
+        editor.putBoolean("banner_enabled", isEnabled);
+        editor.apply();
+    }
+
+    public Boolean getIsInterstitialEnabled() {
+        return sharedPreferences.getBoolean("interstitial_enabled", true);
+    }
+
+    public void setIsInterstitialEnabled(Boolean isEnabled) {
+        editor.putBoolean("interstitial_enabled", isEnabled);
+        editor.apply();
+    }
+
+    public Boolean getIsNativeEnabled() {
+        return sharedPreferences.getBoolean("native_enabled", true);
+    }
+
+    public void setIsNativeEnabled(Boolean isEnabled) {
+        editor.putBoolean("native_enabled", isEnabled);
+        editor.apply();
+    }
+
+    public Boolean getIsRewardedEnabled() {
+        return sharedPreferences.getBoolean("rewarded_enabled", true);
+    }
+
+    public void setIsRewardedEnabled(Boolean isEnabled) {
+        editor.putBoolean("rewarded_enabled", isEnabled);
+        editor.apply();
+    }
+
 }

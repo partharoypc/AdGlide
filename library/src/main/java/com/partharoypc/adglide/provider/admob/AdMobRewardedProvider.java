@@ -28,6 +28,16 @@ public class AdMobRewardedProvider implements RewardedProvider {
                 @Override
                 public void onAdLoaded(@NonNull RewardedInterstitialAd ad) {
                     com.partharoypc.adglide.util.AdMobRateLimiter.resetCooldown(adUnitId);
+                    ad.setOnPaidEventListener(adValue -> {
+                        com.partharoypc.adglide.util.OnPaidEventListener paidListener = com.partharoypc.adglide.AdGlide
+                                .getConfig() != null
+                                        ? com.partharoypc.adglide.AdGlide.getConfig().getOnPaidEventListener()
+                                        : null;
+                        if (paidListener != null) {
+                            paidListener.onPaidEvent(adValue.getValueMicros(), adValue.getCurrencyCode(),
+                                    String.valueOf(adValue.getPrecisionType()), "AdMob RewardedInterstitial", adUnitId);
+                        }
+                    });
                     rewardedInterstitialAd = ad;
                     setupInterstitialCallback(listener);
                     listener.onAdLoaded();
@@ -46,6 +56,16 @@ public class AdMobRewardedProvider implements RewardedProvider {
                 @Override
                 public void onAdLoaded(@NonNull RewardedAd ad) {
                     com.partharoypc.adglide.util.AdMobRateLimiter.resetCooldown(adUnitId);
+                    ad.setOnPaidEventListener(adValue -> {
+                        com.partharoypc.adglide.util.OnPaidEventListener paidListener = com.partharoypc.adglide.AdGlide
+                                .getConfig() != null
+                                        ? com.partharoypc.adglide.AdGlide.getConfig().getOnPaidEventListener()
+                                        : null;
+                        if (paidListener != null) {
+                            paidListener.onPaidEvent(adValue.getValueMicros(), adValue.getCurrencyCode(),
+                                    String.valueOf(adValue.getPrecisionType()), "AdMob Rewarded", adUnitId);
+                        }
+                    });
                     rewardedAd = ad;
                     setupRewardedCallback(listener);
                     listener.onAdLoaded();

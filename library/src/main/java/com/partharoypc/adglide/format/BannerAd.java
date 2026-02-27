@@ -10,6 +10,7 @@ import android.widget.RelativeLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.partharoypc.adglide.AdGlideConfig;
 import com.partharoypc.adglide.AdGlideNetwork;
 import com.partharoypc.adglide.R;
 import com.partharoypc.adglide.util.Tools;
@@ -28,11 +29,11 @@ public class BannerAd {
     public static class Builder implements BannerProvider.BannerConfig {
 
         private static final String TAG = "AdGlide";
-        private final Activity activity;
+        private final java.lang.ref.WeakReference<Activity> activityRef;
         private BannerProvider currentProvider;
         private View currentAdView;
 
-        private boolean adStatus = true;
+        private boolean adStatus = false;
         private String adNetwork = "";
         private String backupAdNetwork = "";
         private WaterfallManager waterfallManager;
@@ -43,13 +44,33 @@ public class BannerAd {
         private String ironSourceBannerId = "";
         private String wortiseBannerId = "";
         private String startAppId = "";
-        private int placementStatus = 1;
+        private int placementStatus = 0;
         private boolean darkTheme = false;
         private boolean legacyGDPR = false;
         private boolean collapsibleBanner = false;
+        private boolean adaptiveBanner = true;
+        private ViewGroup customContainer;
 
         public Builder(Activity activity) {
-            this.activity = activity;
+            this.activityRef = new java.lang.ref.WeakReference<>(activity);
+            if (com.partharoypc.adglide.AdGlide.getConfig() != null) {
+                com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+                this.adStatus = config.getAdStatus();
+                this.adNetwork = config.getPrimaryNetwork();
+                if (!config.getBackupNetworks().isEmpty()) {
+                    this.backupAdNetwork = config.getBackupNetworks().get(0);
+                    this.waterfallManager = new com.partharoypc.adglide.util.WaterfallManager(
+                            config.getBackupNetworks().toArray(new String[0]));
+                }
+                this.adMobBannerId = config.getAdMobBannerId();
+                this.metaBannerId = config.getMetaBannerId();
+                this.unityBannerId = config.getUnityBannerId();
+                this.appLovinBannerId = config.getAppLovinBannerId();
+                this.ironSourceBannerId = config.getIronSourceBannerId();
+                this.wortiseBannerId = config.getWortiseBannerId();
+                this.startAppId = config.getStartAppId();
+                this.legacyGDPR = config.isLegacyGDPR();
+            }
         }
 
         @Override
@@ -70,6 +91,11 @@ public class BannerAd {
         @Override
         public boolean isMrec() {
             return false;
+        }
+
+        @Override
+        public boolean isAdaptive() {
+            return adaptiveBanner;
         }
 
         @NonNull
@@ -202,11 +228,36 @@ public class BannerAd {
             return this;
         }
 
+        @NonNull
+        public Builder adaptive(boolean adaptiveBanner) {
+            this.adaptiveBanner = adaptiveBanner;
+            return this;
+        }
+
+        @NonNull
+        public Builder container(ViewGroup container) {
+            this.customContainer = container;
+            return this;
+        }
+
         public void loadBannerAd() {
             try {
-                if (adStatus && placementStatus != 0) {
+                AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+                boolean isBannerTypeEnabled = config != null && config.isBannerEnabled();
+                if (adStatus && isBannerTypeEnabled && placementStatus != 0) {
+                    Activity activity = activityRef.get();
+                    if (activity == null) {
+                        Log.e(TAG, "Activity is null. Cannot load Banner.");
+                        return;
+                    }
+                    com.partharoypc.adglide.util.PerformanceLogger.log("Banner", "Loading started: " + adNetwork);
                     if (!Tools.isNetworkAvailable(activity)) {
-                        Log.e(TAG, "Internet connection not available. Skipping Primary Banner Ad load.");
+                        Log.e(TAG, "Internet connection not available.");
+                        if (com.partharoypc.adglide.AdGlide.getConfig() != null
+                                && com.partharoypc.adglide.AdGlide.getConfig().isHouseAdEnabled()) {
+                            Log.d(TAG, "Falling back to House Ad due to offline status.");
+                            loadAdFromNetwork(HOUSE_AD);
+                        }
                         return;
                     }
                     if (waterfallManager != null) {
@@ -225,8 +276,17 @@ public class BannerAd {
         public void loadBackupBannerAd() {
             try {
                 if (adStatus && placementStatus != 0) {
+                    Activity activity = activityRef.get();
+                    if (activity == null) {
+                        Log.e(TAG, "Activity is null. Cannot load backup Banner.");
+                        return;
+                    }
                     if (!Tools.isNetworkAvailable(activity)) {
-                        Log.e(TAG, "Internet connection not available. Skipping Backup Banner Ad load.");
+                        Log.e(TAG, "Internet connection not available.");
+                        if (com.partharoypc.adglide.AdGlide.getConfig() != null
+                                && com.partharoypc.adglide.AdGlide.getConfig().isHouseAdEnabled()) {
+                            loadAdFromNetwork(HOUSE_AD);
+                        }
                         return;
                     }
                     if (waterfallManager == null) {
@@ -264,17 +324,27 @@ public class BannerAd {
                     return;
                 }
 
+                Activity activity = activityRef.get();
+                if (activity == null) {
+                    Log.e(TAG, "Activity is null. Cannot load Banner from network.");
+                    return;
+                }
+
                 BannerProvider provider = BannerProviderFactory.getProvider(networkToLoad);
                 if (provider != null) {
                     currentProvider = provider;
                     provider.loadBanner(activity, adUnitId, this, new BannerProvider.BannerListener() {
                         @Override
                         public void onAdLoaded(View adView) {
+                            com.partharoypc.adglide.util.PerformanceLogger.log("Banner",
+                                    "Loaded: " + networkToLoad);
                             displayAdView(networkToLoad, adView);
                         }
 
                         @Override
                         public void onAdFailedToLoad(String error) {
+                            com.partharoypc.adglide.util.PerformanceLogger.error("Banner",
+                                    "Failed [" + networkToLoad + "]: " + error);
                             Log.e(TAG, "Banner failed to load for " + networkToLoad + ": " + error);
                             loadBackupBannerAd();
                         }
@@ -297,19 +367,26 @@ public class BannerAd {
                 case IRONSOURCE, META_BIDDING_IRONSOURCE -> builder.ironSourceBannerId;
                 case STARTAPP -> !builder.startAppId.isEmpty() ? builder.startAppId : "startapp_id";
                 case WORTISE -> builder.wortiseBannerId;
+                case HOUSE_AD -> "house_ad";
                 default -> "";
             };
         }
 
         private void displayAdView(String network, View adView) {
+            Activity activity = activityRef.get();
+            if (activity == null)
+                return;
             activity.runOnUiThread(() -> {
                 try {
-                    ViewGroup container = getContainerForNetwork(network);
+                    ViewGroup container = customContainer != null ? customContainer : getContainerForNetwork(network);
                     if (container != null) {
                         container.removeAllViews();
                         container.addView(adView);
                         container.setVisibility(View.VISIBLE);
                         currentAdView = adView;
+                    } else {
+                        Log.e(TAG, "No container found for Banner [" + network
+                                + "]. Use .container() or provide default XML ID.");
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "Error displaying ad view: " + e.getMessage());
@@ -322,6 +399,7 @@ public class BannerAd {
             switch (network) {
                 case ADMOB:
                 case META_BIDDING_ADMOB:
+                case HOUSE_AD:
                     containerId = R.id.ad_mob_banner_view_container;
                     break;
                 case META:
@@ -346,7 +424,7 @@ public class BannerAd {
                     containerId = R.id.app_lovin_banner_view_container;
                     break;
             }
-            return containerId != -1 ? activity.findViewById(containerId) : null;
+            return containerId != -1 && activityRef.get() != null ? activityRef.get().findViewById(containerId) : null;
         }
 
         public void destroyAndDetachBanner() {

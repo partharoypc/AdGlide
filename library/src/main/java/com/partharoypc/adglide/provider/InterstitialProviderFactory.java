@@ -40,6 +40,11 @@ public class InterstitialProviderFactory {
                 className = "com.partharoypc.adglide.provider.wortise.WortiseInterstitialProvider";
                 checkClass = "com.wortise.ads.interstitial.InterstitialAd";
             }
+            case HOUSE_AD -> {
+                className = "com.partharoypc.adglide.provider.housead.HouseAdInterstitialProvider";
+                // House Ads use standard Android Dialogs, so we check a base class
+                checkClass = "android.app.Dialog";
+            }
         }
 
         if (className != null && (checkClass == null || ReflectionUtils.isClassAvailable(checkClass))) {

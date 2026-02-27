@@ -80,15 +80,13 @@ public class AdMobNativeProvider implements NativeProvider {
     private int getLayoutForStyle(String style) {
         switch (style) {
             case "small":
-                return R.layout.adglide_ad_mob_radio_template_view;
+                return R.layout.adglide_native_small;
             case "medium":
-                return R.layout.adglide_ad_mob_medium_template_view;
-            case "banner":
-                return R.layout.adglide_ad_mob_news_template_view;
+                return R.layout.adglide_native_medium;
             case "video":
-                return R.layout.adglide_ad_mob_video_large_template_view;
+                return R.layout.adglide_native_video;
             default:
-                return R.layout.adglide_ad_mob_medium_template_view;
+                return R.layout.adglide_native_medium;
         }
     }
 

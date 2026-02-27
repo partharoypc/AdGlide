@@ -9,6 +9,7 @@ import static com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import android.annotation.SuppressLint;
+import com.partharoypc.adglide.AdGlideConfig;
 import android.app.Activity;
 import android.util.Log;
 
@@ -53,7 +54,7 @@ public class AppOpenAd {
         return lastShownTimeMs == 0 || (System.currentTimeMillis() - lastShownTimeMs) >= cooldownMs;
     }
 
-    private boolean adStatus = true;
+    private boolean adStatus = false;
     private String adNetwork = "";
     private String backupAdNetwork = "";
     private WaterfallManager waterfallManager;
@@ -61,8 +62,8 @@ public class AppOpenAd {
     private String metaAppOpenId = "";
     private String appLovinAppOpenId = "";
     private String wortiseAppOpenId = "";
-    private Activity currentActivity;
-    private int placementStatus = 1;
+    private java.lang.ref.WeakReference<Activity> activityRef;
+    private int placementStatus = 0;
 
     // Provider management
     private static final Map<String, AppOpenProvider> providers = new HashMap<>();
@@ -173,11 +174,14 @@ public class AppOpenAd {
 
     public void onStartLifecycleObserver() {
         try {
-            if (placementStatus != 0 && adStatus && currentActivity != null) {
-                if (currentActivity.getIntent().hasExtra("unique_id")) {
+            Activity activity = activityRef != null ? activityRef.get() : null;
+            AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+            boolean isAppOpenEnabled = config != null && config.isAppOpenEnabled();
+            if (placementStatus != 0 && adStatus && isAppOpenEnabled && activity != null) {
+                if (activity.getIntent().hasExtra("unique_id")) {
                     return;
                 }
-                showAdIfAvailable(currentActivity, null);
+                showAdIfAvailable(activity, null);
             }
         } catch (Exception e) {
             Log.e(TAG, "Error in onStartLifecycleObserver: " + e.getMessage());
@@ -186,11 +190,13 @@ public class AppOpenAd {
 
     public void onStartActivityLifecycleCallbacks(Activity activity) {
         try {
-            if (placementStatus != 0 && adStatus) {
+            AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+            boolean isAppOpenEnabled = config != null && config.isAppOpenEnabled();
+            if (placementStatus != 0 && adStatus && isAppOpenEnabled) {
                 AppOpenProvider provider = getProvider(adNetwork);
                 boolean isShowing = provider != null && provider.isShowingAd();
                 if (!isShowing) {
-                    currentActivity = activity;
+                    activityRef = new java.lang.ref.WeakReference<>(activity);
                 }
             }
         } catch (Exception e) {
@@ -207,7 +213,9 @@ public class AppOpenAd {
     public void showAdIfAvailable(@NonNull Activity activity,
             @Nullable OnShowAdCompleteListener onShowAdCompleteListener) {
         try {
-            if (placementStatus != 0 && adStatus) {
+            AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+            boolean isAppOpenEnabled = config != null && config.isAppOpenEnabled();
+            if (placementStatus != 0 && adStatus && isAppOpenEnabled) {
                 // ── 30-minute cooldown check ──────────────────────────────
                 if (!isCooldownElapsed()) {
                     Log.d(TAG, "App Open Ad skipped — cooldown not elapsed yet.");
@@ -271,8 +279,8 @@ public class AppOpenAd {
 
     public static class Builder {
         private static final String TAG = "AdGlide";
-        private final Activity activity;
-        private boolean adStatus = true;
+        private final java.lang.ref.WeakReference<Activity> activityRef;
+        private boolean adStatus = false;
         private String adNetwork = "";
         private String backupAdNetwork = "";
         private WaterfallManager waterfallManager;
@@ -280,10 +288,25 @@ public class AppOpenAd {
         private String metaAppOpenId = "";
         private String appLovinAppOpenId = "";
         private String wortiseAppOpenId = "";
+        private int placementStatus = 0;
         private int cooldownMinutes = -1;
 
         public Builder(Activity activity) {
-            this.activity = activity;
+            this.activityRef = new java.lang.ref.WeakReference<>(activity);
+            if (com.partharoypc.adglide.AdGlide.getConfig() != null) {
+                com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+                this.adStatus = config.getAdStatus();
+                this.adNetwork = config.getPrimaryNetwork();
+                if (!config.getBackupNetworks().isEmpty()) {
+                    this.backupAdNetwork = config.getBackupNetworks().get(0);
+                    this.waterfallManager = new com.partharoypc.adglide.util.WaterfallManager(
+                            config.getBackupNetworks().toArray(new String[0]));
+                }
+                this.adMobAppOpenId = config.getAdMobAppOpenId();
+                this.metaAppOpenId = config.getMetaAppOpenId();
+                this.appLovinAppOpenId = config.getAppLovinAppOpenId();
+                this.wortiseAppOpenId = config.getWortiseAppOpenId();
+            }
         }
 
         @NonNull
@@ -317,6 +340,11 @@ public class AppOpenAd {
         }
 
         @NonNull
+        public Builder placement(int placementStatus) {
+            this.placementStatus = placementStatus;
+            return this;
+        }
+
         public Builder backups(String... backupAdNetworks) {
             this.waterfallManager = new WaterfallManager(backupAdNetworks);
             if (backupAdNetworks.length > 0) {
@@ -374,7 +402,24 @@ public class AppOpenAd {
 
         public void loadAppOpenAd(OnShowAdCompleteListener onShowAdCompleteListener) {
             try {
-                if (!adStatus) {
+                AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+                boolean isAppOpenEnabled = config != null && config.isAppOpenEnabled();
+
+                if (!adStatus || !isAppOpenEnabled) {
+                    if (onShowAdCompleteListener != null)
+                        onShowAdCompleteListener.onShowAdComplete();
+                    return;
+                }
+                if (placementStatus == 0) {
+                    Log.d(TAG, "App Open Ad is disabled via placementStatus");
+                    if (onShowAdCompleteListener != null)
+                        onShowAdCompleteListener.onShowAdComplete();
+                    return;
+                }
+
+                Activity activity = activityRef.get();
+                if (activity == null) {
+                    Log.e(TAG, "Activity is null. Cannot load App Open.");
                     if (onShowAdCompleteListener != null)
                         onShowAdCompleteListener.onShowAdComplete();
                     return;
@@ -390,6 +435,7 @@ public class AppOpenAd {
                 if (waterfallManager != null)
                     waterfallManager.reset();
 
+                com.partharoypc.adglide.util.PerformanceLogger.log("AppOpen", "Loading started: " + adNetwork);
                 loadAdFromNetwork(adNetwork, onShowAdCompleteListener);
             } catch (Exception e) {
                 Log.e(TAG, "Error in loadAppOpenAd: " + e.getMessage());
@@ -409,12 +455,18 @@ public class AppOpenAd {
                     return;
                 }
 
+                Activity activity = activityRef.get();
+                if (activity == null) {
+                    Log.e(TAG, "Activity is null. Cannot load App Open from network.");
+                    return;
+                }
                 AppOpenProvider provider = getProvider(network);
                 if (provider != null) {
                     provider.loadAppOpenAd(activity, adUnitId, new AppOpenProvider.AppOpenListener() {
                         @Override
                         public void onAdLoaded() {
                             isAppOpenAdLoaded = true;
+                            com.partharoypc.adglide.util.PerformanceLogger.log("AppOpen", "Loaded: " + network);
                             Log.d(TAG, "AppOpen ad loaded from [" + network.toUpperCase(java.util.Locale.ROOT)
                                     + "]. Showing now.");
                             // ── 30-minute cooldown check (splash path) ────
@@ -426,11 +478,19 @@ public class AppOpenAd {
                             }
                             // Show the ad immediately — onAdDismissed / onAdShowFailed
                             // will call onShowAdCompleteListener to continue the splash flow.
-                            provider.showAppOpenAd(activity, this);
+                            Activity activity = activityRef.get();
+                            if (activity != null) {
+                                provider.showAppOpenAd(activity, this);
+                            } else {
+                                if (onShowAdCompleteListener != null)
+                                    onShowAdCompleteListener.onShowAdComplete();
+                            }
                         }
 
                         @Override
                         public void onAdFailedToLoad(String error) {
+                            com.partharoypc.adglide.util.PerformanceLogger.error("AppOpen",
+                                    "Failed [" + network + "]: " + error);
                             Log.e(TAG, "AppOpen failed to load from [" + network.toUpperCase(java.util.Locale.ROOT)
                                     + "]: " + error);
                             loadBackupAppOpenAd(onShowAdCompleteListener);
@@ -453,6 +513,7 @@ public class AppOpenAd {
 
                         @Override
                         public void onAdShowed() {
+                            com.partharoypc.adglide.util.PerformanceLogger.log("AppOpen", "Showed: " + network);
                             Log.d(TAG, "AppOpen ad showed from [" + network.toUpperCase(java.util.Locale.ROOT) + "]");
                             // Record the time the ad was displayed
                             lastShownTimeMs = System.currentTimeMillis();
@@ -515,6 +576,7 @@ public class AppOpenAd {
 
                 AppOpenProvider provider = getProvider(adNetwork);
                 if (provider != null && provider.isAdAvailable()) {
+                    Activity activity = activityRef.get();
                     provider.showAppOpenAd(activity, new AppOpenProvider.AppOpenListener() {
                         @Override
                         public void onAdLoaded() {

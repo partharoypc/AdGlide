@@ -30,6 +30,14 @@ public class AppLovinAppOpenProvider implements AppOpenProvider, MaxAdListener {
         isLoadingAd = true;
         appOpenAd = new MaxAppOpenAd(adUnitId, context);
         appOpenAd.setListener(this);
+        appOpenAd.setRevenueListener(ad -> {
+            com.partharoypc.adglide.util.OnPaidEventListener paidListener = com.partharoypc.adglide.AdGlide
+                    .getConfig() != null ? com.partharoypc.adglide.AdGlide.getConfig().getOnPaidEventListener() : null;
+            if (paidListener != null) {
+                double valueMicros = ad.getRevenue() * 1000000;
+                paidListener.onPaidEvent(valueMicros, "USD", "ESTIMATED", "AppLovin AppOpen", adUnitId);
+            }
+        });
         appOpenAd.loadAd();
     }
 

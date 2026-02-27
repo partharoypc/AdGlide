@@ -6,16 +6,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import com.partharoypc.adglide.format.RewardedAd;
-import com.partharoypc.adglide.util.OnRewardedAdCompleteListener;
-import com.partharoypc.adglide.util.OnRewardedAdDismissedListener;
-import com.partharoypc.adglide.util.OnRewardedAdErrorListener;
+
+import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglidedemo.R;
-import com.partharoypc.adglidedemo.data.Constant;
 
 public class ActivityRewarded extends AppCompatActivity {
 
-    private RewardedAd.Builder rewardedAd;
     private TextView logTextView;
 
     @Override
@@ -25,7 +21,10 @@ public class ActivityRewarded extends AppCompatActivity {
 
         setupToolbar();
         initViews();
-        loadRewardedAd();
+
+        // AdGlide automatically caches ads via AdGlideConfig,
+        // but if we want to manually trigger preloading we can use the facade:
+        AdGlide.preloadRewarded(this);
     }
 
     private void setupToolbar() {
@@ -44,51 +43,20 @@ public class ActivityRewarded extends AppCompatActivity {
         Button btnLoad = findViewById(R.id.btn_load);
 
         btnShow.setOnClickListener(v -> showRewardedAd());
-        btnLoad.setOnClickListener(v -> loadRewardedAd());
-    }
-
-    private void loadRewardedAd() {
-        appendLog("Loading Rewarded Ad...");
-        rewardedAd = new RewardedAd.Builder(this)
-                .status(Constant.AD_STATUS)
-                .network(Constant.AD_NETWORK)
-                .backup(Constant.BACKUP_AD_NETWORK)
-                .adMobId(Constant.ADMOB_REWARDED_ID)
-                .metaId(Constant.META_REWARDED_ID)
-                .unityId(Constant.UNITY_REWARDED_ID)
-                .appLovinId(Constant.APPLOVIN_MAX_REWARDED_ID)
-                .zoneId(Constant.APPLOVIN_DISC_REWARDED_ZONE_ID)
-                .ironSourceId(Constant.IRONSOURCE_REWARDED_ID)
-                .wortiseId(Constant.WORTISE_REWARDED_ID)
-                .startAppId(Constant.STARTAPP_APP_ID)
-                .build().load(() -> appendLog("Rewarded Ad Loaded"),
-                        () -> appendLog("Rewarded Ad Error"),
-                        () -> appendLog("Rewarded Ad Dismissed"),
-                        () -> appendLog("Rewarded Ad Complete - GIVE REWARD"));
+        btnLoad.setOnClickListener(v -> {
+            appendLog("Manually Loading Rewarded Ad...");
+            AdGlide.preloadRewarded(this);
+        });
     }
 
     private void showRewardedAd() {
-        if (rewardedAd != null && rewardedAd.isAdAvailable()) {
-            rewardedAd.show(new OnRewardedAdCompleteListener() {
-                @Override
-                public void onRewardedAdComplete() {
-                    appendLog("User Earned Reward!");
-                    Toast.makeText(getApplicationContext(), "Reward Earned!", Toast.LENGTH_SHORT).show();
-                }
-            }, new OnRewardedAdDismissedListener() {
-                @Override
-                public void onRewardedAdDismissed() {
-                    appendLog("Ad Dismissed");
-                }
-            }, new OnRewardedAdErrorListener() {
-                @Override
-                public void onRewardedAdError() {
-                    appendLog("Ad Error");
-                }
-            });
-        } else {
-            appendLog("Ad not initialized");
-        }
+        appendLog("Triggering Rewarded Ad Show...");
+        AdGlide.showRewarded(this, () -> {
+            appendLog("User Earned Reward!");
+            Toast.makeText(getApplicationContext(), "Reward Earned!", Toast.LENGTH_SHORT).show();
+        }, () -> {
+            appendLog("Ad Dismissed");
+        });
     }
 
     private void appendLog(String text) {
@@ -98,8 +66,6 @@ public class ActivityRewarded extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (rewardedAd != null) {
-            rewardedAd.destroy();
-        }
+        // AdGlide manages the cache, no need to manually destroy.
     }
 }

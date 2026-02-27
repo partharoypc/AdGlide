@@ -49,6 +49,8 @@
         <activity android:name="com.partharoypc.adglidedemo.activity.ActivitySettings" />
 
 
+        <activity android:name="com.partharoypc.adglidedemo.activity.ads.ActivityNativeShowcase" />
+        <activity android:name="com.partharoypc.adglidedemo.activity.ads.ActivityRewardedInterstitial" />
 
     </application>
 

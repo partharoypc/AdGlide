@@ -38,6 +38,15 @@ public class AdMobAppOpenProvider implements AppOpenProvider {
             @Override
             public void onAdLoaded(@NonNull AppOpenAd ad) {
                 com.partharoypc.adglide.util.AdMobRateLimiter.resetCooldown(adUnitId);
+                ad.setOnPaidEventListener(adValue -> {
+                    com.partharoypc.adglide.util.OnPaidEventListener paidListener = com.partharoypc.adglide.AdGlide
+                            .getConfig() != null ? com.partharoypc.adglide.AdGlide.getConfig().getOnPaidEventListener()
+                                    : null;
+                    if (paidListener != null) {
+                        paidListener.onPaidEvent(adValue.getValueMicros(), adValue.getCurrencyCode(),
+                                String.valueOf(adValue.getPrecisionType()), "AdMob AppOpen", adUnitId);
+                    }
+                });
                 appOpenAd = ad;
                 isLoadingAd = false;
                 loadTime = (new Date()).getTime();

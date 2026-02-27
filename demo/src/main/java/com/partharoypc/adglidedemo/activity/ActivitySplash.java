@@ -1,127 +1,110 @@
 package com.partharoypc.adglidedemo.activity;
 
-import static com.partharoypc.adglide.util.Constant.ADMOB;
-
-import static com.partharoypc.adglide.util.Constant.APPLOVIN;
-import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
-import static com.partharoypc.adglide.util.Constant.WORTISE;
-
-import android.app.Application;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.partharoypc.adglide.AdGlide;
-import com.partharoypc.adglide.format.AppOpenAd;
 import com.partharoypc.adglidedemo.BuildConfig;
 import com.partharoypc.adglidedemo.R;
-import com.partharoypc.adglidedemo.application.MyApplication;
 import com.partharoypc.adglidedemo.data.Constant;
-import com.partharoypc.adglidedemo.database.SharedPref;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-@SuppressWarnings("ConstantConditions")
 public class ActivitySplash extends AppCompatActivity {
 
-    private static final String TAG = "ActivitySplash";
     public static int DELAY_PROGRESS = 1500;
-    AppOpenAd.Builder appOpenAdBuilder;
-    SharedPref sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-        sharedPref = new SharedPref(this);
+
+        syncSettings();
         initAds();
 
-        if (Constant.AD_STATUS && Constant.OPEN_ADS_ON_START) {
-            if (!Constant.FORCE_TO_SHOW_APP_OPEN_AD_ON_START) {
-                new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                    switch (Constant.AD_NETWORK) {
-                        case ADMOB:
-                            if (!Constant.ADMOB_APP_OPEN_AD_ID.equals("0")) {
-                                ((MyApplication) getApplication()).showAdIfAvailable(ActivitySplash.this,
-                                        this::loadOpenAds);
-                            } else {
-                                loadOpenAds();
-                            }
-                            break;
-                        case APPLOVIN:
-                        case APPLOVIN_MAX:
-                            if (!Constant.APPLOVIN_APP_OPEN_AP_ID.equals("0")) {
-                                ((MyApplication) getApplication()).showAdIfAvailable(ActivitySplash.this,
-                                        this::loadOpenAds);
-                            } else {
-                                loadOpenAds();
-                            }
-                            break;
-                        case WORTISE:
-                            if (!Constant.WORTISE_APP_OPEN_AD_ID.equals("0")) {
-                                ((MyApplication) getApplication()).showAdIfAvailable(ActivitySplash.this,
-                                        this::loadOpenAds);
-                            } else {
-                                loadOpenAds();
-                            }
-                            break;
-                        default:
-                            loadOpenAds();
-                            break;
-                    }
-                }, DELAY_PROGRESS);
-            } else {
-                loadOpenAds();
-            }
-        } else {
-            loadOpenAds();
-        }
+        // High-Performance Consent Management (GDPR/UMP)
+        AdGlide.requestConsent(this, () -> {
+            // Once consent is gathered (or skipped if not needed), continue to Main
+            new Handler(Looper.getMainLooper()).postDelayed(this::startMainActivity, DELAY_PROGRESS);
+        });
+    }
 
+    private void syncSettings() {
+        com.partharoypc.adglidedemo.database.SharedPref sharedPref = new com.partharoypc.adglidedemo.database.SharedPref(
+                this);
+        Constant.BANNER_STATUS = sharedPref.getIsBannerEnabled();
+        Constant.INTERSTITIAL_STATUS = sharedPref.getIsInterstitialEnabled();
+        Constant.NATIVE_STATUS = sharedPref.getIsNativeEnabled();
+        Constant.REWARDED_STATUS = sharedPref.getIsRewardedEnabled();
     }
 
     private void initAds() {
-        AdGlide.init(this)
-                .status(Constant.AD_STATUS)
-                .network(Constant.AD_NETWORK)
-                .backup(Constant.BACKUP_AD_NETWORK)
-                .adMobId(null)
+        // Here we configure the AdGlide Facade with all parameters,
+        // and tell it to automatically handle Interstitial caching and AppOpen Ads!
+        com.partharoypc.adglide.AdGlideConfig config = new com.partharoypc.adglide.AdGlideConfig.Builder()
+                .enableAds(Constant.AD_STATUS)
+                .primaryNetwork(Constant.AD_NETWORK)
+                .backupNetwork(Constant.BACKUP_AD_NETWORK)
                 .startAppId(Constant.STARTAPP_APP_ID)
-                .unityId(Constant.UNITY_GAME_ID)
-                .appLovinId(getResources().getString(R.string.app_lovin_sdk_key))
-                .ironSourceId(Constant.IRONSOURCE_APP_KEY)
-                .wortiseId(Constant.WORTISE_APP_ID)
+                .unityGameId(Constant.UNITY_GAME_ID)
+                .appLovinSdkKey(getResources().getString(R.string.app_lovin_sdk_key))
+                .ironSourceAppKey(Constant.IRONSOURCE_APP_KEY)
+                .wortiseAppId(Constant.WORTISE_APP_ID)
                 .debug(BuildConfig.DEBUG)
-                .build();
-    }
 
-    private void loadOpenAds() {
-        if (Constant.FORCE_TO_SHOW_APP_OPEN_AD_ON_START && Constant.OPEN_ADS_ON_START) {
-            appOpenAdBuilder = new AppOpenAd.Builder(this)
-                    .status(Constant.AD_STATUS)
-                    .network(Constant.AD_NETWORK)
-                    .backup(Constant.BACKUP_AD_NETWORK)
-                    .adMobId(Constant.ADMOB_APP_OPEN_AD_ID)
-                    .appLovinId(Constant.APPLOVIN_APP_OPEN_AP_ID)
-                    .wortiseId(Constant.WORTISE_APP_OPEN_AD_ID)
-                    .load(this::startMainActivity);
-        } else {
-            startMainActivity();
-        }
+                // Add all the Ad Unit IDs globally so we never need to provide them again!
+                .adMobInterstitialId(Constant.ADMOB_INTERSTITIAL_ID)
+                .appLovinInterstitialId(Constant.APPLOVIN_INTERSTITIAL_ID)
+                .wortiseInterstitialId(Constant.WORTISE_INTERSTITIAL_ID)
+
+                .adMobRewardedId(Constant.ADMOB_REWARDED_ID)
+                .appLovinRewardedId(Constant.APPLOVIN_MAX_REWARDED_ID)
+
+                .adMobAppOpenId(Constant.ADMOB_APP_OPEN_AD_ID)
+                .appLovinAppOpenId(Constant.APPLOVIN_APP_OPEN_AP_ID)
+                .wortiseAppOpenId(Constant.WORTISE_APP_OPEN_AD_ID)
+
+                // TRUE MAGIC: Automatic Caching and App Open Management
+                .autoLoadInterstitial(true)
+                .autoLoadRewarded(true)
+                .enableAppOpenAd(Constant.OPEN_ADS_ON_START)
+                .appOpenStatus(Constant.OPEN_ADS_ON_START)
+                .bannerStatus(Constant.BANNER_STATUS)
+                .interstitialStatus(Constant.INTERSTITIAL_STATUS)
+                .nativeStatus(Constant.NATIVE_STATUS)
+                .rewardedStatus(Constant.REWARDED_STATUS)
+                .interstitialInterval(Constant.INTERSTITIAL_AD_INTERVAL)
+                .excludeOpenAdFrom(ActivitySplash.class, ActivitySettings.class) // Professional exclusion API
+                .enableGDPR(true) // Enable Elite GDPR Flow
+                .debugGDPR(BuildConfig.DEBUG) // Debug geography for testing
+                .enableDebugHUD(BuildConfig.DEBUG) // Enable secret debugger in debug builds
+
+                // Phase 3: Advanced Monetization
+                .houseAdEnabled(Constant.HOUSE_AD_ENABLE)
+                .houseAdBannerImage(Constant.HOUSE_AD_BANNER_IMAGE)
+                .houseAdBannerClickUrl(Constant.HOUSE_AD_BANNER_URL)
+                .houseAdInterstitialImage(Constant.HOUSE_AD_INTERSTITIAL_IMAGE)
+                .houseAdInterstitialClickUrl(Constant.HOUSE_AD_INTERSTITIAL_URL)
+
+                // 1-Line Revenue Tracking (LTV)
+                .onPaidEventListener((valueMicros, currencyCode, precision, network, adUnitId) -> {
+                    double revenue = valueMicros / 1000000.0;
+                    android.util.Log.i("AdGlide.Analytics", String.format(
+                            "Revenue: %f %s | Network: %s | Unit: %s",
+                            revenue, currencyCode, network, adUnitId));
+                    // TODO: Send to Firebase/AppsFlyer here
+                })
+
+                .build();
+
+        // Initialize with Application context to support global App Open Ads
+        AdGlide.initialize(getApplication(), config);
     }
 
     public void startMainActivity() {
-        new Handler().postDelayed(() -> {
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-            finish();
-        }, DELAY_PROGRESS);
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
-
 }

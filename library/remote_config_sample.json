@@ -1,0 +1,74 @@
+{
+  "ad_status": true,
+  "primary_network": "admobs",
+  "backup_networks": ["applovin_max", "unity", "startapp"],
+  "test_mode": false,
+  "debug_mode": false,
+
+  "status": {
+    "banner": true,
+    "interstitial": true,
+    "native": true,
+    "rewarded": true,
+    "app_open": true
+  },
+
+  "setup": {
+    "auto_load_interstitial": true,
+    "auto_load_rewarded": true,
+    "enable_app_open_ad": true,
+    "interstitial_interval": 3,
+    "rewarded_interval": 1,
+    "enable_gdpr": true,
+    "enable_debug_hud": false
+  },
+
+  "app_ids": {
+    "admob": "ca-app-pub-3940256099942544~3347511713",
+    "startapp": "0",
+    "unity": "0",
+    "applovin_sdk": "",
+    "ironsource_app_key": "",
+    "wortise_app_id": ""
+  },
+
+  "unit_ids": {
+    "banner": {
+      "admob": "ca-app-pub-3940256099942544/6300978111",
+      "meta": "0",
+      "unity": "0",
+      "applovin": "0",
+      "ironsource": "0",
+      "wortise": "0"
+    },
+    "interstitial": {
+      "admob": "ca-app-pub-3940256099942544/1033173712",
+      "meta": "0",
+      "unity": "0",
+      "applovin": "0",
+      "ironsource": "0",
+      "wortise": "0"
+    },
+    "rewarded": {
+      "admob": "ca-app-pub-3940256099942544/5224354917",
+      "meta": "0",
+      "unity": "0",
+      "applovin": "0",
+      "ironsource": "0",
+      "wortise": "0"
+    },
+    "app_open": {
+      "admob": "ca-app-pub-3940256099942544/3419835294",
+      "meta": "0",
+      "applovin": "0",
+      "wortise": "0"
+    },
+    "native": {
+      "admob": "ca-app-pub-3940256099942544/2247696110",
+      "meta": "0",
+      "applovin": "0",
+      "ironsource": "0",
+      "wortise": "0"
+    }
+  }
+}

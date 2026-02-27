@@ -62,6 +62,15 @@ public class AppLovinBannerProvider implements BannerProvider {
             }
         });
 
+        maxAdView.setRevenueListener(ad -> {
+            com.partharoypc.adglide.util.OnPaidEventListener paidListener = com.partharoypc.adglide.AdGlide
+                    .getConfig() != null ? com.partharoypc.adglide.AdGlide.getConfig().getOnPaidEventListener() : null;
+            if (paidListener != null) {
+                double valueMicros = ad.getRevenue() * 1000000;
+                paidListener.onPaidEvent(valueMicros, "USD", "ESTIMATED", "AppLovin Banner", adUnitId);
+            }
+        });
+
         int width = ViewGroup.LayoutParams.MATCH_PARENT;
         int heightPx;
         if (config.isMrec()) {

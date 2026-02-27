@@ -9,9 +9,11 @@ import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.META_BIDDING_IRONSOURCE;
 import static com.partharoypc.adglide.util.Constant.STARTAPP;
+import static com.partharoypc.adglide.util.Constant.HOUSE_AD;
 import static com.partharoypc.adglide.util.Constant.UNITY;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
+import com.partharoypc.adglide.AdGlideConfig;
 import android.app.Activity;
 import android.util.Log;
 
@@ -31,12 +33,12 @@ public class InterstitialAd {
     public static class Builder implements InterstitialProvider.InterstitialConfig {
 
         private static final String TAG = "AdGlide";
-        private final Activity activity;
+        private final java.lang.ref.WeakReference<Activity> activityRef;
         private InterstitialProvider currentProvider;
 
         private int counter = 1;
 
-        private boolean adStatus = true;
+        private boolean adStatus = false;
         private String adNetwork = "";
         private String backupAdNetwork = "";
         private WaterfallManager waterfallManager;
@@ -47,13 +49,32 @@ public class InterstitialAd {
         private String ironSourceInterstitialId = "";
         private String wortiseInterstitialId = "";
         private String startAppId = "";
-        private int placementStatus = 1;
+        private int placementStatus = 0;
         private int interval = 3;
         private boolean testMode = false;
         private boolean debug = true;
 
         public Builder(@NonNull Activity activity) {
-            this.activity = activity;
+            this.activityRef = new java.lang.ref.WeakReference<>(activity);
+            if (com.partharoypc.adglide.AdGlide.getConfig() != null) {
+                com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+                this.adStatus = config.getAdStatus();
+                this.adNetwork = config.getPrimaryNetwork();
+                if (!config.getBackupNetworks().isEmpty()) {
+                    this.backupAdNetwork = config.getBackupNetworks().get(0);
+                    this.waterfallManager = new com.partharoypc.adglide.util.WaterfallManager(
+                            config.getBackupNetworks().toArray(new String[0]));
+                }
+                this.adMobInterstitialId = config.getAdMobInterstitialId();
+                this.metaInterstitialId = config.getMetaInterstitialId();
+                this.unityInterstitialId = config.getUnityInterstitialId();
+                this.appLovinInterstitialId = config.getAppLovinInterstitialId();
+                this.ironSourceInterstitialId = config.getIronSourceInterstitialId();
+                this.wortiseInterstitialId = config.getWortiseInterstitialId();
+                this.startAppId = config.getStartAppId();
+                this.testMode = config.isTestMode();
+                this.debug = config.isDebug();
+            }
         }
 
         @Override
@@ -89,6 +110,7 @@ public class InterstitialAd {
         }
 
         public void show() {
+            Activity activity = activityRef.get();
             showInterstitialAd(activity, null, null);
         }
 
@@ -98,6 +120,7 @@ public class InterstitialAd {
 
         public void show(OnInterstitialAdShowedListener showedListener,
                 OnInterstitialAdDismissedListener dismissedListener) {
+            Activity activity = activityRef.get();
             showInterstitialAd(activity, showedListener, dismissedListener);
         }
 
@@ -230,15 +253,30 @@ public class InterstitialAd {
 
         private void loadInterstitialAd(OnInterstitialAdDismissedListener listener) {
             try {
-                if (adStatus && placementStatus != 0) {
+                AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+                boolean isInterstitialTypeEnabled = config != null && config.isInterstitialEnabled();
+                if (adStatus && isInterstitialTypeEnabled && placementStatus != 0) {
+                    Activity activity = activityRef.get();
+                    if (activity == null) {
+                        Log.e(TAG, "Activity is null. Cannot load Interstitial.");
+                        return;
+                    }
+
                     if (!Tools.isNetworkAvailable(activity)) {
-                        Log.e(TAG, "Internet connection not available. Skipping Primary Interstitial Ad load.");
+                        Log.e(TAG, "Internet connection not available.");
+                        if (com.partharoypc.adglide.AdGlide.getConfig() != null
+                                && com.partharoypc.adglide.AdGlide.getConfig().isHouseAdEnabled()) {
+                            Log.d(TAG, "Falling back to House Ad due to offline status.");
+                            loadAdFromNetwork(HOUSE_AD, listener);
+                        }
                         return;
                     }
                     if (waterfallManager != null) {
                         waterfallManager.reset();
                     }
                     Log.d(TAG, "Interstitial Ad is enabled: " + adNetwork);
+                    com.partharoypc.adglide.util.PerformanceLogger.log("Interstitial",
+                            "Loading started: " + adNetwork);
                     loadAdFromNetwork(adNetwork, listener);
                 } else {
                     Log.d(TAG, "Interstitial Ad is disabled");
@@ -251,8 +289,18 @@ public class InterstitialAd {
         private void loadBackupInterstitialAd(OnInterstitialAdDismissedListener listener) {
             try {
                 if (adStatus && placementStatus != 0) {
+                    Activity activity = activityRef.get();
+                    if (activity == null) {
+                        Log.e(TAG, "Activity is null. Cannot load Interstitial backup.");
+                        return;
+                    }
+
                     if (!Tools.isNetworkAvailable(activity)) {
-                        Log.e(TAG, "Internet connection not available. Skipping Backup Interstitial Ad load.");
+                        Log.e(TAG, "Internet connection not available.");
+                        if (com.partharoypc.adglide.AdGlide.getConfig() != null
+                                && com.partharoypc.adglide.AdGlide.getConfig().isHouseAdEnabled()) {
+                            loadAdFromNetwork(HOUSE_AD, listener);
+                        }
                         return;
                     }
                     if (waterfallManager == null) {
@@ -290,6 +338,12 @@ public class InterstitialAd {
                     return;
                 }
 
+                Activity activity = activityRef.get();
+                if (activity == null) {
+                    Log.e(TAG, "Activity is null. Cannot load Interstitial from network.");
+                    return;
+                }
+
                 InterstitialProvider provider = InterstitialProviderFactory.getProvider(networkToLoad);
                 if (provider != null) {
                     currentProvider = provider;
@@ -297,11 +351,15 @@ public class InterstitialAd {
                             new InterstitialProvider.InterstitialListener() {
                                 @Override
                                 public void onAdLoaded() {
+                                    com.partharoypc.adglide.util.PerformanceLogger.log("Interstitial",
+                                            "Loaded: " + networkToLoad);
                                     Log.d(TAG, networkToLoad + " Interstitial Ad loaded");
                                 }
 
                                 @Override
                                 public void onAdFailedToLoad(String error) {
+                                    com.partharoypc.adglide.util.PerformanceLogger.error("Interstitial",
+                                            "Failed [" + networkToLoad + "]: " + error);
                                     Log.e(TAG, networkToLoad + " Interstitial Ad failed to load: " + error);
                                     loadBackupInterstitialAd(listener);
                                 }
@@ -325,6 +383,8 @@ public class InterstitialAd {
 
                                 @Override
                                 public void onAdShowed() {
+                                    com.partharoypc.adglide.util.PerformanceLogger.log("Interstitial",
+                                            "Showed: " + networkToLoad);
                                     Log.d(TAG, networkToLoad + " Interstitial Ad showed");
                                 }
                             });
@@ -347,6 +407,7 @@ public class InterstitialAd {
                 case IRONSOURCE, META_BIDDING_IRONSOURCE -> builder.ironSourceInterstitialId;
                 case STARTAPP -> !builder.startAppId.isEmpty() ? builder.startAppId : "startapp";
                 case WORTISE -> builder.wortiseInterstitialId;
+                case HOUSE_AD -> "house_ad";
                 default -> "";
             };
         }
@@ -358,7 +419,8 @@ public class InterstitialAd {
                 if (adStatus && placementStatus != 0) {
                     if (counter >= interval) {
                         if (currentProvider != null && currentProvider.isAdLoaded()) {
-                            currentProvider.showInterstitial(displayActivity,
+                            Activity activity = activityRef.get();
+                            currentProvider.showInterstitial(displayActivity != null ? displayActivity : activity,
                                     new InterstitialProvider.InterstitialListener() {
                                         @Override
                                         public void onAdLoaded() {

@@ -40,6 +40,11 @@ public class BannerProviderFactory {
                 className = "com.partharoypc.adglide.provider.wortise.WortiseBannerProvider";
                 checkClass = "com.wortise.ads.banner.BannerAd";
             }
+            case HOUSE_AD -> {
+                className = "com.partharoypc.adglide.provider.housead.HouseAdBannerProvider";
+                // House Ads use standard Android Views, so we check a base class
+                checkClass = "android.widget.ImageView";
+            }
         }
 
         if (className != null && (checkClass == null || ReflectionUtils.isClassAvailable(checkClass))) {

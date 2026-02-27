@@ -2,29 +2,23 @@ package com.partharoypc.adglidedemo.activity.ads;
 
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import com.google.android.material.switchmaterial.SwitchMaterial;
-import com.partharoypc.adglide.format.BannerAd;
+import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglidedemo.R;
-import com.partharoypc.adglidedemo.data.Constant;
-import com.partharoypc.adglidedemo.database.SharedPref;
 
 public class ActivityBanner extends AppCompatActivity {
 
     private LinearLayout bannerContainer;
-    private BannerAd.Builder bannerAd;
-    private SwitchMaterial switchCollapsible;
-    private SharedPref sharedPref;
-    private LinearLayout bannerAdView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_banner);
-        sharedPref = new SharedPref(this);
 
         setupToolbar();
         initViews();
@@ -43,7 +37,6 @@ public class ActivityBanner extends AppCompatActivity {
 
     private void initViews() {
         bannerContainer = findViewById(R.id.banner_container);
-        switchCollapsible = findViewById(R.id.switch_collapsible);
         Button btnRefresh = findViewById(R.id.btn_refresh);
         Button btnDestroy = findViewById(R.id.btn_destroy);
 
@@ -54,32 +47,18 @@ public class ActivityBanner extends AppCompatActivity {
     private void loadBanner() {
         destroyBanner();
 
-        // INFLATE THE LIBRARY LAYOUT HERE
-        bannerContainer.removeAllViews();
-        bannerAdView = (LinearLayout) View.inflate(this, com.partharoypc.adglide.R.layout.adglide_view_banner_ad, null);
-        bannerContainer.addView(bannerAdView);
+        SwitchMaterial switchCollapsible = findViewById(R.id.switch_collapsible);
+        SwitchMaterial switchAdaptive = findViewById(R.id.switch_adaptive);
 
-        bannerAd = new BannerAd.Builder(this)
-                .status(Constant.AD_STATUS)
-                .network(Constant.AD_NETWORK)
-                .backup(Constant.BACKUP_AD_NETWORK)
-                .adMobId(Constant.ADMOB_BANNER_ID)
-                .metaId(Constant.META_BANNER_ID)
-                .unityId(Constant.UNITY_BANNER_ID)
-                .appLovinId(Constant.APPLOVIN_BANNER_ID)
-                .zoneId(Constant.APPLOVIN_BANNER_ZONE_ID)
-                .ironSourceId(Constant.IRONSOURCE_BANNER_ID)
-                .wortiseId(Constant.WORTISE_BANNER_ID)
-                .startAppId(Constant.STARTAPP_APP_ID)
-                .darkTheme(sharedPref.getIsDarkTheme())
+        // Professional Elite API:
+        new com.partharoypc.adglide.format.BannerAd.Builder(this)
+                .container(bannerContainer)
                 .collapsible(switchCollapsible.isChecked())
-                .build().load();
+                .adaptive(switchAdaptive.isChecked())
+                .load();
     }
 
     private void destroyBanner() {
-        if (bannerAd != null) {
-            bannerAd.destroyAndDetachBanner();
-        }
         if (bannerContainer != null) {
             bannerContainer.removeAllViews();
         }

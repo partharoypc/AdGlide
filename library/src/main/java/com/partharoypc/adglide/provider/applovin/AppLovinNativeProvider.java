@@ -28,9 +28,18 @@ public class AppLovinNativeProvider implements NativeProvider {
                 }
                 maxNativeAd = ad;
 
-                // Create a custom view using our template if possible
                 int layoutRes = getLayoutForStyle(config.getStyle());
-                MaxNativeAdView customView = new MaxNativeAdView(getTemplateName(config.getStyle()), activity);
+                com.applovin.mediation.nativeAds.MaxNativeAdViewBinder binder = new com.applovin.mediation.nativeAds.MaxNativeAdViewBinder.Builder(
+                        layoutRes)
+                        .setTitleTextViewId(com.partharoypc.adglide.R.id.title_text_view)
+                        .setBodyTextViewId(com.partharoypc.adglide.R.id.body_text_view)
+                        .setAdvertiserTextViewId(com.partharoypc.adglide.R.id.advertiser_textView)
+                        .setIconImageViewId(com.partharoypc.adglide.R.id.icon_image_view)
+                        .setMediaContentViewGroupId(com.partharoypc.adglide.R.id.media_view_container)
+                        .setOptionsContentViewGroupId(com.partharoypc.adglide.R.id.ad_options_view)
+                        .setCallToActionButtonId(com.partharoypc.adglide.R.id.cta_button)
+                        .build();
+                MaxNativeAdView customView = new MaxNativeAdView(binder, activity);
                 nativeAdLoader.render(customView, ad);
 
                 listener.onAdLoaded(customView);
@@ -44,21 +53,6 @@ public class AppLovinNativeProvider implements NativeProvider {
         });
         Log.d(TAG, "Loading Native Ad: " + adUnitId);
         nativeAdLoader.loadAd();
-    }
-
-    private String getTemplateName(String style) {
-        switch (style) {
-            case "small":
-                return "radio";
-            case "medium":
-                return "medium";
-            case "banner":
-                return "news";
-            case "video":
-                return "video_large";
-            default:
-                return "medium";
-        }
     }
 
     private int getLayoutForStyle(String style) {
