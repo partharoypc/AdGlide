@@ -58,7 +58,6 @@ public class NativeAd {
         private String wortiseNativeId = "";
         private String startAppId = "";
         private String ironSourceNativeId = "";
-        private int placementStatus = 0;
         private boolean darkTheme = false;
         private boolean legacyGDPR = false;
         private String nativeAdStyle = "large";
@@ -69,9 +68,9 @@ public class NativeAd {
 
         public Builder(Activity activity) {
             this.activityRef = new java.lang.ref.WeakReference<>(activity);
+            this.adStatus = com.partharoypc.adglide.AdGlide.isNativeEnabled();
             if (com.partharoypc.adglide.AdGlide.getConfig() != null) {
                 com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-                this.adStatus = config.getAdStatus();
                 this.adNetwork = config.getPrimaryNetwork();
                 if (!config.getBackupNetworks().isEmpty()) {
                     this.backupAdNetwork = config.getBackupNetworks().get(0);
@@ -204,12 +203,6 @@ public class NativeAd {
         }
 
         @NonNull
-        public Builder placement(int placementStatus) {
-            this.placementStatus = placementStatus;
-            return this;
-        }
-
-        @NonNull
         public Builder darkTheme(boolean darkTheme) {
             this.darkTheme = darkTheme;
             return this;
@@ -255,10 +248,10 @@ public class NativeAd {
 
         private void loadNativeAdMain(boolean isBackup) {
             try {
-                AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-                boolean isNativeEnabled = config != null && config.isNativeEnabled();
-                if (!adStatus || !isNativeEnabled || placementStatus == 0)
+                if (!com.partharoypc.adglide.AdGlide.isNativeEnabled() || !adStatus) {
+                    Log.d(TAG, "Native Ad is disabled globally or locally.");
                     return;
+                }
 
                 Activity activity = activityRef.get();
                 if (activity == null) {

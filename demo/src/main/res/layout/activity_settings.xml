@@ -141,7 +141,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:padding="16dp"
-                        android:text="Enable Banner Ads" />
+                        android:text="@string/enable_banner_ads" />
 
                     <View
                         android:layout_width="match_parent"
@@ -153,7 +153,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:padding="16dp"
-                        android:text="Enable Interstitial Ads" />
+                        android:text="@string/enable_interstitial_ads" />
 
                     <View
                         android:layout_width="match_parent"
@@ -165,7 +165,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:padding="16dp"
-                        android:text="Enable Native Ads" />
+                        android:text="@string/enable_native_ads" />
 
                     <View
                         android:layout_width="match_parent"
@@ -177,7 +177,107 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:padding="16dp"
-                        android:text="Enable Rewarded Ads" />
+                        android:text="@string/enable_rewarded_ads" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?attr/colorOutline" />
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switch_rewarded_interstitial_ad"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp"
+                        android:text="@string/enable_rewarded_interstitial_ads" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?attr/colorOutline" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="16dp"
+                        android:gravity="center_vertical">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="@string/interstitial_ad_interval" />
+                        <Button
+                            android:id="@+id/btn_interval_minus"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:text="@string/minus"
+                            android:insetBottom="0dp"
+                            android:insetTop="0dp"
+                            style="?attr/materialButtonOutlinedStyle"/>
+                        <TextView
+                            android:id="@+id/tv_interval_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/three"
+                            android:paddingHorizontal="16dp"
+                            android:textStyle="bold"
+                            android:textSize="18sp"/>
+                        <Button
+                            android:id="@+id/btn_interval_plus"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:text="@string/plus"
+                            android:insetBottom="0dp"
+                            android:insetTop="0dp"
+                            style="?attr/materialButtonOutlinedStyle"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="24dp" />
+
+            <!-- House Ads -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="8dp"
+                android:text="@string/house_ads_title"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
+                android:textColor="?attr/colorPrimary" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardElevation="2dp"
+                app:cardCornerRadius="8dp"
+                app:strokeColor="?attr/colorOutline"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switch_house_ad"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp"
+                        android:text="@string/enable_house_ads" />
+                        
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="16dp"
+                        android:paddingBottom="16dp"
+                        android:text="@string/house_ads_desc"
+                        android:textSize="12sp"
+                        android:textColor="?android:attr/textColorSecondary"/>
 
                 </LinearLayout>
 

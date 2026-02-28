@@ -44,7 +44,6 @@ public class BannerAd {
         private String ironSourceBannerId = "";
         private String wortiseBannerId = "";
         private String startAppId = "";
-        private int placementStatus = 0;
         private boolean darkTheme = false;
         private boolean legacyGDPR = false;
         private boolean collapsibleBanner = false;
@@ -53,9 +52,9 @@ public class BannerAd {
 
         public Builder(Activity activity) {
             this.activityRef = new java.lang.ref.WeakReference<>(activity);
+            this.adStatus = com.partharoypc.adglide.AdGlide.isBannerEnabled();
             if (com.partharoypc.adglide.AdGlide.getConfig() != null) {
                 com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-                this.adStatus = config.getAdStatus();
                 this.adNetwork = config.getPrimaryNetwork();
                 if (!config.getBackupNetworks().isEmpty()) {
                     this.backupAdNetwork = config.getBackupNetworks().get(0);
@@ -205,12 +204,6 @@ public class BannerAd {
         }
 
         @NonNull
-        public Builder placement(int placementStatus) {
-            this.placementStatus = placementStatus;
-            return this;
-        }
-
-        @NonNull
         public Builder darkTheme(boolean darkTheme) {
             this.darkTheme = darkTheme;
             return this;
@@ -242,32 +235,30 @@ public class BannerAd {
 
         public void loadBannerAd() {
             try {
-                AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-                boolean isBannerTypeEnabled = config != null && config.isBannerEnabled();
-                if (adStatus && isBannerTypeEnabled && placementStatus != 0) {
-                    Activity activity = activityRef.get();
-                    if (activity == null) {
-                        Log.e(TAG, "Activity is null. Cannot load Banner.");
-                        return;
-                    }
-                    com.partharoypc.adglide.util.PerformanceLogger.log("Banner", "Loading started: " + adNetwork);
-                    if (!Tools.isNetworkAvailable(activity)) {
-                        Log.e(TAG, "Internet connection not available.");
-                        if (com.partharoypc.adglide.AdGlide.getConfig() != null
-                                && com.partharoypc.adglide.AdGlide.getConfig().isHouseAdEnabled()) {
-                            Log.d(TAG, "Falling back to House Ad due to offline status.");
-                            loadAdFromNetwork(HOUSE_AD);
-                        }
-                        return;
-                    }
-                    if (waterfallManager != null) {
-                        waterfallManager.reset();
-                    }
-                    Log.d(TAG, "Banner Ad is enabled");
-                    loadAdFromNetwork(adNetwork);
-                } else {
-                    Log.d(TAG, "Banner Ad is disabled");
+                if (!com.partharoypc.adglide.AdGlide.isBannerEnabled() || !adStatus) {
+                    Log.d(TAG, "Banner Ad is disabled globally or locally.");
+                    return;
                 }
+                Activity activity = activityRef.get();
+                if (activity == null) {
+                    Log.e(TAG, "Activity is null. Cannot load Banner.");
+                    return;
+                }
+                com.partharoypc.adglide.util.PerformanceLogger.log("Banner", "Loading started: " + adNetwork);
+                if (!Tools.isNetworkAvailable(activity)) {
+                    Log.e(TAG, "Internet connection not available.");
+                    if (com.partharoypc.adglide.AdGlide.getConfig() != null
+                            && com.partharoypc.adglide.AdGlide.getConfig().isHouseAdEnabled()) {
+                        Log.d(TAG, "Falling back to House Ad due to offline status.");
+                        loadAdFromNetwork(HOUSE_AD);
+                    }
+                    return;
+                }
+                if (waterfallManager != null) {
+                    waterfallManager.reset();
+                }
+                Log.d(TAG, "Banner Ad is enabled");
+                loadAdFromNetwork(adNetwork);
             } catch (Exception e) {
                 Log.e(TAG, "Error loading Banner Ad: " + e.getMessage());
             }
@@ -275,37 +266,39 @@ public class BannerAd {
 
         public void loadBackupBannerAd() {
             try {
-                if (adStatus && placementStatus != 0) {
-                    Activity activity = activityRef.get();
-                    if (activity == null) {
-                        Log.e(TAG, "Activity is null. Cannot load backup Banner.");
-                        return;
-                    }
-                    if (!Tools.isNetworkAvailable(activity)) {
-                        Log.e(TAG, "Internet connection not available.");
-                        if (com.partharoypc.adglide.AdGlide.getConfig() != null
-                                && com.partharoypc.adglide.AdGlide.getConfig().isHouseAdEnabled()) {
-                            loadAdFromNetwork(HOUSE_AD);
-                        }
-                        return;
-                    }
-                    if (waterfallManager == null) {
-                        if (backupAdNetwork != null && !backupAdNetwork.isEmpty()) {
-                            waterfallManager = new WaterfallManager(backupAdNetwork);
-                        } else {
-                            return;
-                        }
-                    }
-
-                    String networkToLoad = waterfallManager.getNext();
-                    if (networkToLoad == null) {
-                        Log.d(TAG, "All backup banner ads failed to load");
-                        return;
-                    }
-
-                    Log.d(TAG, "[" + networkToLoad + "] is selected as Backup Ads");
-                    loadAdFromNetwork(networkToLoad);
+                if (!com.partharoypc.adglide.AdGlide.isBannerEnabled() || !adStatus) {
+                    Log.d(TAG, "Banner Ad is disabled globally or locally. Skipping backup.");
+                    return;
                 }
+                Activity activity = activityRef.get();
+                if (activity == null) {
+                    Log.e(TAG, "Activity is null. Cannot load backup Banner.");
+                    return;
+                }
+                if (!Tools.isNetworkAvailable(activity)) {
+                    Log.e(TAG, "Internet connection not available.");
+                    if (com.partharoypc.adglide.AdGlide.getConfig() != null
+                            && com.partharoypc.adglide.AdGlide.getConfig().isHouseAdEnabled()) {
+                        loadAdFromNetwork(HOUSE_AD);
+                    }
+                    return;
+                }
+                if (waterfallManager == null) {
+                    if (backupAdNetwork != null && !backupAdNetwork.isEmpty()) {
+                        waterfallManager = new WaterfallManager(backupAdNetwork);
+                    } else {
+                        return;
+                    }
+                }
+
+                String networkToLoad = waterfallManager.getNext();
+                if (networkToLoad == null) {
+                    Log.d(TAG, "All backup banner ads failed to load");
+                    return;
+                }
+
+                Log.d(TAG, "[" + networkToLoad + "] is selected as Backup Ads");
+                loadAdFromNetwork(networkToLoad);
             } catch (Exception e) {
                 Log.e(TAG, "Error loading Backup Banner Ad: " + e.getMessage());
             }

@@ -1,17 +1,14 @@
 <resources>
     <string name="app_name">AdGlide Demo</string>
-    <string name="btn_show_interstitial_ad">Show Interstitial Ad</string>
-    <string name="btn_show_rewarded_ad">Show Rewarded Ad</string>
-    <string name="btn_load_show_rewarded_ad">Load &amp; Show Rewarded Ad</string>
     <string name="action_ad_network">Ad Network</string>
     <string name="action_switch_theme">Switch Theme</string>
     <string name="loading">Loading&#8230;</string>
     <string name="settings">Settings</string>
     <string name="collapsible_banner">Collapsible Banner</string>
+    <string name="adaptive_banner">Adaptive Banner (Optimized)</string>
     <string name="load_banner">Load Banner</string>
     <string name="destroy">Destroy</string>
     <string name="banner_area">Banner Area</string>
-    <string name="txt_exit_dialog">What do you want to do?</string>
     <string name="ad_network_name">Ad Network Name</string>
     <string name="item_title">Title</string>
     <string name="item_description">Description</string>
@@ -31,5 +28,26 @@
     <string name="privacy">Privacy</string>
     <string name="manage_consent">Manage GDPR Consent</string>
 
-
+    <string name="small_template">Small Template (Compact)</string>
+    <string name="medium_template">Medium Template (Feed Style)</string>
+    <string name="video_template">Video Template (High Engagement)</string>
+    <string name="rewarded_interstitial">Rewarded Interstitial</string>
+    <string name="rewarded_interstitial_desc">The perfect hybrid: Non-intrusive full screen ad that rewards the user.</string>
+    <string name="pre_load_ad">Pre-Load Ad</string>
+    <string name="show_ad_earn_reward">Show Ad &amp; Earn Reward</string>
+    
+    <string name="enable_banner_ads">Enable Banner Ads</string>
+    <string name="enable_interstitial_ads">Enable Interstitial Ads</string>
+    <string name="enable_native_ads">Enable Native Ads</string>
+    <string name="enable_rewarded_ads">Enable Rewarded Ads</string>
+    <string name="enable_rewarded_interstitial_ads">Enable Rewarded Interstitial Ads</string>
+    <string name="interstitial_ad_interval">Interstitial Ad Interval</string>
+    <string name="minus">-</string>
+    <string name="plus">+</string>
+    <string name="three">3</string>
+    
+    <string name="house_ads_title">House Ads (Offline Fallback)</string>
+    <string name="enable_house_ads">Enable House Ads</string>
+    <string name="house_ads_desc">Mock promos that route inside your app or to a webpage when internet is offline.</string>
+    
 </resources>

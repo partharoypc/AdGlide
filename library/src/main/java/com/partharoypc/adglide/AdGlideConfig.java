@@ -31,6 +31,7 @@ public class AdGlideConfig {
     private final boolean nativeStatus;
     private final boolean rewardedStatus;
     private final boolean appOpenStatus;
+    private final boolean rewardedInterstitialStatus;
 
     // App IDs
     private final String adMobAppId;
@@ -117,6 +118,7 @@ public class AdGlideConfig {
         this.nativeStatus = builder.nativeStatus;
         this.rewardedStatus = builder.rewardedStatus;
         this.appOpenStatus = builder.appOpenStatus;
+        this.rewardedInterstitialStatus = builder.rewardedInterstitialStatus;
 
         this.adMobAppId = builder.adMobAppId;
         this.startappAppId = builder.startappAppId;
@@ -262,6 +264,10 @@ public class AdGlideConfig {
 
     public boolean isAppOpenEnabled() {
         return appOpenStatus;
+    }
+
+    public boolean isRewardedInterstitialEnabled() {
+        return rewardedInterstitialStatus;
     }
 
     // Getters for App IDs
@@ -464,6 +470,7 @@ public class AdGlideConfig {
         private boolean nativeStatus = false;
         private boolean rewardedStatus = false;
         private boolean appOpenStatus = false;
+        private boolean rewardedInterstitialStatus = false;
 
         private String adMobAppId = "";
         private String startappAppId = "0";
@@ -692,6 +699,11 @@ public class AdGlideConfig {
 
         public Builder appOpenStatus(boolean enable) {
             this.appOpenStatus = enable;
+            return this;
+        }
+
+        public Builder rewardedInterstitialStatus(boolean enable) {
+            this.rewardedInterstitialStatus = enable;
             return this;
         }
 

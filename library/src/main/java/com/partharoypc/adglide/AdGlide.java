@@ -31,10 +31,12 @@ public class AdGlide {
     // Cached Buidlers
     private static InterstitialAd.Builder cachedInterstitial;
     private static RewardedAd.Builder cachedRewarded;
+    private static com.partharoypc.adglide.format.RewardedInterstitialAd.Builder cachedRewardedInterstitial;
     private static AppOpenAd.Builder cachedAppOpen;
 
     private static int interstitialClickCounter = 1;
     private static int rewardedClickCounter = 1;
+    private static int rewardedInterstitialClickCounter = 1;
     private static boolean isInitialized = false;
     private static boolean isAppOpenRegistered = false;
 
@@ -169,6 +171,39 @@ public class AdGlide {
         return isInitialized;
     }
 
+    // --- Developer Friendly State Helpers ---
+
+    /**
+     * Checks if the overall AdGlide SDK is enabled and correctly configured.
+     */
+    public static boolean isAdsEnabled() {
+        return config != null && config.getAdStatus();
+    }
+
+    public static boolean isBannerEnabled() {
+        return isAdsEnabled() && config.isBannerEnabled();
+    }
+
+    public static boolean isInterstitialEnabled() {
+        return isAdsEnabled() && config.isInterstitialEnabled();
+    }
+
+    public static boolean isRewardedEnabled() {
+        return isAdsEnabled() && config.isRewardedEnabled();
+    }
+
+    public static boolean isNativeEnabled() {
+        return isAdsEnabled() && config.isNativeEnabled();
+    }
+
+    public static boolean isAppOpenEnabled() {
+        return isAdsEnabled() && config.isAppOpenEnabled();
+    }
+
+    public static boolean isRewardedInterstitialEnabled() {
+        return isAdsEnabled() && config.isRewardedInterstitialEnabled();
+    }
+
     /**
      * For backward compatibility if someone still calls initialize with just a
      * Context.
@@ -213,6 +248,14 @@ public class AdGlide {
         }
     }
 
+    public static void preloadRewardedInterstitial(Activity activity) {
+        if (config != null && config.getAdStatus()) {
+            cachedRewardedInterstitial = new com.partharoypc.adglide.format.RewardedInterstitialAd.Builder(activity);
+            // Reusing build internally to perform a standard cache load
+            cachedRewardedInterstitial.loadRewardedInterstitialAd(null, null);
+        }
+    }
+
     // --- Facade Show Methods ---
 
     /**
@@ -221,7 +264,7 @@ public class AdGlide {
      * configured).
      */
     public static void showInterstitial(Activity activity, OnInterstitialAdDismissedListener listener) {
-        if (config == null || !config.getAdStatus()) {
+        if (config == null || !isInterstitialEnabled()) {
             if (listener != null)
                 listener.onInterstitialAdDismissed();
             return;
@@ -252,7 +295,7 @@ public class AdGlide {
             });
         } else {
             // Fallback: load and show on the fly
-            new InterstitialAd.Builder(activity).load(new OnInterstitialAdDismissedListener() {
+            new InterstitialAd.Builder(activity).loadAndShow(activity, null, new OnInterstitialAdDismissedListener() {
                 @Override
                 public void onInterstitialAdDismissed() {
                     interstitialClickCounter = 1; // Reset after fallback show/attempt
@@ -268,7 +311,7 @@ public class AdGlide {
      */
     public static void showRewarded(Activity activity, OnRewardedAdCompleteListener onComplete,
             OnRewardedAdDismissedListener onDismiss) {
-        if (config == null || !config.getAdStatus()) {
+        if (config == null || !isRewardedEnabled()) {
             if (onDismiss != null)
                 onDismiss.onRewardedAdDismissed();
             return;
@@ -296,14 +339,83 @@ public class AdGlide {
             }, null);
         } else {
             // Fallback: load and show on the fly
-            new RewardedAd.Builder(activity).load(onComplete, new OnRewardedAdDismissedListener() {
+            new RewardedAd.Builder(activity).loadAndShow(activity, onComplete, new OnRewardedAdDismissedListener() {
                 @Override
                 public void onRewardedAdDismissed() {
                     rewardedClickCounter = 1; // Reset after fallback show/attempt
                     if (onDismiss != null)
                         onDismiss.onRewardedAdDismissed();
                 }
-            });
+            }, null);
+        }
+    }
+
+    /**
+     * Shows a pre-cached rewarded interstitial ad, or loads one on the fly if not
+     * cached.
+     */
+    public static void showRewardedInterstitial(Activity activity, OnRewardedAdCompleteListener onComplete,
+            OnRewardedAdDismissedListener onDismiss, com.partharoypc.adglide.util.OnRewardedAdErrorListener onError) {
+        if (config == null || !isRewardedInterstitialEnabled()) {
+            if (onDismiss != null)
+                onDismiss.onRewardedAdDismissed();
+            return;
+        }
+
+        if (rewardedInterstitialClickCounter < config.getRewardedInterval()) {
+            Log.d(TAG,
+                    "Rewarded Interstitial Ad interval not met. Current counter: " + rewardedInterstitialClickCounter);
+            rewardedInterstitialClickCounter++;
+            if (onDismiss != null)
+                onDismiss.onRewardedAdDismissed();
+            return;
+        }
+
+        // Technically RewardedInterstitialAd has no direct isAdAvailable() externally
+        // exposed, but we know it triggers show directly or load backups.
+        // We will just try to trigger showRewardedInterstitialAd. If empty,
+        // loadAndShow.
+        if (cachedRewardedInterstitial != null) {
+            // Attempt to show what is cached. If nothing is cached, it'll fail cleanly with
+            // an error or dismiss. But we should ideally guarantee loadAndShow.
+            // RewardedInterstitialAd doesn't have a public isAdAvailable.
+            cachedRewardedInterstitial.showRewardedInterstitialAd(activity, onComplete,
+                    new OnRewardedAdDismissedListener() {
+                        @Override
+                        public void onRewardedAdDismissed() {
+                            rewardedInterstitialClickCounter = 1;
+                            if (config.isAutoLoadRewarded()) {
+                                preloadRewardedInterstitial(activity);
+                            }
+                            if (onDismiss != null)
+                                onDismiss.onRewardedAdDismissed();
+                        }
+                    }, new com.partharoypc.adglide.util.OnRewardedAdErrorListener() {
+                        @Override
+                        public void onRewardedAdError() {
+                            // Cache missed or failed. Fallback to loadAndShow
+                            new com.partharoypc.adglide.format.RewardedInterstitialAd.Builder(activity)
+                                    .loadAndShow(activity, onComplete, new OnRewardedAdDismissedListener() {
+                                        @Override
+                                        public void onRewardedAdDismissed() {
+                                            rewardedInterstitialClickCounter = 1;
+                                            if (onDismiss != null)
+                                                onDismiss.onRewardedAdDismissed();
+                                        }
+                                    }, onError);
+                        }
+                    });
+        } else {
+            // Fallback immediately
+            new com.partharoypc.adglide.format.RewardedInterstitialAd.Builder(activity).loadAndShow(activity,
+                    onComplete, new OnRewardedAdDismissedListener() {
+                        @Override
+                        public void onRewardedAdDismissed() {
+                            rewardedInterstitialClickCounter = 1;
+                            if (onDismiss != null)
+                                onDismiss.onRewardedAdDismissed();
+                        }
+                    }, onError);
         }
     }
 
@@ -311,7 +423,7 @@ public class AdGlide {
      * Shows a banner ad in the activity's default banner container.
      */
     public static void showBanner(Activity activity) {
-        if (config == null || !config.getAdStatus())
+        if (config == null || !isBannerEnabled())
             return;
         new BannerAd.Builder(activity).load();
     }
@@ -320,7 +432,7 @@ public class AdGlide {
      * Shows a banner ad in a custom container.
      */
     public static void showBanner(Activity activity, ViewGroup container) {
-        if (config == null || !config.getAdStatus())
+        if (config == null || !isBannerEnabled())
             return;
         new BannerAd.Builder(activity).container(container).load();
     }
@@ -329,7 +441,7 @@ public class AdGlide {
      * Shows a native ad in the specified containter without needing a builder.
      */
     public static void showNative(Activity activity, String nativeStyle) {
-        if (config == null || !config.getAdStatus())
+        if (config == null || !isNativeEnabled())
             return;
         com.partharoypc.adglide.util.PerformanceLogger.log("NATIVE", "Showing Native Ad Style: " + nativeStyle);
         new NativeAd.Builder(activity).style(nativeStyle).load();
@@ -339,7 +451,7 @@ public class AdGlide {
      * Shows a native ad in a custom container with specified style.
      */
     public static void showNative(Activity activity, ViewGroup container, String nativeStyle) {
-        if (config == null || !config.getAdStatus())
+        if (config == null || !isNativeEnabled())
             return;
         com.partharoypc.adglide.util.PerformanceLogger.log("NATIVE", "Showing Native Ad Style: " + nativeStyle);
         new NativeAd.Builder(activity).container(container).style(nativeStyle).load();

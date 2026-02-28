@@ -56,16 +56,22 @@ public class RewardedAd {
         private String ironSourceRewardedId = "";
         private String startAppId = "";
         private String wortiseRewardedId = "";
-        private int placementStatus = 0;
         private boolean legacyGDPR = false;
 
         private RewardedProvider currentProvider;
 
+        // Internal flag to show the ad immediately when loaded (used for on-the-fly
+        // calls)
+        private boolean showOnLoad = false;
+        private OnRewardedAdCompleteListener onCompleteListener;
+        private OnRewardedAdDismissedListener onDismissListener;
+        private OnRewardedAdErrorListener onErrorListener;
+
         public Builder(@NonNull Activity activity) {
             this.activityRef = new java.lang.ref.WeakReference<>(activity);
+            this.adStatus = com.partharoypc.adglide.AdGlide.isRewardedEnabled();
             if (com.partharoypc.adglide.AdGlide.getConfig() != null) {
                 com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-                this.adStatus = config.getAdStatus();
                 this.adNetwork = config.getPrimaryNetwork();
                 if (!config.getBackupNetworks().isEmpty()) {
                     this.backupAdNetwork = config.getBackupNetworks().get(0);
@@ -133,6 +139,23 @@ public class RewardedAd {
         @NonNull
         public Builder load(OnRewardedAdLoadedListener onLoaded, OnRewardedAdErrorListener onError,
                 OnRewardedAdDismissedListener onDismiss, OnRewardedAdCompleteListener onComplete) {
+            loadRewardedAd(onComplete, onDismiss);
+            return this;
+        }
+
+        /**
+         * Used internally by AdGlide to request an ad on the fly and show it
+         * immediately.
+         */
+        @NonNull
+        public Builder loadAndShow(Activity displayActivity,
+                OnRewardedAdCompleteListener onComplete,
+                OnRewardedAdDismissedListener onDismiss,
+                OnRewardedAdErrorListener onError) {
+            this.showOnLoad = true;
+            this.onCompleteListener = onComplete;
+            this.onDismissListener = onDismiss;
+            this.onErrorListener = onError;
             loadRewardedAd(onComplete, onDismiss);
             return this;
         }
@@ -229,12 +252,6 @@ public class RewardedAd {
         }
 
         @NonNull
-        public Builder placement(int placementStatus) {
-            this.placementStatus = placementStatus;
-            return this;
-        }
-
-        @NonNull
         public Builder legacyGDPR(boolean legacyGDPR) {
             this.legacyGDPR = legacyGDPR;
             return this;
@@ -252,21 +269,31 @@ public class RewardedAd {
         private void loadRewardedAdMain(boolean isBackup, OnRewardedAdCompleteListener onComplete,
                 OnRewardedAdDismissedListener onDismiss) {
             try {
-                AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-                boolean isRewardedEnabled = config != null && config.isRewardedEnabled();
-                if (!adStatus || !isRewardedEnabled || placementStatus == 0) {
-                    Log.d(TAG, "Rewarded Ad is disabled or placement status is 0.");
+                if (!com.partharoypc.adglide.AdGlide.isRewardedEnabled() || !adStatus) {
+                    Log.d(TAG, "Rewarded Ad is disabled globally or locally.");
+                    if (showOnLoad && onDismiss != null) {
+                        showOnLoad = false;
+                        onDismiss.onRewardedAdDismissed();
+                    }
                     return;
                 }
 
                 Activity activity = activityRef.get();
                 if (activity == null) {
                     Log.e(TAG, "Activity is null. Cannot load Rewarded.");
+                    if (showOnLoad && onDismiss != null) {
+                        showOnLoad = false;
+                        onDismiss.onRewardedAdDismissed();
+                    }
                     return;
                 }
 
                 if (!Tools.isNetworkAvailable(activity)) {
                     Log.e(TAG, "Internet connection not available.");
+                    if (showOnLoad && onDismiss != null) {
+                        showOnLoad = false;
+                        onDismiss.onRewardedAdDismissed();
+                    }
                     return;
                 }
 
@@ -277,12 +304,20 @@ public class RewardedAd {
                             waterfallManager = new WaterfallManager(backupAdNetwork);
                         } else {
                             Log.d(TAG, "No backup ad network configured.");
+                            if (showOnLoad && onDismiss != null) {
+                                showOnLoad = false;
+                                onDismiss.onRewardedAdDismissed();
+                            }
                             return;
                         }
                     }
                     network = waterfallManager.getNext();
                     if (network == null) {
                         Log.d(TAG, "All backup rewarded ads failed to load");
+                        if (showOnLoad && onDismiss != null) {
+                            showOnLoad = false;
+                            onDismiss.onRewardedAdDismissed();
+                        }
                         return;
                     }
                 } else {
@@ -348,6 +383,11 @@ public class RewardedAd {
                 public void onAdLoaded() {
                     com.partharoypc.adglide.util.PerformanceLogger.log("Rewarded", "Loaded: " + network);
                     Log.d(TAG, network + " Rewarded ad loaded");
+
+                    if (showOnLoad) {
+                        showOnLoad = false;
+                        showRewardedAd(activity, onCompleteListener, onDismissListener, onErrorListener);
+                    }
                 }
 
                 @Override

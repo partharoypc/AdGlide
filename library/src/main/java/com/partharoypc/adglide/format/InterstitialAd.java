@@ -49,16 +49,21 @@ public class InterstitialAd {
         private String ironSourceInterstitialId = "";
         private String wortiseInterstitialId = "";
         private String startAppId = "";
-        private int placementStatus = 0;
-        private int interval = 3;
+        private int interval = 1;
         private boolean testMode = false;
         private boolean debug = true;
 
+        // Internal flag to show the ad immediately when loaded (used for on-the-fly
+        // calls)
+        private boolean showOnLoad = false;
+        private OnInterstitialAdShowedListener showedListener;
+        private OnInterstitialAdDismissedListener dismissedListener;
+
         public Builder(@NonNull Activity activity) {
             this.activityRef = new java.lang.ref.WeakReference<>(activity);
+            this.adStatus = com.partharoypc.adglide.AdGlide.isInterstitialEnabled();
             if (com.partharoypc.adglide.AdGlide.getConfig() != null) {
                 com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-                this.adStatus = config.getAdStatus();
                 this.adNetwork = config.getPrimaryNetwork();
                 if (!config.getBackupNetworks().isEmpty()) {
                     this.backupAdNetwork = config.getBackupNetworks().get(0);
@@ -106,6 +111,21 @@ public class InterstitialAd {
         @NonNull
         public Builder load(OnInterstitialAdDismissedListener listener) {
             loadInterstitialAd(listener);
+            return this;
+        }
+
+        /**
+         * Used internally by AdGlide to request an ad on the fly and show it
+         * immediately.
+         */
+        @NonNull
+        public Builder loadAndShow(Activity displayActivity,
+                OnInterstitialAdShowedListener showedListener,
+                OnInterstitialAdDismissedListener dismissedListener) {
+            this.showOnLoad = true;
+            this.showedListener = showedListener;
+            this.dismissedListener = dismissedListener;
+            loadInterstitialAd(dismissedListener);
             return this;
         }
 
@@ -222,12 +242,6 @@ public class InterstitialAd {
         }
 
         @NonNull
-        public Builder placement(int placementStatus) {
-            this.placementStatus = placementStatus;
-            return this;
-        }
-
-        @NonNull
         public Builder interval(int interval) {
             this.interval = interval;
             return this;
@@ -253,34 +267,41 @@ public class InterstitialAd {
 
         private void loadInterstitialAd(OnInterstitialAdDismissedListener listener) {
             try {
-                AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-                boolean isInterstitialTypeEnabled = config != null && config.isInterstitialEnabled();
-                if (adStatus && isInterstitialTypeEnabled && placementStatus != 0) {
-                    Activity activity = activityRef.get();
-                    if (activity == null) {
-                        Log.e(TAG, "Activity is null. Cannot load Interstitial.");
-                        return;
+                if (!com.partharoypc.adglide.AdGlide.isInterstitialEnabled() || !adStatus) {
+                    Log.d(TAG, "Interstitial Ad is disabled globally or locally.");
+                    if (showOnLoad && listener != null) {
+                        showOnLoad = false;
+                        listener.onInterstitialAdDismissed();
                     }
-
-                    if (!Tools.isNetworkAvailable(activity)) {
-                        Log.e(TAG, "Internet connection not available.");
-                        if (com.partharoypc.adglide.AdGlide.getConfig() != null
-                                && com.partharoypc.adglide.AdGlide.getConfig().isHouseAdEnabled()) {
-                            Log.d(TAG, "Falling back to House Ad due to offline status.");
-                            loadAdFromNetwork(HOUSE_AD, listener);
-                        }
-                        return;
-                    }
-                    if (waterfallManager != null) {
-                        waterfallManager.reset();
-                    }
-                    Log.d(TAG, "Interstitial Ad is enabled: " + adNetwork);
-                    com.partharoypc.adglide.util.PerformanceLogger.log("Interstitial",
-                            "Loading started: " + adNetwork);
-                    loadAdFromNetwork(adNetwork, listener);
-                } else {
-                    Log.d(TAG, "Interstitial Ad is disabled");
+                    return;
                 }
+                Activity activity = activityRef.get();
+                if (activity == null) {
+                    Log.e(TAG, "Activity is null. Cannot load Interstitial.");
+                    return;
+                }
+
+                if (!Tools.isNetworkAvailable(activity)) {
+                    Log.e(TAG, "Internet connection not available.");
+                    if (com.partharoypc.adglide.AdGlide.getConfig() != null
+                            && com.partharoypc.adglide.AdGlide.getConfig().isHouseAdEnabled()) {
+                        Log.d(TAG, "Falling back to House Ad due to offline status.");
+                        loadAdFromNetwork(HOUSE_AD, listener);
+                    } else {
+                        if (showOnLoad && listener != null) {
+                            showOnLoad = false;
+                            listener.onInterstitialAdDismissed();
+                        }
+                    }
+                    return;
+                }
+                if (waterfallManager != null) {
+                    waterfallManager.reset();
+                }
+                Log.d(TAG, "Interstitial Ad is enabled: " + adNetwork);
+                com.partharoypc.adglide.util.PerformanceLogger.log("Interstitial",
+                        "Loading started: " + adNetwork);
+                loadAdFromNetwork(adNetwork, listener);
             } catch (Exception e) {
                 Log.e(TAG, "Error in loadInterstitialAd: " + e.getMessage());
             }
@@ -288,38 +309,57 @@ public class InterstitialAd {
 
         private void loadBackupInterstitialAd(OnInterstitialAdDismissedListener listener) {
             try {
-                if (adStatus && placementStatus != 0) {
-                    Activity activity = activityRef.get();
-                    if (activity == null) {
-                        Log.e(TAG, "Activity is null. Cannot load Interstitial backup.");
-                        return;
+                if (!com.partharoypc.adglide.AdGlide.isInterstitialEnabled() || !adStatus) {
+                    Log.d(TAG, "Interstitial Ad is disabled globally or locally. Skipping backup.");
+                    if (showOnLoad && listener != null) {
+                        showOnLoad = false;
+                        listener.onInterstitialAdDismissed();
                     }
-
-                    if (!Tools.isNetworkAvailable(activity)) {
-                        Log.e(TAG, "Internet connection not available.");
-                        if (com.partharoypc.adglide.AdGlide.getConfig() != null
-                                && com.partharoypc.adglide.AdGlide.getConfig().isHouseAdEnabled()) {
-                            loadAdFromNetwork(HOUSE_AD, listener);
-                        }
-                        return;
-                    }
-                    if (waterfallManager == null) {
-                        if (backupAdNetwork != null && !backupAdNetwork.isEmpty()) {
-                            waterfallManager = new WaterfallManager(backupAdNetwork);
-                        } else {
-                            return;
-                        }
-                    }
-
-                    String networkToLoad = waterfallManager.getNext();
-                    if (networkToLoad == null) {
-                        Log.d(TAG, "All backup interstitial ads failed to load");
-                        return;
-                    }
-                    Log.d(TAG, "Loading Backup Interstitial Ad [" + networkToLoad.toUpperCase(java.util.Locale.ROOT)
-                            + "]");
-                    loadAdFromNetwork(networkToLoad, listener);
+                    return;
                 }
+                Activity activity = activityRef.get();
+                if (activity == null) {
+                    Log.e(TAG, "Activity is null. Cannot load Interstitial backup.");
+                    return;
+                }
+
+                if (!Tools.isNetworkAvailable(activity)) {
+                    Log.e(TAG, "Internet connection not available.");
+                    if (com.partharoypc.adglide.AdGlide.getConfig() != null
+                            && com.partharoypc.adglide.AdGlide.getConfig().isHouseAdEnabled()) {
+                        loadAdFromNetwork(HOUSE_AD, listener);
+                    } else {
+                        if (showOnLoad && listener != null) {
+                            showOnLoad = false;
+                            listener.onInterstitialAdDismissed();
+                        }
+                    }
+                    return;
+                }
+                if (waterfallManager == null) {
+                    if (backupAdNetwork != null && !backupAdNetwork.isEmpty()) {
+                        waterfallManager = new WaterfallManager(backupAdNetwork);
+                    } else {
+                        if (showOnLoad && listener != null) {
+                            showOnLoad = false;
+                            listener.onInterstitialAdDismissed();
+                        }
+                        return;
+                    }
+                }
+
+                String networkToLoad = waterfallManager.getNext();
+                if (networkToLoad == null) {
+                    Log.d(TAG, "All backup interstitial ads failed to load");
+                    if (showOnLoad && listener != null) {
+                        showOnLoad = false;
+                        listener.onInterstitialAdDismissed();
+                    }
+                    return;
+                }
+                Log.d(TAG, "Loading Backup Interstitial Ad [" + networkToLoad.toUpperCase(java.util.Locale.ROOT)
+                        + "]");
+                loadAdFromNetwork(networkToLoad, listener);
             } catch (Exception e) {
                 Log.e(TAG, "Error in loadBackupInterstitialAd: " + e.getMessage());
             }
@@ -354,6 +394,11 @@ public class InterstitialAd {
                                     com.partharoypc.adglide.util.PerformanceLogger.log("Interstitial",
                                             "Loaded: " + networkToLoad);
                                     Log.d(TAG, networkToLoad + " Interstitial Ad loaded");
+
+                                    if (showOnLoad) {
+                                        showOnLoad = false;
+                                        showInterstitialAd(activity, showedListener, dismissedListener);
+                                    }
                                 }
 
                                 @Override
@@ -416,65 +461,66 @@ public class InterstitialAd {
                 OnInterstitialAdShowedListener showedListener,
                 OnInterstitialAdDismissedListener dismissedListener) {
             try {
-                if (adStatus && placementStatus != 0) {
-                    if (counter >= interval) {
-                        if (currentProvider != null && currentProvider.isAdLoaded()) {
-                            Activity activity = activityRef.get();
-                            currentProvider.showInterstitial(displayActivity != null ? displayActivity : activity,
-                                    new InterstitialProvider.InterstitialListener() {
-                                        @Override
-                                        public void onAdLoaded() {
-                                        }
+                if (!com.partharoypc.adglide.AdGlide.isInterstitialEnabled() || !adStatus) {
+                    Log.d(TAG, "Interstitial Ad is disabled globally or locally. Calling dismissed listener.");
+                    if (dismissedListener != null) {
+                        dismissedListener.onInterstitialAdDismissed();
+                    }
+                    return;
+                }
 
-                                        @Override
-                                        public void onAdFailedToLoad(String error) {
-                                        }
+                if (counter >= interval) {
+                    if (currentProvider != null && currentProvider.isAdLoaded()) {
+                        Activity activity = activityRef.get();
+                        currentProvider.showInterstitial(displayActivity != null ? displayActivity : activity,
+                                new InterstitialProvider.InterstitialListener() {
+                                    @Override
+                                    public void onAdLoaded() {
+                                    }
 
-                                        @Override
-                                        public void onAdDismissed() {
-                                            if (dismissedListener != null) {
-                                                dismissedListener.onInterstitialAdDismissed();
-                                            }
-                                            loadInterstitialAd(dismissedListener); // Load next ad after dismissal
-                                        }
+                                    @Override
+                                    public void onAdFailedToLoad(String error) {
+                                    }
 
-                                        @Override
-                                        public void onAdShowFailed(String error) {
-                                            Log.e(TAG, "Interstitial Ad failed to show: " + error);
-                                            if (dismissedListener != null) {
-                                                dismissedListener.onInterstitialAdDismissed();
-                                            }
-                                            loadInterstitialAd(dismissedListener); // Load next ad after show failure
+                                    @Override
+                                    public void onAdDismissed() {
+                                        if (dismissedListener != null) {
+                                            dismissedListener.onInterstitialAdDismissed();
                                         }
+                                        loadInterstitialAd(dismissedListener); // Load next ad after dismissal
+                                    }
 
-                                        @Override
-                                        public void onAdShowed() {
-                                            if (showedListener != null) {
-                                                showedListener.onInterstitialAdShowed();
-                                            }
+                                    @Override
+                                    public void onAdShowFailed(String error) {
+                                        Log.e(TAG, "Interstitial Ad failed to show: " + error);
+                                        if (dismissedListener != null) {
+                                            dismissedListener.onInterstitialAdDismissed();
                                         }
-                                    });
-                            counter = 1;
-                        } else {
-                            Log.d(TAG,
-                                    "Primary interstitial ad not loaded. Skipping show and calling dismissed listener.");
-                            // If primary ad is not loaded, we don't try to show backup immediately.
-                            // The backup logic is handled during the load phase.
-                            if (dismissedListener != null) {
-                                dismissedListener.onInterstitialAdDismissed();
-                            }
-                            loadInterstitialAd(dismissedListener); // Ensure a new ad is loaded for next time
-                            counter = 1; // Reset counter as if an ad was shown (or attempted)
-                        }
+                                        loadInterstitialAd(dismissedListener); // Load next ad after show failure
+                                    }
+
+                                    @Override
+                                    public void onAdShowed() {
+                                        if (showedListener != null) {
+                                            showedListener.onInterstitialAdShowed();
+                                        }
+                                    }
+                                });
+                        counter = 1;
                     } else {
-                        counter++;
-                        Log.d(TAG, "Interstitial interval not met. Current counter: " + counter);
+                        Log.d(TAG,
+                                "Primary interstitial ad not loaded. Skipping show and calling dismissed listener.");
+                        // If primary ad is not loaded, we don't try to show backup immediately.
+                        // The backup logic is handled during the load phase.
                         if (dismissedListener != null) {
                             dismissedListener.onInterstitialAdDismissed();
                         }
+                        loadInterstitialAd(dismissedListener); // Ensure a new ad is loaded for next time
+                        counter = 1; // Reset counter as if an ad was shown (or attempted)
                     }
                 } else {
-                    Log.d(TAG, "Interstitial Ad is disabled or placement status is 0. Calling dismissed listener.");
+                    counter++;
+                    Log.d(TAG, "Interstitial interval not met. Current counter: " + counter);
                     if (dismissedListener != null) {
                         dismissedListener.onInterstitialAdDismissed();
                     }

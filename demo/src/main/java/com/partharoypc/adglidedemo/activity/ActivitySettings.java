@@ -5,6 +5,9 @@ import static com.partharoypc.adglide.util.Constant.APPLOVIN;
 
 import static com.partharoypc.adglide.util.Constant.APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.META;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX;
+import static com.partharoypc.adglide.util.Constant.META_BIDDING_IRONSOURCE;
 import static com.partharoypc.adglide.util.Constant.IRONSOURCE;
 import static com.partharoypc.adglide.util.Constant.NONE;
 import static com.partharoypc.adglide.util.Constant.STARTAPP;
@@ -77,7 +80,11 @@ public class ActivitySettings extends AppCompatActivity {
         primaryNetworks = new ArrayList<>();
         primaryNetworks.add(new AdapterNetwork.NetworkItem("AdMob", ADMOB));
         primaryNetworks.add(new AdapterNetwork.NetworkItem("Meta Audience Network", META));
+        primaryNetworks.add(new AdapterNetwork.NetworkItem("Meta Bidding (AdMob)", META_BIDDING_ADMOB));
+        primaryNetworks.add(new AdapterNetwork.NetworkItem("Meta Bidding (AppLovin MAX)", META_BIDDING_APPLOVIN_MAX));
+        primaryNetworks.add(new AdapterNetwork.NetworkItem("Meta Bidding (ironSource)", META_BIDDING_IRONSOURCE));
         primaryNetworks.add(new AdapterNetwork.NetworkItem("Unity Ads", UNITY));
+        primaryNetworks.add(new AdapterNetwork.NetworkItem("AppLovin", APPLOVIN));
         primaryNetworks.add(new AdapterNetwork.NetworkItem("AppLovin MAX", APPLOVIN_MAX));
 
         primaryNetworks.add(new AdapterNetwork.NetworkItem("ironSource", IRONSOURCE));
@@ -163,6 +170,48 @@ public class ActivitySettings extends AppCompatActivity {
             initAds();
         });
 
+        // Rewarded Interstitial Ad Switch
+        SwitchMaterial switchRewardedInt = findViewById(R.id.switch_rewarded_interstitial_ad);
+        switchRewardedInt.setChecked(sharedPref.getIsRewardedInterstitialEnabled());
+        switchRewardedInt.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            sharedPref.setIsRewardedInterstitialEnabled(isChecked);
+            Constant.REWARDED_INTERSTITIAL_STATUS = isChecked;
+            initAds();
+        });
+
+        // Interstitial Interval
+        android.widget.TextView tvIntervalValue = findViewById(R.id.tv_interval_value);
+        tvIntervalValue.setText(String.valueOf(sharedPref.getInterstitialInterval()));
+        findViewById(R.id.btn_interval_minus).setOnClickListener(v -> {
+            int current = sharedPref.getInterstitialInterval();
+            if (current > 1) {
+                current--;
+                sharedPref.setInterstitialInterval(current);
+                tvIntervalValue.setText(String.valueOf(current));
+                Constant.INTERSTITIAL_AD_INTERVAL = current;
+                initAds();
+            }
+        });
+        findViewById(R.id.btn_interval_plus).setOnClickListener(v -> {
+            int current = sharedPref.getInterstitialInterval();
+            if (current < 10) {
+                current++;
+                sharedPref.setInterstitialInterval(current);
+                tvIntervalValue.setText(String.valueOf(current));
+                Constant.INTERSTITIAL_AD_INTERVAL = current;
+                initAds();
+            }
+        });
+
+        // House Ad Switch
+        SwitchMaterial switchHouseAd = findViewById(R.id.switch_house_ad);
+        switchHouseAd.setChecked(sharedPref.getIsHouseAdEnabled());
+        switchHouseAd.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            sharedPref.setIsHouseAdEnabled(isChecked);
+            Constant.HOUSE_AD_ENABLE = isChecked;
+            initAds();
+        });
+
         Button btnGdpr = findViewById(R.id.btn_gdpr);
         btnGdpr.setOnClickListener(v -> {
             new GDPR(this).resetConsent();
@@ -181,14 +230,44 @@ public class ActivitySettings extends AppCompatActivity {
                 .wortiseAppId(Constant.WORTISE_APP_ID)
                 .debug(com.partharoypc.adglidedemo.BuildConfig.DEBUG)
 
+                // Banner
+                .adMobBannerId(Constant.ADMOB_BANNER_ID)
+                .metaBannerId(Constant.META_BANNER_ID)
+                .unityBannerId(Constant.UNITY_BANNER_ID)
+                .appLovinBannerId(Constant.APPLOVIN_BANNER_ID)
+                .ironSourceBannerId(Constant.IRONSOURCE_BANNER_ID)
+                .wortiseBannerId(Constant.WORTISE_BANNER_ID)
+
+                // Interstitial
                 .adMobInterstitialId(Constant.ADMOB_INTERSTITIAL_ID)
+                .metaInterstitialId(Constant.META_INTERSTITIAL_ID)
+                .unityInterstitialId(Constant.UNITY_INTERSTITIAL_ID)
                 .appLovinInterstitialId(Constant.APPLOVIN_INTERSTITIAL_ID)
+                .ironSourceInterstitialId(Constant.IRONSOURCE_INTERSTITIAL_ID)
                 .wortiseInterstitialId(Constant.WORTISE_INTERSTITIAL_ID)
+
+                // Rewarded
                 .adMobRewardedId(Constant.ADMOB_REWARDED_ID)
+                .metaRewardedId(Constant.META_REWARDED_ID)
+                .unityRewardedId(Constant.UNITY_REWARDED_ID)
                 .appLovinRewardedId(Constant.APPLOVIN_MAX_REWARDED_ID)
+                .ironSourceRewardedId(Constant.IRONSOURCE_REWARDED_ID)
+                .wortiseRewardedId(Constant.WORTISE_REWARDED_ID)
+
+                // Rewarded Interstitial
+                .adMobRewardedIntId(Constant.ADMOB_REWARDED_INTERSTITIAL_ID)
+
+                // App Open
                 .adMobAppOpenId(Constant.ADMOB_APP_OPEN_AD_ID)
                 .appLovinAppOpenId(Constant.APPLOVIN_APP_OPEN_AP_ID)
                 .wortiseAppOpenId(Constant.WORTISE_APP_OPEN_AD_ID)
+
+                // Native
+                .adMobNativeId(Constant.ADMOB_NATIVE_ID)
+                .metaNativeId(Constant.META_NATIVE_ID)
+                .appLovinNativeId(Constant.APPLOVIN_NATIVE_MANUAL_ID)
+                .ironSourceNativeId(Constant.IRONSOURCE_NATIVE_ID)
+                .wortiseNativeId(Constant.WORTISE_NATIVE_ID)
 
                 .autoLoadInterstitial(true)
                 .autoLoadRewarded(true)
@@ -198,6 +277,7 @@ public class ActivitySettings extends AppCompatActivity {
                 .interstitialStatus(Constant.INTERSTITIAL_STATUS)
                 .nativeStatus(Constant.NATIVE_STATUS)
                 .rewardedStatus(Constant.REWARDED_STATUS)
+                .rewardedInterstitialStatus(Constant.REWARDED_INTERSTITIAL_STATUS)
                 .interstitialInterval(Constant.INTERSTITIAL_AD_INTERVAL)
                 .excludeOpenAdFrom(ActivitySplash.class, ActivitySettings.class)
                 .enableGDPR(true)

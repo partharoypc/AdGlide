@@ -91,4 +91,31 @@ public class SharedPref {
         editor.apply();
     }
 
+    public Boolean getIsRewardedInterstitialEnabled() {
+        return sharedPreferences.getBoolean("rewarded_interstitial_enabled", true);
+    }
+
+    public void setIsRewardedInterstitialEnabled(Boolean isEnabled) {
+        editor.putBoolean("rewarded_interstitial_enabled", isEnabled);
+        editor.apply();
+    }
+
+    public Boolean getIsHouseAdEnabled() {
+        return sharedPreferences.getBoolean("house_ad_enabled", true);
+    }
+
+    public void setIsHouseAdEnabled(Boolean isEnabled) {
+        editor.putBoolean("house_ad_enabled", isEnabled);
+        editor.apply();
+    }
+
+    public int getInterstitialInterval() {
+        return sharedPreferences.getInt("interstitial_interval", 3);
+    }
+
+    public void setInterstitialInterval(int interval) {
+        editor.putInt("interstitial_interval", interval);
+        editor.apply();
+    }
+
 }

@@ -45,7 +45,6 @@ public class NativeAdView {
         private String wortiseNativeId = "";
         private String startAppNativeId = "";
 
-        private int placementStatus = 1;
         private boolean darkTheme = false;
         private boolean legacyGDPR = false;
 
@@ -197,12 +196,6 @@ public class NativeAdView {
         }
 
         @NonNull
-        public Builder placement(int placementStatus) {
-            this.placementStatus = placementStatus;
-            return this;
-        }
-
-        @NonNull
         public Builder darkTheme(boolean darkTheme) {
             this.darkTheme = darkTheme;
             return this;
@@ -234,7 +227,7 @@ public class NativeAdView {
 
         public void loadNativeAd() {
             try {
-                if (adStatus && placementStatus != 0) {
+                if (adStatus) {
                     if (!Tools.isNetworkAvailable(activity)) {
                         Log.e(TAG, "Internet connection not available. Skipping Primary Native Ad load.");
                         return;
@@ -255,7 +248,7 @@ public class NativeAdView {
 
         public void loadBackupNativeAd() {
             try {
-                if (adStatus && placementStatus != 0) {
+                if (adStatus) {
                     if (!Tools.isNetworkAvailable(activity)) {
                         Log.e(TAG, "Internet connection not available. Skipping Backup Native Ad load.");
                         return;

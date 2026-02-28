@@ -63,7 +63,6 @@ public class AppOpenAd {
     private String appLovinAppOpenId = "";
     private String wortiseAppOpenId = "";
     private java.lang.ref.WeakReference<Activity> activityRef;
-    private int placementStatus = 0;
 
     // Provider management
     private static final Map<String, AppOpenProvider> providers = new HashMap<>();
@@ -99,12 +98,6 @@ public class AppOpenAd {
     @NonNull
     public AppOpenAd status(boolean adStatus) {
         this.adStatus = adStatus;
-        return this;
-    }
-
-    @NonNull
-    public AppOpenAd placement(int placementStatus) {
-        this.placementStatus = placementStatus;
         return this;
     }
 
@@ -175,9 +168,7 @@ public class AppOpenAd {
     public void onStartLifecycleObserver() {
         try {
             Activity activity = activityRef != null ? activityRef.get() : null;
-            AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-            boolean isAppOpenEnabled = config != null && config.isAppOpenEnabled();
-            if (placementStatus != 0 && adStatus && isAppOpenEnabled && activity != null) {
+            if (adStatus && com.partharoypc.adglide.AdGlide.isAppOpenEnabled() && activity != null) {
                 if (activity.getIntent().hasExtra("unique_id")) {
                     return;
                 }
@@ -190,9 +181,7 @@ public class AppOpenAd {
 
     public void onStartActivityLifecycleCallbacks(Activity activity) {
         try {
-            AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-            boolean isAppOpenEnabled = config != null && config.isAppOpenEnabled();
-            if (placementStatus != 0 && adStatus && isAppOpenEnabled) {
+            if (adStatus && com.partharoypc.adglide.AdGlide.isAppOpenEnabled()) {
                 AppOpenProvider provider = getProvider(adNetwork);
                 boolean isShowing = provider != null && provider.isShowingAd();
                 if (!isShowing) {
@@ -213,53 +202,53 @@ public class AppOpenAd {
     public void showAdIfAvailable(@NonNull Activity activity,
             @Nullable OnShowAdCompleteListener onShowAdCompleteListener) {
         try {
-            AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-            boolean isAppOpenEnabled = config != null && config.isAppOpenEnabled();
-            if (placementStatus != 0 && adStatus && isAppOpenEnabled) {
-                // ── 30-minute cooldown check ──────────────────────────────
-                if (!isCooldownElapsed()) {
-                    Log.d(TAG, "App Open Ad skipped — cooldown not elapsed yet.");
-                    if (onShowAdCompleteListener != null)
-                        onShowAdCompleteListener.onShowAdComplete();
-                    return;
-                }
-
-                AppOpenProvider provider = getProvider(adNetwork);
-                String adUnitId = getAdUnitIdForNetwork(adNetwork);
-
-                if (provider != null && !adUnitId.equals("0")) {
-                    provider.showAppOpenAd(activity, new AppOpenProvider.AppOpenListener() {
-                        @Override
-                        public void onAdLoaded() {
-                        }
-
-                        @Override
-                        public void onAdFailedToLoad(String error) {
-                            if (onShowAdCompleteListener != null)
-                                onShowAdCompleteListener.onShowAdComplete();
-                        }
-
-                        @Override
-                        public void onAdDismissed() {
-                            if (onShowAdCompleteListener != null)
-                                onShowAdCompleteListener.onShowAdComplete();
-                        }
-
-                        @Override
-                        public void onAdShowFailed(String error) {
-                            if (onShowAdCompleteListener != null)
-                                onShowAdCompleteListener.onShowAdComplete();
-                        }
-
-                        @Override
-                        public void onAdShowed() {
-                            // Record the time the ad was displayed
-                            lastShownTimeMs = System.currentTimeMillis();
-                        }
-                    });
-                } else if (onShowAdCompleteListener != null) {
+            if (!com.partharoypc.adglide.AdGlide.isAppOpenEnabled() || !adStatus) {
+                if (onShowAdCompleteListener != null)
                     onShowAdCompleteListener.onShowAdComplete();
-                }
+                return;
+            }
+
+            // ── 30-minute cooldown check ──────────────────────────────
+            if (!isCooldownElapsed()) {
+                Log.d(TAG, "App Open Ad skipped — cooldown not elapsed yet.");
+                if (onShowAdCompleteListener != null)
+                    onShowAdCompleteListener.onShowAdComplete();
+                return;
+            }
+
+            AppOpenProvider provider = getProvider(adNetwork);
+            String adUnitId = getAdUnitIdForNetwork(adNetwork);
+
+            if (provider != null && !adUnitId.equals("0")) {
+                provider.showAppOpenAd(activity, new AppOpenProvider.AppOpenListener() {
+                    @Override
+                    public void onAdLoaded() {
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(String error) {
+                        if (onShowAdCompleteListener != null)
+                            onShowAdCompleteListener.onShowAdComplete();
+                    }
+
+                    @Override
+                    public void onAdDismissed() {
+                        if (onShowAdCompleteListener != null)
+                            onShowAdCompleteListener.onShowAdComplete();
+                    }
+
+                    @Override
+                    public void onAdShowFailed(String error) {
+                        if (onShowAdCompleteListener != null)
+                            onShowAdCompleteListener.onShowAdComplete();
+                    }
+
+                    @Override
+                    public void onAdShowed() {
+                        // Record the time the ad was displayed
+                        lastShownTimeMs = System.currentTimeMillis();
+                    }
+                });
             } else if (onShowAdCompleteListener != null) {
                 onShowAdCompleteListener.onShowAdComplete();
             }
@@ -288,14 +277,13 @@ public class AppOpenAd {
         private String metaAppOpenId = "";
         private String appLovinAppOpenId = "";
         private String wortiseAppOpenId = "";
-        private int placementStatus = 0;
         private int cooldownMinutes = -1;
 
         public Builder(Activity activity) {
             this.activityRef = new java.lang.ref.WeakReference<>(activity);
+            this.adStatus = com.partharoypc.adglide.AdGlide.isAppOpenEnabled();
             if (com.partharoypc.adglide.AdGlide.getConfig() != null) {
                 com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-                this.adStatus = config.getAdStatus();
                 this.adNetwork = config.getPrimaryNetwork();
                 if (!config.getBackupNetworks().isEmpty()) {
                     this.backupAdNetwork = config.getBackupNetworks().get(0);
@@ -337,12 +325,6 @@ public class AppOpenAd {
         @NonNull
         public Builder backup(AdGlideNetwork backupAdNetwork) {
             return backup(backupAdNetwork.getValue());
-        }
-
-        @NonNull
-        public Builder placement(int placementStatus) {
-            this.placementStatus = placementStatus;
-            return this;
         }
 
         public Builder backups(String... backupAdNetworks) {
@@ -402,16 +384,8 @@ public class AppOpenAd {
 
         public void loadAppOpenAd(OnShowAdCompleteListener onShowAdCompleteListener) {
             try {
-                AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-                boolean isAppOpenEnabled = config != null && config.isAppOpenEnabled();
-
-                if (!adStatus || !isAppOpenEnabled) {
-                    if (onShowAdCompleteListener != null)
-                        onShowAdCompleteListener.onShowAdComplete();
-                    return;
-                }
-                if (placementStatus == 0) {
-                    Log.d(TAG, "App Open Ad is disabled via placementStatus");
+                if (!com.partharoypc.adglide.AdGlide.isAppOpenEnabled() || !adStatus) {
+                    Log.d(TAG, "App Open Ad is disabled globally or locally.");
                     if (onShowAdCompleteListener != null)
                         onShowAdCompleteListener.onShowAdComplete();
                     return;
@@ -566,6 +540,12 @@ public class AppOpenAd {
 
         public void showAppOpenAd(OnShowAdCompleteListener onShowAdCompleteListener) {
             try {
+                if (!com.partharoypc.adglide.AdGlide.isAppOpenEnabled() || !adStatus) {
+                    if (onShowAdCompleteListener != null)
+                        onShowAdCompleteListener.onShowAdComplete();
+                    return;
+                }
+
                 // ── 30-minute cooldown check ──────────────────────────────
                 if (!isCooldownElapsed()) {
                     Log.d(TAG, "App Open Ad skipped — cooldown not elapsed yet.");

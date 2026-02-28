@@ -7,6 +7,7 @@ public class Constant {
     public static boolean INTERSTITIAL_STATUS = true;
     public static boolean NATIVE_STATUS = true;
     public static boolean REWARDED_STATUS = true;
+    public static boolean REWARDED_INTERSTITIAL_STATUS = true;
 
     public static String AD_NETWORK = "admob";
     public static String BACKUP_AD_NETWORK = "none";
@@ -76,12 +77,12 @@ public class Constant {
     public static boolean OPEN_ADS_ON_RESUME = true;
 
     // Frequency & Interval Config
-    public static final int INTERSTITIAL_AD_INTERVAL = 1;
+    public static int INTERSTITIAL_AD_INTERVAL = 1;
     public static final int NATIVE_AD_INDEX = 2;
     public static final int NATIVE_AD_INTERVAL = 8;
 
     // House Ad Config
-    public static final boolean HOUSE_AD_ENABLE = true;
+    public static boolean HOUSE_AD_ENABLE = true;
     public static final String HOUSE_AD_BANNER_IMAGE = "https://images.sampleads.com/banner.png";
     public static final String HOUSE_AD_BANNER_URL = "https://play.google.com/store/apps/details?id=com.partharoypc.sample";
     public static final String HOUSE_AD_INTERSTITIAL_IMAGE = "https://images.sampleads.com/inter.png";

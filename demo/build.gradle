@@ -34,7 +34,7 @@ android {
         }
     }
     lint {
-        disable 'GradleDependency'
+        disable 'GradleDependency', 'OldTargetApi'
     }
     packaging {
         jniLibs {
@@ -78,5 +78,8 @@ dependencies {
     
     implementation 'com.applovin.mediation:facebook-adapter:6.18.0.0'
     implementation 'com.applovin.mediation:google-adapter:23.6.0.0'
-
+    
+    // Force latest version of android-gif-drawable for 16KB alignment support
+    //noinspection Aligned16KB
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.28'
 }

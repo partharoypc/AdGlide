@@ -8,6 +8,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import android.view.ViewGroup;
+
+import com.partharoypc.adglide.AdGlide;
 
 import com.partharoypc.adglide.gdpr.GDPR;
 import com.partharoypc.adglidedemo.R;
@@ -43,6 +46,10 @@ public class MainActivity extends AppCompatActivity {
         loadGdpr();
 
         setupDashboard();
+
+        // Show a banner ad at the bottom of the dashboard
+        ViewGroup bannerContainer = findViewById(R.id.banner_container);
+        AdGlide.showBanner(this, bannerContainer);
     }
 
     private void initAppConfig() {

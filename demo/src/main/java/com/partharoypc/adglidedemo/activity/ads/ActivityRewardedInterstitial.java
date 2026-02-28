@@ -37,19 +37,22 @@ public class ActivityRewardedInterstitial extends AppCompatActivity {
         btnLoad.setVisibility(android.view.View.GONE);
 
         btnShow.setOnClickListener(v -> {
-            Toast.makeText(this, "Loading & Showing Rewarded Interstitial...", Toast.LENGTH_SHORT).show();
-            // Using the actual Builder from the library for Rewarded Interstitial
-            new com.partharoypc.adglide.format.RewardedInterstitialAd.Builder(this)
-                    .build(
-                            () -> {
-                                Toast.makeText(ActivityRewardedInterstitial.this, "Reward Granted!", Toast.LENGTH_SHORT)
-                                        .show();
-                            },
-                            () -> {
-                                // On dismiss
-                                Toast.makeText(ActivityRewardedInterstitial.this, "Ad Closed", Toast.LENGTH_SHORT)
-                                        .show();
-                            });
+            AdGlide.showRewardedInterstitial(this,
+                    () -> {
+                        Toast.makeText(ActivityRewardedInterstitial.this, "Reward Granted!", Toast.LENGTH_SHORT)
+                                .show();
+                    },
+                    () -> {
+                        // On dismiss
+                        Toast.makeText(ActivityRewardedInterstitial.this, "Ad Closed", Toast.LENGTH_SHORT)
+                                .show();
+                    },
+                    () -> {
+                        // On error
+                        Toast.makeText(ActivityRewardedInterstitial.this, "Failed to load/show",
+                                Toast.LENGTH_SHORT)
+                                .show();
+                    });
         });
     }
 }
