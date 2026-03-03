@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <dimen name="adglide_corner_radius">12dp</dimen>
+    <dimen name="adglide_corner_radius">5dp</dimen>
     <dimen name="adglide_app_lovin_banner_height">50dp</dimen>
 
     <dimen name="adglide_default_margin">12dp</dimen>
@@ -13,9 +13,9 @@
     <dimen name="adglide_ad_indicator_text_size">12sp</dimen>
 
     <dimen name="adglide_spacing_tiny">4dp</dimen>
-    <dimen name="adglide_spacing_small">8dp</dimen>
-    <dimen name="adglide_spacing_medium">12dp</dimen>
-    <dimen name="adglide_spacing_large">16dp</dimen>
+    <dimen name="adglide_spacing_small">6dp</dimen>
+    <dimen name="adglide_spacing_medium">10dp</dimen>
+    <dimen name="adglide_spacing_large">14dp</dimen>
 
     <dimen name="adglide_padding_standard">@dimen/adglide_spacing_small</dimen>
     <dimen name="adglide_margin_standard">@dimen/adglide_spacing_small</dimen>
