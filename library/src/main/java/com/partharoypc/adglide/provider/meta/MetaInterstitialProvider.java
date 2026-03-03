@@ -31,7 +31,7 @@ public class MetaInterstitialProvider implements InterstitialProvider {
             @Override
             public void onError(Ad ad, AdError adError) {
                 interstitialAd = null;
-                Log.e("AdGlide.Meta",
+                Log.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META,
                         "Interstitial Error: [" + adError.getErrorCode() + "] " + adError.getErrorMessage());
                 listener.onAdFailedToLoad(adError.getErrorMessage());
             }

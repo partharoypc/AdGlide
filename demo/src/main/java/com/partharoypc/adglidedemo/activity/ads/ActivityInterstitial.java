@@ -52,9 +52,29 @@ public class ActivityInterstitial extends AppCompatActivity {
 
     private void showInterstitialAd() {
         appendLog("Triggering Interstitial Ad Show...");
-        AdGlide.showInterstitial(this, () -> {
-            appendLog("Interstitial Ad Dismissed");
-            Log.d(TAG, "onAdDismissed");
+        AdGlide.showInterstitial(this, new com.partharoypc.adglide.util.AdGlideCallback() {
+            @Override
+            public void onAdLoaded() {
+            }
+
+            @Override
+            public void onAdFailedToLoad(String error) {
+                appendLog("Ad Failed: " + error);
+            }
+
+            @Override
+            public void onAdShowed() {
+            }
+
+            @Override
+            public void onAdDismissed() {
+                appendLog("Interstitial Ad Dismissed");
+                Log.d(TAG, "onAdDismissed");
+            }
+
+            @Override
+            public void onAdCompleted() {
+            }
         });
     }
 

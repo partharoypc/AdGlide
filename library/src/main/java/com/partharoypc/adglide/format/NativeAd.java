@@ -29,6 +29,7 @@ import com.partharoypc.adglide.AdGlideNativeStyle;
 import com.partharoypc.adglide.R;
 import com.partharoypc.adglide.provider.NativeProvider;
 import com.partharoypc.adglide.provider.NativeProviderFactory;
+import com.partharoypc.adglide.util.AdGlideCallback;
 import com.partharoypc.adglide.util.Tools;
 import com.partharoypc.adglide.util.WaterfallManager;
 
@@ -46,46 +47,18 @@ public class NativeAd {
         private final java.lang.ref.WeakReference<Activity> activityRef;
         private ViewGroup nativeAdViewContainer;
         private ViewGroup customContainer;
-
-        private boolean adStatus = false;
-        private String adNetwork = "";
-        private String backupAdNetwork = "";
-        private WaterfallManager waterfallManager;
-        private String adMobNativeId = "";
-        private String metaNativeId = "";
-        private String appLovinNativeId = "";
-        private String appLovinDiscMrecZoneId = "";
-        private String wortiseNativeId = "";
-        private String startAppId = "";
-        private String ironSourceNativeId = "";
-        private boolean darkTheme = false;
-        private boolean legacyGDPR = false;
-        private String nativeAdStyle = "large";
-        private int nativeBackgroundLight = R.color.adglide_color_native_background_light;
-        private int nativeBackgroundDark = R.color.adglide_color_native_background_dark;
-
         private NativeProvider currentProvider;
+        private String nativeAdStyle = "medium";
+        private boolean darkTheme = false;
+        private int nativeBackgroundLight = android.graphics.Color.WHITE;
+        private int nativeBackgroundDark = android.graphics.Color.BLACK;
+
+        private final com.partharoypc.adglide.util.AdLoader adLoader;
 
         public Builder(Activity activity) {
             this.activityRef = new java.lang.ref.WeakReference<>(activity);
-            this.adStatus = com.partharoypc.adglide.AdGlide.isNativeEnabled();
-            if (com.partharoypc.adglide.AdGlide.getConfig() != null) {
-                com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-                this.adNetwork = config.getPrimaryNetwork();
-                if (!config.getBackupNetworks().isEmpty()) {
-                    this.backupAdNetwork = config.getBackupNetworks().get(0);
-                    this.waterfallManager = new com.partharoypc.adglide.util.WaterfallManager(
-                            config.getBackupNetworks().toArray(new String[0]));
-                }
-                this.adMobNativeId = config.getAdMobNativeId();
-                this.metaNativeId = config.getMetaNativeId();
-                this.appLovinNativeId = config.getAppLovinNativeId();
-                this.appLovinDiscMrecZoneId = config.getAppLovinDiscNativeZoneId();
-                this.ironSourceNativeId = config.getIronSourceNativeId();
-                this.wortiseNativeId = config.getWortiseNativeId();
-                this.startAppId = config.getStartAppId();
-                this.legacyGDPR = config.isLegacyGDPR();
-            }
+            this.adLoader = new com.partharoypc.adglide.util.AdLoader(activity,
+                    com.partharoypc.adglide.util.AdFormat.NATIVE);
         }
 
         @NonNull
@@ -95,7 +68,13 @@ public class NativeAd {
 
         @NonNull
         public Builder load() {
-            loadNativeAd();
+            loadNativeAd(null);
+            return this;
+        }
+
+        @NonNull
+        public Builder load(AdGlideCallback callback) {
+            loadNativeAd(callback);
             return this;
         }
 
@@ -117,88 +96,75 @@ public class NativeAd {
             return this;
         }
 
+        // --- Deprecated chained methods. Keeping for compatibility ---
+
         @NonNull
         public Builder status(boolean adStatus) {
-            this.adStatus = adStatus;
             return this;
         }
 
         @NonNull
         public Builder network(@NonNull String adNetwork) {
-            this.adNetwork = AdGlideNetwork.fromString(adNetwork).getValue();
             return this;
         }
 
         @NonNull
         public Builder network(AdGlideNetwork network) {
-            return network(network.getValue());
+            return this;
         }
 
         @Nullable
         public Builder backup(@Nullable String backupAdNetwork) {
-            this.backupAdNetwork = AdGlideNetwork.fromString(backupAdNetwork).getValue();
-            this.waterfallManager = new WaterfallManager(this.backupAdNetwork);
             return this;
         }
 
         @Nullable
         public Builder backup(AdGlideNetwork backupAdNetwork) {
-            return backup(backupAdNetwork.getValue());
+            return this;
         }
 
         @Nullable
         public Builder backups(String... backupAdNetworks) {
-            this.waterfallManager = new WaterfallManager(backupAdNetworks);
-            if (backupAdNetworks.length > 0) {
-                this.backupAdNetwork = AdGlideNetwork.fromString(backupAdNetworks[0]).getValue();
-            }
             return this;
         }
 
         @Nullable
         public Builder backups(AdGlideNetwork... backupAdNetworks) {
-            return backups(AdGlideNetwork.toStringArray(backupAdNetworks));
-        }
-
-        @NonNull
-        public Builder adMobId(@NonNull String adMobNativeId) {
-            this.adMobNativeId = adMobNativeId;
             return this;
         }
 
         @NonNull
-        public Builder metaId(@NonNull String metaNativeId) {
-            this.metaNativeId = metaNativeId;
+        public Builder adMobId(@NonNull String id) {
             return this;
         }
 
         @NonNull
-        public Builder appLovinId(@NonNull String appLovinNativeId) {
-            this.appLovinNativeId = appLovinNativeId;
+        public Builder metaId(@NonNull String id) {
             return this;
         }
 
         @NonNull
-        public Builder zoneId(@NonNull String appLovinDiscMrecZoneId) {
-            this.appLovinDiscMrecZoneId = appLovinDiscMrecZoneId;
+        public Builder appLovinId(@NonNull String id) {
             return this;
         }
 
         @NonNull
-        public Builder wortiseId(@NonNull String wortiseNativeId) {
-            this.wortiseNativeId = wortiseNativeId;
+        public Builder zoneId(@NonNull String id) {
             return this;
         }
 
         @NonNull
-        public Builder startAppId(@NonNull String startAppId) {
-            this.startAppId = startAppId;
+        public Builder wortiseId(@NonNull String id) {
             return this;
         }
 
         @NonNull
-        public Builder ironSourceId(@NonNull String ironSourcePlacementName) {
-            this.ironSourceNativeId = ironSourcePlacementName;
+        public Builder startAppId(@NonNull String id) {
+            return this;
+        }
+
+        @NonNull
+        public Builder ironSourceId(@NonNull String id) {
             return this;
         }
 
@@ -210,7 +176,6 @@ public class NativeAd {
 
         @NonNull
         public Builder legacyGDPR(boolean legacyGDPR) {
-            this.legacyGDPR = legacyGDPR;
             return this;
         }
 
@@ -238,83 +203,68 @@ public class NativeAd {
             return this;
         }
 
-        public void loadNativeAd() {
-            loadNativeAdMain(false);
+        public void loadNativeAd(AdGlideCallback callback) {
+            loadNativeAdMain(false, callback);
         }
 
-        public void loadBackupNativeAd() {
-            loadNativeAdMain(true);
+        public void loadBackupNativeAd(AdGlideCallback callback) {
+            loadNativeAdMain(true, callback);
         }
 
-        private void loadNativeAdMain(boolean isBackup) {
-            try {
-                if (!com.partharoypc.adglide.AdGlide.isNativeEnabled() || !adStatus) {
-                    Log.d(TAG, "Native Ad is disabled globally or locally.");
-                    return;
-                }
-
-                Activity activity = activityRef.get();
-                if (activity == null) {
-                    Log.e(TAG, "Activity is null. Cannot load Native.");
-                    return;
-                }
-
-                if (!Tools.isNetworkAvailable(activity)) {
-                    Log.e(TAG, "Internet connection not available.");
-                    return;
-                }
-
-                String network;
-                if (isBackup) {
-                    if (waterfallManager == null) {
-                        if (!backupAdNetwork.isEmpty()) {
-                            waterfallManager = new WaterfallManager(backupAdNetwork);
-                        } else {
-                            return;
-                        }
+        private void loadNativeAdMain(boolean isBackup, AdGlideCallback callback) {
+            if (adLoader == null)
+                return;
+            if (!isBackup) {
+                adLoader.startLoading(new com.partharoypc.adglide.util.AdLoader.AdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(String network) {
+                        loadAdFromNetwork(network, callback);
                     }
-                    network = waterfallManager.getNext();
-                    if (network == null) {
-                        Log.d(TAG, "All backup native ads failed to load");
-                        return;
+
+                    @Override
+                    public void onAdFailed(String error) {
+                        Log.d(TAG, "Native load failed: " + error);
+                        if (callback != null)
+                            callback.onAdFailedToLoad(error);
                     }
-                } else {
-                    network = adNetwork;
-                    if (waterfallManager != null)
-                        waterfallManager.reset();
-                }
+                });
+            } else {
+                adLoader.loadNext(new com.partharoypc.adglide.util.AdLoader.AdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(String network) {
+                        loadAdFromNetwork(network, callback);
+                    }
 
-                if (network.equals(NONE)) {
-                    loadBackupNativeAd();
-                    return;
-                }
-
-                loadAdFromNetwork(network);
-
-            } catch (Exception e) {
-                Log.e(TAG, "Error in loadNativeAdMain: " + e.getMessage());
-                if (!isBackup)
-                    loadBackupNativeAd();
+                    @Override
+                    public void onAdFailed(String error) {
+                        Log.d(TAG, "Native backup load failed: " + error);
+                        if (callback != null)
+                            callback.onAdFailedToLoad(error);
+                    }
+                });
             }
         }
 
-        private void loadAdFromNetwork(String network) {
+        private void loadAdFromNetwork(String network, AdGlideCallback callback) {
             destroyNativeAd();
             NativeProvider provider = NativeProviderFactory.getProvider(network);
             if (provider == null) {
                 Log.w(TAG, "No provider available for " + network + ". Loading backup.");
-                loadBackupNativeAd();
+                loadBackupNativeAd(callback);
                 return;
             }
 
             this.currentProvider = provider;
-            String adUnitId = getAdUnitIdForNetwork(this, network);
+            String adUnitId = getAdUnitIdForNetwork(network);
             Log.d(TAG, "Loading [" + network.toUpperCase(java.util.Locale.ROOT) + "] Native Ad with ID: " + adUnitId);
             if (adUnitId == null || adUnitId.trim().isEmpty() || (adUnitId.equals("0") && !network.equals(STARTAPP))) {
                 Log.d(TAG, "Ad unit ID for " + network + " is invalid. Trying backup.");
-                loadBackupNativeAd();
+                loadBackupNativeAd(callback);
                 return;
             }
+
+            final boolean finalLegacyGDPR = com.partharoypc.adglide.AdGlide.getConfig() != null &&
+                    com.partharoypc.adglide.AdGlide.getConfig().isLegacyGDPR();
 
             NativeProvider.NativeConfig config = new NativeProvider.NativeConfig() {
                 @Override
@@ -329,7 +279,7 @@ public class NativeAd {
 
                 @Override
                 public boolean isLegacyGDPR() {
-                    return legacyGDPR;
+                    return finalLegacyGDPR;
                 }
             };
 
@@ -342,31 +292,38 @@ public class NativeAd {
             provider.loadNativeAd(activity, adUnitId, config, new NativeProvider.NativeListener() {
                 @Override
                 public void onAdLoaded(View adView) {
-                    displayAdView(adView);
+                    if (callback != null)
+                        callback.onAdLoaded();
+                    displayAdView(adView, callback);
                 }
 
                 @Override
                 public void onAdFailedToLoad(String error) {
                     Log.e(TAG, network + " Native failed: " + error);
-                    loadBackupNativeAd();
+                    if (callback != null)
+                        callback.onAdFailedToLoad(error);
+                    loadBackupNativeAd(callback);
                 }
             });
         }
 
-        private static String getAdUnitIdForNetwork(Builder builder, String network) {
+        private static String getAdUnitIdForNetwork(String network) {
+            AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+            if (config == null)
+                return "0";
             return switch (network) {
-                case ADMOB, META_BIDDING_ADMOB -> builder.adMobNativeId;
-                case META -> builder.metaNativeId;
-                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> builder.appLovinNativeId;
-                case WORTISE -> builder.wortiseNativeId;
-                case STARTAPP -> !builder.startAppId.isEmpty() ? builder.startAppId : "startapp_id";
-                case IRONSOURCE, META_BIDDING_IRONSOURCE -> builder.ironSourceNativeId;
+                case ADMOB, META_BIDDING_ADMOB -> config.getAdMobNativeId();
+                case META -> config.getMetaNativeId();
+                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> config.getAppLovinNativeId();
+                case WORTISE -> config.getWortiseNativeId();
+                case STARTAPP -> !config.getStartAppId().isEmpty() ? config.getStartAppId() : "startapp_id";
+                case IRONSOURCE, META_BIDDING_IRONSOURCE -> config.getIronSourceNativeId();
                 case UNITY -> null; // Unity does not support Native Ads
                 default -> "0";
             };
         }
 
-        private void displayAdView(View adView) {
+        private void displayAdView(View adView, AdGlideCallback callback) {
             Activity activity = activityRef.get();
             if (activity == null)
                 return;
@@ -381,6 +338,8 @@ public class NativeAd {
                 nativeAdViewContainer.removeAllViews();
                 nativeAdViewContainer.addView(adView);
                 animateIn(nativeAdViewContainer);
+                if (callback != null)
+                    callback.onAdShowed();
             }
         }
 
@@ -400,7 +359,7 @@ public class NativeAd {
             if (nativeAdViewContainer != null) {
                 nativeAdViewContainer.setPadding(left, top, right, bottom);
                 int colorRes = darkTheme ? nativeBackgroundDark : nativeBackgroundLight;
-                nativeAdViewContainer.setBackgroundColor(ContextCompat.getColor(activity, colorRes));
+                nativeAdViewContainer.setBackgroundColor(colorRes);
             }
         }
 

@@ -13,13 +13,14 @@ import com.google.ads.mediation.admob.AdMobAdapter;
 import android.os.Bundle;
 import android.util.Log;
 import androidx.annotation.NonNull;
+import com.partharoypc.adglide.util.Tools;
 
 public class AdMobBannerProvider implements BannerProvider {
     private AdView adView;
 
     @Override
     public void loadBanner(Activity activity, String adUnitId, BannerConfig config, BannerListener listener) {
-        if (!com.partharoypc.adglide.util.AdMobRateLimiter.isRequestAllowed(adUnitId)) {
+        if (!com.partharoypc.adglide.util.AdMobHelper.isRequestAllowed(adUnitId)) {
             listener.onAdFailedToLoad("AdMob rate limit hit");
             return;
         }
@@ -38,15 +39,9 @@ public class AdMobBannerProvider implements BannerProvider {
         adView.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
-                com.partharoypc.adglide.util.AdMobRateLimiter.resetCooldown(adUnitId);
+                com.partharoypc.adglide.util.AdMobHelper.resetCooldown(adUnitId);
                 adView.setOnPaidEventListener(adValue -> {
-                    com.partharoypc.adglide.util.OnPaidEventListener paidListener = com.partharoypc.adglide.AdGlide
-                            .getConfig() != null ? com.partharoypc.adglide.AdGlide.getConfig().getOnPaidEventListener()
-                                    : null;
-                    if (paidListener != null) {
-                        paidListener.onPaidEvent(adValue.getValueMicros(), adValue.getCurrencyCode(),
-                                String.valueOf(adValue.getPrecisionType()), "AdMob Banner", adUnitId);
-                    }
+                    com.partharoypc.adglide.util.AdMobHelper.handlePaidEvent(adValue, "Banner", adUnitId);
                 });
                 listener.onAdLoaded(adView);
             }
@@ -54,7 +49,7 @@ public class AdMobBannerProvider implements BannerProvider {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError adError) {
                 if (adError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
-                    com.partharoypc.adglide.util.AdMobRateLimiter.recordFailure(adUnitId);
+                    com.partharoypc.adglide.util.AdMobHelper.recordFailure(adUnitId);
                 }
                 listener.onAdFailedToLoad(adError.getMessage());
             }
@@ -78,21 +73,7 @@ public class AdMobBannerProvider implements BannerProvider {
         if (!config.isAdaptive()) {
             return AdSize.BANNER;
         }
-        // Simple implementation of adaptive banner for provider
-        // Original logic is in Tools.java which we will refactor later
-        int adWidth;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-            android.view.WindowMetrics windowMetrics = activity.getWindowManager().getCurrentWindowMetrics();
-            float widthPixels = windowMetrics.getBounds().width();
-            float density = activity.getResources().getDisplayMetrics().density;
-            adWidth = (int) (widthPixels / density);
-        } else {
-            android.util.DisplayMetrics outMetrics = new android.util.DisplayMetrics();
-            activity.getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
-            float widthPixels = outMetrics.widthPixels;
-            float density = outMetrics.density;
-            adWidth = (int) (widthPixels / density);
-        }
-        return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(activity, adWidth);
+        return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(activity,
+                Tools.getAdaptiveBannerSize(activity));
     }
 }

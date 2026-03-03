@@ -21,7 +21,7 @@ public class UnityBannerProvider implements BannerProvider {
         bannerView.setListener(new BannerView.IListener() {
             @Override
             public void onBannerLoaded(BannerView bannerAdView) {
-                Log.d("AdGlide.Unity", "Banner Ad loaded: " + adUnitId);
+                Log.d(com.partharoypc.adglide.util.Constant.AD_NETWORK_UNITY, "Banner Ad loaded: " + adUnitId);
                 listener.onAdLoaded(bannerAdView);
             }
 
@@ -31,7 +31,7 @@ public class UnityBannerProvider implements BannerProvider {
 
             @Override
             public void onBannerFailedToLoad(BannerView bannerAdView, BannerErrorInfo errorInfo) {
-                Log.e("AdGlide.Unity",
+                Log.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_UNITY,
                         "Banner Ad failed to load: [" + errorInfo.errorCode + "] " + errorInfo.errorMessage);
                 listener.onAdFailedToLoad(errorInfo.errorMessage);
             }

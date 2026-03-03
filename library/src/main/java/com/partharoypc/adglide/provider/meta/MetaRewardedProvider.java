@@ -31,7 +31,7 @@ public class MetaRewardedProvider implements RewardedProvider {
                     @Override
                     public void onError(Ad ad, AdError adError) {
                         isAvailable = false;
-                        Log.e("AdGlide.Meta",
+                        Log.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META,
                                 "Rewarded Error: [" + adError.getErrorCode() + "] " + adError.getErrorMessage());
                         listener.onAdFailedToLoad(adError.getErrorMessage());
                     }

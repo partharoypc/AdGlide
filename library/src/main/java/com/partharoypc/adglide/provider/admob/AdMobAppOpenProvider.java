@@ -27,7 +27,7 @@ public class AdMobAppOpenProvider implements AppOpenProvider {
             return;
         }
 
-        if (!com.partharoypc.adglide.util.AdMobRateLimiter.isRequestAllowed(adUnitId)) {
+        if (!com.partharoypc.adglide.util.AdMobHelper.isRequestAllowed(adUnitId)) {
             listener.onAdFailedToLoad("AdMob rate limit hit");
             return;
         }
@@ -37,15 +37,9 @@ public class AdMobAppOpenProvider implements AppOpenProvider {
         AppOpenAd.load(context, adUnitId, request, new AppOpenAd.AppOpenAdLoadCallback() {
             @Override
             public void onAdLoaded(@NonNull AppOpenAd ad) {
-                com.partharoypc.adglide.util.AdMobRateLimiter.resetCooldown(adUnitId);
+                com.partharoypc.adglide.util.AdMobHelper.resetCooldown(adUnitId);
                 ad.setOnPaidEventListener(adValue -> {
-                    com.partharoypc.adglide.util.OnPaidEventListener paidListener = com.partharoypc.adglide.AdGlide
-                            .getConfig() != null ? com.partharoypc.adglide.AdGlide.getConfig().getOnPaidEventListener()
-                                    : null;
-                    if (paidListener != null) {
-                        paidListener.onPaidEvent(adValue.getValueMicros(), adValue.getCurrencyCode(),
-                                String.valueOf(adValue.getPrecisionType()), "AdMob AppOpen", adUnitId);
-                    }
+                    com.partharoypc.adglide.util.AdMobHelper.handlePaidEvent(adValue, "AppOpen", adUnitId);
                 });
                 appOpenAd = ad;
                 isLoadingAd = false;
@@ -56,7 +50,7 @@ public class AdMobAppOpenProvider implements AppOpenProvider {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                 if (loadAdError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
-                    com.partharoypc.adglide.util.AdMobRateLimiter.recordFailure(adUnitId);
+                    com.partharoypc.adglide.util.AdMobHelper.recordFailure(adUnitId);
                 }
                 isLoadingAd = false;
                 listener.onAdFailedToLoad(loadAdError.getMessage());

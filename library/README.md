@@ -1,79 +1,78 @@
 # AdGlide Library Module 🚀
-### The Core Engine for High-Performance Ad Mediation
+### *The Industrial-Grade Core Engine for Android Ad Mediation*
 
-This module contains the professional-grade source code for the **AdGlide SDK**. It is engineered for stability, maximum fill rates, and zero-latency failovers.
-
----
-
-## 🏗️ Technical Architecture
-### Sequential Waterfall Manager
-The `WaterfallManager` is the brain of AdGlide. It ensures 100% fill rates by rotating through backup networks (Meta, StartApp, Unity, IronSource, AppLovin, Wortise) only if the previous network fails to fill.
-
-### Intelligent Rate Limiting
-Built-in defensive logic prevents "AdMob Error 3" request loops by applying exponential backoff to failing ad units, protecting your account health.
+This module contains the high-performance source code for the **AdGlide SDK**. It is engineered for stability, zero-latency failovers, and maximum revenue optimization.
 
 ---
 
-## 🎨 Professional Native Templates
-AdGlide provides premium XML templates that you can include directly:
-- `adglide_view_native_ad_small` — Compact radio/list style.
-- `adglide_view_native_ad_medium` — Standard banner-replacement style.
-- `adglide_view_native_ad_news` — Content-blending news style.
-- `adglide_view_native_ad_video_large` — High-impact immersive video style.
+## 🏗️ 1. Technical Architecture
+
+### 🌊 Sequential Waterfall Engine
+The `WaterfallManager` is the orchestrator of AdGlide. It ensures **100% fill rates** by intelligently rotating through backup networks (Meta, AppLovin, StartApp, etc.) only when the primary provider fails to fill a request.
+
+### 🛡️ Intelligent Rate Limiting
+AdGlide includes built-in defensive logic to prevent account flags (like "AdMob Error 3"). The SDK applies exponential backoff to failing ad units in real-time, protecting your developer account health without sacrificing user experience.
 
 ---
 
-## 📦 SDK Module Structure
-```
-com.partharoypc.adglide
-├── AdGlide.java                # The Facade: 1-line static methods
-├── AdGlideConfig.java          # Configuration: Builder pattern
-├── format/
-│   ├── AppOpenAd.java          # Automated Lifecycle Management
-│   ├── BannerAd.java           # Adaptive & Collapsible rendering
-│   ├── InterstitialAd.java     # Managed Frequency Capping
-│   ├── RewardedAd.java         # Safe Reward Disbursement
-│   └── NativeAd.java           # Multi-Type Template Engine
-├── gdpr/
-│   └── GDPR.java               # Google UMP (EU Consent)
-└── util/
-    ├── WaterfallManager.java   # Core rotation logic
-    ├── RemoteConfig.java       # Dynamic Orchestration
-    └── Tools.java              # Security & Base64 decoding
-```
+## 🎨 2. Premium Native Templates
+
+AdGlide eliminates the need for complex custom XML for most projects by providing 4 distinct, high-converting templates:
+
+| Layout | Descriptor | Ideal Use Case |
+| :--- | :--- | :--- |
+| `small` | Compact Radio | List items / Small footers |
+| `medium` | Standard Box | News feeds / Card views |
+| `news` | Content Blend | Article inline placements |
+| `video` | Immersive Media | High-CPM video rewards |
+
+> [!TIP]
+> Use the `.style()` API in the `NativeAd.Builder` to switch between these templates effortlessly.
 
 ---
 
-## 🛠 Advanced Developer Usage
+## 📦 3. Module Structure
 
-### Custom Native Container
+AdGlide follows a strict **Clean Architecture** principle to ensure zero memory leaks and thread-safe operations:
+
+- **`com.partharoypc.adglide`**: Main entry Facade and Global Configuration.
+- **`format/`**: Lifecycle-aware ad type implementations (AppOpen, Banner, etc.).
+- **`gdpr/`**: Modern UMP consent logic for European privacy compliance.
+- **`util/`**: The core "brain" including the Waterfall engine, Rate Limiter, and Performance Loggers.
+
+---
+
+## 🛠 4. Advanced Development
+
+### 🎯 Custom Native Integration
 ```java
 new NativeAd.Builder(activity)
-    .style(AdGlideNativeStyle.MEDIUM)
-    .container(myCustomLayout)
-    .backgroundColor(Color.WHITE)
+    .style(AdGlideNativeStyle.MEDIUM) // Choose baseline layout
+    .container(myLayout)              // Bind to your UI
+    .backgroundColor(Color.WHITE)      // Optional styling
     .load();
 ```
 
-### Manual App Open Trigger
+### 📱 Manual App Open Logic
 ```java
 new AppOpenAd.Builder(activity)
     .adMobId("YOUR_ID")
     .load(new OnShowAdCompleteListener() {
         @Override
         public void onShowAdComplete() {
-            // Proceed to Main
+            // Success: Proceed to main activity
         }
     });
 ```
 
 ---
 
-## 📋 Module Specifications
-- **Project Structure**: Android Library (`.aar`)
-- **Min SDK**: `23` (Android 6.0)
-- **Target SDK**: `35` (Android 15)
-- **Dependencies**: Modular & Reflection-aware (Optional dependencies)
+## 📋 5. Specifications
+- **Format**: Android Library (`.aar`)
+- **Compatibility**: Android 6.0+ (API 23+)
+- **Targeting**: Android 15 (API 35)
+- **Performance**: Optimized for zero impact on app startup time.
 
 ---
-*Optimized for Revenue. Built for Developers.*
+*Built for Scale. Optimized for Speed. Perfected for Developers.*
+© 2026 AdGlide. All rights reserved.

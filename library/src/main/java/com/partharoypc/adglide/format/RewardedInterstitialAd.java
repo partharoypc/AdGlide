@@ -17,9 +17,7 @@ import androidx.annotation.Nullable;
 import com.partharoypc.adglide.AdGlideNetwork;
 import com.partharoypc.adglide.provider.RewardedProvider;
 import com.partharoypc.adglide.provider.RewardedProviderFactory;
-import com.partharoypc.adglide.util.OnRewardedAdCompleteListener;
-import com.partharoypc.adglide.util.OnRewardedAdDismissedListener;
-import com.partharoypc.adglide.util.OnRewardedAdErrorListener;
+import com.partharoypc.adglide.util.AdGlideCallback;
 import com.partharoypc.adglide.util.Tools;
 import com.partharoypc.adglide.util.WaterfallManager;
 
@@ -33,48 +31,22 @@ import java.util.Map;
 public class RewardedInterstitialAd {
 
     public static class Builder {
-        private static final String TAG = "AdGlide.RewardedInt";
+        private static final String TAG = "AdGlide";
+        private final com.partharoypc.adglide.util.AdLoader adLoader;
         private final Activity activity;
-
-        private boolean adStatus = true;
-        private String adNetwork = "";
-        private String backupAdNetwork = "";
-        private WaterfallManager waterfallManager;
-        private String adMobRewardedIntId = "";
-        private String appLovinRewardedIntId = "";
-        private String wortiseRewardedIntId = "";
-        private boolean legacyGDPR = false;
-
-        private RewardedProvider currentProvider;
-
-        // Internal flag to show the ad immediately when loaded (used for on-the-fly
-        // calls)
         private boolean showOnLoad = false;
-        private OnRewardedAdCompleteListener onCompleteListener;
-        private OnRewardedAdDismissedListener onDismissListener;
-        private OnRewardedAdErrorListener onErrorListener;
+        private AdGlideCallback callback;
+        private RewardedProvider currentProvider;
 
         public Builder(Activity activity) {
             this.activity = activity;
-            this.adStatus = com.partharoypc.adglide.AdGlide.isRewardedInterstitialEnabled();
-            if (com.partharoypc.adglide.AdGlide.getConfig() != null) {
-                com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-                this.adNetwork = config.getPrimaryNetwork();
-                if (!config.getBackupNetworks().isEmpty()) {
-                    this.backupAdNetwork = config.getBackupNetworks().get(0);
-                    this.waterfallManager = new com.partharoypc.adglide.util.WaterfallManager(
-                            config.getBackupNetworks().toArray(new String[0]));
-                }
-                this.adMobRewardedIntId = config.getAdMobRewardedIntId();
-                this.appLovinRewardedIntId = config.getAppLovinRewardedIntId();
-                this.wortiseRewardedIntId = config.getWortiseRewardedIntId();
-                this.legacyGDPR = config.isLegacyGDPR();
-            }
+            this.adLoader = new com.partharoypc.adglide.util.AdLoader(activity,
+                    com.partharoypc.adglide.util.AdFormat.REWARDED_INTERSTITIAL);
         }
 
         @NonNull
-        public Builder build(OnRewardedAdCompleteListener onComplete, OnRewardedAdDismissedListener onDismiss) {
-            loadRewardedInterstitialAd(onComplete, onDismiss);
+        public Builder build(AdGlideCallback callback) {
+            loadRewardedInterstitialAd(callback);
             return this;
         }
 
@@ -83,157 +55,123 @@ public class RewardedInterstitialAd {
          * immediately.
          */
         @NonNull
-        public Builder loadAndShow(Activity displayActivity,
-                OnRewardedAdCompleteListener onComplete,
-                OnRewardedAdDismissedListener onDismiss,
-                OnRewardedAdErrorListener onError) {
+        public Builder loadAndShow(Activity displayActivity, AdGlideCallback callback) {
             this.showOnLoad = true;
-            this.onCompleteListener = onComplete;
-            this.onDismissListener = onDismiss;
-            this.onErrorListener = onError;
-            loadRewardedInterstitialAd(onComplete, onDismiss);
+            this.callback = callback;
+            loadRewardedInterstitialAd(callback);
             return this;
         }
 
         @NonNull
         public Builder status(boolean adStatus) {
-            this.adStatus = adStatus;
             return this;
         }
 
         @NonNull
         public Builder network(@NonNull String adNetwork) {
-            this.adNetwork = adNetwork;
             return this;
         }
 
         @NonNull
         public Builder network(AdGlideNetwork network) {
-            return network(network.getValue());
+            return this;
         }
 
         @Nullable
         public Builder backup(@Nullable String backupAdNetwork) {
-            this.backupAdNetwork = backupAdNetwork != null ? backupAdNetwork : "";
-            this.waterfallManager = new WaterfallManager(this.backupAdNetwork);
             return this;
         }
 
         @Nullable
         public Builder backup(AdGlideNetwork backupAdNetwork) {
-            return backup(backupAdNetwork.getValue());
+            return this;
         }
 
         @Nullable
         public Builder backups(String... backupAdNetworks) {
-            this.waterfallManager = new WaterfallManager(backupAdNetworks);
-            if (backupAdNetworks != null && backupAdNetworks.length > 0) {
-                this.backupAdNetwork = backupAdNetworks[0];
-            }
             return this;
         }
 
         @Nullable
         public Builder backups(AdGlideNetwork... backupAdNetworks) {
-            return backups(AdGlideNetwork.toStringArray(backupAdNetworks));
+            return this;
         }
 
         @NonNull
         public Builder adMobId(@NonNull String id) {
-            this.adMobRewardedIntId = id;
             return this;
         }
 
         @NonNull
         public Builder legacyGDPR(boolean legacyGDPR) {
-            this.legacyGDPR = legacyGDPR;
             return this;
         }
 
-        public void loadRewardedInterstitialAd(OnRewardedAdCompleteListener onComplete,
-                OnRewardedAdDismissedListener onDismiss) {
-            loadRewardedAdMain(false, onComplete, onDismiss);
+        public void loadRewardedInterstitialAd(AdGlideCallback callback) {
+            loadRewardedAdMain(false, callback);
         }
 
-        public void loadRewardedBackupAd(OnRewardedAdCompleteListener onComplete,
-                OnRewardedAdDismissedListener onDismiss) {
-            loadRewardedAdMain(true, onComplete, onDismiss);
+        public void loadRewardedBackupAd(AdGlideCallback callback) {
+            loadRewardedAdMain(true, callback);
         }
 
-        private void loadRewardedAdMain(boolean isBackup, OnRewardedAdCompleteListener onComplete,
-                OnRewardedAdDismissedListener onDismiss) {
-            try {
-                if (!com.partharoypc.adglide.AdGlide.isRewardedInterstitialEnabled() || !adStatus) {
-                    Log.d(TAG, "Rewarded Interstitial Ad is disabled globally or locally.");
-                    if (showOnLoad && onDismiss != null) {
-                        showOnLoad = false;
-                        onDismiss.onRewardedAdDismissed();
+        private void loadRewardedAdMain(boolean isBackup, AdGlideCallback callback) {
+            if (adLoader == null)
+                return;
+            if (!isBackup) {
+                adLoader.startLoading(new com.partharoypc.adglide.util.AdLoader.AdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(String network) {
+                        loadAdFromNetwork(network, callback);
                     }
-                    return;
-                }
 
-                if (!Tools.isNetworkAvailable(activity)) {
-                    Log.e(TAG, "Internet connection not available.");
-                    if (showOnLoad && onDismiss != null) {
-                        showOnLoad = false;
-                        onDismiss.onRewardedAdDismissed();
-                    }
-                    return;
-                }
-
-                String network;
-                if (isBackup) {
-                    if (waterfallManager == null) {
-                        if (!backupAdNetwork.isEmpty()) {
-                            waterfallManager = new WaterfallManager(backupAdNetwork);
-                        } else {
-                            if (showOnLoad && onDismiss != null) {
-                                showOnLoad = false;
-                                onDismiss.onRewardedAdDismissed();
-                            }
-                            return;
+                    @Override
+                    public void onAdFailed(String error) {
+                        Log.d(TAG, "Rewarded interstitial load failed: " + error);
+                        if (callback != null) {
+                            callback.onAdFailedToLoad(error);
                         }
-                    }
-                    network = waterfallManager.getNext();
-                    if (network == null) {
-                        Log.d(TAG, "All backup rewarded interstitial ads failed to load");
-                        if (showOnLoad && onDismiss != null) {
+                        if (showOnLoad && callback != null) {
                             showOnLoad = false;
-                            onDismiss.onRewardedAdDismissed();
+                            callback.onAdDismissed();
                         }
-                        return;
                     }
-                } else {
-                    network = adNetwork;
-                    if (waterfallManager != null)
-                        waterfallManager.reset();
-                }
+                });
+            } else {
+                adLoader.loadNext(new com.partharoypc.adglide.util.AdLoader.AdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(String network) {
+                        loadAdFromNetwork(network, callback);
+                    }
 
-                if (network.equals(NONE)) {
-                    loadRewardedBackupAd(onComplete, onDismiss);
-                    return;
-                }
-
-                loadAdFromNetwork(network, onComplete, onDismiss);
-
-            } catch (Exception e) {
-                Log.e(TAG, "Error in loadRewardedAdMain: " + e.getMessage());
-                if (!isBackup)
-                    loadRewardedBackupAd(onComplete, onDismiss);
+                    @Override
+                    public void onAdFailed(String error) {
+                        Log.d(TAG, "Rewarded interstitial backup load failed: " + error);
+                        if (callback != null) {
+                            callback.onAdFailedToLoad(error);
+                        }
+                        if (showOnLoad && callback != null) {
+                            showOnLoad = false;
+                            callback.onAdDismissed();
+                        }
+                    }
+                });
             }
         }
 
-        private void loadAdFromNetwork(String network, OnRewardedAdCompleteListener onComplete,
-                OnRewardedAdDismissedListener onDismiss) {
+        private void loadAdFromNetwork(String network, AdGlideCallback callback) {
             RewardedProvider provider = RewardedProviderFactory.getProvider(network);
             if (provider == null) {
                 Log.w(TAG, "No provider available for " + network + ". Loading backup.");
-                loadRewardedBackupAd(onComplete, onDismiss);
+                loadRewardedBackupAd(callback);
                 return;
             }
 
             this.currentProvider = provider;
-            String adUnitId = getAdUnitIdForNetwork(this, network);
+            String adUnitId = getAdUnitIdForNetwork(network);
+
+            final boolean legacyGDPR = com.partharoypc.adglide.AdGlide.getConfig() != null &&
+                    com.partharoypc.adglide.AdGlide.getConfig().isLegacyGDPR();
 
             RewardedProvider.RewardedConfig config = new RewardedProvider.RewardedConfig() {
                 @Override
@@ -251,41 +189,41 @@ public class RewardedInterstitialAd {
                 @Override
                 public void onAdLoaded() {
                     Log.d(TAG, network + " Rewarded interstitial loaded");
-
+                    if (callback != null) {
+                        callback.onAdLoaded();
+                    }
                     if (showOnLoad) {
                         showOnLoad = false;
-                        showRewardedInterstitialAd(activity, onCompleteListener, onDismissListener, onErrorListener);
+                        showRewardedInterstitialAd(activity, callback);
                     }
                 }
 
                 @Override
                 public void onAdFailedToLoad(String error) {
                     Log.e(TAG, network + " Rewarded interstitial failed: " + error);
-                    loadRewardedBackupAd(onComplete, onDismiss);
+                    loadRewardedBackupAd(callback);
                 }
 
                 @Override
                 public void onAdDismissed() {
-                    if (onDismiss != null)
-                        onDismiss.onRewardedAdDismissed();
-                    loadRewardedInterstitialAd(onComplete, onDismiss);
+                    if (callback != null)
+                        callback.onAdDismissed();
+                    loadRewardedInterstitialAd(callback);
                 }
 
                 @Override
                 public void onAdCompleted() {
-                    if (onComplete != null)
-                        onComplete.onRewardedAdComplete();
+                    if (callback != null)
+                        callback.onAdCompleted();
                 }
             });
         }
 
-        public void showRewardedInterstitialAd(OnRewardedAdCompleteListener onComplete,
-                OnRewardedAdDismissedListener onDismiss, OnRewardedAdErrorListener onError) {
-            showRewardedInterstitialAd(activity, onComplete, onDismiss, onError);
+        public void showRewardedInterstitialAd(AdGlideCallback callback) {
+            showRewardedInterstitialAd(activity, callback);
         }
 
-        public void showRewardedInterstitialAd(Activity displayActivity, OnRewardedAdCompleteListener onComplete,
-                OnRewardedAdDismissedListener onDismiss, OnRewardedAdErrorListener onError) {
+        public void showRewardedInterstitialAd(Activity displayActivity, AdGlideCallback callback) {
             if (currentProvider != null && currentProvider.isAdAvailable()) {
                 currentProvider.showRewardedAd(displayActivity != null ? displayActivity : activity,
                         new RewardedProvider.RewardedListener() {
@@ -295,34 +233,37 @@ public class RewardedInterstitialAd {
 
                             @Override
                             public void onAdFailedToLoad(String error) {
-                                if (onError != null)
-                                    onError.onRewardedAdError();
+                                if (callback != null)
+                                    callback.onAdFailedToLoad(error);
                             }
 
                             @Override
                             public void onAdDismissed() {
-                                if (onDismiss != null)
-                                    onDismiss.onRewardedAdDismissed();
+                                if (callback != null)
+                                    callback.onAdDismissed();
                             }
 
                             @Override
                             public void onAdCompleted() {
-                                if (onComplete != null)
-                                    onComplete.onRewardedAdComplete();
+                                if (callback != null)
+                                    callback.onAdCompleted();
                             }
                         });
             } else {
                 Log.w(TAG, "No ad available to show.");
-                if (onError != null)
-                    onError.onRewardedAdError();
+                if (callback != null)
+                    callback.onAdFailedToLoad("No ad available");
             }
         }
 
-        private static String getAdUnitIdForNetwork(Builder builder, String network) {
+        private static String getAdUnitIdForNetwork(String network) {
+            com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+            if (config == null)
+                return "0";
             return switch (network) {
-                case ADMOB, META_BIDDING_ADMOB -> builder.adMobRewardedIntId;
-                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> builder.appLovinRewardedIntId;
-                case WORTISE -> builder.wortiseRewardedIntId;
+                case ADMOB, META_BIDDING_ADMOB -> config.getAdMobRewardedIntId();
+                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> config.getAppLovinRewardedIntId();
+                case WORTISE -> config.getWortiseRewardedIntId();
                 default -> "0";
             };
         }

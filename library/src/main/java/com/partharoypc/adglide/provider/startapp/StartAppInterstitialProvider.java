@@ -22,6 +22,8 @@ public class StartAppInterstitialProvider implements InterstitialProvider {
 
             @Override
             public void onFailedToReceiveAd(Ad ad) {
+                android.util.Log.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_STARTAPP,
+                        "Interstitial failed to load: " + ad.getErrorMessage());
                 listener.onAdFailedToLoad("StartApp failed to receive ad");
             }
         });

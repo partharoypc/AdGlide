@@ -14,6 +14,7 @@ import android.widget.RelativeLayout;
 import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.AdGlideConfig;
 import com.partharoypc.adglide.provider.InterstitialProvider;
+import com.partharoypc.adglide.util.AdGlideCallback;
 import com.partharoypc.adglide.util.ImageDownloader;
 
 public class HouseAdInterstitialProvider implements InterstitialProvider {
@@ -53,7 +54,7 @@ public class HouseAdInterstitialProvider implements InterstitialProvider {
     public void showInterstitial(Activity activity, InterstitialListener listener) {
         if (cachedAdImage == null) {
             if (listener != null)
-                listener.onAdShowFailed("House ad image not loaded");
+                listener.onAdFailedToLoad("House ad image not loaded");
             return;
         }
 

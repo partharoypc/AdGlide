@@ -56,6 +56,27 @@ public class Tools {
     }
 
     /**
+     * Calculates the adaptive banner size for the current device width.
+     *
+     * @param activity the active activity
+     * @return the adaptive banner width in DP
+     */
+    public static int getAdaptiveBannerSize(@NonNull Activity activity) {
+        float widthPixels;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            android.view.WindowMetrics windowMetrics = activity.getWindowManager().getCurrentWindowMetrics();
+            widthPixels = windowMetrics.getBounds().width();
+        } else {
+            android.util.DisplayMetrics outMetrics = new android.util.DisplayMetrics();
+            activity.getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
+            widthPixels = outMetrics.widthPixels;
+        }
+
+        float density = activity.getResources().getDisplayMetrics().density;
+        return (int) (widthPixels / density);
+    }
+
+    /**
      * Checks if the current device is a tablet.
      *
      * @param context the application context
@@ -65,5 +86,4 @@ public class Tools {
         return (context.getResources().getConfiguration().screenLayout
                 & android.content.res.Configuration.SCREENLAYOUT_SIZE_MASK) >= android.content.res.Configuration.SCREENLAYOUT_SIZE_LARGE;
     }
-
 }

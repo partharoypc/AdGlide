@@ -19,6 +19,8 @@ public class StartAppBannerProvider implements BannerProvider {
 
                 @Override
                 public void onFailedToReceiveAd(View view) {
+                    android.util.Log.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_STARTAPP,
+                            "MREC failed to load");
                     listener.onAdFailedToLoad("StartApp failed to receive ad");
                 }
 
@@ -39,6 +41,8 @@ public class StartAppBannerProvider implements BannerProvider {
 
                 @Override
                 public void onFailedToReceiveAd(View view) {
+                    android.util.Log.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_STARTAPP,
+                            "Banner failed to load");
                     listener.onAdFailedToLoad("StartApp failed to receive ad");
                 }
 

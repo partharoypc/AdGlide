@@ -42,6 +42,14 @@ public class AppLovinNativeProvider implements NativeProvider {
                 MaxNativeAdView customView = new MaxNativeAdView(binder, activity);
                 nativeAdLoader.render(customView, ad);
 
+                com.partharoypc.adglide.util.RevenueHelper.logRevenue(
+                        ad.getRevenue() * 1000000,
+                        "USD",
+                        "ESTIMATED",
+                        com.partharoypc.adglide.util.Constant.AD_NETWORK_APPLOVIN_MAX,
+                        com.partharoypc.adglide.util.Constant.NATIVE,
+                        adUnitId);
+
                 listener.onAdLoaded(customView);
             }
 

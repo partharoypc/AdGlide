@@ -12,6 +12,7 @@ import com.facebook.ads.AdOptionsView;
 import com.facebook.ads.NativeAd;
 import com.facebook.ads.NativeAdLayout;
 import com.facebook.ads.NativeAdListener;
+import android.util.Log;
 import com.partharoypc.adglide.R;
 import com.partharoypc.adglide.provider.NativeProvider;
 import java.util.ArrayList;
@@ -30,6 +31,8 @@ public class MetaNativeProvider implements NativeProvider {
 
             @Override
             public void onError(Ad ad, AdError adError) {
+                Log.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META,
+                        "Native Error: [" + adError.getErrorCode() + "] " + adError.getErrorMessage());
                 listener.onAdFailedToLoad(adError.getErrorMessage());
             }
 

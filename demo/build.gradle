@@ -52,13 +52,6 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-process:2.10.0'
     implementation 'androidx.lifecycle:lifecycle-runtime:2.10.0'
     implementation 'androidx.lifecycle:lifecycle-common-java8:2.10.0'
-    implementation 'com.squareup.retrofit2:converter-gson:3.0.0'
-    implementation 'com.squareup.retrofit2:retrofit:3.0.0'
-    implementation(platform("com.squareup.okhttp3:okhttp-bom:5.3.2"))
-    implementation("com.squareup.okhttp3:okhttp")
-    implementation("com.squareup.okhttp3:logging-interceptor")
-    implementation 'com.github.bumptech.glide:glide:5.0.5'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
     implementation project(':library')
     
     // Ad Networks (Required by Demo App)
@@ -73,11 +66,7 @@ dependencies {
     // Mediation adapters if necessary
     implementation 'com.google.ads.mediation:facebook:6.18.0.0'
     implementation 'com.google.ads.mediation:applovin:13.0.1.0'
-    implementation 'com.google.ads.mediation:vungle:7.4.2.0'
     implementation 'com.google.ads.mediation:ironsource:8.6.0.0'
-    
-    implementation 'com.applovin.mediation:facebook-adapter:6.18.0.0'
-    implementation 'com.applovin.mediation:google-adapter:23.6.0.0'
     
     // Force latest version of android-gif-drawable for 16KB alignment support
     //noinspection Aligned16KB

@@ -17,6 +17,7 @@ import com.partharoypc.adglide.util.Tools;
 import com.partharoypc.adglide.util.WaterfallManager;
 import com.partharoypc.adglide.provider.BannerProvider;
 import com.partharoypc.adglide.provider.BannerProviderFactory;
+import com.partharoypc.adglide.util.AdGlideCallback;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,50 +27,23 @@ import static com.partharoypc.adglide.util.Constant.*;
 
 public class BannerAd {
 
+    private static final String TAG = "AdGlide";
+
     public static class Builder implements BannerProvider.BannerConfig {
 
-        private static final String TAG = "AdGlide";
+        private final com.partharoypc.adglide.util.AdLoader adLoader;
         private final java.lang.ref.WeakReference<Activity> activityRef;
         private BannerProvider currentProvider;
         private View currentAdView;
-
-        private boolean adStatus = false;
-        private String adNetwork = "";
-        private String backupAdNetwork = "";
-        private WaterfallManager waterfallManager;
-        private String adMobBannerId = "";
-        private String metaBannerId = "";
-        private String unityBannerId = "";
-        private String appLovinBannerId = "";
-        private String ironSourceBannerId = "";
-        private String wortiseBannerId = "";
-        private String startAppId = "";
+        private ViewGroup customContainer;
         private boolean darkTheme = false;
-        private boolean legacyGDPR = false;
         private boolean collapsibleBanner = false;
         private boolean adaptiveBanner = true;
-        private ViewGroup customContainer;
 
         public Builder(Activity activity) {
             this.activityRef = new java.lang.ref.WeakReference<>(activity);
-            this.adStatus = com.partharoypc.adglide.AdGlide.isBannerEnabled();
-            if (com.partharoypc.adglide.AdGlide.getConfig() != null) {
-                com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-                this.adNetwork = config.getPrimaryNetwork();
-                if (!config.getBackupNetworks().isEmpty()) {
-                    this.backupAdNetwork = config.getBackupNetworks().get(0);
-                    this.waterfallManager = new com.partharoypc.adglide.util.WaterfallManager(
-                            config.getBackupNetworks().toArray(new String[0]));
-                }
-                this.adMobBannerId = config.getAdMobBannerId();
-                this.metaBannerId = config.getMetaBannerId();
-                this.unityBannerId = config.getUnityBannerId();
-                this.appLovinBannerId = config.getAppLovinBannerId();
-                this.ironSourceBannerId = config.getIronSourceBannerId();
-                this.wortiseBannerId = config.getWortiseBannerId();
-                this.startAppId = config.getStartAppId();
-                this.legacyGDPR = config.isLegacyGDPR();
-            }
+            this.adLoader = new com.partharoypc.adglide.util.AdLoader(activity,
+                    com.partharoypc.adglide.util.AdFormat.BANNER);
         }
 
         @Override
@@ -79,7 +53,8 @@ public class BannerAd {
 
         @Override
         public boolean isLegacyGDPR() {
-            return legacyGDPR;
+            AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+            return config != null && config.isLegacyGDPR();
         }
 
         @Override
@@ -104,102 +79,87 @@ public class BannerAd {
 
         @NonNull
         public Builder load() {
-            loadBannerAd();
+            loadBannerAd(null);
             return this;
         }
 
         @NonNull
+        public Builder load(AdGlideCallback callback) {
+            loadBannerAd(callback);
+            return this;
+        }
+
+        // --- Deprecated chained methods. Keeping for compatibility, but they use
+        // global config now ---
+
+        @NonNull
         public Builder status(boolean adStatus) {
-            this.adStatus = adStatus;
             return this;
         }
 
         @NonNull
         public Builder network(@NonNull String adNetwork) {
-            this.adNetwork = AdGlideNetwork.fromString(adNetwork).getValue();
             return this;
         }
 
         @NonNull
         public Builder network(AdGlideNetwork network) {
-            return network(network.getValue());
-        }
-
-        @Nullable
-        public Builder backup(@Nullable String backupAdNetwork) {
-            this.backupAdNetwork = AdGlideNetwork.fromString(backupAdNetwork).getValue();
-            if (waterfallManager == null) {
-                waterfallManager = new WaterfallManager(this.backupAdNetwork);
-            } else {
-                waterfallManager.getNetworks().add(this.backupAdNetwork);
-            }
             return this;
         }
 
         @Nullable
-        public Builder backup(AdGlideNetwork backupAdNetwork) {
-            return backup(backupAdNetwork.getValue());
+        public Builder backup(@Nullable String backupAdNetwork) {
+            return this;
         }
 
         @Nullable
         public Builder backups(String... backupAdNetworks) {
-            this.waterfallManager = new WaterfallManager(backupAdNetworks);
-            if (backupAdNetworks.length > 0) {
-                this.backupAdNetwork = AdGlideNetwork.fromString(backupAdNetworks[0]).getValue();
-            }
             return this;
         }
 
         @Nullable
         public Builder backups(AdGlideNetwork... backupAdNetworks) {
-            return backups(AdGlideNetwork.toStringArray(backupAdNetworks));
-        }
-
-        @NonNull
-        public Builder adMobId(@NonNull String adMobBannerId) {
-            this.adMobBannerId = adMobBannerId;
             return this;
         }
 
         @NonNull
-        public Builder metaId(@NonNull String metaBannerId) {
-            this.metaBannerId = metaBannerId;
+        public Builder adMobId(@NonNull String id) {
             return this;
         }
 
         @NonNull
-        public Builder unityId(@NonNull String unityBannerId) {
-            this.unityBannerId = unityBannerId;
+        public Builder metaId(@NonNull String id) {
             return this;
         }
 
         @NonNull
-        public Builder appLovinId(@NonNull String appLovinBannerId) {
-            this.appLovinBannerId = appLovinBannerId;
+        public Builder unityId(@NonNull String id) {
             return this;
         }
 
         @NonNull
-        public Builder zoneId(@NonNull String appLovinBannerZoneId) {
+        public Builder appLovinId(@NonNull String id) {
+            return this;
+        }
+
+        @NonNull
+        public Builder zoneId(@NonNull String id) {
             // Zone ID is deprecated in MAX but kept for compatibility
             return this;
         }
 
         @NonNull
-        public Builder ironSourceId(@NonNull String ironSourceBannerId) {
-            this.ironSourceBannerId = ironSourceBannerId;
+        public Builder ironSourceId(@NonNull String id) {
             return this;
         }
 
         @NonNull
-        public Builder wortiseId(@NonNull String wortiseBannerId) {
-            this.wortiseBannerId = wortiseBannerId;
+        public Builder wortiseId(@NonNull String id) {
             return this;
         }
 
         @NonNull
-        public Builder startAppId(@NonNull String startAppId) {
-            this.startAppId = startAppId;
+        public Builder startAppId(@NonNull String id) {
             return this;
         }
 
@@ -211,7 +171,6 @@ public class BannerAd {
 
         @NonNull
         public Builder legacyGDPR(boolean legacyGDPR) {
-            this.legacyGDPR = legacyGDPR;
             return this;
         }
 
@@ -233,87 +192,48 @@ public class BannerAd {
             return this;
         }
 
-        public void loadBannerAd() {
-            try {
-                if (!com.partharoypc.adglide.AdGlide.isBannerEnabled() || !adStatus) {
-                    Log.d(TAG, "Banner Ad is disabled globally or locally.");
-                    return;
+        public void loadBannerAd(AdGlideCallback callback) {
+            adLoader.startLoading(new com.partharoypc.adglide.util.AdLoader.AdLoadCallback() {
+                @Override
+                public void onAdLoaded(String network) {
+                    loadAdFromNetwork(network, callback);
                 }
-                Activity activity = activityRef.get();
-                if (activity == null) {
-                    Log.e(TAG, "Activity is null. Cannot load Banner.");
-                    return;
+
+                @Override
+                public void onAdFailed(String error) {
+                    Log.d(TAG, "Banner load failed: " + error);
+                    if (callback != null)
+                        callback.onAdFailedToLoad(error);
                 }
-                com.partharoypc.adglide.util.PerformanceLogger.log("Banner", "Loading started: " + adNetwork);
-                if (!Tools.isNetworkAvailable(activity)) {
-                    Log.e(TAG, "Internet connection not available.");
-                    if (com.partharoypc.adglide.AdGlide.getConfig() != null
-                            && com.partharoypc.adglide.AdGlide.getConfig().isHouseAdEnabled()) {
-                        Log.d(TAG, "Falling back to House Ad due to offline status.");
-                        loadAdFromNetwork(HOUSE_AD);
-                    }
-                    return;
-                }
-                if (waterfallManager != null) {
-                    waterfallManager.reset();
-                }
-                Log.d(TAG, "Banner Ad is enabled");
-                loadAdFromNetwork(adNetwork);
-            } catch (Exception e) {
-                Log.e(TAG, "Error loading Banner Ad: " + e.getMessage());
-            }
+            });
         }
 
-        public void loadBackupBannerAd() {
-            try {
-                if (!com.partharoypc.adglide.AdGlide.isBannerEnabled() || !adStatus) {
-                    Log.d(TAG, "Banner Ad is disabled globally or locally. Skipping backup.");
-                    return;
-                }
-                Activity activity = activityRef.get();
-                if (activity == null) {
-                    Log.e(TAG, "Activity is null. Cannot load backup Banner.");
-                    return;
-                }
-                if (!Tools.isNetworkAvailable(activity)) {
-                    Log.e(TAG, "Internet connection not available.");
-                    if (com.partharoypc.adglide.AdGlide.getConfig() != null
-                            && com.partharoypc.adglide.AdGlide.getConfig().isHouseAdEnabled()) {
-                        loadAdFromNetwork(HOUSE_AD);
-                    }
-                    return;
-                }
-                if (waterfallManager == null) {
-                    if (backupAdNetwork != null && !backupAdNetwork.isEmpty()) {
-                        waterfallManager = new WaterfallManager(backupAdNetwork);
-                    } else {
-                        return;
-                    }
+        public void loadBackupBannerAd(AdGlideCallback callback) {
+            adLoader.loadNext(new com.partharoypc.adglide.util.AdLoader.AdLoadCallback() {
+                @Override
+                public void onAdLoaded(String network) {
+                    loadAdFromNetwork(network, callback);
                 }
 
-                String networkToLoad = waterfallManager.getNext();
-                if (networkToLoad == null) {
-                    Log.d(TAG, "All backup banner ads failed to load");
-                    return;
+                @Override
+                public void onAdFailed(String error) {
+                    Log.d(TAG, "Banner backup load failed: " + error);
+                    if (callback != null)
+                        callback.onAdFailedToLoad(error);
                 }
-
-                Log.d(TAG, "[" + networkToLoad + "] is selected as Backup Ads");
-                loadAdFromNetwork(networkToLoad);
-            } catch (Exception e) {
-                Log.e(TAG, "Error loading Backup Banner Ad: " + e.getMessage());
-            }
+            });
         }
 
-        private void loadAdFromNetwork(String networkToLoad) {
+        private void loadAdFromNetwork(String networkToLoad, AdGlideCallback callback) {
             try {
                 destroyAndDetachBanner();
-                String adUnitId = getAdUnitIdForNetwork(this, networkToLoad);
+                String adUnitId = getAdUnitIdForNetwork(networkToLoad);
                 Log.d(TAG, "Loading [" + networkToLoad.toUpperCase(java.util.Locale.ROOT) + "] Banner Ad with ID: "
                         + adUnitId);
                 if (adUnitId == null || adUnitId.trim().isEmpty()
                         || (adUnitId.equals("0") && !networkToLoad.equals(STARTAPP))) {
                     Log.d(TAG, "Ad unit ID for " + networkToLoad + " is invalid. Trying backup.");
-                    loadBackupBannerAd();
+                    loadBackupBannerAd(callback);
                     return;
                 }
 
@@ -331,7 +251,9 @@ public class BannerAd {
                         public void onAdLoaded(View adView) {
                             com.partharoypc.adglide.util.PerformanceLogger.log("Banner",
                                     "Loaded: " + networkToLoad);
-                            displayAdView(networkToLoad, adView);
+                            if (callback != null)
+                                callback.onAdLoaded();
+                            displayAdView(networkToLoad, adView, callback);
                         }
 
                         @Override
@@ -339,33 +261,38 @@ public class BannerAd {
                             com.partharoypc.adglide.util.PerformanceLogger.error("Banner",
                                     "Failed [" + networkToLoad + "]: " + error);
                             Log.e(TAG, "Banner failed to load for " + networkToLoad + ": " + error);
-                            loadBackupBannerAd();
+                            if (callback != null)
+                                callback.onAdFailedToLoad(error);
+                            loadBackupBannerAd(callback);
                         }
                     });
                 } else {
-                    loadBackupBannerAd();
+                    loadBackupBannerAd(callback);
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Failed to load banner for " + networkToLoad + ". Error: " + e.getMessage());
-                loadBackupBannerAd();
+                loadBackupBannerAd(callback);
             }
         }
 
-        private static String getAdUnitIdForNetwork(Builder builder, String network) {
+        private static String getAdUnitIdForNetwork(String network) {
+            AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+            if (config == null)
+                return "";
             return switch (network) {
-                case ADMOB, META_BIDDING_ADMOB -> builder.adMobBannerId;
-                case META -> builder.metaBannerId;
-                case UNITY -> builder.unityBannerId;
-                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> builder.appLovinBannerId;
-                case IRONSOURCE, META_BIDDING_IRONSOURCE -> builder.ironSourceBannerId;
-                case STARTAPP -> !builder.startAppId.isEmpty() ? builder.startAppId : "startapp_id";
-                case WORTISE -> builder.wortiseBannerId;
+                case ADMOB, META_BIDDING_ADMOB -> config.getAdMobBannerId();
+                case META -> config.getMetaBannerId();
+                case UNITY -> config.getUnityBannerId();
+                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> config.getAppLovinBannerId();
+                case IRONSOURCE, META_BIDDING_IRONSOURCE -> config.getIronSourceBannerId();
+                case STARTAPP -> !config.getStartAppId().isEmpty() ? config.getStartAppId() : "startapp_id";
+                case WORTISE -> config.getWortiseBannerId();
                 case HOUSE_AD -> "house_ad";
                 default -> "";
             };
         }
 
-        private void displayAdView(String network, View adView) {
+        private void displayAdView(String network, View adView, AdGlideCallback callback) {
             Activity activity = activityRef.get();
             if (activity == null)
                 return;
@@ -377,6 +304,8 @@ public class BannerAd {
                         container.addView(adView);
                         container.setVisibility(View.VISIBLE);
                         currentAdView = adView;
+                        if (callback != null)
+                            callback.onAdShowed();
                     } else {
                         Log.e(TAG, "No container found for Banner [" + network
                                 + "]. Use .container() or provide default XML ID.");

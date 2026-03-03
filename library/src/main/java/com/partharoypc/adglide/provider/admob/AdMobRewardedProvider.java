@@ -16,7 +16,7 @@ public class AdMobRewardedProvider implements RewardedProvider {
 
     @Override
     public void loadRewardedAd(Activity activity, String adUnitId, RewardedConfig config, RewardedListener listener) {
-        if (!com.partharoypc.adglide.util.AdMobRateLimiter.isRequestAllowed(adUnitId)) {
+        if (!com.partharoypc.adglide.util.AdMobHelper.isRequestAllowed(adUnitId)) {
             listener.onAdFailedToLoad("AdMob rate limit hit");
             return;
         }
@@ -27,16 +27,10 @@ public class AdMobRewardedProvider implements RewardedProvider {
             RewardedInterstitialAd.load(activity, adUnitId, adRequest, new RewardedInterstitialAdLoadCallback() {
                 @Override
                 public void onAdLoaded(@NonNull RewardedInterstitialAd ad) {
-                    com.partharoypc.adglide.util.AdMobRateLimiter.resetCooldown(adUnitId);
+                    com.partharoypc.adglide.util.AdMobHelper.resetCooldown(adUnitId);
                     ad.setOnPaidEventListener(adValue -> {
-                        com.partharoypc.adglide.util.OnPaidEventListener paidListener = com.partharoypc.adglide.AdGlide
-                                .getConfig() != null
-                                        ? com.partharoypc.adglide.AdGlide.getConfig().getOnPaidEventListener()
-                                        : null;
-                        if (paidListener != null) {
-                            paidListener.onPaidEvent(adValue.getValueMicros(), adValue.getCurrencyCode(),
-                                    String.valueOf(adValue.getPrecisionType()), "AdMob RewardedInterstitial", adUnitId);
-                        }
+                        com.partharoypc.adglide.util.AdMobHelper.handlePaidEvent(adValue, "RewardedInterstitial",
+                                adUnitId);
                     });
                     rewardedInterstitialAd = ad;
                     setupInterstitialCallback(listener);
@@ -46,7 +40,7 @@ public class AdMobRewardedProvider implements RewardedProvider {
                 @Override
                 public void onAdFailedToLoad(@NonNull LoadAdError adError) {
                     if (adError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
-                        com.partharoypc.adglide.util.AdMobRateLimiter.recordFailure(adUnitId);
+                        com.partharoypc.adglide.util.AdMobHelper.recordFailure(adUnitId);
                     }
                     listener.onAdFailedToLoad(adError.getMessage());
                 }
@@ -55,16 +49,9 @@ public class AdMobRewardedProvider implements RewardedProvider {
             RewardedAd.load(activity, adUnitId, adRequest, new RewardedAdLoadCallback() {
                 @Override
                 public void onAdLoaded(@NonNull RewardedAd ad) {
-                    com.partharoypc.adglide.util.AdMobRateLimiter.resetCooldown(adUnitId);
+                    com.partharoypc.adglide.util.AdMobHelper.resetCooldown(adUnitId);
                     ad.setOnPaidEventListener(adValue -> {
-                        com.partharoypc.adglide.util.OnPaidEventListener paidListener = com.partharoypc.adglide.AdGlide
-                                .getConfig() != null
-                                        ? com.partharoypc.adglide.AdGlide.getConfig().getOnPaidEventListener()
-                                        : null;
-                        if (paidListener != null) {
-                            paidListener.onPaidEvent(adValue.getValueMicros(), adValue.getCurrencyCode(),
-                                    String.valueOf(adValue.getPrecisionType()), "AdMob Rewarded", adUnitId);
-                        }
+                        com.partharoypc.adglide.util.AdMobHelper.handlePaidEvent(adValue, "Rewarded", adUnitId);
                     });
                     rewardedAd = ad;
                     setupRewardedCallback(listener);
@@ -74,7 +61,7 @@ public class AdMobRewardedProvider implements RewardedProvider {
                 @Override
                 public void onAdFailedToLoad(@NonNull LoadAdError adError) {
                     if (adError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
-                        com.partharoypc.adglide.util.AdMobRateLimiter.recordFailure(adUnitId);
+                        com.partharoypc.adglide.util.AdMobHelper.recordFailure(adUnitId);
                     }
                     listener.onAdFailedToLoad(adError.getMessage());
                 }

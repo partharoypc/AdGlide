@@ -19,7 +19,7 @@ import androidx.annotation.Nullable;
 import com.partharoypc.adglide.AdGlideNetwork;
 import com.partharoypc.adglide.provider.AppOpenProvider;
 import com.partharoypc.adglide.provider.AppOpenProviderFactory;
-import com.partharoypc.adglide.util.OnShowAdCompleteListener;
+import com.partharoypc.adglide.util.AdGlideCallback;
 import com.partharoypc.adglide.util.Tools;
 import com.partharoypc.adglide.util.WaterfallManager;
 
@@ -54,15 +54,8 @@ public class AppOpenAd {
         return lastShownTimeMs == 0 || (System.currentTimeMillis() - lastShownTimeMs) >= cooldownMs;
     }
 
-    private boolean adStatus = false;
-    private String adNetwork = "";
-    private String backupAdNetwork = "";
-    private WaterfallManager waterfallManager;
-    private String adMobAppOpenId = "";
-    private String metaAppOpenId = "";
-    private String appLovinAppOpenId = "";
-    private String wortiseAppOpenId = "";
     private java.lang.ref.WeakReference<Activity> activityRef;
+    private com.partharoypc.adglide.util.AdLoader adLoader;
 
     // Provider management
     private static final Map<String, AppOpenProvider> providers = new HashMap<>();
@@ -71,17 +64,9 @@ public class AppOpenAd {
     }
 
     private AppOpenAd(Builder builder) {
-        this.adStatus = builder.adStatus;
-        this.adNetwork = builder.adNetwork;
-        this.backupAdNetwork = builder.backupAdNetwork;
-        this.waterfallManager = builder.waterfallManager;
-        this.adMobAppOpenId = builder.adMobAppOpenId;
-        this.metaAppOpenId = builder.metaAppOpenId;
-        this.appLovinAppOpenId = builder.appLovinAppOpenId;
-        this.wortiseAppOpenId = builder.wortiseAppOpenId;
-        if (builder.cooldownMinutes > 0) {
-            setCooldown(builder.cooldownMinutes);
-        }
+        this.activityRef = builder.activityRef;
+        this.adLoader = new com.partharoypc.adglide.util.AdLoader(activityRef.get(),
+                com.partharoypc.adglide.util.AdFormat.APP_OPEN);
     }
 
     private static synchronized AppOpenProvider getProvider(String network) {
@@ -95,80 +80,10 @@ public class AppOpenAd {
         return provider;
     }
 
-    @NonNull
-    public AppOpenAd status(boolean adStatus) {
-        this.adStatus = adStatus;
-        return this;
-    }
-
-    @NonNull
-    public AppOpenAd network(@NonNull String adNetwork) {
-        this.adNetwork = AdGlideNetwork.fromString(adNetwork).getValue();
-        return this;
-    }
-
-    @NonNull
-    public AppOpenAd network(AdGlideNetwork network) {
-        this.adNetwork = network.getValue();
-        return this;
-    }
-
-    @NonNull
-    public AppOpenAd backup(@Nullable String backupAdNetwork) {
-        this.backupAdNetwork = AdGlideNetwork.fromString(backupAdNetwork).getValue();
-        this.waterfallManager = new WaterfallManager(backupAdNetwork);
-        return this;
-    }
-
-    @NonNull
-    public AppOpenAd backups(@Nullable String... backupAdNetworks) {
-        this.waterfallManager = new WaterfallManager(backupAdNetworks);
-        if (backupAdNetworks != null && backupAdNetworks.length > 0) {
-            this.backupAdNetwork = AdGlideNetwork.fromString(backupAdNetworks[0]).getValue();
-        }
-        return this;
-    }
-
-    @NonNull
-    public AppOpenAd adMobId(@NonNull String adMobAppOpenId) {
-        this.adMobAppOpenId = adMobAppOpenId;
-        return this;
-    }
-
-    @NonNull
-    public AppOpenAd metaId(@NonNull String metaAppOpenId) {
-        this.metaAppOpenId = metaAppOpenId;
-        return this;
-    }
-
-    @NonNull
-    public AppOpenAd appLovinId(@NonNull String appLovinAppOpenId) {
-        this.appLovinAppOpenId = appLovinAppOpenId;
-        return this;
-    }
-
-    @NonNull
-    public AppOpenAd wortiseId(@NonNull String wortiseAppOpenId) {
-        this.wortiseAppOpenId = wortiseAppOpenId;
-        return this;
-    }
-
-    @NonNull
-    public AppOpenAd setLifecycleObserver() {
-        onStartLifecycleObserver();
-        return this;
-    }
-
-    @NonNull
-    public AppOpenAd setActivityLifecycleCallbacks(@NonNull Activity activity) {
-        onStartActivityLifecycleCallbacks(activity);
-        return this;
-    }
-
     public void onStartLifecycleObserver() {
         try {
             Activity activity = activityRef != null ? activityRef.get() : null;
-            if (adStatus && com.partharoypc.adglide.AdGlide.isAppOpenEnabled() && activity != null) {
+            if (activity != null && com.partharoypc.adglide.AdGlide.isAppOpenEnabled()) {
                 if (activity.getIntent().hasExtra("unique_id")) {
                     return;
                 }
@@ -181,192 +96,217 @@ public class AppOpenAd {
 
     public void onStartActivityLifecycleCallbacks(Activity activity) {
         try {
-            if (adStatus && com.partharoypc.adglide.AdGlide.isAppOpenEnabled()) {
-                AppOpenProvider provider = getProvider(adNetwork);
-                boolean isShowing = provider != null && provider.isShowingAd();
-                if (!isShowing) {
-                    activityRef = new java.lang.ref.WeakReference<>(activity);
-                }
+            activityRef = new java.lang.ref.WeakReference<>(activity);
+            if (adLoader == null) {
+                adLoader = new com.partharoypc.adglide.util.AdLoader(activity,
+                        com.partharoypc.adglide.util.AdFormat.APP_OPEN);
             }
         } catch (Exception e) {
             Log.e(TAG, "Error in onStartActivityLifecycleCallbacks: " + e.getMessage());
         }
     }
 
-    public AppOpenAd showAppOpenAdIfAvailable(Activity activity,
-            OnShowAdCompleteListener onShowAdCompleteListener) {
-        showAdIfAvailable(activity, onShowAdCompleteListener);
-        return this;
-    }
-
-    public void showAdIfAvailable(@NonNull Activity activity,
-            @Nullable OnShowAdCompleteListener onShowAdCompleteListener) {
+    public void showAdIfAvailable(@NonNull Activity activity, @Nullable AdGlideCallback callback) {
         try {
-            if (!com.partharoypc.adglide.AdGlide.isAppOpenEnabled() || !adStatus) {
-                if (onShowAdCompleteListener != null)
-                    onShowAdCompleteListener.onShowAdComplete();
+            if (!com.partharoypc.adglide.AdGlide.isAppOpenEnabled()) {
+                if (callback != null)
+                    callback.onAdDismissed();
                 return;
             }
 
-            // ── 30-minute cooldown check ──────────────────────────────
+            // Cooldown check
             if (!isCooldownElapsed()) {
                 Log.d(TAG, "App Open Ad skipped — cooldown not elapsed yet.");
-                if (onShowAdCompleteListener != null)
-                    onShowAdCompleteListener.onShowAdComplete();
+                if (callback != null)
+                    callback.onAdDismissed();
                 return;
             }
 
-            AppOpenProvider provider = getProvider(adNetwork);
-            String adUnitId = getAdUnitIdForNetwork(adNetwork);
-
-            if (provider != null && !adUnitId.equals("0")) {
-                provider.showAppOpenAd(activity, new AppOpenProvider.AppOpenListener() {
-                    @Override
-                    public void onAdLoaded() {
-                    }
-
-                    @Override
-                    public void onAdFailedToLoad(String error) {
-                        if (onShowAdCompleteListener != null)
-                            onShowAdCompleteListener.onShowAdComplete();
-                    }
-
-                    @Override
-                    public void onAdDismissed() {
-                        if (onShowAdCompleteListener != null)
-                            onShowAdCompleteListener.onShowAdComplete();
-                    }
-
-                    @Override
-                    public void onAdShowFailed(String error) {
-                        if (onShowAdCompleteListener != null)
-                            onShowAdCompleteListener.onShowAdComplete();
-                    }
-
-                    @Override
-                    public void onAdShowed() {
-                        // Record the time the ad was displayed
-                        lastShownTimeMs = System.currentTimeMillis();
-                    }
-                });
-            } else if (onShowAdCompleteListener != null) {
-                onShowAdCompleteListener.onShowAdComplete();
+            if (adLoader == null) {
+                adLoader = new com.partharoypc.adglide.util.AdLoader(activity,
+                        com.partharoypc.adglide.util.AdFormat.APP_OPEN);
             }
+
+            adLoader.startLoading(new com.partharoypc.adglide.util.AdLoader.AdLoadCallback() {
+                @Override
+                public void onAdLoaded(String network) {
+                    AppOpenProvider provider = getProvider(network);
+                    if (provider != null) {
+                        provider.showAppOpenAd(activity, new AppOpenProvider.AppOpenListener() {
+                            @Override
+                            public void onAdLoaded() {
+                                if (callback != null)
+                                    callback.onAdLoaded();
+                            }
+
+                            @Override
+                            public void onAdFailedToLoad(String error) {
+                                if (callback != null)
+                                    callback.onAdFailedToLoad(error);
+                                loadBackupAd(callback);
+                            }
+
+                            @Override
+                            public void onAdDismissed() {
+                                if (callback != null)
+                                    callback.onAdDismissed();
+                            }
+
+                            @Override
+                            public void onAdShowFailed(String error) {
+                                if (callback != null)
+                                    callback.onAdDismissed();
+                                loadBackupAd(callback);
+                            }
+
+                            @Override
+                            public void onAdShowed() {
+                                lastShownTimeMs = System.currentTimeMillis();
+                                if (callback != null)
+                                    callback.onAdShowed();
+                            }
+                        });
+                    } else {
+                        loadBackupAd(callback);
+                    }
+                }
+
+                @Override
+                public void onAdFailed(String error) {
+                    if (callback != null)
+                        callback.onAdDismissed();
+                }
+            });
         } catch (Exception e) {
             Log.e(TAG, "Error in showAdIfAvailable: " + e.getMessage());
-            if (onShowAdCompleteListener != null) {
-                onShowAdCompleteListener.onShowAdComplete();
+            if (callback != null) {
+                callback.onAdDismissed();
             }
         }
     }
 
-    private String getAdUnitIdForNetwork(String network) {
-        return Builder.getAdUnitIdForNetwork(this, network);
+    private void loadBackupAd(AdGlideCallback callback) {
+        if (adLoader == null)
+            return;
+        adLoader.loadNext(new com.partharoypc.adglide.util.AdLoader.AdLoadCallback() {
+            @Override
+            public void onAdLoaded(String network) {
+                AppOpenProvider provider = getProvider(network);
+                Activity activity = activityRef != null ? activityRef.get() : null;
+                if (provider != null && activity != null) {
+                    provider.showAppOpenAd(activity, new AppOpenProvider.AppOpenListener() {
+                        @Override
+                        public void onAdLoaded() {
+                            if (callback != null)
+                                callback.onAdLoaded();
+                        }
+
+                        @Override
+                        public void onAdFailedToLoad(String error) {
+                            if (callback != null)
+                                callback.onAdFailedToLoad(error);
+                            loadBackupAd(callback);
+                        }
+
+                        @Override
+                        public void onAdDismissed() {
+                            if (callback != null)
+                                callback.onAdDismissed();
+                        }
+
+                        @Override
+                        public void onAdShowFailed(String error) {
+                            loadBackupAd(callback);
+                        }
+
+                        @Override
+                        public void onAdShowed() {
+                            lastShownTimeMs = System.currentTimeMillis();
+                            if (callback != null)
+                                callback.onAdShowed();
+                        }
+                    });
+                } else if (callback != null) {
+                    callback.onAdDismissed();
+                }
+            }
+
+            @Override
+            public void onAdFailed(String error) {
+                if (callback != null)
+                    callback.onAdDismissed();
+            }
+        });
     }
 
     // ── Builder ──────────────────────────────────────────────────────────
 
     public static class Builder {
-        private static final String TAG = "AdGlide";
+        private final com.partharoypc.adglide.util.AdLoader adLoader;
         private final java.lang.ref.WeakReference<Activity> activityRef;
-        private boolean adStatus = false;
-        private String adNetwork = "";
-        private String backupAdNetwork = "";
-        private WaterfallManager waterfallManager;
-        private String adMobAppOpenId = "";
-        private String metaAppOpenId = "";
-        private String appLovinAppOpenId = "";
-        private String wortiseAppOpenId = "";
-        private int cooldownMinutes = -1;
 
         public Builder(Activity activity) {
             this.activityRef = new java.lang.ref.WeakReference<>(activity);
-            this.adStatus = com.partharoypc.adglide.AdGlide.isAppOpenEnabled();
-            if (com.partharoypc.adglide.AdGlide.getConfig() != null) {
-                com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-                this.adNetwork = config.getPrimaryNetwork();
-                if (!config.getBackupNetworks().isEmpty()) {
-                    this.backupAdNetwork = config.getBackupNetworks().get(0);
-                    this.waterfallManager = new com.partharoypc.adglide.util.WaterfallManager(
-                            config.getBackupNetworks().toArray(new String[0]));
-                }
-                this.adMobAppOpenId = config.getAdMobAppOpenId();
-                this.metaAppOpenId = config.getMetaAppOpenId();
-                this.appLovinAppOpenId = config.getAppLovinAppOpenId();
-                this.wortiseAppOpenId = config.getWortiseAppOpenId();
-            }
+            this.adLoader = new com.partharoypc.adglide.util.AdLoader(activity,
+                    com.partharoypc.adglide.util.AdFormat.APP_OPEN);
         }
+
+        // --- Deprecated chained methods. Keeping for compatibility, but they use
+        // global config now ---
 
         @NonNull
         public Builder status(boolean adStatus) {
-            this.adStatus = adStatus;
             return this;
         }
 
         @NonNull
         public Builder network(@NonNull String adNetwork) {
-            this.adNetwork = AdGlideNetwork.fromString(adNetwork).getValue();
             return this;
         }
 
         @NonNull
         public Builder network(AdGlideNetwork network) {
-            this.adNetwork = network.getValue();
             return this;
         }
 
         @NonNull
         public Builder backup(@Nullable String backupAdNetwork) {
-            this.backupAdNetwork = AdGlideNetwork.fromString(backupAdNetwork).getValue();
-            this.waterfallManager = new WaterfallManager(backupAdNetwork);
             return this;
         }
 
         @NonNull
-        public Builder backup(AdGlideNetwork backupAdNetwork) {
-            return backup(backupAdNetwork.getValue());
-        }
-
-        public Builder backups(String... backupAdNetworks) {
-            this.waterfallManager = new WaterfallManager(backupAdNetworks);
-            if (backupAdNetworks.length > 0) {
-                this.backupAdNetwork = AdGlideNetwork.fromString(backupAdNetworks[0]).getValue();
-            }
+        public Builder backups(@Nullable String... backupAdNetworks) {
             return this;
         }
 
         @NonNull
         public Builder backups(AdGlideNetwork... backupAdNetworks) {
-            return backups(AdGlideNetwork.toStringArray(backupAdNetworks));
+            return this;
         }
 
         @NonNull
         public Builder adMobId(@NonNull String adMobAppOpenId) {
-            this.adMobAppOpenId = adMobAppOpenId;
             return this;
         }
 
         @NonNull
         public Builder metaId(@NonNull String metaAppOpenId) {
-            this.metaAppOpenId = metaAppOpenId;
             return this;
         }
 
         @NonNull
         public Builder appLovinId(@NonNull String appLovinAppOpenId) {
-            this.appLovinAppOpenId = appLovinAppOpenId;
             return this;
         }
 
         @NonNull
         public Builder wortiseId(@NonNull String wortiseAppOpenId) {
-            this.wortiseAppOpenId = wortiseAppOpenId;
             return this;
         }
 
         @NonNull
         public Builder cooldown(int minutes) {
-            this.cooldownMinutes = minutes;
+            AppOpenAd.setCooldown(minutes);
             return this;
         }
 
@@ -377,55 +317,36 @@ public class AppOpenAd {
         }
 
         @NonNull
-        public Builder load(OnShowAdCompleteListener onShowAdCompleteListener) {
-            loadAppOpenAd(onShowAdCompleteListener);
+        public Builder load(AdGlideCallback callback) {
+            loadAppOpenAd(callback);
             return this;
         }
 
-        public void loadAppOpenAd(OnShowAdCompleteListener onShowAdCompleteListener) {
-            try {
-                if (!com.partharoypc.adglide.AdGlide.isAppOpenEnabled() || !adStatus) {
-                    Log.d(TAG, "App Open Ad is disabled globally or locally.");
-                    if (onShowAdCompleteListener != null)
-                        onShowAdCompleteListener.onShowAdComplete();
-                    return;
+        public void loadAppOpenAd(AdGlideCallback callback) {
+            if (adLoader == null)
+                return;
+            adLoader.startLoading(new com.partharoypc.adglide.util.AdLoader.AdLoadCallback() {
+                @Override
+                public void onAdLoaded(String network) {
+                    loadAdFromNetwork(network, callback);
                 }
 
-                Activity activity = activityRef.get();
-                if (activity == null) {
-                    Log.e(TAG, "Activity is null. Cannot load App Open.");
-                    if (onShowAdCompleteListener != null)
-                        onShowAdCompleteListener.onShowAdComplete();
-                    return;
+                @Override
+                public void onAdFailed(String error) {
+                    Log.d(TAG, "App Open load failed: " + error);
+                    if (callback != null)
+                        callback.onAdDismissed();
                 }
-
-                if (!Tools.isNetworkAvailable(activity)) {
-                    Log.e(TAG, "No internet. Skipping App Open load.");
-                    if (onShowAdCompleteListener != null)
-                        onShowAdCompleteListener.onShowAdComplete();
-                    return;
-                }
-
-                if (waterfallManager != null)
-                    waterfallManager.reset();
-
-                com.partharoypc.adglide.util.PerformanceLogger.log("AppOpen", "Loading started: " + adNetwork);
-                loadAdFromNetwork(adNetwork, onShowAdCompleteListener);
-            } catch (Exception e) {
-                Log.e(TAG, "Error in loadAppOpenAd: " + e.getMessage());
-                if (onShowAdCompleteListener != null)
-                    onShowAdCompleteListener.onShowAdComplete();
-            }
+            });
         }
 
-        private void loadAdFromNetwork(String network,
-                OnShowAdCompleteListener onShowAdCompleteListener) {
+        private void loadAdFromNetwork(String network, AdGlideCallback callback) {
             try {
-                String adUnitId = getAdUnitIdForNetwork(this, network);
+                String adUnitId = getAdUnitIdForNetwork(network);
                 if (adUnitId == null || adUnitId.trim().isEmpty()
                         || (adUnitId.equals("0") && !network.equals("startapp"))) {
                     Log.d(TAG, "Ad unit ID for " + network + " is invalid. Trying backup.");
-                    loadBackupAppOpenAd(onShowAdCompleteListener);
+                    loadBackupAppOpenAd(callback);
                     return;
                 }
 
@@ -443,21 +364,20 @@ public class AppOpenAd {
                             com.partharoypc.adglide.util.PerformanceLogger.log("AppOpen", "Loaded: " + network);
                             Log.d(TAG, "AppOpen ad loaded from [" + network.toUpperCase(java.util.Locale.ROOT)
                                     + "]. Showing now.");
-                            // ── 30-minute cooldown check (splash path) ────
+                            if (callback != null)
+                                callback.onAdLoaded();
+                            // Splash path auto-show logic
                             if (!isCooldownElapsed()) {
                                 Log.d(TAG, "App Open Ad skipped — cooldown not elapsed yet.");
-                                if (onShowAdCompleteListener != null)
-                                    onShowAdCompleteListener.onShowAdComplete();
+                                if (callback != null)
+                                    callback.onAdDismissed();
                                 return;
                             }
-                            // Show the ad immediately — onAdDismissed / onAdShowFailed
-                            // will call onShowAdCompleteListener to continue the splash flow.
                             Activity activity = activityRef.get();
                             if (activity != null) {
                                 provider.showAppOpenAd(activity, this);
-                            } else {
-                                if (onShowAdCompleteListener != null)
-                                    onShowAdCompleteListener.onShowAdComplete();
+                            } else if (callback != null) {
+                                callback.onAdDismissed();
                             }
                         }
 
@@ -467,94 +387,97 @@ public class AppOpenAd {
                                     "Failed [" + network + "]: " + error);
                             Log.e(TAG, "AppOpen failed to load from [" + network.toUpperCase(java.util.Locale.ROOT)
                                     + "]: " + error);
-                            loadBackupAppOpenAd(onShowAdCompleteListener);
+                            if (callback != null)
+                                callback.onAdFailedToLoad(error);
+                            loadBackupAppOpenAd(callback);
                         }
 
                         @Override
                         public void onAdDismissed() {
                             isAppOpenAdLoaded = false;
-                            if (onShowAdCompleteListener != null)
-                                onShowAdCompleteListener.onShowAdComplete();
+                            if (callback != null)
+                                callback.onAdDismissed();
                         }
 
                         @Override
                         public void onAdShowFailed(String error) {
                             Log.e(TAG, "AppOpen failed to show from [" + network.toUpperCase(java.util.Locale.ROOT)
                                     + "]: " + error);
-                            if (onShowAdCompleteListener != null)
-                                onShowAdCompleteListener.onShowAdComplete();
+                            if (callback != null)
+                                callback.onAdDismissed();
                         }
 
                         @Override
                         public void onAdShowed() {
                             com.partharoypc.adglide.util.PerformanceLogger.log("AppOpen", "Showed: " + network);
                             Log.d(TAG, "AppOpen ad showed from [" + network.toUpperCase(java.util.Locale.ROOT) + "]");
-                            // Record the time the ad was displayed
                             lastShownTimeMs = System.currentTimeMillis();
+                            if (callback != null)
+                                callback.onAdShowed();
                         }
                     });
                 } else {
-                    loadBackupAppOpenAd(onShowAdCompleteListener);
+                    loadBackupAppOpenAd(callback);
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Failed loading AppOpen from " + network + ": " + e.getMessage());
-                loadBackupAppOpenAd(onShowAdCompleteListener);
+                loadBackupAppOpenAd(callback);
             }
         }
 
-        private void loadBackupAppOpenAd(OnShowAdCompleteListener onShowAdCompleteListener) {
-            if (waterfallManager != null && waterfallManager.hasNext()) {
-                String nextNetwork = waterfallManager.getNext();
-                Log.d(TAG, "Loading backup AppOpen from: " + nextNetwork);
-                loadAdFromNetwork(nextNetwork, onShowAdCompleteListener);
-            } else {
-                Log.d(TAG, "All AppOpen backups exhausted.");
-                if (onShowAdCompleteListener != null)
-                    onShowAdCompleteListener.onShowAdComplete();
-            }
+        private void loadBackupAppOpenAd(AdGlideCallback callback) {
+            if (adLoader == null)
+                return;
+            adLoader.loadNext(new com.partharoypc.adglide.util.AdLoader.AdLoadCallback() {
+                @Override
+                public void onAdLoaded(String network) {
+                    loadAdFromNetwork(network, callback);
+                }
+
+                @Override
+                public void onAdFailed(String error) {
+                    Log.d(TAG, "App Open backup load failed: " + error);
+                    if (callback != null)
+                        callback.onAdDismissed();
+                }
+            });
         }
 
-        private static String getAdUnitIdForNetwork(AppOpenAd ad, String network) {
+        private static String getAdUnitIdForNetwork(String network) {
+            AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+            if (config == null)
+                return "0";
             return switch (network) {
-                case ADMOB, META_BIDDING_ADMOB -> ad.adMobAppOpenId;
-                case META -> ad.metaAppOpenId;
-                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> ad.appLovinAppOpenId;
-                case WORTISE -> ad.wortiseAppOpenId;
+                case ADMOB, META_BIDDING_ADMOB -> config.getAdMobAppOpenId();
+                case META -> config.getMetaAppOpenId();
+                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> config.getAppLovinAppOpenId();
+                case WORTISE -> config.getWortiseAppOpenId();
                 default -> "0";
             };
         }
 
-        private static String getAdUnitIdForNetwork(Builder builder, String network) {
-            return switch (network) {
-                case ADMOB, META_BIDDING_ADMOB -> builder.adMobAppOpenId;
-                case META -> builder.metaAppOpenId;
-                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> builder.appLovinAppOpenId;
-                case WORTISE -> builder.wortiseAppOpenId;
-                default -> "0";
-            };
-        }
-
-        public void showAppOpenAd() {
-            showAppOpenAd(null);
-        }
-
-        public void showAppOpenAd(OnShowAdCompleteListener onShowAdCompleteListener) {
+        public void showAppOpenAd(AdGlideCallback callback) {
             try {
-                if (!com.partharoypc.adglide.AdGlide.isAppOpenEnabled() || !adStatus) {
-                    if (onShowAdCompleteListener != null)
-                        onShowAdCompleteListener.onShowAdComplete();
+                if (!com.partharoypc.adglide.AdGlide.isAppOpenEnabled()) {
+                    if (callback != null)
+                        callback.onAdDismissed();
                     return;
                 }
 
-                // ── 30-minute cooldown check ──────────────────────────────
                 if (!isCooldownElapsed()) {
                     Log.d(TAG, "App Open Ad skipped — cooldown not elapsed yet.");
-                    if (onShowAdCompleteListener != null)
-                        onShowAdCompleteListener.onShowAdComplete();
+                    if (callback != null)
+                        callback.onAdDismissed();
                     return;
                 }
 
-                AppOpenProvider provider = getProvider(adNetwork);
+                // Try to show from currently loaded network if available
+                final AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+                if (config == null)
+                    return;
+
+                String network = config.getPrimaryNetwork();
+                AppOpenProvider provider = getProvider(network);
                 if (provider != null && provider.isAdAvailable()) {
                     Activity activity = activityRef.get();
                     provider.showAppOpenAd(activity, new AppOpenProvider.AppOpenListener() {
@@ -568,43 +491,39 @@ public class AppOpenAd {
 
                         @Override
                         public void onAdDismissed() {
-                            if (onShowAdCompleteListener != null)
-                                onShowAdCompleteListener.onShowAdComplete();
+                            if (callback != null)
+                                callback.onAdDismissed();
                         }
 
                         @Override
                         public void onAdShowFailed(String error) {
-                            if (onShowAdCompleteListener != null)
-                                onShowAdCompleteListener.onShowAdComplete();
+                            if (callback != null)
+                                callback.onAdDismissed();
                         }
 
                         @Override
                         public void onAdShowed() {
-                            // Record the time the ad was displayed
                             lastShownTimeMs = System.currentTimeMillis();
+                            if (callback != null)
+                                callback.onAdShowed();
                         }
                     });
-                } else if (onShowAdCompleteListener != null) {
-                    onShowAdCompleteListener.onShowAdComplete();
+                } else if (callback != null) {
+                    callback.onAdDismissed();
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Error in showAppOpenAd: " + e.getMessage());
-                if (onShowAdCompleteListener != null)
-                    onShowAdCompleteListener.onShowAdComplete();
+                if (callback != null)
+                    callback.onAdDismissed();
             }
-        }
-
-        public void destroyOpenAd() {
-            AppOpenAd.isAppOpenAdLoaded = false;
-        }
-
-        public boolean isAdAvailable() {
-            AppOpenProvider provider = getProvider(adNetwork);
-            return provider != null && provider.isAdAvailable();
         }
 
         public AppOpenAd build() {
             return new AppOpenAd(this);
+        }
+
+        public boolean isAdAvailable() {
+            return isAppOpenAdLoaded;
         }
     }
 }

@@ -51,12 +51,13 @@ public class AppLovinInterstitialProvider implements InterstitialProvider {
         });
 
         maxInterstitialAd.setRevenueListener(ad -> {
-            com.partharoypc.adglide.util.OnPaidEventListener paidListener = com.partharoypc.adglide.AdGlide
-                    .getConfig() != null ? com.partharoypc.adglide.AdGlide.getConfig().getOnPaidEventListener() : null;
-            if (paidListener != null) {
-                double valueMicros = ad.getRevenue() * 1000000;
-                paidListener.onPaidEvent(valueMicros, "USD", "ESTIMATED", "AppLovin Interstitial", adUnitId);
-            }
+            com.partharoypc.adglide.util.RevenueHelper.logRevenue(
+                    ad.getRevenue() * 1000000,
+                    "USD",
+                    "ESTIMATED",
+                    com.partharoypc.adglide.util.Constant.AD_NETWORK_APPLOVIN_MAX,
+                    com.partharoypc.adglide.util.Constant.INTERSTITIAL,
+                    adUnitId);
         });
 
         Log.d(TAG, "Loading Interstitial Ad: " + adUnitId);

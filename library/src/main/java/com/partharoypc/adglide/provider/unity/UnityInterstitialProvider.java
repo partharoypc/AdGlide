@@ -12,7 +12,7 @@ import com.unity3d.ads.UnityAdsShowOptions;
 public class UnityInterstitialProvider implements InterstitialProvider {
     private boolean isLoaded = false;
     private String placementId;
-    private static final String TAG = "AdGlide.Unity";
+    private static final String TAG = com.partharoypc.adglide.util.Constant.AD_NETWORK_UNITY;
 
     @Override
     public void loadInterstitial(Activity activity, String adUnitId, InterstitialConfig config,

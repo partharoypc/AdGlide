@@ -16,7 +16,7 @@ public class AdMobInterstitialProvider implements InterstitialProvider {
     @Override
     public void loadInterstitial(Activity activity, String adUnitId, InterstitialConfig config,
             InterstitialListener listener) {
-        if (!com.partharoypc.adglide.util.AdMobRateLimiter.isRequestAllowed(adUnitId)) {
+        if (!com.partharoypc.adglide.util.AdMobHelper.isRequestAllowed(adUnitId)) {
             listener.onAdFailedToLoad("AdMob rate limit hit");
             return;
         }
@@ -25,15 +25,9 @@ public class AdMobInterstitialProvider implements InterstitialProvider {
         InterstitialAd.load(activity, adUnitId, adRequest, new InterstitialAdLoadCallback() {
             @Override
             public void onAdLoaded(@NonNull InterstitialAd ad) {
-                com.partharoypc.adglide.util.AdMobRateLimiter.resetCooldown(adUnitId);
+                com.partharoypc.adglide.util.AdMobHelper.resetCooldown(adUnitId);
                 ad.setOnPaidEventListener(adValue -> {
-                    com.partharoypc.adglide.util.OnPaidEventListener paidListener = com.partharoypc.adglide.AdGlide
-                            .getConfig() != null ? com.partharoypc.adglide.AdGlide.getConfig().getOnPaidEventListener()
-                                    : null;
-                    if (paidListener != null) {
-                        paidListener.onPaidEvent(adValue.getValueMicros(), adValue.getCurrencyCode(),
-                                String.valueOf(adValue.getPrecisionType()), "AdMob Interstitial", adUnitId);
-                    }
+                    com.partharoypc.adglide.util.AdMobHelper.handlePaidEvent(adValue, "Interstitial", adUnitId);
                 });
                 interstitialAd = ad;
                 listener.onAdLoaded();
@@ -42,7 +36,7 @@ public class AdMobInterstitialProvider implements InterstitialProvider {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                 if (loadAdError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
-                    com.partharoypc.adglide.util.AdMobRateLimiter.recordFailure(adUnitId);
+                    com.partharoypc.adglide.util.AdMobHelper.recordFailure(adUnitId);
                 }
                 interstitialAd = null;
                 listener.onAdFailedToLoad(loadAdError.getMessage());

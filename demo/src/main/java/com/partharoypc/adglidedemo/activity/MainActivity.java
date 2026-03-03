@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 
 import com.partharoypc.adglide.AdGlide;
 
-import com.partharoypc.adglide.gdpr.GDPR;
 import com.partharoypc.adglidedemo.R;
 import com.partharoypc.adglidedemo.activity.ads.ActivityBanner;
 import com.partharoypc.adglidedemo.activity.ads.ActivityInterstitial;
@@ -32,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
     private SharedPref sharedPref;
     private RecyclerView recyclerView;
     private DashboardAdapter adapter;
-    private GDPR gdpr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +41,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         setupToolbar();
-        loadGdpr();
 
         setupDashboard();
 
@@ -83,15 +80,9 @@ public class MainActivity extends AppCompatActivity {
                 ActivityRewarded.class));
         items.add(new DashboardItem("Native Ads", "Ads that blend into content", R.mipmap.ic_launcher,
                 ActivityNative.class));
-        items.add(new DashboardItem("Native Showcases", "Small, Medium, & Video templates", R.mipmap.ic_launcher,
-                com.partharoypc.adglidedemo.activity.ads.ActivityNativeShowcase.class));
         items.add(new DashboardItem("Rewarded Interstitial", "Hybrid ad: Watch to earn reward", R.mipmap.ic_launcher,
-                null)); // Launch later
-        items.add(new DashboardItem("Sync Ad Strategy", "Demonstrate Remote Config logic", R.mipmap.ic_launcher,
-                null)); // Custom click
+                com.partharoypc.adglidedemo.activity.ads.ActivityRewardedInterstitial.class));
         items.add(new DashboardItem("SDK Debugger (HUD)", "Analyze fill issues & waterfall", R.mipmap.ic_launcher,
-                null)); // Custom click
-        items.add(new DashboardItem("Manage GDPR Consent", "Review privacy settings", R.mipmap.ic_launcher,
                 null)); // Custom click
 
         adapter = new DashboardAdapter(this, items, item -> {
@@ -99,10 +90,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, item.getActivityClass()));
             } else if (item.getTitle().contains("Debugger")) {
                 com.partharoypc.adglide.AdGlide.showDebugHUD(MainActivity.this);
-            } else if (item.getTitle().contains("GDPR")) {
-                com.partharoypc.adglide.AdGlide.requestConsent(MainActivity.this, null);
-            } else if (item.getTitle().contains("Sync")) {
-                syncRemoteConfig();
             } else if (item.getTitle().contains("Rewarded Interstitial")) {
                 showRewardedInterstitial();
             }
@@ -110,45 +97,8 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
-    private void syncRemoteConfig() {
-        android.app.ProgressDialog pd = new android.app.ProgressDialog(this);
-        pd.setMessage("Synchronizing Ad Strategy...");
-        pd.show();
-
-        // Provide a real URL hosting your remote_config_sample.json for prod
-        String demoUrl = "https://raw.githubusercontent.com/partharoypc/AdGlide/main/library/remote_config_sample.json";
-
-        com.partharoypc.adglide.AdGlide.fetchRemoteConfig(demoUrl,
-                new com.partharoypc.adglide.util.RemoteConfigManager.OnConfigFetchedListener() {
-                    @Override
-                    public void onSuccess(com.partharoypc.adglide.AdGlideConfig.Builder updatedBuilder) {
-                        runOnUiThread(() -> {
-                            pd.dismiss();
-                            android.widget.Toast.makeText(MainActivity.this, "Strategy Synchronized!",
-                                    android.widget.Toast.LENGTH_SHORT).show();
-                        });
-                    }
-
-                    @Override
-                    public void onFailure(Exception e) {
-                        runOnUiThread(() -> {
-                            pd.dismiss();
-                            android.widget.Toast
-                                    .makeText(MainActivity.this, "Sync Failed (Using Mock URL): " + e.getMessage(),
-                                            android.widget.Toast.LENGTH_SHORT)
-                                    .show();
-                        });
-                    }
-                });
-    }
-
     private void showRewardedInterstitial() {
         startActivity(new Intent(this, com.partharoypc.adglidedemo.activity.ads.ActivityRewardedInterstitial.class));
-    }
-
-    private void loadGdpr() {
-        gdpr = new GDPR(this);
-        gdpr.updateGDPRConsentStatus(Constant.AD_NETWORK, false, false);
     }
 
     @Override

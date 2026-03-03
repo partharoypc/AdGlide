@@ -16,10 +16,7 @@ import com.partharoypc.adglide.format.InterstitialAd;
 import com.partharoypc.adglide.format.RewardedAd;
 import com.partharoypc.adglide.format.BannerAd;
 import com.partharoypc.adglide.format.NativeAd;
-import com.partharoypc.adglide.util.OnInterstitialAdDismissedListener;
-import com.partharoypc.adglide.util.OnShowAdCompleteListener;
-import com.partharoypc.adglide.util.OnRewardedAdCompleteListener;
-import com.partharoypc.adglide.util.OnRewardedAdDismissedListener;
+import com.partharoypc.adglide.util.AdGlideCallback;
 
 public class AdGlide {
     private static final String TAG = "AdGlide";
@@ -83,7 +80,7 @@ public class AdGlide {
                 .build();
 
         if (config.getAdStatus()) {
-            if (config.isAppOpenAdEnabled() && !isAppOpenRegistered) {
+            if (config.isAppOpenEnabled() && !isAppOpenRegistered) {
                 registerAppOpenLifecycle(application);
                 isAppOpenRegistered = true;
             }
@@ -112,28 +109,14 @@ public class AdGlide {
                 .unityId(config.getUnityGameId())
                 .wortiseId(config.getWortiseAppId())
                 .build();
-    }
 
-    /**
-     * Updates the SDK configuration dynamically from a remote JSON URL.
-     */
-    public static void fetchRemoteConfig(String url,
-            com.partharoypc.adglide.util.RemoteConfigManager.OnConfigFetchedListener listener) {
-        com.partharoypc.adglide.util.RemoteConfigManager.fetch(url,
-                new com.partharoypc.adglide.util.RemoteConfigManager.OnConfigFetchedListener() {
-                    @Override
-                    public void onSuccess(AdGlideConfig.Builder updatedBuilder) {
-                        config = updatedBuilder.build();
-                        if (listener != null)
-                            listener.onSuccess(updatedBuilder);
-                    }
-
-                    @Override
-                    public void onFailure(Exception e) {
-                        if (listener != null)
-                            listener.onFailure(e);
-                    }
-                });
+        // Ensure AppOpen is registered/unregistered if status changed
+        if (config.getAdStatus() && config.isAppOpenEnabled()) {
+            if (!isAppOpenRegistered) {
+                registerAppOpenLifecycle(currentApplication);
+                isAppOpenRegistered = true;
+            }
+        }
     }
 
     /**
@@ -252,7 +235,7 @@ public class AdGlide {
         if (config != null && config.getAdStatus()) {
             cachedRewardedInterstitial = new com.partharoypc.adglide.format.RewardedInterstitialAd.Builder(activity);
             // Reusing build internally to perform a standard cache load
-            cachedRewardedInterstitial.loadRewardedInterstitialAd(null, null);
+            cachedRewardedInterstitial.loadRewardedInterstitialAd(null);
         }
     }
 
@@ -263,10 +246,10 @@ public class AdGlide {
      * Once the ad is dismissed, it automatically caches the next one (if
      * configured).
      */
-    public static void showInterstitial(Activity activity, OnInterstitialAdDismissedListener listener) {
+    public static void showInterstitial(Activity activity, AdGlideCallback callback) {
         if (config == null || !isInterstitialEnabled()) {
-            if (listener != null)
-                listener.onInterstitialAdDismissed();
+            if (callback != null)
+                callback.onAdDismissed();
             return;
         }
 
@@ -274,33 +257,33 @@ public class AdGlide {
             com.partharoypc.adglide.util.PerformanceLogger.log("INTERSTITIAL", "Ad skipped — Interval not met ("
                     + interstitialClickCounter + "/" + config.getInterstitialInterval() + ")");
             interstitialClickCounter++;
-            if (listener != null)
-                listener.onInterstitialAdDismissed();
+            if (callback != null)
+                callback.onAdDismissed();
             return;
         }
 
         com.partharoypc.adglide.util.PerformanceLogger.log("INTERSTITIAL", "Showing Interstitial Ad");
 
         if (cachedInterstitial != null && cachedInterstitial.isAdLoaded()) {
-            cachedInterstitial.show(activity, null, new OnInterstitialAdDismissedListener() {
+            cachedInterstitial.show(activity, new AdGlideCallback() {
                 @Override
-                public void onInterstitialAdDismissed() {
+                public void onAdDismissed() {
                     interstitialClickCounter = 1; // Reset after successfully showing
                     if (config.isAutoLoadInterstitial()) {
                         preloadInterstitial(activity);
                     }
-                    if (listener != null)
-                        listener.onInterstitialAdDismissed();
+                    if (callback != null)
+                        callback.onAdDismissed();
                 }
             });
         } else {
             // Fallback: load and show on the fly
-            new InterstitialAd.Builder(activity).loadAndShow(activity, null, new OnInterstitialAdDismissedListener() {
+            new InterstitialAd.Builder(activity).loadAndShow(activity, new AdGlideCallback() {
                 @Override
-                public void onInterstitialAdDismissed() {
+                public void onAdDismissed() {
                     interstitialClickCounter = 1; // Reset after fallback show/attempt
-                    if (listener != null)
-                        listener.onInterstitialAdDismissed();
+                    if (callback != null)
+                        callback.onAdDismissed();
                 }
             });
         }
@@ -309,44 +292,55 @@ public class AdGlide {
     /**
      * Shows a pre-cached rewarded ad, or loads one on the fly if not cached.
      */
-    public static void showRewarded(Activity activity, OnRewardedAdCompleteListener onComplete,
-            OnRewardedAdDismissedListener onDismiss) {
+    public static void showRewarded(Activity activity, AdGlideCallback callback) {
         if (config == null || !isRewardedEnabled()) {
-            if (onDismiss != null)
-                onDismiss.onRewardedAdDismissed();
+            if (callback != null)
+                callback.onAdDismissed();
             return;
         }
 
         if (rewardedClickCounter < config.getRewardedInterval()) {
             Log.d(TAG, "Rewarded Ad interval not met. Current counter: " + rewardedClickCounter);
             rewardedClickCounter++;
-            if (onDismiss != null)
-                onDismiss.onRewardedAdDismissed();
+            if (callback != null)
+                callback.onAdDismissed();
             return;
         }
 
         if (cachedRewarded != null && cachedRewarded.isAdAvailable()) {
-            cachedRewarded.showRewardedAd(activity, onComplete, new OnRewardedAdDismissedListener() {
+            cachedRewarded.showRewardedAd(activity, new AdGlideCallback() {
                 @Override
-                public void onRewardedAdDismissed() {
+                public void onAdDismissed() {
                     rewardedClickCounter = 1; // Reset after successfully showing
                     if (config.isAutoLoadRewarded()) {
                         preloadRewarded(activity);
                     }
-                    if (onDismiss != null)
-                        onDismiss.onRewardedAdDismissed();
+                    if (callback != null)
+                        callback.onAdDismissed();
                 }
-            }, null);
+
+                @Override
+                public void onAdCompleted() {
+                    if (callback != null)
+                        callback.onAdCompleted();
+                }
+            });
         } else {
             // Fallback: load and show on the fly
-            new RewardedAd.Builder(activity).loadAndShow(activity, onComplete, new OnRewardedAdDismissedListener() {
+            new RewardedAd.Builder(activity).loadAndShow(activity, new AdGlideCallback() {
                 @Override
-                public void onRewardedAdDismissed() {
+                public void onAdDismissed() {
                     rewardedClickCounter = 1; // Reset after fallback show/attempt
-                    if (onDismiss != null)
-                        onDismiss.onRewardedAdDismissed();
+                    if (callback != null)
+                        callback.onAdDismissed();
                 }
-            }, null);
+
+                @Override
+                public void onAdCompleted() {
+                    if (callback != null)
+                        callback.onAdCompleted();
+                }
+            });
         }
     }
 
@@ -354,11 +348,10 @@ public class AdGlide {
      * Shows a pre-cached rewarded interstitial ad, or loads one on the fly if not
      * cached.
      */
-    public static void showRewardedInterstitial(Activity activity, OnRewardedAdCompleteListener onComplete,
-            OnRewardedAdDismissedListener onDismiss, com.partharoypc.adglide.util.OnRewardedAdErrorListener onError) {
+    public static void showRewardedInterstitial(Activity activity, AdGlideCallback callback) {
         if (config == null || !isRewardedInterstitialEnabled()) {
-            if (onDismiss != null)
-                onDismiss.onRewardedAdDismissed();
+            if (callback != null)
+                callback.onAdDismissed();
             return;
         }
 
@@ -366,56 +359,66 @@ public class AdGlide {
             Log.d(TAG,
                     "Rewarded Interstitial Ad interval not met. Current counter: " + rewardedInterstitialClickCounter);
             rewardedInterstitialClickCounter++;
-            if (onDismiss != null)
-                onDismiss.onRewardedAdDismissed();
+            if (callback != null)
+                callback.onAdDismissed();
             return;
         }
 
-        // Technically RewardedInterstitialAd has no direct isAdAvailable() externally
-        // exposed, but we know it triggers show directly or load backups.
-        // We will just try to trigger showRewardedInterstitialAd. If empty,
-        // loadAndShow.
         if (cachedRewardedInterstitial != null) {
-            // Attempt to show what is cached. If nothing is cached, it'll fail cleanly with
-            // an error or dismiss. But we should ideally guarantee loadAndShow.
-            // RewardedInterstitialAd doesn't have a public isAdAvailable.
-            cachedRewardedInterstitial.showRewardedInterstitialAd(activity, onComplete,
-                    new OnRewardedAdDismissedListener() {
-                        @Override
-                        public void onRewardedAdDismissed() {
-                            rewardedInterstitialClickCounter = 1;
-                            if (config.isAutoLoadRewarded()) {
-                                preloadRewardedInterstitial(activity);
-                            }
-                            if (onDismiss != null)
-                                onDismiss.onRewardedAdDismissed();
-                        }
-                    }, new com.partharoypc.adglide.util.OnRewardedAdErrorListener() {
-                        @Override
-                        public void onRewardedAdError() {
-                            // Cache missed or failed. Fallback to loadAndShow
-                            new com.partharoypc.adglide.format.RewardedInterstitialAd.Builder(activity)
-                                    .loadAndShow(activity, onComplete, new OnRewardedAdDismissedListener() {
-                                        @Override
-                                        public void onRewardedAdDismissed() {
-                                            rewardedInterstitialClickCounter = 1;
-                                            if (onDismiss != null)
-                                                onDismiss.onRewardedAdDismissed();
-                                        }
-                                    }, onError);
-                        }
-                    });
+            cachedRewardedInterstitial.showRewardedInterstitialAd(activity, new AdGlideCallback() {
+                @Override
+                public void onAdDismissed() {
+                    rewardedInterstitialClickCounter = 1;
+                    if (config.isAutoLoadRewarded()) {
+                        preloadRewardedInterstitial(activity);
+                    }
+                    if (callback != null)
+                        callback.onAdDismissed();
+                }
+
+                @Override
+                public void onAdCompleted() {
+                    if (callback != null)
+                        callback.onAdCompleted();
+                }
+
+                @Override
+                public void onAdFailedToLoad(String error) {
+                    // Cache missed or failed. Fallback to loadAndShow
+                    new com.partharoypc.adglide.format.RewardedInterstitialAd.Builder(activity)
+                            .loadAndShow(activity, new AdGlideCallback() {
+                                @Override
+                                public void onAdDismissed() {
+                                    rewardedInterstitialClickCounter = 1;
+                                    if (callback != null)
+                                        callback.onAdDismissed();
+                                }
+
+                                @Override
+                                public void onAdCompleted() {
+                                    if (callback != null)
+                                        callback.onAdCompleted();
+                                }
+                            });
+                }
+            });
         } else {
             // Fallback immediately
             new com.partharoypc.adglide.format.RewardedInterstitialAd.Builder(activity).loadAndShow(activity,
-                    onComplete, new OnRewardedAdDismissedListener() {
+                    new AdGlideCallback() {
                         @Override
-                        public void onRewardedAdDismissed() {
+                        public void onAdDismissed() {
                             rewardedInterstitialClickCounter = 1;
-                            if (onDismiss != null)
-                                onDismiss.onRewardedAdDismissed();
+                            if (callback != null)
+                                callback.onAdDismissed();
                         }
-                    }, onError);
+
+                        @Override
+                        public void onAdCompleted() {
+                            if (callback != null)
+                                callback.onAdCompleted();
+                        }
+                    });
         }
     }
 
@@ -479,7 +482,7 @@ public class AdGlide {
             public void onActivityStarted(@NonNull Activity activity) {
                 currentActivityRef = new java.lang.ref.WeakReference<>(activity);
                 // Show App Open Ad automatically if it isn't Specifically Excluded
-                if (config != null && config.getAdStatus() && config.isAppOpenAdEnabled()) {
+                if (config != null && config.getAdStatus() && config.isAppOpenEnabled()) {
                     // Check exclusion list
                     if (!config.getOpenAdExcludedActivities().contains(activity.getClass().getName())) {
                         showAppOpenAd(activity);
@@ -513,16 +516,11 @@ public class AdGlide {
     private static void showAppOpenAd(Activity activity) {
         if (cachedAppOpen == null) {
             cachedAppOpen = new AppOpenAd.Builder(activity);
-            cachedAppOpen.load(new OnShowAdCompleteListener() {
-                @Override
-                public void onShowAdComplete() {
-                    // Start of the session, ad was just loaded
-                }
-            });
+            cachedAppOpen.load(null);
         } else if (cachedAppOpen.isAdAvailable()) {
-            cachedAppOpen.showAppOpenAd();
+            cachedAppOpen.showAppOpenAd(null);
         } else {
-            cachedAppOpen.load();
+            cachedAppOpen.load(null);
         }
     }
 }

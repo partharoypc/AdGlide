@@ -19,9 +19,8 @@ public class MetaBannerProvider implements BannerProvider {
         if (config.isMrec()) {
             adSize = AdSize.RECTANGLE_HEIGHT_250;
         } else {
-            adSize = com.partharoypc.adglide.util.Tools.isTablet(activity)
-                    ? AdSize.BANNER_HEIGHT_90
-                    : AdSize.BANNER_HEIGHT_50;
+            int bannerHeight = com.partharoypc.adglide.util.Tools.isTablet(activity) ? 90 : 50;
+            adSize = (bannerHeight == 90) ? AdSize.BANNER_HEIGHT_90 : AdSize.BANNER_HEIGHT_50;
         }
         adView = new AdView(activity, adUnitId, adSize);
 

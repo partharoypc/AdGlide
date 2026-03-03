@@ -51,11 +51,30 @@ public class ActivityRewarded extends AppCompatActivity {
 
     private void showRewardedAd() {
         appendLog("Triggering Rewarded Ad Show...");
-        AdGlide.showRewarded(this, () -> {
-            appendLog("User Earned Reward!");
-            Toast.makeText(getApplicationContext(), "Reward Earned!", Toast.LENGTH_SHORT).show();
-        }, () -> {
-            appendLog("Ad Dismissed");
+        AdGlide.showRewarded(this, new com.partharoypc.adglide.util.AdGlideCallback() {
+            @Override
+            public void onAdLoaded() {
+            }
+
+            @Override
+            public void onAdFailedToLoad(String error) {
+                appendLog("Ad Failed: " + error);
+            }
+
+            @Override
+            public void onAdShowed() {
+            }
+
+            @Override
+            public void onAdDismissed() {
+                appendLog("Ad Dismissed");
+            }
+
+            @Override
+            public void onAdCompleted() {
+                appendLog("User Earned Reward!");
+                Toast.makeText(getApplicationContext(), "Reward Earned!", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 

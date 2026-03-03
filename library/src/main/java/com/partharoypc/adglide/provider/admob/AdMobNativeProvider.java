@@ -21,14 +21,17 @@ public class AdMobNativeProvider implements NativeProvider {
 
     @Override
     public void loadNativeAd(Activity activity, String adUnitId, NativeConfig config, NativeListener listener) {
-        if (!com.partharoypc.adglide.util.AdMobRateLimiter.isRequestAllowed(adUnitId)) {
+        if (!com.partharoypc.adglide.util.AdMobHelper.isRequestAllowed(adUnitId)) {
             listener.onAdFailedToLoad("AdMob rate limit hit");
             return;
         }
 
         AdLoader adLoader = new AdLoader.Builder(activity, adUnitId)
                 .forNativeAd(ad -> {
-                    com.partharoypc.adglide.util.AdMobRateLimiter.resetCooldown(adUnitId);
+                    com.partharoypc.adglide.util.AdMobHelper.resetCooldown(adUnitId);
+                    ad.setOnPaidEventListener(adValue -> {
+                        com.partharoypc.adglide.util.AdMobHelper.handlePaidEvent(adValue, "Native", adUnitId);
+                    });
                     if (this.nativeAd != null) {
                         this.nativeAd.destroy();
                     }
@@ -41,7 +44,7 @@ public class AdMobNativeProvider implements NativeProvider {
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError adError) {
                         if (adError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
-                            com.partharoypc.adglide.util.AdMobRateLimiter.recordFailure(adUnitId);
+                            com.partharoypc.adglide.util.AdMobHelper.recordFailure(adUnitId);
                         }
                         listener.onAdFailedToLoad(adError.getMessage());
                     }

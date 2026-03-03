@@ -16,7 +16,6 @@ public class AdGlideConfig {
     private final boolean legacyGDPR;
     private final boolean autoLoadInterstitial;
     private final boolean autoLoadRewarded;
-    private final boolean enableAppOpenAd;
     private final boolean enableHouseAd;
     private final int interstitialInterval;
     private final int rewardedInterval;
@@ -63,7 +62,6 @@ public class AdGlideConfig {
     private final String metaRewardedId;
     private final String unityRewardedId;
     private final String appLovinRewardedId;
-    private final String appLovinDiscRewardedZoneId;
     private final String ironSourceRewardedId;
     private final String wortiseRewardedId;
 
@@ -82,7 +80,6 @@ public class AdGlideConfig {
     private final String adMobNativeId;
     private final String metaNativeId;
     private final String appLovinNativeId;
-    private final String appLovinDiscNativeZoneId;
     private final String ironSourceNativeId;
     private final String wortiseNativeId;
 
@@ -104,7 +101,6 @@ public class AdGlideConfig {
         this.legacyGDPR = builder.legacyGDPR;
         this.autoLoadInterstitial = builder.autoLoadInterstitial;
         this.autoLoadRewarded = builder.autoLoadRewarded;
-        this.enableAppOpenAd = builder.enableAppOpenAd;
         this.enableHouseAd = builder.enableHouseAd;
         this.interstitialInterval = builder.interstitialInterval;
         this.rewardedInterval = builder.rewardedInterval;
@@ -145,7 +141,6 @@ public class AdGlideConfig {
         this.metaRewardedId = builder.metaRewardedId;
         this.unityRewardedId = builder.unityRewardedId;
         this.appLovinRewardedId = builder.appLovinRewardedId;
-        this.appLovinDiscRewardedZoneId = builder.appLovinDiscRewardedZoneId;
         this.ironSourceRewardedId = builder.ironSourceRewardedId;
         this.wortiseRewardedId = builder.wortiseRewardedId;
 
@@ -161,7 +156,6 @@ public class AdGlideConfig {
         this.adMobNativeId = builder.adMobNativeId;
         this.metaNativeId = builder.metaNativeId;
         this.appLovinNativeId = builder.appLovinNativeId;
-        this.appLovinDiscNativeZoneId = builder.appLovinDiscNativeZoneId;
         this.ironSourceNativeId = builder.ironSourceNativeId;
         this.wortiseNativeId = builder.wortiseNativeId;
 
@@ -210,8 +204,8 @@ public class AdGlideConfig {
         return autoLoadRewarded;
     }
 
-    public boolean isAppOpenAdEnabled() {
-        return enableAppOpenAd;
+    public boolean isAppOpenEnabled() {
+        return appOpenStatus;
     }
 
     public boolean isHouseAdEnabled() {
@@ -262,7 +256,7 @@ public class AdGlideConfig {
         return rewardedStatus;
     }
 
-    public boolean isAppOpenEnabled() {
+    public boolean isAppOpenEnabledGlobal() {
         return appOpenStatus;
     }
 
@@ -362,10 +356,6 @@ public class AdGlideConfig {
         return appLovinRewardedId;
     }
 
-    public String getAppLovinDiscRewardedZoneId() {
-        return appLovinDiscRewardedZoneId;
-    }
-
     public String getIronSourceRewardedId() {
         return ironSourceRewardedId;
     }
@@ -417,10 +407,6 @@ public class AdGlideConfig {
         return appLovinNativeId;
     }
 
-    public String getAppLovinDiscNativeZoneId() {
-        return appLovinDiscNativeZoneId;
-    }
-
     public String getIronSourceNativeId() {
         return ironSourceNativeId;
     }
@@ -456,21 +442,19 @@ public class AdGlideConfig {
         private boolean legacyGDPR = false;
         private boolean autoLoadInterstitial = false;
         private boolean autoLoadRewarded = false;
-        private boolean enableAppOpenAd = false;
-        private boolean enableHouseAd = false;
-        private int interstitialInterval = 1;
-        private int rewardedInterval = 1;
-        private final List<String> openAdExcludedActivities = new ArrayList<>();
-        private boolean enableGDPR = false;
-        private boolean debugGDPR = false;
-        private boolean enableDebugHUD = false;
-
         private boolean bannerStatus = false;
         private boolean interstitialStatus = false;
         private boolean nativeStatus = false;
         private boolean rewardedStatus = false;
         private boolean appOpenStatus = false;
         private boolean rewardedInterstitialStatus = false;
+        private boolean enableHouseAd = false;
+        private int interstitialInterval = 0;
+        private int rewardedInterval = 0;
+        private final List<String> openAdExcludedActivities = new ArrayList<>();
+        private boolean enableGDPR = false;
+        private boolean debugGDPR = false;
+        private boolean enableDebugHUD = false;
 
         private String adMobAppId = "";
         private String startappAppId = "0";
@@ -497,7 +481,6 @@ public class AdGlideConfig {
         private String metaRewardedId = "";
         private String unityRewardedId = "";
         private String appLovinRewardedId = "";
-        private String appLovinDiscRewardedZoneId = "";
         private String ironSourceRewardedId = "";
         private String wortiseRewardedId = "";
 
@@ -513,7 +496,6 @@ public class AdGlideConfig {
         private String adMobNativeId = "";
         private String metaNativeId = "";
         private String appLovinNativeId = "";
-        private String appLovinDiscNativeZoneId = "";
         private String ironSourceNativeId = "";
         private String wortiseNativeId = "";
 
@@ -605,13 +587,13 @@ public class AdGlideConfig {
             return this;
         }
 
-        public Builder enableAppOpenAd(boolean enableAppOpenAd) {
-            this.enableAppOpenAd = enableAppOpenAd;
+        public Builder appOpenEnabled(boolean enable) {
+            this.appOpenStatus = enable;
             return this;
         }
 
-        public Builder houseAdEnabled(boolean enableHouseAd) {
-            this.enableHouseAd = enableHouseAd;
+        public Builder houseAdEnabled(boolean enable) {
+            this.enableHouseAd = enable;
             return this;
         }
 
@@ -622,6 +604,53 @@ public class AdGlideConfig {
 
         public Builder rewardedInterval(int interval) {
             this.rewardedInterval = interval;
+            return this;
+        }
+
+        public Builder bannerEnabled(boolean enable) {
+            this.bannerStatus = enable;
+            return this;
+        }
+
+        public Builder interstitialEnabled(boolean enable) {
+            this.interstitialStatus = enable;
+            return this;
+        }
+
+        public Builder nativeEnabled(boolean enable) {
+            this.nativeStatus = enable;
+            return this;
+        }
+
+        public Builder rewardedEnabled(boolean enable) {
+            this.rewardedStatus = enable;
+            return this;
+        }
+
+        public Builder rewardedInterstitialEnabled(boolean enable) {
+            this.rewardedInterstitialStatus = enable;
+            return this;
+        }
+
+        public Builder excludeOpenAdFrom(Class<?>... activities) {
+            for (Class<?> activity : activities) {
+                this.openAdExcludedActivities.add(activity.getName());
+            }
+            return this;
+        }
+
+        public Builder enableGDPR(boolean enable) {
+            this.enableGDPR = enable;
+            return this;
+        }
+
+        public Builder debugGDPR(boolean debug) {
+            this.debugGDPR = debug;
+            return this;
+        }
+
+        public Builder enableDebugHUD(boolean enable) {
+            this.enableDebugHUD = enable;
             return this;
         }
 
@@ -652,58 +681,6 @@ public class AdGlideConfig {
 
         public Builder wortiseAppId(String id) {
             this.wortiseAppId = id;
-            return this;
-        }
-
-        public Builder excludeOpenAdFrom(Class<?>... activities) {
-            for (Class<?> activity : activities) {
-                this.openAdExcludedActivities.add(activity.getName());
-            }
-            return this;
-        }
-
-        public Builder enableGDPR(boolean enable) {
-            this.enableGDPR = enable;
-            return this;
-        }
-
-        public Builder debugGDPR(boolean debug) {
-            this.debugGDPR = debug;
-            return this;
-        }
-
-        public Builder enableDebugHUD(boolean enable) {
-            this.enableDebugHUD = enable;
-            return this;
-        }
-
-        public Builder bannerStatus(boolean enable) {
-            this.bannerStatus = enable;
-            return this;
-        }
-
-        public Builder interstitialStatus(boolean enable) {
-            this.interstitialStatus = enable;
-            return this;
-        }
-
-        public Builder nativeStatus(boolean enable) {
-            this.nativeStatus = enable;
-            return this;
-        }
-
-        public Builder rewardedStatus(boolean enable) {
-            this.rewardedStatus = enable;
-            return this;
-        }
-
-        public Builder appOpenStatus(boolean enable) {
-            this.appOpenStatus = enable;
-            return this;
-        }
-
-        public Builder rewardedInterstitialStatus(boolean enable) {
-            this.rewardedInterstitialStatus = enable;
             return this;
         }
 
@@ -788,7 +765,6 @@ public class AdGlideConfig {
         }
 
         public Builder appLovinDiscRewardedZoneId(String id) {
-            this.appLovinDiscRewardedZoneId = id;
             return this;
         }
 
@@ -853,7 +829,6 @@ public class AdGlideConfig {
         }
 
         public Builder appLovinDiscNativeZoneId(String id) {
-            this.appLovinDiscNativeZoneId = id;
             return this;
         }
 
