@@ -70,5 +70,5 @@ dependencies {
     
     // Force latest version of android-gif-drawable for 16KB alignment support
     //noinspection Aligned16KB
-    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.28'
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.31'
 }

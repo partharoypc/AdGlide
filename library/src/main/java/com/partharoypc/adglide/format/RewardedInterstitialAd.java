@@ -33,13 +33,13 @@ public class RewardedInterstitialAd {
     public static class Builder {
         private static final String TAG = "AdGlide";
         private final com.partharoypc.adglide.util.AdLoader adLoader;
-        private final Activity activity;
+        private final java.lang.ref.WeakReference<Activity> activityRef;
         private boolean showOnLoad = false;
         private AdGlideCallback callback;
         private RewardedProvider currentProvider;
 
         public Builder(Activity activity) {
-            this.activity = activity;
+            this.activityRef = new java.lang.ref.WeakReference<>(activity);
             this.adLoader = new com.partharoypc.adglide.util.AdLoader(activity,
                     com.partharoypc.adglide.util.AdFormat.REWARDED_INTERSTITIAL);
         }
@@ -185,6 +185,10 @@ public class RewardedInterstitialAd {
                 }
             };
 
+            Activity activity = activityRef.get();
+            if (activity == null)
+                return;
+
             provider.loadRewardedAd(activity, adUnitId, config, new RewardedProvider.RewardedListener() {
                 @Override
                 public void onAdLoaded() {
@@ -220,12 +224,16 @@ public class RewardedInterstitialAd {
         }
 
         public void showRewardedInterstitialAd(AdGlideCallback callback) {
-            showRewardedInterstitialAd(activity, callback);
+            Activity activity = activityRef.get();
+            if (activity != null) {
+                showRewardedInterstitialAd(activity, callback);
+            }
         }
 
         public void showRewardedInterstitialAd(Activity displayActivity, AdGlideCallback callback) {
             if (currentProvider != null && currentProvider.isAdAvailable()) {
-                currentProvider.showRewardedAd(displayActivity != null ? displayActivity : activity,
+                Activity defaultActivity = activityRef.get();
+                currentProvider.showRewardedAd(displayActivity != null ? displayActivity : defaultActivity,
                         new RewardedProvider.RewardedListener() {
                             @Override
                             public void onAdLoaded() {

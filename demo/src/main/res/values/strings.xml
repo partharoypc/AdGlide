@@ -28,9 +28,6 @@
     <string name="privacy">Privacy</string>
     <string name="manage_consent">Manage GDPR Consent</string>
 
-    <string name="small_template">Small Template (Compact)</string>
-    <string name="medium_template">Medium Template (Feed Style)</string>
-    <string name="video_template">Video Template (High Engagement)</string>
     <string name="rewarded_interstitial">Rewarded Interstitial</string>
     <string name="rewarded_interstitial_desc">The perfect hybrid: Non-intrusive full screen ad that rewards the user.</string>
     <string name="pre_load_ad">Pre-Load Ad</string>
