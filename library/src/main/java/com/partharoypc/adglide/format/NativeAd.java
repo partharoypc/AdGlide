@@ -50,8 +50,8 @@ public class NativeAd {
         private NativeProvider currentProvider;
         private String nativeAdStyle = "medium";
         private boolean darkTheme = false;
-        private int nativeBackgroundLight = android.graphics.Color.WHITE;
-        private int nativeBackgroundDark = android.graphics.Color.BLACK;
+        private int nativeBackgroundLight;
+        private int nativeBackgroundDark;
 
         private final com.partharoypc.adglide.util.AdLoader adLoader;
 
@@ -59,6 +59,9 @@ public class NativeAd {
             this.activityRef = new java.lang.ref.WeakReference<>(activity);
             this.adLoader = new com.partharoypc.adglide.util.AdLoader(activity,
                     com.partharoypc.adglide.util.AdFormat.NATIVE);
+            // Default semantic colors: Transparent
+            this.nativeBackgroundLight = ContextCompat.getColor(activity, android.R.color.transparent);
+            this.nativeBackgroundDark = ContextCompat.getColor(activity, android.R.color.transparent);
         }
 
         @NonNull

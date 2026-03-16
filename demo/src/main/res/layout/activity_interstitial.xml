@@ -22,39 +22,39 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:gravity="center_horizontal"
         android:orientation="vertical"
         android:padding="16dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:gravity="center_horizontal">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             app:cardCornerRadius="8dp"
-            app:cardElevation="2dp"
-            android:layout_marginBottom="16dp">
+            app:cardElevation="2dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center"
                 android:orientation="vertical"
-                android:padding="24dp"
-                android:gravity="center">
+                android:padding="24dp">
 
                 <Button
                     android:id="@+id/btn_load"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/load_interstitial"
                     android:layout_marginBottom="8dp"
-                    style="@style/Widget.Material3.Button.OutlinedButton"/>
+                    android:text="@string/load_interstitial" />
 
                 <Button
                     android:id="@+id/btn_show"
+                    style="@style/Widget.Material3.Button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/show_interstitial"
-                    style="@style/Widget.Material3.Button"/>
+                    android:text="@string/show_interstitial" />
 
             </LinearLayout>
 
@@ -63,9 +63,9 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:text="@string/logs"
-            android:textAppearance="?attr/textAppearanceTitleMedium"
-            android:layout_marginBottom="8dp"/>
+            android:textAppearance="?attr/textAppearanceTitleMedium" />
 
         <ScrollView
             android:layout_width="match_parent"
@@ -79,8 +79,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="monospace"
-                android:textSize="12sp"
-                android:textColor="@color/black"/>
+                android:textColor="@color/black"
+                android:textSize="12sp" />
 
         </ScrollView>
 

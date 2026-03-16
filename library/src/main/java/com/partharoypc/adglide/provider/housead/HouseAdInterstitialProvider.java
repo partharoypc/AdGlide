@@ -16,6 +16,8 @@ import com.partharoypc.adglide.AdGlideConfig;
 import com.partharoypc.adglide.provider.InterstitialProvider;
 import com.partharoypc.adglide.util.AdGlideCallback;
 import com.partharoypc.adglide.util.ImageDownloader;
+import androidx.core.content.ContextCompat;
+import com.partharoypc.adglide.R;
 
 public class HouseAdInterstitialProvider implements InterstitialProvider {
 
@@ -64,7 +66,7 @@ public class HouseAdInterstitialProvider implements InterstitialProvider {
         RelativeLayout layout = new RelativeLayout(activity);
         layout.setLayoutParams(
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        layout.setBackgroundColor(Color.BLACK);
+        layout.setBackgroundColor(ContextCompat.getColor(activity, R.color.adglide_color_black));
 
         ImageView imageView = new ImageView(activity);
         imageView.setImageBitmap(cachedAdImage);
@@ -88,7 +90,7 @@ public class HouseAdInterstitialProvider implements InterstitialProvider {
         // Close button (Basic top right X)
         ImageView closeButton = new ImageView(activity);
         closeButton.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);
-        closeButton.setBackgroundColor(Color.parseColor("#80000000")); // semi-transparent black background
+        closeButton.setBackgroundColor(ContextCompat.getColor(activity, R.color.adglide_color_overlay_dark)); // semantic overlay
         closeButton.setPadding(32, 32, 32, 32);
         RelativeLayout.LayoutParams closeParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);

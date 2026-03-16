@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="adglide_color_primary">#0061A4</color>
+    <color name="adglide_color_background">#FDFBFF</color>
+    <color name="adglide_color_surface">#F1F0F4</color>
+    <color name="adglide_color_text_primary">#1C1B1F</color>
+    <color name="adglide_color_text_secondary">#49454E</color>
+    <color name="adglide_color_outline">#79747E</color>
+    <color name="adglide_color_cta_background">@color/adglide_color_primary</color>
+    <color name="adglide_color_cta_text">#FFFFFF</color>
 
-    <color name="adglide_color_native_background_light">@android:color/transparent</color>
-    <color name="adglide_color_native_background_dark">@android:color/transparent</color> <!-- Modern Dark -->
+    <color name="adglide_color_indicator_background">#FBB828</color>
 
-    <!-- Premium Text Palette -->
-    <color name="adglide_color_primary_text">#212121</color>
-    <color name="adglide_color_secondary_text">#757575</color>
-    <color name="adglide_color_primary_text_dark">#ECEFF1</color> <!-- Blueish White -->
-    <color name="adglide_color_secondary_text_dark">#B0BEC5</color>
+    <color name="adglide_color_debug_background">#121212</color>
+    <color name="adglide_color_debug_surface">#1E1E1E</color>
+    <color name="adglide_color_debug_logs">#00FF00</color>
 
-    <!-- Premium Brand Colors -->
-    <color name="adglide_color_primary">#2962FF</color> <!-- Vibrant Blue -->
+    <!-- Overlay & Stroke Colors -->
+    <color name="adglide_color_white_overlay">#40FFFFFF</color>
+    <color name="adglide_color_white_stroke">#33FFFFFF</color>
 
-    <color name="adglide_white">#FFFFFF</color>
-    <color name="adglide_ad_yellow">#FBB828</color>
-    <color name="adglide_outline">#EEEEEE</color>
-    <color name="adglide_outline_dark">#2C2C2C</color>
+    <color name="adglide_color_black">#000000</color>
+    <color name="adglide_color_overlay_dark">#80000000</color>
 </resources>
 

@@ -39,6 +39,8 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
+            <include layout="@layout/adglide_view_native_ad_label" />
+
             <TextView
                 android:id="@+id/native_ad_title"
                 style="@style/AdGlide.Headline"

@@ -20,11 +20,11 @@
             android:orientation="horizontal">
 
             <ImageView
-                tools:ignore="ContentDescription"
                 android:id="@+id/icon"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_marginEnd="10dp" />
+                android:layout_marginEnd="10dp"
+                tools:ignore="ContentDescription" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -32,11 +32,13 @@
                 android:layout_weight="1"
                 android:orientation="vertical">
 
+                <include layout="@layout/adglide_view_native_ad_label" />
+
                 <TextView
                     android:id="@+id/primary"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="#000000"
+                    android:textColor="@color/adglide_color_text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -44,7 +46,7 @@
                     android:id="@+id/body"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="#666666"
+                    android:textColor="@color/adglide_color_text_secondary"
                     android:textSize="14sp" />
             </LinearLayout>
         </LinearLayout>
@@ -53,16 +55,16 @@
             android:id="@+id/media_view"
             android:layout_width="match_parent"
             android:layout_height="180dp"
-            android:layout_marginTop="10dp"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="10dp" />
 
         <Button
             android:id="@+id/cta"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:backgroundTint="#007AFF"
-            android:textColor="#FFFFFF" />
+            android:backgroundTint="@color/adglide_color_primary"
+            android:textColor="@color/adglide_color_cta_text" />
 
     </LinearLayout>
 </com.google.android.gms.ads.nativead.NativeAdView>

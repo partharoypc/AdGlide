@@ -1,3 +1,5 @@
+package com.partharoypc.adglide.format;
+
 import android.app.Activity;
 import android.util.Log;
 import android.view.View;
@@ -49,8 +51,8 @@ public class NativeAdView {
         private boolean legacyGDPR = false;
 
         private String nativeAdStyle = "";
-        private int nativeBackgroundLight = R.color.adglide_color_native_background_light;
-        private int nativeBackgroundDark = R.color.adglide_color_native_background_dark;
+        private int nativeBackgroundLight = android.R.color.transparent;
+        private int nativeBackgroundDark = android.R.color.transparent;
 
         public Builder(Activity activity) {
             this.activity = activity;
@@ -315,7 +317,8 @@ public class NativeAdView {
                 case META -> builder.metaNativeId;
                 case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> builder.appLovinNativeId;
                 case WORTISE -> builder.wortiseNativeId;
-                case STARTAPP -> "startapp_native"; // StartApp usually doesn't need unit IDs for Native
+                case STARTAPP ->
+                        "startapp_native"; // StartApp usually doesn't need unit IDs for Native
                 default -> "";
             };
         }

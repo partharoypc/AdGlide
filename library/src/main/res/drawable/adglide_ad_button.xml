@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="#40FFFFFF"> <!-- Semi-transparent white ripple -->
+    android:color="@color/adglide_color_white_overlay"> <!-- Semi-transparent white ripple -->
     <item>
         <shape android:shape="rectangle">
             <solid android:color="@color/adglide_color_primary" />
-            <stroke android:width="0.5dp" android:color="#33FFFFFF" />
+            <stroke
+                android:width="0.5dp"
+                android:color="@color/adglide_color_white_stroke" />
             <corners android:radius="@dimen/adglide_corner_radius" />
         </shape>
     </item>

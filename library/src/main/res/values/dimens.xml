@@ -8,9 +8,9 @@
     <dimen name="adglide_text_size_small">14sp</dimen>
     <dimen name="adglide_text_size_large">16sp</dimen>
 
-    <dimen name="adglide_ad_indicator_width">28dp</dimen>
-    <dimen name="adglide_ad_indicator_height">18dp</dimen>
-    <dimen name="adglide_ad_indicator_text_size">12sp</dimen>
+    <dimen name="adglide_ad_indicator_width">26dp</dimen>
+    <dimen name="adglide_ad_indicator_height">16dp</dimen>
+    <dimen name="adglide_ad_indicator_text_size">10sp</dimen>
 
     <dimen name="adglide_spacing_tiny">4dp</dimen>
     <dimen name="adglide_spacing_small">6dp</dimen>
