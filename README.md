@@ -321,6 +321,8 @@ AdGlide.preloadRewardedInterstitial(activity);
 
 ### 🎨 3.6 Native Ads
 
+Our "Super Perfect" Native Ad styles are fully Material Design compliant and seamlessly integrate across **all** supported networks (AdMob, Meta, AppLovin, IronSource, StartApp, Wortise).
+
 ```java
 // Quick 1-liner
 AdGlide.showNative(activity, binding.nativeContainer, "medium");
@@ -331,6 +333,12 @@ new NativeAd.Builder(activity)
     .style("video") // "small" | "medium" | "banner" | "video"
     .load();
 ```
+
+#### Native Ad Styles Explained
+- **`small`**: Compact 1-line radio style. Fits perfectly in recycler views.
+- **`medium`**: Standard box with prominent CTA. 
+- **`banner`**: Traditional news feed inline styling.
+- **`video`** / **`large`**: Large scale immersive video or image container.
 
 ---
 
@@ -458,5 +466,13 @@ Use these constants when defining your networks in the `AdGlideConfig.Builder`:
 
 ---
 
+---
+
+## 👨‍💻 Developed By
+
+**Partha Roy**
+*Android Developer & Architecture Enthusiast*
+- 🌐 **GitHub**: [github.com/partharoypc](https://github.com/partharoypc)
+
 *Built for Scale. Optimized for Speed. Perfected for Developers.*
-*© 2026 [AdGlide](https://github.com/partharoypc/AdGlide) — All rights reserved.*
+*© 2026 AdGlide — All rights reserved.*

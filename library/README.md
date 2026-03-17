@@ -1,6 +1,10 @@
 # AdGlide Library Module 🚀
 ### *The Industrial-Grade Core Engine for Android Ad Mediation*
 
+[![Android](https://img.shields.io/badge/Android-23%2B-green.svg)](https://developer.android.com)
+[![Compile SDK](https://img.shields.io/badge/Compile_SDK-36-green.svg)](https://developer.android.com)
+[![Architecture](https://img.shields.io/badge/Architecture-Clean-blue.svg)](https://en.wikipedia.org/wiki/Clean_code)
+
 This module contains the high-performance source code for the **AdGlide SDK**. It is engineered for stability, zero-latency failovers, and maximum revenue optimization.
 
 ---
@@ -74,5 +78,6 @@ new AppOpenAd.Builder(activity)
 - **Performance**: Optimized for zero impact on app startup time.
 
 ---
+
 *Built for Scale. Optimized for Speed. Perfected for Developers.*
-© 2026 AdGlide. All rights reserved.
+*© 2026 AdGlide — All rights reserved.*
