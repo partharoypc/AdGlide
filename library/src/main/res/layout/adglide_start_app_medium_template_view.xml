@@ -32,17 +32,7 @@
 
                 <include layout="@layout/adglide_view_native_ad_label" />
 
-                <TextView
-                    android:id="@+id/advertiser_textView"
-                    style="@style/AdGlide.Body"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/adglide_spacing_small"
-                    android:layout_marginTop="@dimen/adglide_spacing_tiny"
-                    android:ellipsize="end"
-                    android:gravity="start"
-                    android:maxLines="1"
-                    android:text="@string/adglide_txt_advertiser" />
+                
 
             </LinearLayout>
 

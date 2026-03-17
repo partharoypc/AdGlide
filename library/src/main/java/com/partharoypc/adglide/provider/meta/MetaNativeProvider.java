@@ -77,7 +77,6 @@ public class MetaNativeProvider implements NativeProvider {
         com.facebook.ads.MediaView nativeAdIcon = nativeAdView.findViewById(R.id.native_ad_icon);
         TextView nativeAdSocialContext = nativeAdView.findViewById(R.id.native_ad_social_context);
         TextView nativeAdBody = nativeAdView.findViewById(R.id.native_ad_body);
-        TextView sponsoredLabel = nativeAdView.findViewById(R.id.native_ad_sponsored_label);
         Button nativeAdCallToAction = nativeAdView.findViewById(R.id.native_ad_call_to_action);
 
         if (nativeAdTitle != null)
@@ -90,14 +89,10 @@ public class MetaNativeProvider implements NativeProvider {
             nativeAdCallToAction.setVisibility(ad.hasCallToAction() ? View.VISIBLE : View.INVISIBLE);
             nativeAdCallToAction.setText(ad.getAdCallToAction());
         }
-        if (sponsoredLabel != null)
-            sponsoredLabel.setText(ad.getSponsoredTranslation());
 
         List<View> clickableViews = new ArrayList<>();
         if (nativeAdTitle != null)
             clickableViews.add(nativeAdTitle);
-        if (sponsoredLabel != null)
-            clickableViews.add(sponsoredLabel);
         if (nativeAdIcon != null)
             clickableViews.add(nativeAdIcon);
         if (nativeAdMedia != null)

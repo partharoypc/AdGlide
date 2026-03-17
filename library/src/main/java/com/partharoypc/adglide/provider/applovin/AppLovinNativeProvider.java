@@ -33,7 +33,6 @@ public class AppLovinNativeProvider implements NativeProvider {
                         layoutRes)
                         .setTitleTextViewId(com.partharoypc.adglide.R.id.title_text_view)
                         .setBodyTextViewId(com.partharoypc.adglide.R.id.body_text_view)
-                        .setAdvertiserTextViewId(com.partharoypc.adglide.R.id.advertiser_textView)
                         .setIconImageViewId(com.partharoypc.adglide.R.id.icon_image_view)
                         .setMediaContentViewGroupId(com.partharoypc.adglide.R.id.media_view_container)
                         .setOptionsContentViewGroupId(com.partharoypc.adglide.R.id.ad_options_view)
