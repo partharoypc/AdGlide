@@ -38,5 +38,15 @@
         <item name="android:gravity">center</item>
         <item name="android:background">@drawable/adglide_ad_icon</item>
     </style>
+    <!-- Shape Styles -->
+    <style name="AdGlide.ShapeAppearance.SmallComponent" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">10dp</item>
+    </style>
+
+    <style name="AdGlide.ShapeAppearance.MediumComponent" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
 
 </resources>

@@ -1,7 +1,9 @@
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/ad_notification_view"
     style="@style/AdGlide.AdIndicator"
-    android:layout_width="@dimen/adglide_ad_indicator_width"
-    android:layout_height="@dimen/adglide_ad_indicator_height"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="6dp"
+    android:paddingVertical="1dp"
+    android:layout_gravity="top|start"
     android:text="@string/adglide_txt_ad" />
-

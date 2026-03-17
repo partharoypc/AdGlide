@@ -1,64 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.gms.ads.nativead.NativeAdView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/native_ad_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <LinearLayout
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_margin="2dp"
-        android:background="@drawable/adglide_bg_native_ad"
-        android:elevation="1dp"
-        android:minHeight="50dp"
-        android:orientation="horizontal"
-        android:padding="5dp">
-
-        <ImageView
-            android:id="@+id/icon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="5dp"
-            android:adjustViewBounds="true"
-            tools:ignore="ContentDescription" />
+        android:layout_margin="5dp"
+        app:cardBackgroundColor="@color/adglide_color_background"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
+        app:strokeColor="@color/adglide_color_outline"
+        app:strokeWidth="1.5dp">
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="12dp">
 
-            <include layout="@layout/adglide_view_native_ad_label" />
-
-            <TextView
-                android:id="@+id/primary"
+            <FrameLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textColor="@color/adglide_color_text_primary"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+                android:layout_marginEnd="12dp">
 
-            <TextView
-                android:id="@+id/body"
-                android:layout_width="wrap_content"
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/icon"
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:background="#F8FAFC"
+                    android:padding="2dp"
+                    app:shapeAppearanceOverlay="@style/AdGlide.ShapeAppearance.SmallComponent"
+                    tools:ignore="ContentDescription" />
+
+                <include layout="@layout/adglide_view_native_ad_label" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textColor="@color/adglide_color_text_secondary"
-                android:textSize="12sp" />
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/primary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/adglide_color_text_primary"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/body"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/adglide_color_text_secondary"
+                    android:textSize="13sp" />
+
+                <RatingBar
+                    android:id="@+id/stars"
+                    style="?android:attr/ratingBarStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:isIndicator="true"
+                    android:numStars="5"
+                    android:progressTint="@color/adglide_color_indicator_background"
+                    android:stepSize="0.5"
+                    android:theme="@style/Widget.AppCompat.RatingBar.Small"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/cta"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginStart="12dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:paddingHorizontal="16dp"
+                android:textAllCaps="true"
+                android:textColor="@color/adglide_color_cta_text"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/adglide_color_cta_background"
+                app:cornerRadius="10dp" />
         </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
-        <Button
-            android:id="@+id/cta"
-            android:layout_width="wrap_content"
-            android:layout_height="35dp"
-            android:layout_gravity="center_vertical"
-            android:backgroundTint="@color/adglide_color_primary"
-            android:textColor="@color/adglide_color_cta_text"
-            android:textSize="12sp" />
-    </LinearLayout>
 </com.google.android.gms.ads.nativead.NativeAdView>
