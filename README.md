@@ -327,18 +327,35 @@ Our "Super Perfect" Native Ad styles are fully Material Design compliant and sea
 // Quick 1-liner
 AdGlide.showNative(activity, binding.nativeContainer, "medium");
 
-// Builder API with full style control
-new NativeAd.Builder(activity)
-    .container(binding.nativeContainer)
-    .style("video") // "small" | "medium" | "banner" | "video"
-    .load();
+// Builder API with full style control and professional error handling
+if (AdGlide.isNativeEnabled()) {
+    binding.nativeContainer.setVisibility(View.VISIBLE);
+    
+    new NativeAd.Builder(activity)
+        .container(binding.nativeContainer)
+        .style(AdGlideNativeStyle.MEDIUM) // AdGlideNativeStyle.SMALL | MEDIUM | BANNER | VIDEO
+        .load(new AdGlideCallback() {
+            @Override
+            public void onAdLoaded() {
+                // Ad was successfully loaded and rendered
+            }
+
+            @Override
+            public void onAdFailedToLoad(String error) {
+                // Hide the container to prevent empty white space if no ad fills
+                binding.nativeContainer.setVisibility(View.GONE);
+            }
+        });
+} else {
+    binding.nativeContainer.setVisibility(View.GONE);
+}
 ```
 
 #### Native Ad Styles Explained
-- **`small`**: Compact 1-line radio style. Fits perfectly in recycler views.
-- **`medium`**: Standard box with prominent CTA. 
-- **`banner`**: Traditional news feed inline styling.
-- **`video`** / **`large`**: Large scale immersive video or image container.
+- **`AdGlideNativeStyle.SMALL`** (`"small"`): Compact 1-line radio style. Fits perfectly in recycler views.
+- **`AdGlideNativeStyle.MEDIUM`** (`"medium"`): Standard box with prominent CTA. 
+- **`AdGlideNativeStyle.BANNER`** (`"banner"`): Traditional news feed inline styling.
+- **`AdGlideNativeStyle.VIDEO`** (`"video"`): Large scale immersive video or image container.
 
 ---
 
