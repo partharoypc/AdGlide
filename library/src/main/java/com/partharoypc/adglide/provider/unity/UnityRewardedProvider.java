@@ -56,6 +56,8 @@ public class UnityRewardedProvider implements RewardedProvider {
 
                 @Override
                 public void onUnityAdsShowStart(String placementId) {
+                    com.partharoypc.adglide.util.PerformanceLogger.log(TAG, "Rewarded showed: " + placementId);
+                    listener.onAdShowed();
                 }
 
                 @Override

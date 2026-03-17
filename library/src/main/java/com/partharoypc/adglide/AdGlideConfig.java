@@ -13,7 +13,6 @@ public class AdGlideConfig {
     private final List<String> backupNetworks;
     private final boolean testMode;
     private final boolean debug;
-    private final boolean legacyGDPR;
     private final boolean autoLoadInterstitial;
     private final boolean autoLoadRewarded;
     private final boolean enableHouseAd;
@@ -89,8 +88,6 @@ public class AdGlideConfig {
     private final String houseAdInterstitialImage;
     private final String houseAdInterstitialClickUrl;
 
-    private final com.partharoypc.adglide.util.OnPaidEventListener onPaidEventListener;
-
     private AdGlideConfig(Builder builder) {
         this.adStatus = builder.adStatus;
         this.primaryNetwork = builder.primaryNetwork;
@@ -98,7 +95,6 @@ public class AdGlideConfig {
         this.backupNetworks = builder.backupNetworks;
         this.testMode = builder.testMode;
         this.debug = builder.debug;
-        this.legacyGDPR = builder.legacyGDPR;
         this.autoLoadInterstitial = builder.autoLoadInterstitial;
         this.autoLoadRewarded = builder.autoLoadRewarded;
         this.enableHouseAd = builder.enableHouseAd;
@@ -164,7 +160,6 @@ public class AdGlideConfig {
         this.houseAdInterstitialImage = builder.houseAdInterstitialImage;
         this.houseAdInterstitialClickUrl = builder.houseAdInterstitialClickUrl;
 
-        this.onPaidEventListener = builder.onPaidEventListener;
     }
 
     // Getters for Global Settings
@@ -192,10 +187,6 @@ public class AdGlideConfig {
         return debug;
     }
 
-    public boolean isLegacyGDPR() {
-        return legacyGDPR;
-    }
-
     public boolean isAutoLoadInterstitial() {
         return autoLoadInterstitial;
     }
@@ -218,10 +209,6 @@ public class AdGlideConfig {
 
     public int getRewardedInterval() {
         return rewardedInterval;
-    }
-
-    public com.partharoypc.adglide.util.OnPaidEventListener getOnPaidEventListener() {
-        return onPaidEventListener;
     }
 
     public List<String> getOpenAdExcludedActivities() {
@@ -439,7 +426,6 @@ public class AdGlideConfig {
         private final List<String> backupNetworks = new ArrayList<>();
         private boolean testMode = false;
         private boolean debug = true;
-        private boolean legacyGDPR = false;
         private boolean autoLoadInterstitial = false;
         private boolean autoLoadRewarded = false;
         private boolean bannerStatus = false;
@@ -504,8 +490,6 @@ public class AdGlideConfig {
         private String houseAdInterstitialImage = "";
         private String houseAdInterstitialClickUrl = "";
 
-        private com.partharoypc.adglide.util.OnPaidEventListener onPaidEventListener = null;
-
         public Builder() {
         }
 
@@ -521,11 +505,6 @@ public class AdGlideConfig {
 
         public Builder primaryNetwork(String network) {
             this.primaryNetwork = network;
-            return this;
-        }
-
-        public Builder onPaidEventListener(com.partharoypc.adglide.util.OnPaidEventListener listener) {
-            this.onPaidEventListener = listener;
             return this;
         }
 
@@ -569,11 +548,6 @@ public class AdGlideConfig {
 
         public Builder debug(boolean debug) {
             this.debug = debug;
-            return this;
-        }
-
-        public Builder legacyGDPR(boolean legacyGDPR) {
-            this.legacyGDPR = legacyGDPR;
             return this;
         }
 
@@ -761,10 +735,6 @@ public class AdGlideConfig {
 
         public Builder appLovinRewardedId(String id) {
             this.appLovinRewardedId = id;
-            return this;
-        }
-
-        public Builder appLovinDiscRewardedZoneId(String id) {
             return this;
         }
 

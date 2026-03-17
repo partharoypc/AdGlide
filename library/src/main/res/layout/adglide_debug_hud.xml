@@ -11,31 +11,61 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="12dp"
         android:text="AdGlide SDK Debugger"
         android:textColor="@color/adglide_color_text_primary"
         android:textSize="22sp"
         android:textStyle="bold" />
 
+    <!-- SDK Config Section -->
     <TextView
         android:id="@+id/config_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="12dp"
         android:background="@color/adglide_color_debug_surface"
         android:fontFamily="monospace"
         android:padding="8dp"
         android:text="Loading configuration..."
         android:textColor="@color/adglide_color_text_secondary"
-        android:textSize="14sp" />
+        android:textSize="13sp" />
 
+    <!-- Waterfall Status Section -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="4dp"
+        android:text="Waterfall Status"
+        android:textColor="@color/adglide_color_text_primary"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_marginBottom="12dp"
+        android:background="@color/adglide_color_debug_surface"
+        android:padding="6dp">
+
+        <TextView
+            android:id="@+id/waterfall_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:text="— No ad requests yet —"
+            android:textColor="@color/adglide_color_debug_logs"
+            android:textSize="11sp" />
+    </ScrollView>
+
+    <!-- Performance Logs Section -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
         android:text="Performance Logs"
         android:textColor="@color/adglide_color_text_primary"
-        android:textSize="18sp" />
+        android:textSize="16sp"
+        android:textStyle="bold" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -53,11 +83,26 @@
             android:textSize="12sp" />
     </ScrollView>
 
-    <Button
-        android:id="@+id/refresh_btn"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Refresh Logs" />
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/refresh_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="Refresh" />
+
+        <Button
+            android:id="@+id/clear_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Clear Logs" />
+    </LinearLayout>
 
 </LinearLayout>

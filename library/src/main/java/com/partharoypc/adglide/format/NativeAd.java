@@ -99,89 +99,6 @@ public class NativeAd {
             return this;
         }
 
-        // --- Deprecated chained methods. Keeping for compatibility ---
-
-        @NonNull
-        public Builder status(boolean adStatus) {
-            return this;
-        }
-
-        @NonNull
-        public Builder network(@NonNull String adNetwork) {
-            return this;
-        }
-
-        @NonNull
-        public Builder network(AdGlideNetwork network) {
-            return this;
-        }
-
-        @Nullable
-        public Builder backup(@Nullable String backupAdNetwork) {
-            return this;
-        }
-
-        @Nullable
-        public Builder backup(AdGlideNetwork backupAdNetwork) {
-            return this;
-        }
-
-        @Nullable
-        public Builder backups(String... backupAdNetworks) {
-            return this;
-        }
-
-        @Nullable
-        public Builder backups(AdGlideNetwork... backupAdNetworks) {
-            return this;
-        }
-
-        @NonNull
-        public Builder adMobId(@NonNull String id) {
-            return this;
-        }
-
-        @NonNull
-        public Builder metaId(@NonNull String id) {
-            return this;
-        }
-
-        @NonNull
-        public Builder appLovinId(@NonNull String id) {
-            return this;
-        }
-
-        @NonNull
-        public Builder zoneId(@NonNull String id) {
-            return this;
-        }
-
-        @NonNull
-        public Builder wortiseId(@NonNull String id) {
-            return this;
-        }
-
-        @NonNull
-        public Builder startAppId(@NonNull String id) {
-            return this;
-        }
-
-        @NonNull
-        public Builder ironSourceId(@NonNull String id) {
-            return this;
-        }
-
-        @NonNull
-        public Builder darkTheme(boolean darkTheme) {
-            this.darkTheme = darkTheme;
-            return this;
-        }
-
-        @NonNull
-        public Builder legacyGDPR(boolean legacyGDPR) {
-            return this;
-        }
-
         @NonNull
         public Builder style(@NonNull String nativeAdStyle) {
             this.nativeAdStyle = nativeAdStyle;
@@ -207,6 +124,12 @@ public class NativeAd {
         }
 
         public void loadNativeAd(AdGlideCallback callback) {
+            Activity activity = activityRef != null ? activityRef.get() : null;
+            if (activity == null) {
+                Log.e(TAG, "Cannot load Native Ad: Activity reference is null.");
+                if (callback != null) callback.onAdFailedToLoad("Activity is null");
+                return;
+            }
             loadNativeAdMain(false, callback);
         }
 
@@ -266,8 +189,6 @@ public class NativeAd {
                 return;
             }
 
-            final boolean finalLegacyGDPR = com.partharoypc.adglide.AdGlide.getConfig() != null &&
-                    com.partharoypc.adglide.AdGlide.getConfig().isLegacyGDPR();
 
             NativeProvider.NativeConfig config = new NativeProvider.NativeConfig() {
                 @Override
@@ -278,11 +199,6 @@ public class NativeAd {
                 @Override
                 public boolean isDarkTheme() {
                     return darkTheme;
-                }
-
-                @Override
-                public boolean isLegacyGDPR() {
-                    return finalLegacyGDPR;
                 }
             };
 
@@ -327,9 +243,11 @@ public class NativeAd {
         }
 
         private void displayAdView(View adView, AdGlideCallback callback) {
-            Activity activity = activityRef.get();
-            if (activity == null)
+            Activity activity = activityRef != null ? activityRef.get() : null;
+            if (activity == null) {
+                Log.e(TAG, "Activity reference is null, cannot display native ad.");
                 return;
+            }
 
             if (customContainer != null) {
                 nativeAdViewContainer = customContainer;

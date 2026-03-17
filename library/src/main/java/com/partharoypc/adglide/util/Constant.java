@@ -40,8 +40,6 @@ public class Constant {
     public static final String AD_NETWORK_IRONSOURCE = "IronSource";
     public static final String AD_NETWORK_WORTISE = "Wortise";
 
-    // startapp native ad image parameters
-    public static final int STARTAPP_IMAGE_SMALL = 2; // for image size 150px X 150px
 
     // unity banner ad size
     public static final int UNITY_ADS_BANNER_WIDTH_MEDIUM = 320;

@@ -2,20 +2,22 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/colorBackground">
+    android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:background="@color/colorPrimary"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        app:elevation="0dp">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            android:background="@color/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:titleTextColor="@color/white"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -25,6 +27,7 @@
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+        <!-- Scrollable controls -->
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -36,90 +39,111 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
+                <!-- Banner type settings card -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cardCornerRadius="8dp"
+                    android:layout_marginBottom="16dp"
+                    app:cardCornerRadius="16dp"
                     app:cardElevation="2dp"
-                    android:layout_marginBottom="16dp">
+                    app:strokeWidth="0dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="20dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/settings"
-                            android:textAppearance="?attr/textAppearanceTitleMedium"
-                            android:layout_marginBottom="8dp"/>
+                            android:text="🖼  Banner Ad"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="?attr/colorOnSurface"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Persistent ad strip anchored at the bottom of the screen"
+                            android:textSize="13sp"
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="20dp"/>
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
                             android:id="@+id/switch_collapsible"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/collapsible_banner" />
+                            android:layout_marginBottom="8dp"
+                            android:text="Collapsible Banner (5× eCPM boost)"
+                            android:textSize="14sp"/>
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
                             android:id="@+id/switch_adaptive"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:checked="true"
-                            android:text="@string/adaptive_banner" />
+                            android:text="Adaptive Banner (screen-optimised height)"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="20dp"/>
+
+                        <!-- Action buttons row -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_refresh"
+                                style="@style/Widget.Material3.Button.OutlinedButton"
+                                android:layout_width="0dp"
+                                android:layout_height="50dp"
+                                android:layout_weight="1"
+                                android:layout_marginEnd="8dp"
+                                android:text="↻  Reload"
+                                app:cornerRadius="12dp"/>
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_destroy"
+                                style="@style/Widget.Material3.Button.TonalButton"
+                                android:layout_width="0dp"
+                                android:layout_height="50dp"
+                                android:layout_weight="1"
+                                android:text="✕  Destroy"
+                                app:cornerRadius="12dp"/>
+
+                        </LinearLayout>
 
                     </LinearLayout>
 
                 </com.google.android.material.card.MaterialCardView>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center"
-                    style="?android:attr/buttonBarStyle">
-
-                    <Button
-                        android:id="@+id/btn_refresh"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/load_banner"
-                        android:layout_marginEnd="8dp"
-                        style="?android:attr/buttonBarButtonStyle"/>
-
-                    <Button
-                        android:id="@+id/btn_destroy"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/destroy"
-                        style="?android:attr/buttonBarButtonStyle"/>
-
-                </LinearLayout>
-
             </LinearLayout>
 
         </ScrollView>
 
+        <!-- Live banner preview strip -->
         <LinearLayout
             android:id="@+id/banner_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:minHeight="50dp"
-            android:background="@color/grey_200"
-            android:gravity="center">
-            
-           <!-- The library layout will be inflated here -->
-           <TextView
+            android:background="?attr/colorSurfaceVariant"
+            android:gravity="center"
+            android:elevation="4dp"
+            android:minHeight="60dp">
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/banner_area"
-                android:textColor="@color/grey_600"
-                android:padding="16dp"/>
+                android:text="Ad Preview Area"
+                android:textSize="12sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:padding="12dp"/>
 
         </LinearLayout>
-        
+
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

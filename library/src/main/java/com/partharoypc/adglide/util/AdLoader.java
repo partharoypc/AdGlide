@@ -1,7 +1,10 @@
 package com.partharoypc.adglide.util;
 
 import android.app.Activity;
+import androidx.annotation.NonNull;
 import android.util.Log;
+import java.util.List;
+import java.util.ArrayList;
 
 import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.AdGlideConfig;
@@ -25,13 +28,15 @@ public class AdLoader {
     private final WaterfallManager waterfallManager;
     private final String primaryNetwork;
 
-    public AdLoader(Activity activity, AdFormat format) {
+    public AdLoader(@NonNull Activity activity, AdFormat format) {
         this.activity = activity;
         this.format = format;
         AdGlideConfig config = AdGlide.getConfig();
         if (config != null) {
-            this.primaryNetwork = config.getPrimaryNetwork();
-            this.waterfallManager = new WaterfallManager(config.getBackupNetworks());
+            String primary = config.getPrimaryNetwork();
+            this.primaryNetwork = (primary != null) ? primary : "";
+            List<String> backups = config.getBackupNetworks();
+            this.waterfallManager = new WaterfallManager((backups != null) ? backups : new java.util.ArrayList<>());
         } else {
             this.primaryNetwork = "";
             this.waterfallManager = new WaterfallManager();
@@ -69,7 +74,11 @@ public class AdLoader {
         }
 
         waterfallManager.reset();
-        loadNetwork(primaryNetwork, callback);
+        if (primaryNetwork == null || primaryNetwork.isEmpty()) {
+            loadNext(callback);
+        } else {
+            loadNetwork(primaryNetwork, callback);
+        }
     }
 
     private void loadNetwork(String network, AdLoadCallback callback) {

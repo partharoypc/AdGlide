@@ -49,4 +49,8 @@ public class PerformanceLogger {
     public static synchronized List<LogEntry> getLogs() {
         return new ArrayList<>(logs);
     }
+
+    public static synchronized void clear() {
+        logs.clear();
+    }
 }

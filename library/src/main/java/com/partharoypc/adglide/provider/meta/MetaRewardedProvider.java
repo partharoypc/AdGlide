@@ -25,6 +25,7 @@ public class MetaRewardedProvider implements RewardedProvider {
 
                     @Override
                     public void onRewardedVideoClosed() {
+                        isAvailable = false;
                         listener.onAdDismissed();
                     }
 
@@ -33,12 +34,15 @@ public class MetaRewardedProvider implements RewardedProvider {
                         isAvailable = false;
                         Log.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META,
                                 "Rewarded Error: [" + adError.getErrorCode() + "] " + adError.getErrorMessage());
+                        com.partharoypc.adglide.util.PerformanceLogger.error("Meta",
+                                "Rewarded failed: [" + adError.getErrorCode() + "] " + adError.getErrorMessage());
                         listener.onAdFailedToLoad(adError.getErrorMessage());
                     }
 
                     @Override
                     public void onAdLoaded(Ad ad) {
                         isAvailable = true;
+                        com.partharoypc.adglide.util.PerformanceLogger.log("Meta", "Rewarded loaded: " + adUnitId);
                         listener.onAdLoaded();
                     }
 
@@ -48,6 +52,8 @@ public class MetaRewardedProvider implements RewardedProvider {
 
                     @Override
                     public void onLoggingImpression(Ad ad) {
+                        com.partharoypc.adglide.util.PerformanceLogger.log("Meta", "Rewarded impression logged");
+                        listener.onAdShowed();
                     }
                 }).build());
     }
@@ -55,7 +61,14 @@ public class MetaRewardedProvider implements RewardedProvider {
     @Override
     public void showRewardedAd(Activity activity, RewardedListener listener) {
         if (rewardedVideoAd != null && isAvailable) {
-            rewardedVideoAd.show();
+            try {
+                rewardedVideoAd.show();
+            } catch (Exception e) {
+                Log.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META, "Failed to show rewarded: " + e.getMessage());
+                listener.onAdShowFailed(e.getMessage());
+            }
+        } else {
+            listener.onAdShowFailed("Meta Rewarded not available");
         }
     }
 
@@ -69,6 +82,7 @@ public class MetaRewardedProvider implements RewardedProvider {
         if (rewardedVideoAd != null) {
             rewardedVideoAd.destroy();
             rewardedVideoAd = null;
+            isAvailable = false;
         }
     }
 }

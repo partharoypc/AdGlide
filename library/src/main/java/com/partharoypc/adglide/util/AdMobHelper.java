@@ -2,7 +2,6 @@ package com.partharoypc.adglide.util;
 
 import android.os.SystemClock;
 import android.util.Log;
-import com.google.android.gms.ads.AdValue;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,22 +18,7 @@ public class AdMobHelper {
         // Utility class
     }
 
-    /**
-     * Standardized paid event handler for AdMob.
-     *
-     * @param adValue  the paid value from AdMob
-     * @param format   the ad format name (e.g. "Banner", "Interstitial")
-     * @param adUnitId the ad unit ID
-     */
-    public static void handlePaidEvent(AdValue adValue, String format, String adUnitId) {
-        RevenueHelper.logRevenue(
-                adValue.getValueMicros(),
-                adValue.getCurrencyCode(),
-                String.valueOf(adValue.getPrecisionType()),
-                Constant.AD_NETWORK_ADMOB,
-                format,
-                adUnitId);
-    }
+
 
     /**
      * Checks if a request is allowed based on rate limiting.

@@ -46,19 +46,4 @@ public enum AdGlideNetwork {
         return NONE;
     }
 
-    /**
-     * Converts a vararg of AdGlideNetwork to a String array.
-     * 
-     * @param networks The network enums to convert.
-     * @return An array of string keys.
-     */
-    public static String[] toStringArray(AdGlideNetwork... networks) {
-        if (networks == null)
-            return new String[0];
-        String[] result = new String[networks.length];
-        for (int i = 0; i < networks.length; i++) {
-            result[i] = networks[i].getValue();
-        }
-        return result;
-    }
 }

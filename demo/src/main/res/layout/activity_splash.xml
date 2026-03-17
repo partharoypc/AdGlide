@@ -1,16 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorPrimary"
+    android:gravity="center">
 
+    <!-- Glow Circle behind logo -->
+    <FrameLayout
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:background="@drawable/bg_splash_glow">
+
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:src="@mipmap/ic_launcher"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter" />
+
+    </FrameLayout>
+
+    <!-- Brand name -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:gravity="center"
-        app:drawableTopCompat="@mipmap/ic_launcher"
-        android:drawablePadding="20dp"
-        android:text="@string/loading" />
+        android:text="AdGlide"
+        android:textSize="36sp"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginTop="32dp"
+        android:letterSpacing="0.05"/>
 
-</RelativeLayout>
+    <!-- Tagline -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Premium Ad Mediation SDK"
+        android:textSize="15sp"
+        android:textColor="#B0D0BCFF"
+        android:fontFamily="sans-serif-light"
+        android:layout_marginTop="8dp"
+        android:letterSpacing="0.08"/>
+
+    <!-- Loading dots indicator -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="64dp">
+
+        <View
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_marginHorizontal="4dp"
+            android:background="@drawable/bg_dot_active"/>
+
+        <View
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_marginHorizontal="4dp"
+            android:background="@drawable/bg_dot_inactive"/>
+
+        <View
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_marginHorizontal="4dp"
+            android:background="@drawable/bg_dot_inactive"/>
+
+    </LinearLayout>
+
+    <!-- Version / copyright -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="v2.0.0 · © 2026 AdGlide"
+        android:textSize="12sp"
+        android:textColor="#60FFFFFF"
+        android:layout_marginTop="24dp"/>
+
+</LinearLayout>

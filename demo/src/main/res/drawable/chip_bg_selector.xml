@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Chip background: white 20% when checked, transparent otherwise -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true">
+        <color android:color="#33FFFFFF"/>
+    </item>
+    <item>
+        <color android:color="#14FFFFFF"/>
+    </item>
+</selector>

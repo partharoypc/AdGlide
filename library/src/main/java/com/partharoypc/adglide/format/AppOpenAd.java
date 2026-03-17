@@ -30,7 +30,6 @@ import java.util.Map;
 public class AppOpenAd {
     private static final String TAG = "AdGlide";
 
-    public static boolean isAppOpenAdLoaded = false;
 
     /**
      * Timestamp (ms) of the last time an App Open Ad was shown. 0 = never shown.
@@ -251,59 +250,6 @@ public class AppOpenAd {
                     com.partharoypc.adglide.util.AdFormat.APP_OPEN);
         }
 
-        // --- Deprecated chained methods. Keeping for compatibility, but they use
-        // global config now ---
-
-        @NonNull
-        public Builder status(boolean adStatus) {
-            return this;
-        }
-
-        @NonNull
-        public Builder network(@NonNull String adNetwork) {
-            return this;
-        }
-
-        @NonNull
-        public Builder network(AdGlideNetwork network) {
-            return this;
-        }
-
-        @NonNull
-        public Builder backup(@Nullable String backupAdNetwork) {
-            return this;
-        }
-
-        @NonNull
-        public Builder backups(@Nullable String... backupAdNetworks) {
-            return this;
-        }
-
-        @NonNull
-        public Builder backups(AdGlideNetwork... backupAdNetworks) {
-            return this;
-        }
-
-        @NonNull
-        public Builder adMobId(@NonNull String adMobAppOpenId) {
-            return this;
-        }
-
-        @NonNull
-        public Builder metaId(@NonNull String metaAppOpenId) {
-            return this;
-        }
-
-        @NonNull
-        public Builder appLovinId(@NonNull String appLovinAppOpenId) {
-            return this;
-        }
-
-        @NonNull
-        public Builder wortiseId(@NonNull String wortiseAppOpenId) {
-            return this;
-        }
-
         @NonNull
         public Builder cooldown(int minutes) {
             AppOpenAd.setCooldown(minutes);
@@ -360,7 +306,6 @@ public class AppOpenAd {
                     provider.loadAppOpenAd(activity, adUnitId, new AppOpenProvider.AppOpenListener() {
                         @Override
                         public void onAdLoaded() {
-                            isAppOpenAdLoaded = true;
                             com.partharoypc.adglide.util.PerformanceLogger.log("AppOpen", "Loaded: " + network);
                             Log.d(TAG, "AppOpen ad loaded from [" + network.toUpperCase(java.util.Locale.ROOT)
                                     + "]. Showing now.");
@@ -394,7 +339,7 @@ public class AppOpenAd {
 
                         @Override
                         public void onAdDismissed() {
-                            isAppOpenAdLoaded = false;
+                            // No-op
                             if (callback != null)
                                 callback.onAdDismissed();
                         }
@@ -479,7 +424,7 @@ public class AppOpenAd {
                 String network = config.getPrimaryNetwork();
                 AppOpenProvider provider = getProvider(network);
                 if (provider != null && provider.isAdAvailable()) {
-                    Activity activity = activityRef.get();
+                    Activity activity = activityRef != null ? activityRef.get() : null;
                     provider.showAppOpenAd(activity, new AppOpenProvider.AppOpenListener() {
                         @Override
                         public void onAdLoaded() {
@@ -523,7 +468,7 @@ public class AppOpenAd {
         }
 
         public boolean isAdAvailable() {
-            return isAppOpenAdLoaded;
+            return false; // Deprecated, check provider directly if needed
         }
     }
 }

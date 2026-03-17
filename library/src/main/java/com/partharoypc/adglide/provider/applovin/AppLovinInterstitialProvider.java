@@ -20,6 +20,7 @@ public class AppLovinInterstitialProvider implements InterstitialProvider {
             @Override
             public void onAdLoaded(MaxAd ad) {
                 Log.d(TAG, "Interstitial Ad loaded");
+                com.partharoypc.adglide.util.PerformanceLogger.log(TAG, "Interstitial loaded: " + adUnitId);
                 listener.onAdLoaded();
             }
 
@@ -37,6 +38,7 @@ public class AppLovinInterstitialProvider implements InterstitialProvider {
 
             @Override
             public void onAdDisplayed(MaxAd ad) {
+                com.partharoypc.adglide.util.PerformanceLogger.log(TAG, "Interstitial showed: " + ad.getAdUnitId());
                 listener.onAdShowed();
             }
 
@@ -50,15 +52,7 @@ public class AppLovinInterstitialProvider implements InterstitialProvider {
             }
         });
 
-        maxInterstitialAd.setRevenueListener(ad -> {
-            com.partharoypc.adglide.util.RevenueHelper.logRevenue(
-                    ad.getRevenue() * 1000000,
-                    "USD",
-                    "ESTIMATED",
-                    com.partharoypc.adglide.util.Constant.AD_NETWORK_APPLOVIN_MAX,
-                    com.partharoypc.adglide.util.Constant.INTERSTITIAL,
-                    adUnitId);
-        });
+
 
         Log.d(TAG, "Loading Interstitial Ad: " + adUnitId);
         maxInterstitialAd.loadAd();
@@ -67,7 +61,12 @@ public class AppLovinInterstitialProvider implements InterstitialProvider {
     @Override
     public void showInterstitial(Activity activity, InterstitialListener listener) {
         if (maxInterstitialAd != null && maxInterstitialAd.isReady()) {
-            maxInterstitialAd.showAd();
+            try {
+                maxInterstitialAd.showAd();
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to show interstitial: " + e.getMessage());
+                listener.onAdShowFailed(e.getMessage());
+            }
         } else {
             listener.onAdShowFailed("AppLovin Interstitial not ready");
         }

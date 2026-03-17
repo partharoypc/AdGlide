@@ -44,6 +44,8 @@ public class StartAppRewardedProvider implements RewardedProvider {
 
                 @Override
                 public void adDisplayed(Ad ad) {
+                    com.partharoypc.adglide.util.PerformanceLogger.log("StartApp", "Rewarded showed");
+                    listener.onAdShowed();
                 }
 
                 @Override
@@ -52,8 +54,12 @@ public class StartAppRewardedProvider implements RewardedProvider {
 
                 @Override
                 public void adNotDisplayed(Ad ad) {
+                    com.partharoypc.adglide.util.PerformanceLogger.error("StartApp", "Rewarded not displayed: " + (ad != null ? ad.getErrorMessage() : "null"));
+                    listener.onAdShowFailed("StartApp Rewarded not displayed");
                 }
             });
+        } else {
+            listener.onAdShowFailed("StartApp Rewarded not ready");
         }
     }
 

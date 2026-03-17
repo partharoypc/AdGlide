@@ -4,55 +4,79 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
-    android:layout_marginVertical="8dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="2dp"
-    app:strokeColor="?attr/colorOutline"
-    app:strokeWidth="1dp"
-    android:foreground="?android:attr/selectableItemBackground">
+    android:layout_marginVertical="6dp"
+    android:foreground="?android:attr/selectableItemBackground"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="3dp"
+    app:strokeWidth="0dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="20dp"
-        android:gravity="center_vertical">
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="18dp">
 
-        <ImageView
-            android:id="@+id/item_icon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@mipmap/ic_launcher"
-            android:contentDescription="@null"
-            app:tint="?attr/colorPrimary"/>
+        <!-- Coloured icon container -->
+        <FrameLayout
+            android:id="@+id/icon_container"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:background="@drawable/bg_icon_container">
 
+            <ImageView
+                android:id="@+id/item_icon"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="center"
+                android:src="@mipmap/ic_launcher"
+                android:contentDescription="@null"
+                android:scaleType="fitCenter"/>
+
+        </FrameLayout>
+
+        <!-- Text block -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_marginStart="20dp">
+            android:layout_marginStart="18dp">
 
             <TextView
                 android:id="@+id/item_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/item_title"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                android:textSize="18sp"
-                android:textColor="?attr/colorOnSurface"/>
+                android:textColor="?attr/colorOnSurface"
+                android:fontFamily="sans-serif-medium"/>
 
             <TextView
                 android:id="@+id/item_description"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/item_description"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 android:textColor="?android:attr/textColorSecondary"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="3dp"
                 android:maxLines="2"
-                android:ellipsize="end"/>
+                android:ellipsize="end"
+                android:lineSpacingMultiplier="1.2"/>
 
         </LinearLayout>
+
+        <!-- Chevron -->
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="8dp"
+            android:src="@drawable/ic_chevron_right"
+            android:contentDescription="@null"
+            android:alpha="0.4"
+            app:tint="?attr/colorOnSurface"/>
 
     </LinearLayout>
 

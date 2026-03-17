@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.partharoypc.adglidedemo.R;
 import com.partharoypc.adglidedemo.model.DashboardItem;
@@ -15,9 +17,19 @@ import java.util.List;
 
 public class DashboardAdapter extends RecyclerView.Adapter<DashboardAdapter.ViewHolder> {
 
-    private Context context;
-    private List<DashboardItem> items;
-    private OnItemClickListener listener;
+    // Per-position icon tint colors to visually differentiate each ad format card
+    private static final int[] ICON_COLORS = {
+        R.color.badgeBanner,         // Banner
+        R.color.badgeInterstitial,   // Interstitial
+        R.color.badgeRewarded,       // Rewarded
+        R.color.badgeNative,         // Native
+        R.color.badgeRewardedInt,    // Rewarded Interstitial
+        R.color.badgeDebug,          // Debug HUD
+    };
+
+    private final Context context;
+    private final List<DashboardItem> items;
+    private final OnItemClickListener listener;
 
     public interface OnItemClickListener {
         void onItemClick(DashboardItem item);
@@ -41,7 +53,15 @@ public class DashboardAdapter extends RecyclerView.Adapter<DashboardAdapter.View
         DashboardItem item = items.get(position);
         holder.title.setText(item.getTitle());
         holder.description.setText(item.getDescription());
-        holder.icon.setImageResource(item.getIconResId());
+
+        // Apply a unique tint color to each card's icon container
+        if (holder.iconContainer != null) {
+            int colorResId = ICON_COLORS[Math.min(position, ICON_COLORS.length - 1)];
+            int color = ContextCompat.getColor(context, colorResId);
+            // Set alpha-20 tint on the container background
+            holder.iconContainer.getBackground().mutate().setAlpha(30);
+            holder.icon.setColorFilter(color);
+        }
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
@@ -60,12 +80,14 @@ public class DashboardAdapter extends RecyclerView.Adapter<DashboardAdapter.View
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView title, description;
         ImageView icon;
+        FrameLayout iconContainer;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.item_title);
             description = itemView.findViewById(R.id.item_description);
             icon = itemView.findViewById(R.id.item_icon);
+            iconContainer = itemView.findViewById(R.id.icon_container);
         }
     }
 }

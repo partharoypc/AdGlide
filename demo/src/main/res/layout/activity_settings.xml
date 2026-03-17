@@ -2,20 +2,24 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?attr/colorSurface">
+    android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        app:elevation="0dp">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorPrimary"
             app:navigationIcon="@drawable/ic_arrow_back_white_24dp"
             app:title="@string/settings"
-            app:titleTextColor="?attr/colorOnPrimary" />
+            app:titleTextColor="@color/white"
+            app:popupTheme="@style/AppTheme.PopupOverlay"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -28,281 +32,281 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="16dp"
+            android:paddingBottom="32dp">
 
-            <!-- Primary Ad Network -->
+            <!-- ─── Primary Network ────────────────────────────────────── -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="8dp"
-                android:text="@string/primary_network"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
-                android:textColor="?attr/colorPrimary" />
+                android:text="🌐  Primary Ad Network"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimary"
+                android:layout_marginBottom="8dp"
+                android:letterSpacing="0.05"/>
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
                 app:cardElevation="2dp"
-                app:cardCornerRadius="8dp"
-                app:strokeColor="?attr/colorOutline"
-                app:strokeWidth="1dp">
+                app:cardCornerRadius="16dp"
+                app:strokeWidth="0dp">
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recycler_view_primary"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp" />
+                    android:paddingVertical="8dp"
+                    android:nestedScrollingEnabled="false"/>
 
             </com.google.android.material.card.MaterialCardView>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="24dp" />
-
-            <!-- Backup Ad Network -->
+            <!-- ─── Backup Network ─────────────────────────────────────── -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="8dp"
-                android:text="@string/backup_network"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
-                android:textColor="?attr/colorPrimary" />
+                android:text="🔄  Backup Ad Network"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimary"
+                android:layout_marginBottom="8dp"
+                android:letterSpacing="0.05"/>
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
                 app:cardElevation="2dp"
-                app:cardCornerRadius="8dp"
-                app:strokeColor="?attr/colorOutline"
-                app:strokeWidth="1dp">
+                app:cardCornerRadius="16dp"
+                app:strokeWidth="0dp">
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recycler_view_backup"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp" />
+                    android:paddingVertical="8dp"
+                    android:nestedScrollingEnabled="false"/>
 
             </com.google.android.material.card.MaterialCardView>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="24dp" />
-
-            <!-- Preferences -->
+            <!-- ─── Format Preferences ────────────────────────────────── -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="8dp"
-                android:text="@string/preferences"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
-                android:textColor="?attr/colorPrimary" />
+                android:text="⚙️  Ad Format Preferences"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimary"
+                android:layout_marginBottom="8dp"
+                android:letterSpacing="0.05"/>
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
                 app:cardElevation="2dp"
-                app:cardCornerRadius="8dp"
-                app:strokeColor="?attr/colorOutline"
-                app:strokeWidth="1dp">
+                app:cardCornerRadius="16dp"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:paddingVertical="4dp">
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/switch_dark_mode"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="16dp"
-                        android:text="@string/dark_mode" />
+                        android:layout_height="56dp"
+                        android:paddingHorizontal="20dp"
+                        android:text="🌙  Dark Mode"/>
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="?attr/colorOutline" />
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="?attr/colorOutline" android:alpha="0.3"/>
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/switch_app_open_ad"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="16dp"
-                        android:text="@string/show_app_open" />
+                        android:layout_height="56dp"
+                        android:paddingHorizontal="20dp"
+                        android:text="📱  App Open Ad on Resume"/>
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="?attr/colorOutline" />
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="?attr/colorOutline" android:alpha="0.3"/>
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/switch_banner_ad"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="16dp"
-                        android:text="@string/enable_banner_ads" />
+                        android:layout_height="56dp"
+                        android:paddingHorizontal="20dp"
+                        android:text="🖼  Banner Ads"/>
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="?attr/colorOutline" />
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="?attr/colorOutline" android:alpha="0.3"/>
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/switch_interstitial_ad"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="16dp"
-                        android:text="@string/enable_interstitial_ads" />
+                        android:layout_height="56dp"
+                        android:paddingHorizontal="20dp"
+                        android:text="🎬  Interstitial Ads"/>
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="?attr/colorOutline" />
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="?attr/colorOutline" android:alpha="0.3"/>
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/switch_native_ad"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="16dp"
-                        android:text="@string/enable_native_ads" />
+                        android:layout_height="56dp"
+                        android:paddingHorizontal="20dp"
+                        android:text="🎨  Native Ads"/>
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="?attr/colorOutline" />
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="?attr/colorOutline" android:alpha="0.3"/>
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/switch_rewarded_ad"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="16dp"
-                        android:text="@string/enable_rewarded_ads" />
+                        android:layout_height="56dp"
+                        android:paddingHorizontal="20dp"
+                        android:text="🎁  Rewarded Ads"/>
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="?attr/colorOutline" />
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="?attr/colorOutline" android:alpha="0.3"/>
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/switch_rewarded_interstitial_ad"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="16dp"
-                        android:text="@string/enable_rewarded_interstitial_ads" />
+                        android:layout_height="56dp"
+                        android:paddingHorizontal="20dp"
+                        android:text="🎬🎁  Rewarded Interstitial Ads"/>
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="?attr/colorOutline" />
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="?attr/colorOutline" android:alpha="0.3"/>
 
+                    <!-- Interstitial Interval stepper -->
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="56dp"
                         android:orientation="horizontal"
-                        android:padding="16dp"
+                        android:paddingHorizontal="20dp"
                         android:gravity="center_vertical">
+
                         <TextView
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="wrap_content"
-                            android:text="@string/interstitial_ad_interval" />
-                        <Button
+                            android:layout_weight="1"
+                            android:text="⏱  Interstitial Interval"
+                            android:textSize="14sp"
+                            android:textColor="?attr/colorOnSurface"/>
+
+                        <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_interval_minus"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
                             android:layout_width="40dp"
                             android:layout_height="40dp"
                             android:text="@string/minus"
-                            android:insetBottom="0dp"
+                            android:textSize="18sp"
                             android:insetTop="0dp"
-                            style="?attr/materialButtonOutlinedStyle"/>
+                            android:insetBottom="0dp"
+                            android:padding="0dp"
+                            app:cornerRadius="8dp"/>
+
                         <TextView
                             android:id="@+id/tv_interval_value"
-                            android:layout_width="wrap_content"
+                            android:layout_width="40dp"
                             android:layout_height="wrap_content"
+                            android:gravity="center"
                             android:text="@string/three"
-                            android:paddingHorizontal="16dp"
+                            android:textSize="18sp"
                             android:textStyle="bold"
-                            android:textSize="18sp"/>
-                        <Button
+                            android:textColor="?attr/colorOnSurface"/>
+
+                        <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_interval_plus"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
                             android:layout_width="40dp"
                             android:layout_height="40dp"
                             android:text="@string/plus"
-                            android:insetBottom="0dp"
+                            android:textSize="18sp"
                             android:insetTop="0dp"
-                            style="?attr/materialButtonOutlinedStyle"/>
+                            android:insetBottom="0dp"
+                            android:padding="0dp"
+                            app:cornerRadius="8dp"/>
+
                     </LinearLayout>
 
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="24dp" />
-
-            <!-- House Ads -->
+            <!-- ─── House Ads ──────────────────────────────────────────── -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="8dp"
-                android:text="@string/house_ads_title"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
-                android:textColor="?attr/colorPrimary" />
+                android:text="🏠  House Ads (Zero-Fill Fallback)"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimary"
+                android:layout_marginBottom="8dp"
+                android:letterSpacing="0.05"/>
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
                 app:cardElevation="2dp"
-                app:cardCornerRadius="8dp"
-                app:strokeColor="?attr/colorOutline"
-                app:strokeWidth="1dp">
+                app:cardCornerRadius="16dp"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:paddingVertical="4dp">
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/switch_house_ad"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="16dp"
-                        android:text="@string/enable_house_ads" />
-                        
+                        android:layout_height="56dp"
+                        android:paddingHorizontal="20dp"
+                        android:text="Enable House Ads"/>
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingHorizontal="16dp"
+                        android:paddingHorizontal="20dp"
                         android:paddingBottom="16dp"
                         android:text="@string/house_ads_desc"
                         android:textSize="12sp"
+                        android:lineSpacingMultiplier="1.4"
                         android:textColor="?android:attr/textColorSecondary"/>
 
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="24dp" />
-
-            <!-- Privacy -->
+            <!-- ─── Privacy ────────────────────────────────────────────── -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="8dp"
-                android:text="@string/privacy"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
-                android:textColor="?attr/colorPrimary" />
+                android:text="🔒  Privacy"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimary"
+                android:layout_marginBottom="8dp"
+                android:letterSpacing="0.05"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_gdpr"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="12dp"
-                android:text="@string/manage_consent" />
+                android:layout_height="52dp"
+                android:text="🔑  Manage GDPR Consent"
+                android:textSize="14sp"
+                app:cornerRadius="14dp"/>
 
         </LinearLayout>
 

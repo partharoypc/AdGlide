@@ -8,6 +8,11 @@ public class WaterfallManager {
     private final List<String> networks;
     private int currentIndex;
 
+    public WaterfallManager() {
+        this.networks = new ArrayList<>();
+        this.currentIndex = 0;
+    }
+
     public WaterfallManager(List<String> networks) {
         this.networks = new ArrayList<>(networks);
         this.currentIndex = 0;

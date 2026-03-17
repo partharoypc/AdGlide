@@ -2,20 +2,22 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/colorBackground">
+    android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:background="@color/colorPrimary"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        app:elevation="0dp">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            android:background="@color/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:titleTextColor="@color/white"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -27,45 +29,60 @@
         android:padding="24dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <ImageView
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:src="@mipmap/ic_launcher"
-            android:importantForAccessibility="no"
-            android:layout_marginBottom="24dp"
-            app:tint="?attr/colorPrimary"/>
+        <!-- Hero icon badge -->
+        <FrameLayout
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:background="@drawable/bg_icon_container"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="🎬"
+                android:textSize="40sp"/>
+
+        </FrameLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/rewarded_interstitial"
-            android:textAppearance="?attr/textAppearanceHeadlineMedium"
+            android:textSize="24sp"
+            android:textStyle="bold"
             android:textColor="?attr/colorOnSurface"
+            android:gravity="center"
             android:layout_marginBottom="8dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/rewarded_interstitial_desc"
+            android:textSize="14sp"
             android:textAlignment="center"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:textColor="@color/grey_600"
-            android:layout_marginBottom="32dp"/>
+            android:textColor="?android:attr/textColorSecondary"
+            android:layout_marginBottom="40dp"
+            android:lineSpacingMultiplier="1.4"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_load"
+            style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/pre_load_ad"
+            android:layout_height="52dp"
             android:layout_marginBottom="12dp"
-            style="@style/Widget.Material3.Button.TonalButton"/>
+            android:text="⬇   Preload Ad"
+            android:textSize="15sp"
+            app:cornerRadius="14dp"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_show"
+            style="@style/Widget.Material3.Button"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/show_ad_earn_reward"
-            style="@style/Widget.Material3.Button"/>
+            android:layout_height="52dp"
+            android:text="▶   Show &amp; Earn Reward"
+            android:textSize="15sp"
+            app:cornerRadius="14dp"/>
 
     </LinearLayout>
 

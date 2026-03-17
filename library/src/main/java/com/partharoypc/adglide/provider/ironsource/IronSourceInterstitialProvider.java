@@ -17,12 +17,14 @@ public class IronSourceInterstitialProvider implements InterstitialProvider {
             @Override
             public void onAdReady(AdInfo adInfo) {
                 isLoaded = true;
+                com.partharoypc.adglide.util.PerformanceLogger.log("IronSource", "Interstitial loaded: " + adUnitId);
                 listener.onAdLoaded();
             }
 
             @Override
             public void onAdLoadFailed(IronSourceError error) {
                 isLoaded = false;
+                com.partharoypc.adglide.util.PerformanceLogger.error("IronSource", "Interstitial failed: " + error.getErrorMessage());
                 listener.onAdFailedToLoad(error.getErrorMessage());
             }
 
@@ -32,12 +34,14 @@ public class IronSourceInterstitialProvider implements InterstitialProvider {
 
             @Override
             public void onAdShowSucceeded(AdInfo adInfo) {
+                com.partharoypc.adglide.util.PerformanceLogger.log("IronSource", "Interstitial showed");
                 listener.onAdShowed();
             }
 
             @Override
             public void onAdShowFailed(IronSourceError error, AdInfo adInfo) {
                 isLoaded = false;
+                com.partharoypc.adglide.util.PerformanceLogger.error("IronSource", "Interstitial show failed: " + error.getErrorMessage());
                 listener.onAdShowFailed(error.getErrorMessage());
             }
 

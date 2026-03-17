@@ -13,7 +13,6 @@ public interface NativeProvider {
 
         boolean isDarkTheme();
 
-        boolean isLegacyGDPR();
     }
 
     interface NativeListener {

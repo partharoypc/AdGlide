@@ -19,6 +19,7 @@ public class MetaInterstitialProvider implements InterstitialProvider {
         InterstitialAdListener adListener = new InterstitialAdListener() {
             @Override
             public void onInterstitialDisplayed(Ad ad) {
+                com.partharoypc.adglide.util.PerformanceLogger.log("Meta", "Interstitial showed: " + adUnitId);
                 listener.onAdShowed();
             }
 
@@ -33,11 +34,14 @@ public class MetaInterstitialProvider implements InterstitialProvider {
                 interstitialAd = null;
                 Log.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META,
                         "Interstitial Error: [" + adError.getErrorCode() + "] " + adError.getErrorMessage());
+                com.partharoypc.adglide.util.PerformanceLogger.error("Meta",
+                        "Interstitial failed: [" + adError.getErrorCode() + "] " + adError.getErrorMessage());
                 listener.onAdFailedToLoad(adError.getErrorMessage());
             }
 
             @Override
             public void onAdLoaded(Ad ad) {
+                com.partharoypc.adglide.util.PerformanceLogger.log("Meta", "Interstitial loaded: " + adUnitId);
                 listener.onAdLoaded();
             }
 
@@ -55,7 +59,12 @@ public class MetaInterstitialProvider implements InterstitialProvider {
     @Override
     public void showInterstitial(Activity activity, InterstitialListener listener) {
         if (interstitialAd != null && interstitialAd.isAdLoaded()) {
-            interstitialAd.show();
+            try {
+                interstitialAd.show();
+            } catch (Exception e) {
+                Log.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META, "Failed to show interstitial: " + e.getMessage());
+                listener.onAdShowFailed(e.getMessage());
+            }
         } else {
             listener.onAdShowFailed("Meta Interstitial not loaded");
         }

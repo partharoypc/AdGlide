@@ -26,19 +26,18 @@ public class MyApplication extends Application {
         Constant.NATIVE_STATUS = sharedPref.getIsNativeEnabled();
         Constant.REWARDED_STATUS = sharedPref.getIsRewardedEnabled();
 
-        // Build AdGlide configuration using v1.4.0 Builder
         AdGlideConfig config = new AdGlideConfig.Builder()
                 .enableAds(Constant.AD_STATUS)
                 .primaryNetwork(Constant.AD_NETWORK)
-                .backupNetwork(Constant.BACKUP_AD_NETWORK)
+                .backupNetworks(Constant.BACKUP_AD_NETWORK)
                 .startAppId(Constant.STARTAPP_APP_ID)
                 .unityGameId(Constant.UNITY_GAME_ID)
                 .appLovinSdkKey(getResources().getString(com.partharoypc.adglidedemo.R.string.app_lovin_sdk_key))
                 .ironSourceAppKey(Constant.IRONSOURCE_APP_KEY)
                 .wortiseAppId(Constant.WORTISE_APP_ID)
-                .debug(com.partharoypc.adglidedemo.BuildConfig.DEBUG) // Use BuildConfig for debug mode
+                .debug(com.partharoypc.adglidedemo.BuildConfig.DEBUG)
 
-                // Banner
+                // ── Banner ────────────────────────────────────────────────
                 .adMobBannerId(Constant.ADMOB_BANNER_ID)
                 .metaBannerId(Constant.META_BANNER_ID)
                 .unityBannerId(Constant.UNITY_BANNER_ID)
@@ -46,7 +45,7 @@ public class MyApplication extends Application {
                 .ironSourceBannerId(Constant.IRONSOURCE_BANNER_ID)
                 .wortiseBannerId(Constant.WORTISE_BANNER_ID)
 
-                // Interstitial
+                // ── Interstitial ──────────────────────────────────────────
                 .adMobInterstitialId(Constant.ADMOB_INTERSTITIAL_ID)
                 .metaInterstitialId(Constant.META_INTERSTITIAL_ID)
                 .unityInterstitialId(Constant.UNITY_INTERSTITIAL_ID)
@@ -54,7 +53,7 @@ public class MyApplication extends Application {
                 .ironSourceInterstitialId(Constant.IRONSOURCE_INTERSTITIAL_ID)
                 .wortiseInterstitialId(Constant.WORTISE_INTERSTITIAL_ID)
 
-                // Rewarded
+                // ── Rewarded ──────────────────────────────────────────────
                 .adMobRewardedId(Constant.ADMOB_REWARDED_ID)
                 .metaRewardedId(Constant.META_REWARDED_ID)
                 .unityRewardedId(Constant.UNITY_REWARDED_ID)
@@ -62,45 +61,48 @@ public class MyApplication extends Application {
                 .ironSourceRewardedId(Constant.IRONSOURCE_REWARDED_ID)
                 .wortiseRewardedId(Constant.WORTISE_REWARDED_ID)
 
-                // Rewarded Interstitial
+                // ── Rewarded Interstitial ─────────────────────────────────
                 .adMobRewardedIntId(Constant.ADMOB_REWARDED_INTERSTITIAL_ID)
+                .wortiseRewardedIntId(Constant.WORTISE_REWARDED_INTERSTITIAL_ID)
 
-                // App Open
+                // ── App Open ──────────────────────────────────────────────
                 .adMobAppOpenId(Constant.ADMOB_APP_OPEN_AD_ID)
                 .appLovinAppOpenId(Constant.APPLOVIN_APP_OPEN_AP_ID)
                 .wortiseAppOpenId(Constant.WORTISE_APP_OPEN_AD_ID)
 
-                // Native
+                // ── Native ────────────────────────────────────────────────
                 .adMobNativeId(Constant.ADMOB_NATIVE_ID)
                 .metaNativeId(Constant.META_NATIVE_ID)
                 .appLovinNativeId(Constant.APPLOVIN_NATIVE_MANUAL_ID)
                 .ironSourceNativeId(Constant.IRONSOURCE_NATIVE_ID)
                 .wortiseNativeId(Constant.WORTISE_NATIVE_ID)
 
-                .autoLoadInterstitial(true)
-                .autoLoadRewarded(true)
-                .appOpenEnabled(Constant.OPEN_ADS_ON_START)
+                // ── Format Toggles ────────────────────────────────────────
                 .bannerEnabled(Constant.BANNER_STATUS)
                 .interstitialEnabled(Constant.INTERSTITIAL_STATUS)
                 .nativeEnabled(Constant.NATIVE_STATUS)
                 .rewardedEnabled(Constant.REWARDED_STATUS)
+                .rewardedInterstitialEnabled(Constant.REWARDED_INTERSTITIAL_STATUS)
+                .appOpenEnabled(Constant.OPEN_ADS_ON_START)
+
+                // ── Smart Loading & Intervals ─────────────────────────────
+                .autoLoadInterstitial(true)
+                .autoLoadRewarded(true)
                 .interstitialInterval(Constant.INTERSTITIAL_AD_INTERVAL)
+
+                // ── Privacy & Debug ───────────────────────────────────────
                 .excludeOpenAdFrom(ActivitySplash.class, ActivitySettings.class)
                 .enableGDPR(true)
                 .debugGDPR(com.partharoypc.adglidedemo.BuildConfig.DEBUG)
                 .enableDebugHUD(com.partharoypc.adglidedemo.BuildConfig.DEBUG)
+
+                // ── House Ads Fallback ────────────────────────────────────
                 .houseAdEnabled(Constant.HOUSE_AD_ENABLE)
                 .houseAdBannerImage(Constant.HOUSE_AD_BANNER_IMAGE)
                 .houseAdBannerClickUrl(Constant.HOUSE_AD_BANNER_URL)
                 .houseAdInterstitialImage(Constant.HOUSE_AD_INTERSTITIAL_IMAGE)
                 .houseAdInterstitialClickUrl(Constant.HOUSE_AD_INTERSTITIAL_URL)
 
-                // 1-Line Revenue Tracking (LTV)
-                .onPaidEventListener((valueMicros, currencyCode, precision, network, adUnitId) -> {
-                    double revenue = valueMicros / 1000000.0;
-                    android.util.Log.i("AdGlideRevenue", String.format(
-                            "Earned: %f %s from %s", revenue, currencyCode, network));
-                })
                 .build();
 
         // Initialize globally

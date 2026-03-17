@@ -62,51 +62,6 @@ public class RewardedInterstitialAd {
             return this;
         }
 
-        @NonNull
-        public Builder status(boolean adStatus) {
-            return this;
-        }
-
-        @NonNull
-        public Builder network(@NonNull String adNetwork) {
-            return this;
-        }
-
-        @NonNull
-        public Builder network(AdGlideNetwork network) {
-            return this;
-        }
-
-        @Nullable
-        public Builder backup(@Nullable String backupAdNetwork) {
-            return this;
-        }
-
-        @Nullable
-        public Builder backup(AdGlideNetwork backupAdNetwork) {
-            return this;
-        }
-
-        @Nullable
-        public Builder backups(String... backupAdNetworks) {
-            return this;
-        }
-
-        @Nullable
-        public Builder backups(AdGlideNetwork... backupAdNetworks) {
-            return this;
-        }
-
-        @NonNull
-        public Builder adMobId(@NonNull String id) {
-            return this;
-        }
-
-        @NonNull
-        public Builder legacyGDPR(boolean legacyGDPR) {
-            return this;
-        }
-
         public void loadRewardedInterstitialAd(AdGlideCallback callback) {
             loadRewardedAdMain(false, callback);
         }
@@ -170,15 +125,8 @@ public class RewardedInterstitialAd {
             this.currentProvider = provider;
             String adUnitId = getAdUnitIdForNetwork(network);
 
-            final boolean legacyGDPR = com.partharoypc.adglide.AdGlide.getConfig() != null &&
-                    com.partharoypc.adglide.AdGlide.getConfig().isLegacyGDPR();
 
             RewardedProvider.RewardedConfig config = new RewardedProvider.RewardedConfig() {
-                @Override
-                public boolean isLegacyGDPR() {
-                    return legacyGDPR;
-                }
-
                 @Override
                 public boolean isInterstitial() {
                     return true;

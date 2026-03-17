@@ -1,9 +1,11 @@
 package com.partharoypc.adglide.provider.wortise;
 
 import android.app.Activity;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import com.partharoypc.adglide.provider.RewardedProvider;
 import com.wortise.ads.AdError;
+import com.wortise.ads.RevenueData;
 import com.wortise.ads.rewarded.RewardedAd;
 
 public class WortiseRewardedProvider implements RewardedProvider {
@@ -14,10 +16,12 @@ public class WortiseRewardedProvider implements RewardedProvider {
         rewardedAd = new RewardedAd(activity, adUnitId);
         rewardedAd.setListener(new RewardedAd.Listener() {
             public void onRewardedLoaded(@NonNull RewardedAd ad) {
+                com.partharoypc.adglide.util.PerformanceLogger.log("Wortise", "Rewarded loaded: " + adUnitId);
                 listener.onAdLoaded();
             }
 
             public void onRewardedFailedToLoad(@NonNull RewardedAd ad, @NonNull AdError error) {
+                com.partharoypc.adglide.util.PerformanceLogger.error("Wortise", "Rewarded failed: " + error.getMessage());
                 listener.onAdFailedToLoad(error.toString());
             }
 
@@ -31,7 +35,8 @@ public class WortiseRewardedProvider implements RewardedProvider {
             }
 
             public void onRewardedShown(@NonNull RewardedAd ad) {
-                // Triggered when ad is shown.
+                com.partharoypc.adglide.util.PerformanceLogger.log("Wortise", "Rewarded showed: " + adUnitId);
+                listener.onAdShowed();
             }
 
             public void onRewardedClicked(@NonNull RewardedAd ad) {
@@ -41,32 +46,22 @@ public class WortiseRewardedProvider implements RewardedProvider {
             }
 
             public void onRewardedFailedToShow(@NonNull RewardedAd ad, @NonNull AdError error) {
+                com.partharoypc.adglide.util.PerformanceLogger.error("Wortise", "Rewarded show failed: " + error.getMessage());
+                listener.onAdShowFailed(error.getMessage());
             }
 
-            public void onRewardedRevenuePaid(@NonNull RewardedAd ad, @NonNull com.wortise.ads.RevenueData reward) {
+            public void onRewardedRevenuePaid(@NonNull RewardedAd ad, @NonNull RevenueData revenueData) {
+                // Wortise RevenueData fields not publicly accessible; revenue is tracked via server callbacks.
             }
 
             // Dummy implementation for older or newer versions
-            public void onRewardedAdLoaded(@NonNull RewardedAd ad) {
-            }
-
-            public void onRewardedAdFailedToLoad(@NonNull RewardedAd ad, @NonNull AdError error) {
-            }
-
-            public void onRewardedAdDismissed(@NonNull RewardedAd ad) {
-            }
-
-            public void onRewardedAdCompleted(@NonNull RewardedAd ad) {
-            }
-
-            public void onRewardedAdClicked(@NonNull RewardedAd ad) {
-            }
-
-            public void onRewardedAdImpression(@NonNull RewardedAd ad) {
-            }
-
-            public void onRewardedAdShown(@NonNull RewardedAd ad) {
-            }
+            public void onRewardedAdLoaded(@NonNull RewardedAd ad) {}
+            public void onRewardedAdFailedToLoad(@NonNull RewardedAd ad, @NonNull AdError error) {}
+            public void onRewardedAdDismissed(@NonNull RewardedAd ad) {}
+            public void onRewardedAdCompleted(@NonNull RewardedAd ad) {}
+            public void onRewardedAdClicked(@NonNull RewardedAd ad) {}
+            public void onRewardedAdImpression(@NonNull RewardedAd ad) {}
+            public void onRewardedAdShown(@NonNull RewardedAd ad) {}
         });
         rewardedAd.loadAd();
     }
@@ -74,7 +69,14 @@ public class WortiseRewardedProvider implements RewardedProvider {
     @Override
     public void showRewardedAd(Activity activity, RewardedListener listener) {
         if (rewardedAd != null && rewardedAd.isAvailable()) {
-            rewardedAd.showAd();
+            try {
+                rewardedAd.showAd();
+            } catch (Exception e) {
+                Log.e("AdGlide.Wortise", "Failed to show rewarded: " + e.getMessage());
+                listener.onAdShowFailed(e.getMessage());
+            }
+        } else {
+            listener.onAdShowFailed("Wortise Rewarded not available");
         }
     }
 

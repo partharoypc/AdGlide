@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dark theme color overrides — automatically applied by Android on Night Mode -->
+<resources>
+    <color name="colorBackground">@color/colorBackgroundDark</color>
+    <color name="colorSurface">@color/colorSurfaceDark</color>
+    <color name="colorLogBackground">@color/colorLogBackgroundDark</color>
+    <color name="colorLogText">@color/colorLogTextDark</color>
+    <color name="grey_600">#9E9E9E</color>
+</resources>

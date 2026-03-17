@@ -28,6 +28,7 @@ public class Constant {
 
     // StartApp
     public static final String STARTAPP_APP_ID = "0";
+    // Note: StartApp does not use separate ad unit IDs — the App ID covers all formats
 
     // Unity Ads
     public static final String UNITY_GAME_ID = "4089993";
@@ -60,6 +61,7 @@ public class Constant {
     public static final String WORTISE_BANNER_ID = "test-banner";
     public static final String WORTISE_INTERSTITIAL_ID = "test-interstitial";
     public static final String WORTISE_REWARDED_ID = "test-rewarded";
+    public static final String WORTISE_REWARDED_INTERSTITIAL_ID = "test-rewarded-interstitial";
     public static final String WORTISE_NATIVE_ID = "test-native";
     public static final String WORTISE_APP_OPEN_AD_ID = "test-app-open";
 

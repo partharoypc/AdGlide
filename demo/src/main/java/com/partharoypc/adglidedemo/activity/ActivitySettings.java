@@ -222,7 +222,7 @@ public class ActivitySettings extends AppCompatActivity {
         com.partharoypc.adglide.AdGlideConfig config = new com.partharoypc.adglide.AdGlideConfig.Builder()
                 .enableAds(Constant.AD_STATUS)
                 .primaryNetwork(Constant.AD_NETWORK)
-                .backupNetwork(Constant.BACKUP_AD_NETWORK)
+                .backupNetworks(Constant.BACKUP_AD_NETWORK)
                 .startAppId(Constant.STARTAPP_APP_ID)
                 .unityGameId(Constant.UNITY_GAME_ID)
                 .appLovinSdkKey(getResources().getString(R.string.app_lovin_sdk_key))
@@ -256,6 +256,7 @@ public class ActivitySettings extends AppCompatActivity {
 
                 // Rewarded Interstitial
                 .adMobRewardedIntId(Constant.ADMOB_REWARDED_INTERSTITIAL_ID)
+                .wortiseRewardedIntId(Constant.WORTISE_REWARDED_INTERSTITIAL_ID)
 
                 // App Open
                 .adMobAppOpenId(Constant.ADMOB_APP_OPEN_AD_ID)

@@ -11,7 +11,6 @@ public interface BannerProvider {
     interface BannerConfig {
         boolean isDarkTheme();
 
-        boolean isLegacyGDPR();
 
         boolean isCollapsible();
 

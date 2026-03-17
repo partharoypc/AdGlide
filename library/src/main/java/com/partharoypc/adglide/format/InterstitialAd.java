@@ -37,7 +37,6 @@ public class InterstitialAd {
         private InterstitialProvider currentProvider;
         private boolean showOnLoad = false;
         private AdGlideCallback callback;
-        private int counter = 1;
 
         public Builder(@NonNull Activity activity) {
             this.activityRef = new java.lang.ref.WeakReference<>(activity);
@@ -92,8 +91,12 @@ public class InterstitialAd {
         }
 
         public void show() {
-            Activity activity = activityRef.get();
-            showInterstitialAd(activity, null);
+            Activity activity = activityRef != null ? activityRef.get() : null;
+            if (activity != null) {
+                showInterstitialAd(activity, null);
+            } else {
+                Log.e(TAG, "Cannot show Interstitial Ad: Activity reference is null.");
+            }
         }
 
         public void show(@NonNull Activity displayActivity) {
@@ -101,111 +104,19 @@ public class InterstitialAd {
         }
 
         public void show(AdGlideCallback callback) {
-            Activity activity = activityRef.get();
-            showInterstitialAd(activity, callback);
+            Activity activity = activityRef != null ? activityRef.get() : null;
+            if (activity != null) {
+                showInterstitialAd(activity, callback);
+            } else {
+                Log.e(TAG, "Cannot show Interstitial Ad: Activity reference is null.");
+                if (callback != null) callback.onAdDismissed();
+            }
         }
 
         public void show(@NonNull Activity displayActivity, AdGlideCallback callback) {
             showInterstitialAd(displayActivity, callback);
         }
 
-        // --- Deprecated chained methods. Keeping for broad API compatibility where
-        // possible, but they do nothing useful now as config is global ---
-
-        @NonNull
-        public Builder status(boolean adStatus) {
-            return this;
-        }
-
-        @NonNull
-        public Builder network(@NonNull String adNetwork) {
-            return this;
-        }
-
-        @NonNull
-        public Builder network(AdGlideNetwork network) {
-            return this;
-        }
-
-        @NonNull
-        public Builder backup(@Nullable String backupAdNetwork) {
-            return this;
-        }
-
-        @NonNull
-        public Builder backup(AdGlideNetwork backupAdNetwork) {
-            return this;
-        }
-
-        @NonNull
-        public Builder backups(@Nullable String... backupAdNetworks) {
-            return this;
-        }
-
-        @NonNull
-        public Builder backups(AdGlideNetwork... backupAdNetworks) {
-            return this;
-        }
-
-        @NonNull
-        public Builder adMobId(@NonNull String adMobInterstitialId) {
-            return this;
-        }
-
-        @NonNull
-        public Builder metaId(@NonNull String metaInterstitialId) {
-            return this;
-        }
-
-        @NonNull
-        public Builder unityId(@NonNull String unityInterstitialId) {
-            return this;
-        }
-
-        @NonNull
-        public Builder appLovinId(@NonNull String appLovinInterstitialId) {
-            return this;
-        }
-
-        @NonNull
-        public Builder zoneId(@NonNull String appLovinInterstitialZoneId) {
-            return this;
-        }
-
-        @NonNull
-        public Builder ironSourceId(@NonNull String ironSourceInterstitialId) {
-            return this;
-        }
-
-        @NonNull
-        public Builder wortiseId(@NonNull String wortiseInterstitialId) {
-            return this;
-        }
-
-        @NonNull
-        public Builder startAppId(@NonNull String startAppId) {
-            return this;
-        }
-
-        @NonNull
-        public Builder interval(int interval) {
-            return this;
-        }
-
-        @NonNull
-        public Builder debug(boolean debug) {
-            return this;
-        }
-
-        @NonNull
-        public Builder testMode(boolean testMode) {
-            return this;
-        }
-
-        @NonNull
-        public Builder legacyGDPR(boolean legacyGDPR) {
-            return this;
-        }
 
         // --- Core Internal Logic ---
 
@@ -361,68 +272,38 @@ public class InterstitialAd {
                     return;
                 }
 
-                AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-                int interval = config != null ? config.getInterstitialInterval() : 1;
-
-                if (counter >= interval) {
-                    if (currentProvider != null && currentProvider.isAdLoaded()) {
-                        Activity activity = activityRef.get();
-                        currentProvider.showInterstitial(displayActivity != null ? displayActivity : activity,
-                                new InterstitialProvider.InterstitialListener() {
-                                    @Override
-                                    public void onAdLoaded() {
-                                    }
-
-                                    @Override
-                                    public void onAdFailedToLoad(String error) {
-                                    }
-
-                                    @Override
-                                    public void onAdDismissed() {
-                                        if (callback != null) {
-                                            callback.onAdDismissed();
-                                        }
-                                        loadInterstitialAd(callback); // Load next ad after dismissal
-                                    }
-
-                                    @Override
-                                    public void onAdShowFailed(String error) {
-                                        Log.e(TAG, "Interstitial Ad failed to show: " + error);
-                                        if (callback != null) {
-                                            callback.onAdDismissed();
-                                        }
-                                        loadInterstitialAd(callback); // Load next ad after show failure
-                                    }
-
-                                    @Override
-                                    public void onAdShowed() {
-                                        if (callback != null) {
-                                            callback.onAdShowed();
-                                        }
-                                    }
-                                });
-                        counter = 1;
-                    } else {
-                        Log.d(TAG,
-                                "Primary interstitial ad not loaded. Skipping show and calling dismissed listener.");
-                        if (callback != null) {
-                            callback.onAdDismissed();
-                        }
-                        loadInterstitialAd(callback); // Ensure a new ad is loaded for next time
-                        counter = 1;
-                    }
+                if (currentProvider != null && currentProvider.isAdLoaded()) {
+                    Activity activity = activityRef.get();
+                    currentProvider.showInterstitial(displayActivity != null ? displayActivity : activity,
+                            new InterstitialProvider.InterstitialListener() {
+                                @Override
+                                public void onAdLoaded() {}
+                                @Override
+                                public void onAdFailedToLoad(String error) {}
+                                @Override
+                                public void onAdDismissed() {
+                                    if (callback != null) callback.onAdDismissed();
+                                    loadInterstitialAd(callback);
+                                }
+                                @Override
+                                public void onAdShowFailed(String error) {
+                                    Log.e(TAG, "Interstitial Ad failed to show: " + error);
+                                    if (callback != null) callback.onAdDismissed();
+                                    loadInterstitialAd(callback);
+                                }
+                                @Override
+                                public void onAdShowed() {
+                                    if (callback != null) callback.onAdShowed();
+                                }
+                            });
                 } else {
-                    counter++;
-                    Log.d(TAG, "Interstitial interval not met. Current counter: " + counter);
-                    if (callback != null) {
-                        callback.onAdDismissed();
-                    }
+                    Log.d(TAG, "Interstitial ad not loaded. Skipping show and calling dismissed listener.");
+                    if (callback != null) callback.onAdDismissed();
+                    loadInterstitialAd(callback);
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Error in showInterstitialAd: " + e.getMessage());
-                if (callback != null) {
-                    callback.onAdDismissed();
-                }
+                if (callback != null) callback.onAdDismissed();
             }
         }
 

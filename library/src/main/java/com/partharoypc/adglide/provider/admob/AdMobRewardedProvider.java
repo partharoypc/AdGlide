@@ -28,10 +28,6 @@ public class AdMobRewardedProvider implements RewardedProvider {
                 @Override
                 public void onAdLoaded(@NonNull RewardedInterstitialAd ad) {
                     com.partharoypc.adglide.util.AdMobHelper.resetCooldown(adUnitId);
-                    ad.setOnPaidEventListener(adValue -> {
-                        com.partharoypc.adglide.util.AdMobHelper.handlePaidEvent(adValue, "RewardedInterstitial",
-                                adUnitId);
-                    });
                     rewardedInterstitialAd = ad;
                     setupInterstitialCallback(listener);
                     listener.onAdLoaded();
@@ -50,9 +46,6 @@ public class AdMobRewardedProvider implements RewardedProvider {
                 @Override
                 public void onAdLoaded(@NonNull RewardedAd ad) {
                     com.partharoypc.adglide.util.AdMobHelper.resetCooldown(adUnitId);
-                    ad.setOnPaidEventListener(adValue -> {
-                        com.partharoypc.adglide.util.AdMobHelper.handlePaidEvent(adValue, "Rewarded", adUnitId);
-                    });
                     rewardedAd = ad;
                     setupRewardedCallback(listener);
                     listener.onAdLoaded();
@@ -72,9 +65,20 @@ public class AdMobRewardedProvider implements RewardedProvider {
     private void setupRewardedCallback(RewardedListener listener) {
         rewardedAd.setFullScreenContentCallback(new FullScreenContentCallback() {
             @Override
+            public void onAdShowedFullScreenContent() {
+                listener.onAdShowed();
+            }
+
+            @Override
             public void onAdDismissedFullScreenContent() {
                 rewardedAd = null;
                 listener.onAdDismissed();
+            }
+
+            @Override
+            public void onAdFailedToShowFullScreenContent(@NonNull com.google.android.gms.ads.AdError adError) {
+                rewardedAd = null;
+                listener.onAdShowFailed(adError.getMessage());
             }
         });
     }
@@ -82,19 +86,36 @@ public class AdMobRewardedProvider implements RewardedProvider {
     private void setupInterstitialCallback(RewardedListener listener) {
         rewardedInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
             @Override
+            public void onAdShowedFullScreenContent() {
+                listener.onAdShowed();
+            }
+
+            @Override
             public void onAdDismissedFullScreenContent() {
                 rewardedInterstitialAd = null;
                 listener.onAdDismissed();
+            }
+
+            @Override
+            public void onAdFailedToShowFullScreenContent(@NonNull com.google.android.gms.ads.AdError adError) {
+                rewardedInterstitialAd = null;
+                listener.onAdShowFailed(adError.getMessage());
             }
         });
     }
 
     @Override
     public void showRewardedAd(Activity activity, RewardedListener listener) {
-        if (rewardedInterstitialAd != null) {
-            rewardedInterstitialAd.show(activity, rewardItem -> listener.onAdCompleted());
-        } else if (rewardedAd != null) {
-            rewardedAd.show(activity, rewardItem -> listener.onAdCompleted());
+        try {
+            if (rewardedInterstitialAd != null) {
+                rewardedInterstitialAd.show(activity, rewardItem -> listener.onAdCompleted());
+            } else if (rewardedAd != null) {
+                rewardedAd.show(activity, rewardItem -> listener.onAdCompleted());
+            } else {
+                listener.onAdShowFailed("AdMob Rewarded not loaded");
+            }
+        } catch (Exception e) {
+            listener.onAdShowFailed(e.getMessage());
         }
     }
 

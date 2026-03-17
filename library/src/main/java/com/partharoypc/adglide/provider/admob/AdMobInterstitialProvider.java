@@ -26,9 +26,6 @@ public class AdMobInterstitialProvider implements InterstitialProvider {
             @Override
             public void onAdLoaded(@NonNull InterstitialAd ad) {
                 com.partharoypc.adglide.util.AdMobHelper.resetCooldown(adUnitId);
-                ad.setOnPaidEventListener(adValue -> {
-                    com.partharoypc.adglide.util.AdMobHelper.handlePaidEvent(adValue, "Interstitial", adUnitId);
-                });
                 interstitialAd = ad;
                 listener.onAdLoaded();
             }
@@ -65,7 +62,11 @@ public class AdMobInterstitialProvider implements InterstitialProvider {
                     listener.onAdShowed();
                 }
             });
-            interstitialAd.show(activity);
+            try {
+                interstitialAd.show(activity);
+            } catch (Exception e) {
+                listener.onAdShowFailed(e.getMessage());
+            }
         } else {
             listener.onAdShowFailed("AdMob Interstitial not loaded");
         }

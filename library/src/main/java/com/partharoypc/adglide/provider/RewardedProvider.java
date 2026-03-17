@@ -12,7 +12,6 @@ public interface RewardedProvider {
     void destroy();
 
     interface RewardedConfig {
-        boolean isLegacyGDPR();
 
         boolean isInterstitial();
     }
@@ -25,6 +24,10 @@ public interface RewardedProvider {
         void onAdDismissed();
 
         void onAdCompleted();
+
+        default void onAdShowed() {
+            // Default no-op: override to handle show events
+        }
 
         default void onAdShowFailed(String error) {
             // Default no-op: override to handle show failures

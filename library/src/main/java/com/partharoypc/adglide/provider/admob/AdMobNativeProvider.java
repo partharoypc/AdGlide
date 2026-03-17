@@ -29,9 +29,6 @@ public class AdMobNativeProvider implements NativeProvider {
         AdLoader adLoader = new AdLoader.Builder(activity, adUnitId)
                 .forNativeAd(ad -> {
                     com.partharoypc.adglide.util.AdMobHelper.resetCooldown(adUnitId);
-                    ad.setOnPaidEventListener(adValue -> {
-                        com.partharoypc.adglide.util.AdMobHelper.handlePaidEvent(adValue, "Native", adUnitId);
-                    });
                     if (this.nativeAd != null) {
                         this.nativeAd.destroy();
                     }

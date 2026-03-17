@@ -2,7 +2,9 @@ package com.partharoypc.adglide.format;
 
 import android.app.Activity;
 import android.content.Context;
+import com.partharoypc.adglide.AdGlideConfig;
 import android.util.Log;
+import androidx.annotation.NonNull;
 import com.partharoypc.adglide.AdGlideNetwork;
 import com.partharoypc.adglide.util.Tools;
 import com.partharoypc.adglide.provider.NetworkInitializer;
@@ -18,163 +20,64 @@ public class AdNetwork {
 
         private static final String TAG = "AdGlide";
         private final Context context;
-        private final Activity activity;
-        private boolean adStatus = true;
-        private String adNetwork = "";
-        private String backupAdNetwork = "";
-        private List<String> backupAdNetworks = new ArrayList<>(); // New: Support for multiple backups
-        private String adMobAppId = "";
-        private String startappAppId = "0";
-        private String unityGameId = "";
-        private String appLovinSdkKey = "";
-        private String ironSourceAppKey = "";
-        private String wortiseAppId = "";
-        private boolean debug = true;
-        private boolean testMode = false;
+        private AdGlideConfig config;
 
-        public Initialize(Context context) {
+        public Initialize(@NonNull Context context) {
             this.context = context;
-            this.activity = context instanceof Activity ? (Activity) context : null;
+        }
+
+        public Initialize config(AdGlideConfig config) {
+            this.config = config;
+            return this;
         }
 
         @Override
         public String getAppId() {
-            AdGlideNetwork network = AdGlideNetwork.fromString(adNetwork);
-            return switch (network) {
-                case ADMOB, META_BIDDING_ADMOB -> adMobAppId;
-                case UNITY -> unityGameId;
-                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> appLovinSdkKey;
-                case IRONSOURCE, META_BIDDING_IRONSOURCE -> ironSourceAppKey;
-                case STARTAPP -> startappAppId;
-                case WORTISE -> wortiseAppId;
-                default -> "";
-            };
+            if (config == null) return "";
+            return getAppIdForNetwork(config.getPrimaryNetwork());
         }
 
         private String getAppIdForNetwork(String networkName) {
+            if (config == null) return "";
             AdGlideNetwork network = AdGlideNetwork.fromString(networkName);
             return switch (network) {
-                case ADMOB, META_BIDDING_ADMOB -> adMobAppId;
-                case UNITY -> unityGameId;
-                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> appLovinSdkKey;
-                case IRONSOURCE, META_BIDDING_IRONSOURCE -> ironSourceAppKey;
-                case STARTAPP -> startappAppId;
-                case WORTISE -> wortiseAppId;
+                case ADMOB, META_BIDDING_ADMOB -> config.getAdMobAppId();
+                case UNITY -> config.getUnityGameId();
+                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> config.getAppLovinSdkKey();
+                case IRONSOURCE, META_BIDDING_IRONSOURCE -> config.getIronSourceAppKey();
+                case STARTAPP -> config.getStartAppId();
+                case WORTISE -> config.getWortiseAppId();
                 default -> "";
             };
         }
 
         @Override
         public boolean isDebug() {
-            return debug;
+            return config != null && config.isDebug();
         }
 
         @Override
         public boolean isTestMode() {
-            return testMode;
+            return config != null && config.isTestMode();
         }
 
         public Initialize build() {
+            if (config == null || context == null) {
+                Log.e(TAG, "AdGlide not initialized: config or context is null.");
+                return this;
+            }
             initAds();
             initBackupAds();
             return this;
         }
 
-        public Initialize status(boolean adStatus) {
-            this.adStatus = adStatus;
-            return this;
-        }
-
-        public Initialize network(String adNetwork) {
-            this.adNetwork = AdGlideNetwork.fromString(adNetwork).getValue();
-            return this;
-        }
-
-        public Initialize network(AdGlideNetwork network) {
-            this.adNetwork = network.getValue();
-            return this;
-        }
-
-        public Initialize backup(String backupAdNetwork) {
-            this.backupAdNetwork = backupAdNetwork;
-            if (!this.backupAdNetworks.contains(backupAdNetwork)) {
-                this.backupAdNetworks.add(backupAdNetwork);
-            }
-            return this;
-        }
-
-        public Initialize backup(AdGlideNetwork backupAdNetwork) {
-            return backup(backupAdNetwork.getValue());
-        }
-
-        public Initialize backups(String... backupAdNetworks) {
-            this.backupAdNetworks.clear();
-            this.backupAdNetworks.addAll(Arrays.asList(backupAdNetworks));
-            if (!this.backupAdNetworks.isEmpty()) {
-                this.backupAdNetwork = this.backupAdNetworks.get(0);
-            }
-            return this;
-        }
-
-        public Initialize backups(AdGlideNetwork... backupAdNetworks) {
-            this.backupAdNetworks.clear();
-            for (AdGlideNetwork network : backupAdNetworks) {
-                if (network != null) {
-                    this.backupAdNetworks.add(network.getValue());
-                }
-            }
-            if (!this.backupAdNetworks.isEmpty()) {
-                this.backupAdNetwork = this.backupAdNetworks.get(0);
-            }
-            return this;
-        }
-
-        public Initialize adMobId(String adMobAppId) {
-            this.adMobAppId = adMobAppId;
-            return this;
-        }
-
-        public Initialize startAppId(String startappAppId) {
-            this.startappAppId = startappAppId;
-            return this;
-        }
-
-        public Initialize unityId(String unityGameId) {
-            this.unityGameId = unityGameId;
-            return this;
-        }
-
-        public Initialize appLovinId(String appLovinSdkKey) {
-            this.appLovinSdkKey = appLovinSdkKey;
-            return this;
-        }
-
-        public Initialize ironSourceId(String ironSourceAppKey) {
-            this.ironSourceAppKey = ironSourceAppKey;
-            return this;
-        }
-
-        public Initialize wortiseId(String wortiseAppId) {
-            this.wortiseAppId = wortiseAppId;
-            return this;
-        }
-
-        public Initialize debug(boolean debug) {
-            this.debug = debug;
-            return this;
-        }
-
-        public Initialize testMode(boolean testMode) {
-            this.testMode = testMode;
-            return this;
-        }
-
         public void initAds() {
-            if (adStatus) {
+            if (config.getAdStatus()) {
                 if (!Tools.isNetworkAvailable(context)) {
                     Log.e(TAG, "Internet connection not available. Skipping Primary Ads initialization.");
                     return;
                 }
+                String adNetwork = config.getPrimaryNetwork();
                 AdGlideNetwork primaryNetwork = AdGlideNetwork.fromString(adNetwork);
                 if (primaryNetwork == AdGlideNetwork.NONE && !adNetwork.isEmpty()) {
                     Log.w(TAG, "Unknown Primary Ad Network: [" + adNetwork + "]. Skipping initialization.");
@@ -186,16 +89,14 @@ public class AdNetwork {
         }
 
         public void initBackupAds() {
-            if (adStatus) {
+            if (config.getAdStatus()) {
                 if (!Tools.isNetworkAvailable(context)) {
                     Log.e(TAG, "Internet connection not available. Skipping Backup Ads initialization.");
                     return;
                 }
-                // Initialize legacy single backup if set and list is empty (backward
-                // compatibility)
-                if (backupAdNetworks.isEmpty() && !backupAdNetwork.isEmpty()) {
-                    backupAdNetworks.add(backupAdNetwork);
-                }
+
+                List<String> backupAdNetworks = config.getBackupNetworks();
+                String primaryNetwork = config.getPrimaryNetwork();
 
                 for (String network : backupAdNetworks) {
                     AdGlideNetwork backupNetwork = AdGlideNetwork.fromString(network);
@@ -205,7 +106,7 @@ public class AdNetwork {
                     }
 
                     // Skip if it's the same as the primary network (already initialized)
-                    if (network.equals(adNetwork)) {
+                    if (network.equals(primaryNetwork)) {
                         continue;
                     }
 
@@ -216,25 +117,11 @@ public class AdNetwork {
         }
 
         private void initializeSdk(String network) {
+            if (context == null || network == null || network.isEmpty()) return;
             try {
                 NetworkInitializer initializer = NetworkInitializerFactory.getInitializer(network);
                 if (initializer != null) {
-                    initializer.initialize(context, new NetworkInitializer.InitializerConfig() {
-                        @Override
-                        public String getAppId() {
-                            return getAppIdForNetwork(network);
-                        }
-
-                        @Override
-                        public boolean isDebug() {
-                            return debug;
-                        }
-
-                        @Override
-                        public boolean isTestMode() {
-                            return testMode;
-                        }
-                    });
+                    initializer.initialize(context, this);
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Failed to initialize " + network + " SDK. Error: " + e.getMessage());

@@ -1,6 +1,7 @@
 package com.partharoypc.adglide.provider.wortise;
 
 import android.app.Activity;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import com.partharoypc.adglide.provider.InterstitialProvider;
 import com.wortise.ads.AdError;
@@ -33,17 +34,20 @@ public class WortiseInterstitialProvider implements InterstitialProvider {
 
             @Override
             public void onInterstitialLoaded(@NonNull InterstitialAd ad) {
+                com.partharoypc.adglide.util.PerformanceLogger.log("Wortise", "Interstitial loaded: " + adUnitId);
                 listener.onAdLoaded();
             }
 
             @Override
             public void onInterstitialShown(@NonNull InterstitialAd ad) {
+                com.partharoypc.adglide.util.PerformanceLogger.log("Wortise", "Interstitial showed: " + adUnitId);
                 listener.onAdShowed();
             }
 
             @Override
             public void onInterstitialFailedToShow(@NonNull InterstitialAd ad, @NonNull AdError error) {
                 interstitialAd = null;
+                com.partharoypc.adglide.util.PerformanceLogger.error("Wortise", "Interstitial show failed: " + error.getMessage());
                 listener.onAdShowFailed(error.getMessage());
             }
 
@@ -53,6 +57,7 @@ public class WortiseInterstitialProvider implements InterstitialProvider {
 
             @Override
             public void onInterstitialRevenuePaid(@NonNull InterstitialAd ad, @NonNull RevenueData revenueData) {
+                // Wortise RevenueData fields not publicly accessible; revenue is tracked via server callbacks.
             }
         });
         interstitialAd.loadAd();
@@ -61,7 +66,12 @@ public class WortiseInterstitialProvider implements InterstitialProvider {
     @Override
     public void showInterstitial(Activity activity, InterstitialListener listener) {
         if (interstitialAd != null && interstitialAd.isAvailable()) {
-            interstitialAd.showAd();
+            try {
+                interstitialAd.showAd();
+            } catch (Exception e) {
+                Log.e("AdGlide.Wortise", "Failed to show interstitial: " + e.getMessage());
+                listener.onAdShowFailed(e.getMessage());
+            }
         } else {
             listener.onAdShowFailed("Wortise Interstitial not available");
         }

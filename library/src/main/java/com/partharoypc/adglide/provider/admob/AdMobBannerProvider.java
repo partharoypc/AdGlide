@@ -40,9 +40,6 @@ public class AdMobBannerProvider implements BannerProvider {
             @Override
             public void onAdLoaded() {
                 com.partharoypc.adglide.util.AdMobHelper.resetCooldown(adUnitId);
-                adView.setOnPaidEventListener(adValue -> {
-                    com.partharoypc.adglide.util.AdMobHelper.handlePaidEvent(adValue, "Banner", adUnitId);
-                });
                 listener.onAdLoaded(adView);
             }
 

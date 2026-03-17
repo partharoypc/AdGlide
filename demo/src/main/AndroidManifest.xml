@@ -50,6 +50,11 @@
 
         <activity android:name="com.partharoypc.adglidedemo.activity.ads.ActivityRewardedInterstitial" />
 
+        <activity
+            android:name="com.partharoypc.adglide.util.DebugActivity"
+            android:exported="false"
+            android:label="AdGlide Debug HUD" />
+
     </application>
 
 </manifest>

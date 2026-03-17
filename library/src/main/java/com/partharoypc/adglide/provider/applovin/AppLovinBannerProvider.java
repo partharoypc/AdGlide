@@ -62,15 +62,7 @@ public class AppLovinBannerProvider implements BannerProvider {
             }
         });
 
-        maxAdView.setRevenueListener(ad -> {
-            com.partharoypc.adglide.util.RevenueHelper.logRevenue(
-                    ad.getRevenue() * 1000000,
-                    "USD",
-                    "ESTIMATED",
-                    com.partharoypc.adglide.util.Constant.AD_NETWORK_APPLOVIN_MAX,
-                    com.partharoypc.adglide.util.Constant.BANNER,
-                    adUnitId);
-        });
+
 
         int width = ViewGroup.LayoutParams.MATCH_PARENT;
         int heightPx;

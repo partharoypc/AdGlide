@@ -66,17 +66,7 @@ public class AdGlide {
 
         // Initialize SDKs based on the global configuration
         new AdNetwork.Initialize(application)
-                .status(glideConfig.getAdStatus())
-                .network(glideConfig.getPrimaryNetwork())
-                .backups(glideConfig.getBackupNetworks().toArray(new String[0]))
-                .testMode(glideConfig.isTestMode())
-                .debug(glideConfig.isDebug())
-                .adMobId(glideConfig.getAdMobAppId())
-                .appLovinId(glideConfig.getAppLovinSdkKey())
-                .ironSourceId(glideConfig.getIronSourceAppKey())
-                .startAppId(glideConfig.getStartAppId())
-                .unityId(glideConfig.getUnityGameId())
-                .wortiseId(glideConfig.getWortiseAppId())
+                .config(glideConfig)
                 .build();
 
         if (config.getAdStatus()) {
@@ -97,17 +87,7 @@ public class AdGlide {
         config = newConfig;
 
         new AdNetwork.Initialize(currentApplication)
-                .status(config.getAdStatus())
-                .network(config.getPrimaryNetwork())
-                .backups(config.getBackupNetworks().toArray(new String[0]))
-                .testMode(config.isTestMode())
-                .debug(config.isDebug())
-                .adMobId(config.getAdMobAppId())
-                .appLovinId(config.getAppLovinSdkKey())
-                .ironSourceId(config.getIronSourceAppKey())
-                .startAppId(config.getStartAppId())
-                .unityId(config.getUnityGameId())
-                .wortiseId(config.getWortiseAppId())
+                .config(config)
                 .build();
 
         // Ensure AppOpen is registered/unregistered if status changed
@@ -200,17 +180,7 @@ public class AdGlide {
             // Fallback (auto-caching features that require Application will not work fully)
             config = glideConfig;
             new AdNetwork.Initialize(context)
-                    .status(glideConfig.getAdStatus())
-                    .network(glideConfig.getPrimaryNetwork())
-                    .backups(glideConfig.getBackupNetworks().toArray(new String[0]))
-                    .testMode(glideConfig.isTestMode())
-                    .debug(glideConfig.isDebug())
-                    .adMobId(glideConfig.getAdMobAppId())
-                    .appLovinId(glideConfig.getAppLovinSdkKey())
-                    .ironSourceId(glideConfig.getIronSourceAppKey())
-                    .startAppId(glideConfig.getStartAppId())
-                    .unityId(glideConfig.getUnityGameId())
-                    .wortiseId(glideConfig.getWortiseAppId())
+                    .config(glideConfig)
                     .build();
         }
     }
@@ -239,15 +209,16 @@ public class AdGlide {
         }
     }
 
-    // --- Facade Show Methods ---
-
-    /**
-     * Shows a pre-cached interstitial ad, or loads one on the fly if not cached.
-     * Once the ad is dismissed, it automatically caches the next one (if
-     * configured).
-     */
     public static void showInterstitial(Activity activity, AdGlideCallback callback) {
-        if (config == null || !isInterstitialEnabled()) {
+        if (!isInitialized || config == null) {
+            Log.e(TAG, "AdGlide is not initialized. Call AdGlide.initialize() first.");
+            if (callback != null)
+                callback.onAdDismissed();
+            return;
+        }
+
+        if (!isInterstitialEnabled()) {
+            Log.d(TAG, "Interstitial Ad is disabled.");
             if (callback != null)
                 callback.onAdDismissed();
             return;
@@ -293,7 +264,15 @@ public class AdGlide {
      * Shows a pre-cached rewarded ad, or loads one on the fly if not cached.
      */
     public static void showRewarded(Activity activity, AdGlideCallback callback) {
-        if (config == null || !isRewardedEnabled()) {
+        if (!isInitialized || config == null) {
+            Log.e(TAG, "AdGlide is not initialized. Call AdGlide.initialize() first.");
+            if (callback != null)
+                callback.onAdDismissed();
+            return;
+        }
+
+        if (!isRewardedEnabled()) {
+            Log.d(TAG, "Rewarded Ad is disabled.");
             if (callback != null)
                 callback.onAdDismissed();
             return;
@@ -349,7 +328,15 @@ public class AdGlide {
      * cached.
      */
     public static void showRewardedInterstitial(Activity activity, AdGlideCallback callback) {
-        if (config == null || !isRewardedInterstitialEnabled()) {
+        if (!isInitialized || config == null) {
+            Log.e(TAG, "AdGlide is not initialized. Call AdGlide.initialize() first.");
+            if (callback != null)
+                callback.onAdDismissed();
+            return;
+        }
+
+        if (!isRewardedInterstitialEnabled()) {
+            Log.d(TAG, "Rewarded Interstitial Ad is disabled.");
             if (callback != null)
                 callback.onAdDismissed();
             return;

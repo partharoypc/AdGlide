@@ -16,27 +16,35 @@ public class IronSourceRewardedProvider implements RewardedProvider {
         IronSource.setLevelPlayRewardedVideoListener(new LevelPlayRewardedVideoListener() {
             @Override
             public void onAdOpened(AdInfo adInfo) {
+                com.partharoypc.adglide.util.PerformanceLogger.log("IronSource", "Rewarded opened");
+                listener.onAdShowed();
             }
 
             @Override
             public void onAdClosed(AdInfo adInfo) {
+                isAvailable = false;
                 listener.onAdDismissed();
             }
 
             @Override
             public void onAdAvailable(AdInfo adInfo) {
                 isAvailable = true;
+                com.partharoypc.adglide.util.PerformanceLogger.log("IronSource", "Rewarded available: " + adUnitId);
                 listener.onAdLoaded();
             }
 
             @Override
             public void onAdUnavailable() {
                 isAvailable = false;
+                com.partharoypc.adglide.util.PerformanceLogger.error("IronSource", "Rewarded unavailable");
+                listener.onAdFailedToLoad("IronSource Rewarded unavailable");
             }
 
             @Override
             public void onAdShowFailed(IronSourceError ironSourceError, AdInfo adInfo) {
                 isAvailable = false;
+                com.partharoypc.adglide.util.PerformanceLogger.error("IronSource", "Rewarded show failed: " + ironSourceError.getErrorMessage());
+                listener.onAdShowFailed(ironSourceError.getErrorMessage());
             }
 
             @Override
@@ -54,7 +62,13 @@ public class IronSourceRewardedProvider implements RewardedProvider {
     @Override
     public void showRewardedAd(Activity activity, RewardedListener listener) {
         if (IronSource.isRewardedVideoAvailable()) {
-            IronSource.showRewardedVideo();
+            try {
+                IronSource.showRewardedVideo();
+            } catch (Exception e) {
+                listener.onAdShowFailed(e.getMessage());
+            }
+        } else {
+            listener.onAdShowFailed("IronSource Rewarded not available");
         }
     }
 
@@ -65,5 +79,6 @@ public class IronSourceRewardedProvider implements RewardedProvider {
 
     @Override
     public void destroy() {
+        isAvailable = false;
     }
 }

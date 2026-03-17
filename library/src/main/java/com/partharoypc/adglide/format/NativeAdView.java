@@ -4,11 +4,13 @@ import android.app.Activity;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
+import com.partharoypc.adglide.AdGlideConfig;
 import com.partharoypc.adglide.AdGlideNetwork;
 import com.partharoypc.adglide.AdGlideNativeStyle;
 import com.partharoypc.adglide.R;
@@ -40,15 +42,8 @@ public class NativeAdView {
         private String backupAdNetwork = "";
         private WaterfallManager waterfallManager;
 
-        private String adMobNativeId = "";
-        private String metaNativeId = "";
-        private String appLovinNativeId = "";
-        private String appLovinDiscMrecZoneId = "";
-        private String wortiseNativeId = "";
-        private String startAppNativeId = "";
 
         private boolean darkTheme = false;
-        private boolean legacyGDPR = false;
 
         private String nativeAdStyle = "";
         private int nativeBackgroundLight = android.R.color.transparent;
@@ -63,14 +58,6 @@ public class NativeAdView {
             return darkTheme;
         }
 
-        @Override
-        public boolean isLegacyGDPR() {
-            return legacyGDPR;
-        }
-
-        public String getNativeAdStyle() {
-            return nativeAdStyle;
-        }
 
         public int getNativeBackgroundLight() {
             return nativeBackgroundLight;
@@ -117,95 +104,6 @@ public class NativeAdView {
         @NonNull
         public Builder view(View view) {
             this.view = view;
-            return this;
-        }
-
-        @NonNull
-        public Builder status(boolean adStatus) {
-            this.adStatus = adStatus;
-            return this;
-        }
-
-        @NonNull
-        public Builder network(@NonNull String adNetwork) {
-            this.adNetwork = adNetwork;
-            return this;
-        }
-
-        @NonNull
-        public Builder network(AdGlideNetwork network) {
-            return network(network.getValue());
-        }
-
-        @Nullable
-        public Builder backup(@Nullable String backupAdNetwork) {
-            this.backupAdNetwork = backupAdNetwork;
-            if (waterfallManager == null) {
-                waterfallManager = new WaterfallManager(backupAdNetwork);
-            } else {
-                waterfallManager.getNetworks().add(backupAdNetwork);
-            }
-            return this;
-        }
-
-        @Nullable
-        public Builder backup(AdGlideNetwork backupAdNetwork) {
-            return backup(backupAdNetwork.getValue());
-        }
-
-        @Nullable
-        public Builder backups(String... backupAdNetworks) {
-            this.waterfallManager = new WaterfallManager(backupAdNetworks);
-            if (backupAdNetworks.length > 0) {
-                this.backupAdNetwork = backupAdNetworks[0];
-            }
-            return this;
-        }
-
-        @Nullable
-        public Builder backups(AdGlideNetwork... backupAdNetworks) {
-            return backups(AdGlideNetwork.toStringArray(backupAdNetworks));
-        }
-
-        @NonNull
-        public Builder adMobId(@NonNull String adMobNativeId) {
-            this.adMobNativeId = adMobNativeId;
-            return this;
-        }
-
-        @NonNull
-        public Builder zoneId(@NonNull String appLovinDiscMrecZoneId) {
-            this.appLovinDiscMrecZoneId = appLovinDiscMrecZoneId;
-            return this;
-        }
-
-        @NonNull
-        public Builder wortiseId(@NonNull String wortiseNativeId) {
-            this.wortiseNativeId = wortiseNativeId;
-            return this;
-        }
-
-        @NonNull
-        public Builder metaId(@NonNull String metaNativeId) {
-            this.metaNativeId = metaNativeId;
-            return this;
-        }
-
-        @NonNull
-        public Builder appLovinId(@NonNull String appLovinNativeId) {
-            this.appLovinNativeId = appLovinNativeId;
-            return this;
-        }
-
-        @NonNull
-        public Builder darkTheme(boolean darkTheme) {
-            this.darkTheme = darkTheme;
-            return this;
-        }
-
-        @NonNull
-        public Builder legacyGDPR(boolean legacyGDPR) {
-            this.legacyGDPR = legacyGDPR;
             return this;
         }
 
@@ -279,7 +177,7 @@ public class NativeAdView {
 
         private void loadAdFromNetwork(String networkToLoad) {
             try {
-                String adUnitId = getAdUnitIdForNetwork(this, networkToLoad);
+                String adUnitId = getAdUnitIdForNetwork(networkToLoad);
                 if (adUnitId.equals("0") || adUnitId.isEmpty()) {
                     loadBackupNativeAd();
                     return;
@@ -311,14 +209,15 @@ public class NativeAdView {
             }
         }
 
-        private static String getAdUnitIdForNetwork(Builder builder, String network) {
+        private static String getAdUnitIdForNetwork(String network) {
+            AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+            if (config == null) return "";
             return switch (network) {
-                case ADMOB, META_BIDDING_ADMOB -> builder.adMobNativeId;
-                case META -> builder.metaNativeId;
-                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> builder.appLovinNativeId;
-                case WORTISE -> builder.wortiseNativeId;
-                case STARTAPP ->
-                        "startapp_native"; // StartApp usually doesn't need unit IDs for Native
+                case ADMOB, META_BIDDING_ADMOB -> config.getAdMobNativeId();
+                case META -> config.getMetaNativeId();
+                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> config.getAppLovinNativeId();
+                case WORTISE -> config.getWortiseNativeId();
+                case STARTAPP -> config.getStartAppId();
                 default -> "";
             };
         }

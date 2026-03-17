@@ -30,6 +30,8 @@ public class AppLovinRewardedProvider implements RewardedProvider {
 
             @Override
             public void onAdDisplayed(MaxAd ad) {
+                com.partharoypc.adglide.util.PerformanceLogger.log(TAG, "Rewarded showed: " + ad.getAdUnitId());
+                listener.onAdShowed();
             }
 
             @Override
@@ -50,18 +52,12 @@ public class AppLovinRewardedProvider implements RewardedProvider {
             @Override
             public void onAdDisplayFailed(MaxAd ad, MaxError error) {
                 Log.e(TAG, "Rewarded Ad failed to display: [" + error.getCode() + "] " + error.getMessage());
+                com.partharoypc.adglide.util.PerformanceLogger.error(TAG, "Rewarded show failed: " + error.getMessage());
+                listener.onAdShowFailed(error.getMessage());
             }
         });
 
-        rewardedAd.setRevenueListener(ad -> {
-            com.partharoypc.adglide.util.RevenueHelper.logRevenue(
-                    ad.getRevenue() * 1000000,
-                    "USD",
-                    "ESTIMATED",
-                    com.partharoypc.adglide.util.Constant.AD_NETWORK_APPLOVIN_MAX,
-                    com.partharoypc.adglide.util.Constant.REWARDED,
-                    adUnitId);
-        });
+
 
         Log.d(TAG, "Loading Rewarded Ad: " + adUnitId);
         rewardedAd.loadAd();
@@ -70,7 +66,14 @@ public class AppLovinRewardedProvider implements RewardedProvider {
     @Override
     public void showRewardedAd(Activity activity, RewardedListener listener) {
         if (rewardedAd != null && rewardedAd.isReady()) {
-            rewardedAd.showAd();
+            try {
+                rewardedAd.showAd();
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to show rewarded: " + e.getMessage());
+                listener.onAdShowFailed(e.getMessage());
+            }
+        } else {
+            listener.onAdShowFailed("AppLovin Rewarded not ready");
         }
     }
 

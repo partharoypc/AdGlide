@@ -1,81 +1,73 @@
-﻿# AdGlide SDK 🚀
+# AdGlide SDK 🚀
 ### *The Premium Mediation Wrapper for High-Performance Android Apps*
 
-[![Version](https://img.shields.io/badge/Version-1.5.0-blue.svg)](https://github.com/partharoypc/AdGlide)
-[![SDK Support](https://img.shields.io/badge/Android-23%2B-green.svg)](https://developer.android.com)
+[![Version](https://img.shields.io/badge/Version-1.6.0-blue.svg)](https://github.com/partharoypc/AdGlide)
+[![Android](https://img.shields.io/badge/Android-23%2B-green.svg)](https://developer.android.com)
 [![Compile SDK](https://img.shields.io/badge/Compile_SDK-36-green.svg)](https://developer.android.com)
-[![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://developer.android.com)
+[![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://openjdk.org/projects/jdk/17/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**AdGlide** is an industrial-grade ad mediation SDK designed for professional Android developers. It eliminates the friction of multi-network integration, providing a **"Just Copy-Paste"** architecture that handles initialization, bidding, waterfalls, rate limiting, and pre-fetching out of the box.
+**AdGlide** is an industrial-grade ad mediation SDK for professional Android developers. It eliminates the friction of multi-network integration with a **"Just Copy-Paste"** architecture that handles initialization, waterfall orchestration, rate limiting, pre-fetching, and crash protection out of the box across **8 ad networks**.
 
 ---
 
-## ✨ What's New in v1.5.0
+## ✨ What's New in v1.6.0
 
-- **Global Configuration Object** — Replaced `AdGlide.init()` chain with a robust `AdGlideConfig` architecture, ensuring thread-safe settings decoupled from Context or Activity lifting constraints.
-- **Zero Memory Leaks Architecture** — Eliminated aggressive `Activity` contexts traversing formats. We safely handle transitions using `WeakReference<Activity>` for App Open, Banner, Interstitial, and Native formats, protecting app performance organically.
-- **House Ads & Offline Fallback** — Keep users engaged even without an internet connection using static internal promos.
-- **LTV & Revenue Callbacks (`OnPaidEventListener`)** — Direct access to micro-revenue estimates from loaded ads to help you calculate precise LTV locally.
-- **Manual Preloading APIs** — Added explicit `AdGlide.preloadInterstitial()` and `AdGlide.preloadRewarded()` hooks so you control cache timing manually beyond the automated interval configurations.
-- **Modernized Core** — Refactored internal ad unit mapping with static logic and Java 17+ switch expressions for peak performance and safety.
+- **Fully Crash-Safe Ad Display** — Every `showAd()` call on every network is now wrapped in a `try-catch` guard. Third-party SDK crashes can never propagate to your app.
+- **Consistent Callback Coverage** — `onAdShowed()` and `onAdShowFailed()` are now reliably fired on all 8 networks.
+- **Plural `backupNetworks()`** — Easily supply an array of backup networks for robust waterfall fill.
+- **`PerformanceLogger` Across All Networks** — Unified event tracking (load, show, fail) for all providers; visible in the live Debug HUD.
+- **Debug HUD v2** — New Waterfall Status panel with real-time ✓/✗ events, plus a "Clear Logs" button.
+- **`AdGlide.preloadRewardedInterstitial()`** — New manual preload API for Rewarded Interstitial format.
+- **`AdGlide.updateConfig()`** — Hot-swap your configuration at runtime without re-initializing.
+- **`AdGlide.requestConsent()`** — Explicit GDPR/UMP consent request flow for Splash screens.
+- **Brand New Demo App** — The repository includes a stunning Material 3 demo app featuring a live Network Selector, Theme Toggle, and interactive integration examples for every format.
 
 ---
 
 ## 🏗️ 1. Core Architecture
 
-AdGlide supports four distinct integration patterns:
+AdGlide supports four integration patterns:
 
-1. **Direct Use** — Target a specific ad network exclusively.
-2. **Bidding Mediation** — Leverage real-time header bidding for supported networks (Meta ↔ AdMob, Meta ↔ AppLovin, Meta ↔ IronSource).
-3. **Sequential Waterfall Engine** — The `WaterfallManager` is the orchestrator of AdGlide. It ensures **100% fill rates** by intelligently rotating through backup networks only when the primary provider fails to fill a request.
-4. **Intelligent Rate Limiting** — Built-in defensive logic to prevent account flags (like "AdMob Error 3"). The SDK applies exponential backoff to failing ad units in real-time, protecting your developer account health without sacrificing user experience.
+1. **Direct Use** — Target a single ad network exclusively.
+2. **Bidding Mediation** — Real-time header bidding (Meta ↔ AdMob, Meta ↔ AppLovin, Meta ↔ IronSource).
+3. **Sequential Waterfall** — `WaterfallManager` rotates through backup networks on fill failure for near-100% fill rates.
+4. **Intelligent Rate Limiting** — Built-in exponential backoff on `AdMob Error 3`, protecting your account health automatically.
 
 ### 📊 Network × Format Support Matrix
 
-| Ad Format | AdMob | Meta | AppLovin | StartApp | Wortise | Unity | IronSource |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Banner** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Interstitial** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Native** | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
-| **Rewarded** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Rewarded Interstitial** | ✅ | ❌ | ✅ | ❌ | ✅ | ❌ | ❌ |
-| **App Open** | ✅ | ❌ | ✅ | ❌ | ✅ | ❌ | ❌ |
-| **Bidding** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ |
-| **Direct Use** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Bidding Mediation** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ |
-| **Sequential Waterfall** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Intelligent Rate Limiting** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Ad Format | AdMob | Meta | AppLovin | Wortise | IronSource | Unity | StartApp | HouseAd |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Banner** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Interstitial** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Rewarded** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| **Rewarded Interstitial** | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Native** | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ |
+| **App Open** | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Bidding** | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| **Waterfall** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
-### 🎨 Native Ad Styles
+### 🎨 Native Ad Templates
 
-AdGlide provides distinct, high-converting templates for Native Ads:
-
-| Enum Value | Descriptor | Ideal Use Case |
+| Style Value | Layout Type | Ideal Use Case |
 | :--- | :--- | :--- |
-| `AdGlideNativeStyle.SMALL` | Compact Radio | List items / Small footers |
-| `AdGlideNativeStyle.MEDIUM` | Standard Box | News feeds / Card views |
-| `AdGlideNativeStyle.BANNER` | Content Blend | Article inline placements / News style |
-| `AdGlideNativeStyle.VIDEO` | Immersive Media | High-CPM video rewards / Media focus |
-
-### 📦 SDK Module Structure
-AdGlide follows a strict **Clean Architecture** principle to ensure zero memory leaks and thread-safe operations:
-- **`com.partharoypc.adglide`**: Main entry Facade and Global Configuration.
-- **`format/`**: Lifecycle-aware ad type implementations (AppOpen, Banner, etc.).
-- **`gdpr/`**: Modern UMP consent logic for European privacy compliance.
-- **`util/`**: The core "brain" including the Waterfall engine, Rate Limiter, and Performance Loggers.
+| `"small"` | Compact Radio | List items / Footers |
+| `"medium"` | Standard Box | News feeds / Card views |
+| `"banner"` | Content Blend | Article inline / News style |
+| `"video"` | Immersive Video | High-CPM rewarded media |
 
 ---
 
 ## ⚡ 2. Step-by-Step Setup Guide
 
-Follow these instructions to integrate AdGlide into your Android project in less than 5 minutes.
+Integrate AdGlide in under 5 minutes.
 
 ### Step 1: Configure Repositories
-Add the AdGlide repository and your chosen ad networks to your **`settings.gradle`** file inside the `dependencyResolutionManagement` block.
+
+Add the following to your **`settings.gradle`** inside the `dependencyResolutionManagement` block.
 
 > [!TIP]
-> Only include repositories for the networks you intend to use to keep your build configuration clean.
+> Only include repositories for the networks you actually use.
 
 ```gradle
 dependencyResolutionManagement {
@@ -83,15 +75,14 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        
-        // 🌟 Required for AdGlide SDK
-        maven { url 'https://jitpack.io' } 
-        
-        // 🏗️ Optional Ad Networks (Include only what you need)
-        maven { url 'https://artifacts.applovin.com/android' } // AppLovin
-        maven { url 'https://artifact.bytedance.com/repository/pangle' } // Meta/Pangle
-        maven { url 'https://maven.wortise.com/artifactory/public' }     // Wortise
-        maven { url 'https://android-sdk.is.com/' }                      // IronSource
+
+        // 🌟 Required for AdGlide
+        maven { url 'https://jitpack.io' }
+
+        // Ad Network Repositories (add only what you need)
+        maven { url 'https://artifacts.applovin.com/android' }         // AppLovin
+        maven { url 'https://maven.wortise.com/artifactory/public' }   // Wortise
+        maven { url 'https://android-sdk.is.com/' }                    // IronSource
     }
 }
 ```
@@ -99,44 +90,43 @@ dependencyResolutionManagement {
 ---
 
 ### Step 2: Add Dependencies
-Open your **app-level `build.gradle`** (e.g., `app/build.gradle`) and add the core AdGlide library. 
 
-AdGlide is **unbundled**—it doesn't force heavy SDKs on you. You must manually add the dependencies for the networks you want to use.
+Open your **app-level `build.gradle`** and add the AdGlide core plus only the network SDKs you need.
 
 ```gradle
 dependencies {
-    // 🚀 Core AdGlide SDK (Required)
-    implementation 'com.github.partharoypc:adglide:1.5.0'
-    
-    // 🛡️ GDPR & Consent (Required for European Compliance)
+    // 🚀 AdGlide Core (Required)
+    implementation 'com.github.partharoypc:adglide:2.0.0'
+
+    // 🛡️ GDPR Consent (Required for EU compliance)
     implementation 'com.google.android.ump:user-messaging-platform:4.0.0'
-    
-    // 🔥 CHOOSE YOUR NETWORKS 🔥
-    implementation 'com.google.android.gms:play-services-ads:23.6.0'   // AdMob
+
+    // ─── Choose Your Networks ───────────────────────────────────────
+    implementation 'com.google.android.gms:play-services-ads:23.6.0'    // AdMob ✅
     // implementation 'com.facebook.android:audience-network-sdk:6.18.0' // Meta
-    // implementation 'com.applovin:applovin-sdk:13.0.1'                 // AppLovin
-    // implementation 'com.startapp:inapp-sdk:5.3.0'                     // StartApp
-    // implementation 'com.wortise:android-sdk:1.7.0'                    // Wortise
-    // implementation 'com.ironsource.sdk:mediationsdk:8.4.0'            // IronSource
+    // implementation 'com.applovin:applovin-sdk:13.0.1'                  // AppLovin
+    // implementation 'com.startapp:inapp-sdk:5.3.0'                      // StartApp
+    // implementation 'com.wortise:android-sdk:1.7.0'                     // Wortise
+    // implementation 'com.ironsource.sdk:mediationsdk:8.4.0'             // IronSource
+    // implementation 'com.unity3d.ads:unity-ads:4.9.2'                   // Unity Ads
 }
 ```
 
 ---
 
 ### Step 3: Configure AndroidManifest.xml
-Declare your App IDs for AdMob or AppLovin.
 
 > [!CAUTION]
-> **CRITICAL:** Missing the AdMob App ID will cause an immediate crash on app launch.
+> Missing the AdMob App ID will crash the app on launch immediately.
 
 ```xml
 <application ...>
-    <!-- 🟢 AdMob App ID -->
+    <!-- AdMob App ID (Required if using AdMob) -->
     <meta-data
         android:name="com.google.android.gms.ads.APPLICATION_ID"
-        android:value="ca-app-pub-3940256099942544~3347511713"/> <!-- REPLACE WITH YOUR ID -->
-        
-    <!-- 🔵 AppLovin SDK Key -->
+        android:value="ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX"/>
+
+    <!-- AppLovin SDK Key (Required if using AppLovin) -->
     <meta-data
         android:name="applovin.sdk.key"
         android:value="YOUR_APPLOVIN_SDK_KEY"/>
@@ -145,96 +135,67 @@ Declare your App IDs for AdMob or AppLovin.
 
 ---
 
-### Step 4: Initialize in Application Class
-To prevent memory leaks and ensure ads are pre-loaded, initialize AdGlide in a custom `Application` class.
+### Step 4: Initialize in Your Application Class
 
-**Java Implementation:**
+Initialize AdGlide once in your `Application.onCreate()`. Note the use of `com.partharoypc.adglide.util.Constant` parameters for robust configuration.
+
 ```java
+import com.partharoypc.adglide.util.Constant;
+
 public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
 
         AdGlideConfig config = new AdGlideConfig.Builder()
-            .enableAds(true)              // Global toggle
-            .testMode(true)               // ⚠️ Set to FALSE for Production
-            .debug(true)                  // Enables detailed console logs
-            
-            // 🎯 Strategy
-            .primaryNetwork(AdGlideNetwork.ADMOB)
-            .backupNetworks(AdGlideNetwork.META, AdGlideNetwork.STARTAPP)
-            
-            // 🆔 Ad Unit IDs which is required for the ads to work
+            // ─── Global Settings ─────────────────────────────────────────
+            .enableAds(true)                         // Master on/off switch
+            .testMode(false)                         // ⚠️ Set to FALSE for production
+            .debug(true)                             // Verbose console logging
 
-            // AdMob
-            .adMobAppId("ca-app-pub-3940256099942544~3347511713")
-            .adMobBannerId("ca-app-pub-3940256099942544/6300978111")
-            .adMobInterstitialId("ca-app-pub-3940256099942544/1033173712")
-            .adMobAppOpenId("ca-app-pub-3940256099942544/9257395921")
-            .adMobRewardedId("ca-app-pub-3940256099942544/5224354917")
-            .adMobRewardedInterstitialId("ca-app-pub-3940256099942544/5224354917")
-            .adMobNativeId("ca-app-pub-3940256099942544/2247696110")
+            // ─── Waterfall Strategy ──────────────────────────────────────
+            .primaryNetwork(Constant.ADMOB)
+            .backupNetworks(Constant.META, Constant.WORTISE)
 
-            // Meta
-            .metaAppId("YOUR_META_APP_ID")
-            .metaBannerId("YOUR_META_BANNER_ID")
-            .metaInterstitialId("YOUR_META_INTERSTITIAL_ID")
-            .metaAppOpenId("YOUR_META_APP_OPEN_ID")
-            .metaRewardedId("YOUR_META_REWARDED_ID")
-            .metaRewardedInterstitialId("YOUR_META_REWARDED_INTERSTITIAL_ID")
-            .metaNativeId("YOUR_META_NATIVE_ID")
+            // ─── Format Toggles ──────────────────────────────────────────
+            .bannerEnabled(true)
+            .interstitialEnabled(true)
+            .rewardedEnabled(true)
+            .nativeEnabled(true)
+            .appOpenEnabled(true)
+            .rewardedInterstitialEnabled(false)
 
-            // AppLovin
-            .applovinSdkKey("YOUR_APPLOVIN_SDK_KEY")
-            .applovinBannerId("YOUR_APPLOVIN_BANNER_ID")
-            .applovinInterstitialId("YOUR_APPLOVIN_INTERSTITIAL_ID")
-            .applovinAppOpenId("YOUR_APPLOVIN_APP_OPEN_ID")
-            .applovinRewardedId("YOUR_APPLOVIN_REWARDED_ID")
-            .applovinRewardedInterstitialId("YOUR_APPLOVIN_REWARDED_INTERSTITIAL_ID")
-            .applovinNativeId("YOUR_APPLOVIN_NATIVE_ID")
+            // ─── Smart Loading ───────────────────────────────────────────
+            .autoLoadInterstitial(true)              // Prefetch after each show
+            .autoLoadRewarded(true)                  // Prefetch after each show
+            .interstitialInterval(2)                 // Show every N clicks (0 = always)
+            .rewardedInterval(1)                     // Show every N clicks (0 = always)
 
-            // StartApp
-            .startappAppId("YOUR_STARTAPP_APP_ID")
-            .startappBannerId("YOUR_STARTAPP_BANNER_ID")
-            .startappInterstitialId("YOUR_STARTAPP_INTERSTITIAL_ID")
-            .startappAppOpenId("YOUR_STARTAPP_APP_OPEN_ID")
-            .startappRewardedId("YOUR_STARTAPP_REWARDED_ID")
-            .startappRewardedInterstitialId("YOUR_STARTAPP_REWARDED_INTERSTITIAL_ID")
-            .startappNativeId("YOUR_STARTAPP_NATIVE_ID")
+            // ─── GDPR / Privacy ─────────────────────────────────────────
+            .enableGDPR(true)
+            .debugGDPR(false)
 
-            // IronSource
-            .ironSourceAppKey("YOUR_IRONSOURCE_APP_KEY")
-            .ironSourceBannerId("YOUR_IRONSOURCE_BANNER_ID")
-            .ironSourceInterstitialId("YOUR_IRONSOURCE_INTERSTITIAL_ID")
-            .ironSourceAppOpenId("YOUR_IRONSOURCE_APP_OPEN_ID")
-            .ironSourceRewardedId("YOUR_IRONSOURCE_REWARDED_ID")
-            .ironSourceRewardedInterstitialId("YOUR_IRONSOURCE_REWARDED_INTERSTITIAL_ID")
-            .ironSourceNativeId("YOUR_IRONSOURCE_NATIVE_ID")
+            // ─── App Open Exclusions ─────────────────────────────────────
+            .excludeOpenAdFrom(SplashActivity.class, PaymentActivity.class)
 
-            // Unity Ads
-            .unityGameId("YOUR_UNITY_GAME_ID")
-            .unityBannerId("YOUR_UNITY_BANNER_ID")
-            .unityInterstitialId("YOUR_UNITY_INTERSTITIAL_ID")
-            .unityAppOpenId("YOUR_UNITY_APP_OPEN_ID")
-            .unityRewardedId("YOUR_UNITY_REWARDED_ID")
-            .unityRewardedInterstitialId("YOUR_UNITY_REWARDED_INTERSTITIAL_ID")
-            .unityNativeId("YOUR_UNITY_NATIVE_ID")
+            // ─── AdMob ───────────────────────────────────────────────────
+            .adMobAppId("ca-app-pub-XXXXXXXX~XXXXXXXX")
+            .adMobBannerId("ca-app-pub-XXXXXXXX~XXXXXXXX")
+            .adMobInterstitialId("ca-app-pub-XXXXXXXX~XXXXXXXX")
+            .adMobRewardedId("ca-app-pub-XXXXXXXX~XXXXXXXX")
+            .adMobRewardedIntId("ca-app-pub-XXXXXXXX~XXXXXXXX")
+            .adMobNativeId("ca-app-pub-XXXXXXXX~XXXXXXXX")
+            .adMobAppOpenId("ca-app-pub-XXXXXXXX~XXXXXXXX")
 
-            // Wortise
-            .wortiseAppId("YOUR_WORTISE_APP_ID")
-            .wortiseBannerId("YOUR_WORTISE_BANNER_ID")
-            .wortiseInterstitialId("YOUR_WORTISE_INTERSTITIAL_ID")
-            .wortiseAppOpenId("YOUR_WORTISE_APP_OPEN_ID")
-            .wortiseRewardedId("YOUR_WORTISE_REWARDED_ID")
-            .wortiseRewardedInterstitialId("YOUR_WORTISE_REWARDED_INTERSTITIAL_ID")
-            .wortiseNativeId("YOUR_WORTISE_NATIVE_ID")  
+            // ─── House Ads (Zero-Fill Fallback) ──────────────────────────
+            .houseAdEnabled(true)
+            .houseAdBannerImage("https://yourcdn.com/promo_banner.jpg")
+            .houseAdBannerClickUrl("https://play.google.com/store/apps/details?id=your.app")
+            .houseAdInterstitialImage("https://yourcdn.com/promo_full.jpg")
+            .houseAdInterstitialClickUrl("https://play.google.com/store/apps/details?id=your.app")
 
-            // 🤖 Automation
-            .autoLoadInterstitial(true)   // Auto-fetch next ad after show
-            .enableAppOpenAd(true)        // Handle App Open automatically
-            .enableGDPR(true)             // Show UMP consent form
             .build();
-            
+
         AdGlide.initialize(this, config);
     }
 }
@@ -243,221 +204,259 @@ public class MyApplication extends Application {
 ---
 
 ### Step 5: Register Application Class
-Finally, tell Android to use your custom application class in your `AndroidManifest.xml`.
 
 ```xml
 <application
-    android:name=".MyApplication"  <!-- 👈 DO NOT MISS THIS -->
+    android:name=".MyApplication"
     ...>
-    ...
 </application>
 ```
 
-**Setup Complete! 🎉** You are now ready to show ads with 1-line implementation.
-
----
-
-## 🛠️ 3. Implementation Guide (The "Just Copy-Paste" API)
-
-AdGlide's architecture is built on a "Logic-First" philosophy. You don't need to worry about `Runnable` posts, UI thread safety, or memory leaks—the SDK handles everything internally.
-
----
-
-### 📱 3.1 App Open Ads (Full Automation)
-App Open ads are the highest eCPM format for most apps. They appear during cold starts and resume events.
-
 > [!IMPORTANT]
-> **Zero-Code Implementation:** If enabled in your `AdGlideConfig`, App Open ads require **zero** additional code in your Activities. The SDK tracks the lifecycle and injects the ad overlay automatically.
+> **Do NOT miss** `android:name=".MyApplication"` — without it, AdGlide will not initialize and no ads will show.
 
-#### �️ Handling Blacklisted Screens (Splash/Onboarding)
-To prevent ads from showing on specific screens (like a Splash screen that's still loading data), use the exclusion API:
+---
 
+## 🛠️ 3. Ad Implementation (Copy-Paste API)
+
+### 📱 3.1 App Open Ads
+
+App Open ads are fully automatic. When `appOpenEnabled(true)` is set, the SDK attaches to the Activity lifecycle and shows the ad automatically on each app resume — no additional code required.
+
+#### Excluding Specific Screens
 ```java
-// Add to your AdGlideConfig Builder
-.excludeOpenAdFrom(SplashActivity.class, OnboardingActivity.class)
+// In your AdGlideConfig Builder:
+.excludeOpenAdFrom(SplashActivity.class, PaymentActivity.class)
 ```
 
-#### 📱 Manual App Open Logic
-If you disabled `enableAppOpenAd` in your config, you can trigger the format manually:
+#### GDPR Consent on Splash Screen
 ```java
-new AppOpenAd.Builder(activity)
-    .adMobId("YOUR_ID")
-    .load(new OnShowAdCompleteListener() {
-        @Override
-        public void onShowAdComplete() {
-            // Success: Proceed to main activity
-        }
+// Call this BEFORE showing any ads, typically in SplashActivity
+AdGlide.requestConsent(this, () -> {
+    // Consent complete — safe to show ads now
+    proceedToMainActivity();
+});
+```
+
+---
+
+### 🖼️ 3.2 Banner Ads
+
+```java
+// Quick 1-liner (uses config's primary network)
+AdGlide.showBanner(activity, binding.bannerContainer);
+
+// Builder API for advanced control
+new BannerAd.Builder(activity)
+    .container(binding.bannerContainer)
+    .collapsible(true) // ↗️ Up to 5× eCPM boost (AdMob only)
+    .load();
+```
+
+---
+
+### 🎬 3.3 Interstitial Ads
+
+The recommended pattern: never block navigation. The callback fires immediately if no ad is ready.
+
+```java
+// Facade (recommended) — respects interval + preload cache
+AdGlide.showInterstitial(activity, () -> {
+    // Called after dismiss OR if no ad is ready
+    startActivity(new Intent(this, NextActivity.class));
+});
+
+// Manual preload trigger (when autoLoadInterstitial is false)
+AdGlide.preloadInterstitial(activity);
+
+// Builder API
+new InterstitialAd.Builder(activity)
+    .load(new AdGlideCallback() {
+        @Override public void onAdLoaded() { /* ready */ }
+        @Override public void onAdFailedToLoad(String error) { /* handle */ }
     });
 ```
 
 ---
 
-### 🖼️ 3.2 Banner Ads (Adaptive & Collapsible)
-AdGlide uses **Anchored Adaptive Banners** by default, which calculate the optimal height for your specific device screen.
-
-#### ⚡ Standard 1-Line Implementation
-```java
-AdGlide.showBanner(activity, binding.bannerContainer);
-```
-
-#### 👑 Premium: Collapsible Banners
-Collapsible banners are large-format banners that show a massive ad initially, then retract to a standard size. They can yield up to **5x higher eCPM** than standard banners.
+### 🎁 3.4 Rewarded Ads
 
 ```java
-new BannerAd.Builder(activity)
-    .container(binding.bannerContainer)
-    .collapsible(true) // 👈 Prompts AdMob/networks to serve an expandable asset
-    .load();
-```
-
----
-
-### 🎬 3.3 Interstitial Ads (Smart Pre-fetching)
-Interstitials are full-screen ads. AdGlide's pre-fetching engine ensures an ad is almost always ready.
-
-#### 🚿 The Recommended "Seamless Flow"
-Never block your user's navigation. Use the callback to transition to the next screen only after the ad is dismissed.
-
-```java
-AdGlide.showInterstitial(activity, () -> {
-    // This logic executes INSTANTLY if no ad is ready, 
-    // or precisely after the user clicks "X" to close the ad.
-    startActivity(new Intent(activity, NextActivity.class));
-});
-```
-
-#### 🧠 Manual Preloading (Optimization)
-If you disable `autoLoadInterstitial`, you can manual trigger a cache fill at strategic moments (e.g., when a user finishes a level):
-```java
-AdGlide.preloadInterstitial(activity);
-```
-
----
-
-### 🎁 3.4 Rewarded Ads (In-App Economy)
-Used for granting currency, extra lives, or premium access.
-
-```java
-AdGlide.showRewarded(activity, (rewarded) -> {
-    if (rewarded) {
-        grantCoins(50); // The user watched successfully
+// Facade (recommended)
+AdGlide.showRewarded(activity, new AdGlideCallback() {
+    @Override
+    public void onAdCompleted() {
+        grantCoins(50); // ✅ User watched the full ad
     }
-}, () -> {
-    // Ad dismissed: Resume your game state or music here
+
+    @Override
+    public void onAdDismissed() {
+        resumeGame(); // Called whether completed or skipped
+    }
 });
+
+// Manual preload
+AdGlide.preloadRewarded(activity);
 ```
 
 ---
 
-### 🎨 3.5 Native Ads (Seamless Blending)
-Native ads are rendered by the SDK into your container using high-converting pre-built layouts.
-
-| Template | Recommendation |
-| :--- | :--- |
-| `SMALL` | List items / Small footers |
-| `MEDIUM` | News feeds / Card views |
-| `BANNER` | Article inline placements / News style |
-| `VIDEO` | High-CPM video rewards / Media focus |
+### 🎁 3.5 Rewarded Interstitial Ads
 
 ```java
-// 1-Line Quick Integration
-AdGlide.showNative(activity, binding.nativeContainer, AdGlideNativeStyle.MEDIUM);
+// Facade
+AdGlide.showRewardedInterstitial(activity, new AdGlideCallback() {
+    @Override
+    public void onAdCompleted() { grantBonus(); }
+
+    @Override
+    public void onAdDismissed() { resumeFlow(); }
+});
+
+// Manual preload
+AdGlide.preloadRewardedInterstitial(activity);
 ```
 
-#### 🛠️ Custom Builder for Flexibility
+---
+
+### 🎨 3.6 Native Ads
+
 ```java
+// Quick 1-liner
+AdGlide.showNative(activity, binding.nativeContainer, "medium");
+
+// Builder API with full style control
 new NativeAd.Builder(activity)
     .container(binding.nativeContainer)
-    .style(AdGlideNativeStyle.VIDEO)
+    .style("video") // "small" | "medium" | "banner" | "video"
     .load();
 ```
 
 ---
 
-## 🚀 4. Pro Features (Maximum Efficiency)
-
-AdGlide includes built-in tools to help you optimize and debug your ad stack in real-time.
+## 🚀 4. Pro Features
 
 ### 🏠 4.1 House Ads (Zero-Fill Fallback)
-Don't waste impressions. If the ad networks fail to fill a slot, AdGlide automatically fallbacks to your **House Ads**—static internal promos for your other apps or premium upgrades.
+
+House Ads keep your inventory monetized even when all ad networks fail to fill. They show static promo images for your own apps or services.
 
 ```java
-// Setup in your AdGlideConfig Builder
 .houseAdEnabled(true)
-.houseAdBannerImage("https://yourlink.com/banner.jpg")
-.houseAdBannerClickUrl("https://play.google.com/store/apps/details?id=your.other.app")
-.houseAdInterstitialImage("https://yourlink.com/full.jpg")
-.houseAdInterstitialClickUrl("https://yourlink.com/upgrade")
+.houseAdBannerImage("https://yourcdn.com/promo_banner.jpg")
+.houseAdBannerClickUrl("https://play.google.com/store/apps/details?id=your.app")
+.houseAdInterstitialImage("https://yourcdn.com/promo_full.jpg")
+.houseAdInterstitialClickUrl("https://play.google.com/store/apps/details?id=your.app")
 ```
 
 ---
 
-### 🛠️ 4.2 SDK Debugger (Real-Time HUD)
-Mediation can be complex. Activate the HUD to see exactly which network is filling, failing, or being rate-limited on your test device.
+### 🛠️ 4.2 Live Debug HUD
+
+The Debug HUD shows you exactly which network filled, failed, or was rate-limited on your device in real time. It also shows waterfall status with real-time ✓/✗ indicators.
 
 ```java
-// Trigger this via a secret button or developer menu
+// Trigger via a secret gesture or developer menu
 AdGlide.showDebugHUD(activity);
+```
+
+> [!TIP]
+> Enable in config with `.debug(true)`. The HUD shows a **Waterfall Status** panel, a full **Performance Log**, and a **Clear Logs** button.
+
+---
+
+### 🔄 4.3 Runtime Config Updates
+
+You can hot-swap the AdGlide configuration at runtime — for example, to disable ads after an in-app purchase:
+
+```java
+// Disable all ads instantly (e.g., after premium purchase)
+AdGlide.updateConfig(new AdGlideConfig.Builder()
+    .enableAds(false)
+    .build());
 ```
 
 ---
 
 ## 🔒 5. Production & Security
 
-### 🛡️ ProGuard / R8 Rules
-If you use code shrinking (minifyEnabled true), you **must** add these rules to your `proguard-rules.pro` file. This prevents the compiler from stripping the ad network SDKs.
+### ProGuard / R8 Rules
+
+Add these rules to your `proguard-rules.pro` file when `minifyEnabled true`:
 
 ```proguard
-# 🌟 Protect AdGlide Core
+# AdGlide Core
 -keep public class com.partharoypc.adglide.** { *; }
 
-# 🏗️ Protect Underlying Ad Networks
+# Ad Networks
 -dontwarn com.google.android.gms.ads.**
 -dontwarn com.facebook.ads.**
 -dontwarn com.applovin.**
 -dontwarn com.startapp.**
+-dontwarn com.wortise.**
+-dontwarn com.ironsource.**
+-dontwarn com.unity3d.ads.**
+-dontwarn com.unity3d.services.**
 ```
 
 ---
 
-## 📈 6. Best Practices & Pro Tips
+## 📈 6. Best Practices
 
-| Tip | Strategy |
+| Practice | Recommendation |
 | :--- | :--- |
-| **App Open Ads** | Always enable them. They capture high-value "fresh eyes" attention. |
-| **Auto-Loading** | Set `.autoLoadInterstitial(true)` to ensure 0-second wait times for users. |
-| **Collapsible Banners** | Use them on your main "menu" or "dashboard" screen for max eCPM. |
-| **Revenue Tracking** | Use `.onPaidEventListener` to send micro-cent revenue to Firebase Analytics. |
+| **App Open Ads** | Always enable — highest eCPM format. Exclude only truly blocking screens. |
+| **Auto-Loading** | Use `.autoLoadInterstitial(true)` for zero-wait ad-ready state. |
+| **Waterfall** | Set at least 1 backup network for higher fill rates. |
+| **Intervals** | Start with `interstitialInterval(2)` — show every 2nd click to balance UX & revenue. |
+| **House Ads** | Always configure a fallback — never waste an impression. |
+| **Test Mode** | Always develop with `.testMode(true)` — **never** use real ads during testing. |
+| **Collapsible Banners** | Use on home/dashboard screens for up to 5× standard CPM. |
 
 ---
 
-## 🚑 7. FAQ & Troubleshooting
+## 📋 7. Quick Reference — `AdGlideConfig.Builder` Methods
 
-<details>
-<summary><b>1. App crashes immediately on launch?</b></summary>
-<b>Cause:</b> Missing AdMob App ID in Manifest or missing <code>android:name=".MyApplication"</code>.<br>
-<b>Fix:</b> Review Steps 3 and 5 in the Setup Guide.
-</details>
+| Method | Type | Default | Description |
+| :--- | :--- | :---: | :--- |
+| `enableAds(bool)` | `boolean` | `false` | Master ad on/off toggle |
+| `testMode(bool)` | `boolean` | `false` | Use test ads during development |
+| `debug(bool)` | `boolean` | `true` | Enable verbose logcat output |
+| `primaryNetwork(network)` | `String` | — | Use `Constant.ADMOB` etc. |
+| `backupNetworks(n...)` | `String...` | — | Fallback string constants |
+| `bannerEnabled(bool)` | `boolean` | `false` | Toggle banner ads |
+| `interstitialEnabled(bool)` | `boolean` | `false` | Toggle interstitial ads |
+| `rewardedEnabled(bool)` | `boolean` | `false` | Toggle rewarded ads |
+| `nativeEnabled(bool)` | `boolean` | `false` | Toggle native ads |
+| `appOpenEnabled(bool)` | `boolean` | `false` | Toggle app open ads |
+| `rewardedInterstitialEnabled(bool)` | `boolean` | `false` | Toggle rewarded interstitial |
+| `autoLoadInterstitial(bool)` | `boolean` | `false` | Auto-prefetch after show |
+| `autoLoadRewarded(bool)` | `boolean` | `false` | Auto-prefetch after show |
+| `interstitialInterval(int)` | `int` | `0` | Show every N calls (0 = always) |
+| `rewardedInterval(int)` | `int` | `0` | Show every N calls (0 = always) |
+| `houseAdEnabled(bool)` | `boolean` | `false` | Enable house ads fallback |
+| `excludeOpenAdFrom(Class...)` | `Class<?>...` | — | Blacklist activities from App Open |
+| `enableGDPR(bool)` | `boolean` | `false` | Show UMP consent form |
+| `debugGDPR(bool)` | `boolean` | `false` | Force GDPR dialog in debug |
 
-<details>
-<summary><b>2. Ads are not showing ("No Fill")?</b></summary>
-<b>Cause:</b> New ad units take 24h to active, or you're in a low-fill region.<br>
-<b>Fix:</b> Ensure <code>.testMode(true)</code> is on during development to see test ads immediately. Use the <b>SDK Debugger</b> to verify network responses.
-</details>
+### Configuration Constants (`com.partharoypc.adglide.util.Constant`)
 
-<details>
-<summary><b>3. How do I disable ads for Premium users?</b></summary>
-<b>Fix:</b> Simply re-initialize AdGlide with a disabled config when the purchase is detected:
-<pre>AdGlide.initialize(this, new AdGlideConfig.Builder().enableAds(false).build());</pre>
-</details>
+Use these constants when defining your networks in the `AdGlideConfig.Builder`:
 
-<details>
-<summary><b>4. Does AdGlide support Kotlin?</b></summary>
-<b>Yes!</b> AdGlide is built in Java but fully optimized for Kotlin interop, including a clean DSL for configuration.
-</details>
+| Value | Network |
+| :--- | :--- |
+| `Constant.ADMOB` | Google AdMob |
+| `Constant.META` | Meta Audience Network |
+| `Constant.APPLOVIN_MAX` | AppLovin MAX |
+| `Constant.WORTISE` | Wortise |
+| `Constant.IRONSOURCE` | IronSource / LevelPlay |
+| `Constant.UNITY` | Unity Ads |
+| `Constant.STARTAPP` | StartApp |
+| `Constant.HOUSE_AD` | House Ad (internal) |
+| `Constant.META_BIDDING_ADMOB` | Meta bidding via AdMob |
+| `Constant.META_BIDDING_APPLOVIN_MAX` | Meta bidding via AppLovin |
+| `Constant.META_BIDDING_IRONSOURCE` | Meta bidding via IronSource |
 
 ---
 
 *Built for Scale. Optimized for Speed. Perfected for Developers.*
-*For more information, visit [AdGlide](https://github.com/partharoypc/AdGlide/blob/main/README.md)*
-© 2026 AdGlide. All rights reserved.
+*© 2026 [AdGlide](https://github.com/partharoypc/AdGlide) — All rights reserved.*

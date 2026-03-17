@@ -7,7 +7,9 @@
     android:clickable="true"
     android:focusable="true"
     android:orientation="horizontal"
-    android:padding="16dp">
+    android:paddingHorizontal="20dp"
+    android:paddingVertical="14dp"
+    android:gravity="center_vertical">
 
     <TextView
         android:id="@+id/name"
@@ -15,8 +17,10 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="@string/ad_network_name"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-        android:textColor="?attr/colorOnSurface" />
+        android:textSize="15sp"
+        android:textColor="?attr/colorOnSurface"
+        android:fontFamily="sans-serif"
+        android:lineSpacingMultiplier="1.2"/>
 
     <RadioButton
         android:id="@+id/radio_selected"

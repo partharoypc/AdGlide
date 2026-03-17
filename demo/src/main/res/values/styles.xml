@@ -1,26 +1,43 @@
 <resources>
-    <!-- Base application theme. -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!--  Light Theme (AdGlide brand — Indigo / Teal)                   -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
     <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorOnPrimary">@color/colorOnPrimary</item>
+        <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
         <item name="colorSecondary">@color/colorSecondary</item>
         <item name="colorOnSecondary">@color/colorOnSecondary</item>
-        <item name="android:statusBarColor">@color/colorPrimaryVariant</item>
-        <item name="android:windowLightStatusBar">false</item> 
+        <item name="android:colorBackground">@color/colorBackground</item>
+        <item name="android:statusBarColor">@color/colorPrimary</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:navigationBarColor">@color/colorBackground</item>
     </style>
-    
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.Material3.Dark.ActionBar" />
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.Material3.Light" />
-
-
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!--  Dark Theme                                                     -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
     <style name="AppDarkTheme" parent="Theme.Material3.Dark.NoActionBar">
         <item name="colorPrimary">@color/colorPrimaryDark</item>
         <item name="colorOnPrimary">@color/colorOnPrimaryDark</item>
         <item name="colorSecondary">@color/colorSecondaryDark</item>
         <item name="colorOnSecondary">@color/colorOnSecondaryDark</item>
+        <item name="android:colorBackground">@color/colorBackgroundDark</item>
+        <item name="android:statusBarColor">@color/colorPrimary</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:navigationBarColor">@color/colorBackgroundDark</item>
+    </style>
+
+    <!-- AppBar overlays -->
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.Material3.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.Material3.Light" />
+
+    <!-- Splash / Branding Screen — no action bar, edge-to-edge -->
+    <style name="AppTheme.Splash" parent="AppTheme">
+        <item name="android:windowFullscreen">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
+
 
 </resources>

@@ -62,11 +62,6 @@ public class RewardedAd {
             return this;
         }
 
-        @NonNull
-        public Builder build(AdGlideCallback callback, boolean unused) {
-            loadRewardedAd(callback);
-            return this;
-        }
 
         @NonNull
         public Builder show(AdGlideCallback callback) {
@@ -93,11 +88,6 @@ public class RewardedAd {
             return this;
         }
 
-        @NonNull
-        public Builder load(AdGlideCallback callback, boolean unused) {
-            loadRewardedAd(callback);
-            return this;
-        }
 
         /**
          * Used internally by AdGlide to request an ad on the fly and show it
@@ -108,84 +98,6 @@ public class RewardedAd {
             this.showOnLoad = true;
             this.callback = callback;
             loadRewardedAd(callback);
-            return this;
-        }
-
-        // --- Deprecated chained methods. Keeping for broad API compatibility where
-        // possible, but they do nothing useful now as config is global ---
-
-        @NonNull
-        public Builder status(boolean adStatus) {
-            return this;
-        }
-
-        @NonNull
-        public Builder network(@NonNull String adNetwork) {
-            return this;
-        }
-
-        @NonNull
-        public Builder network(AdGlideNetwork network) {
-            return this;
-        }
-
-        @NonNull
-        public Builder backup(@Nullable String backupAdNetwork) {
-            return this;
-        }
-
-        @NonNull
-        public Builder backups(@Nullable String... backupAdNetworks) {
-            return this;
-        }
-
-        @NonNull
-        public Builder backups(AdGlideNetwork... backupAdNetworks) {
-            return this;
-        }
-
-        @NonNull
-        public Builder adMobId(@NonNull String id) {
-            return this;
-        }
-
-        @NonNull
-        public Builder metaId(@NonNull String id) {
-            return this;
-        }
-
-        @NonNull
-        public Builder unityId(@NonNull String id) {
-            return this;
-        }
-
-        @NonNull
-        public Builder appLovinId(@NonNull String id) {
-            return this;
-        }
-
-        @NonNull
-        public Builder zoneId(@NonNull String id) {
-            return this;
-        }
-
-        @NonNull
-        public Builder ironSourceId(@NonNull String id) {
-            return this;
-        }
-
-        @NonNull
-        public Builder startAppId(@NonNull String id) {
-            return this;
-        }
-
-        @NonNull
-        public Builder wortiseId(@NonNull String id) {
-            return this;
-        }
-
-        @NonNull
-        public Builder legacyGDPR(boolean legacyGDPR) {
             return this;
         }
 
@@ -265,15 +177,8 @@ public class RewardedAd {
                 return;
             }
 
-            final boolean legacyGDPR = com.partharoypc.adglide.AdGlide.getConfig() != null &&
-                    com.partharoypc.adglide.AdGlide.getConfig().isLegacyGDPR();
 
             RewardedProvider.RewardedConfig config = new RewardedProvider.RewardedConfig() {
-                @Override
-                public boolean isLegacyGDPR() {
-                    return legacyGDPR;
-                }
-
                 @Override
                 public boolean isInterstitial() {
                     return false;
@@ -318,45 +223,57 @@ public class RewardedAd {
         }
 
         public void showRewardedAd(AdGlideCallback callback) {
-            Activity activity = activityRef.get();
-            showRewardedAd(activity, callback);
+            Activity activity = activityRef != null ? activityRef.get() : null;
+            if (activity != null) {
+                showRewardedAd(activity, callback);
+            } else {
+                Log.e(TAG, "Cannot show Rewarded Ad: Activity reference is null.");
+                if (callback != null) callback.onAdDismissed();
+            }
         }
 
         public void showRewardedAd(Activity displayActivity, AdGlideCallback callback) {
-            if (currentProvider != null && currentProvider.isAdAvailable()) {
-                Activity activity = activityRef.get();
-                currentProvider.showRewardedAd(displayActivity != null ? displayActivity : activity,
-                        new RewardedProvider.RewardedListener() {
-                            @Override
-                            public void onAdLoaded() {
-                            }
+            try {
+                if (currentProvider != null && currentProvider.isAdAvailable()) {
+                    Activity activity = activityRef != null ? activityRef.get() : null;
+                    currentProvider.showRewardedAd(displayActivity != null ? displayActivity : activity,
+                            new RewardedProvider.RewardedListener() {
+                                @Override
+                                public void onAdLoaded() {
+                                }
 
-                            @Override
-                            public void onAdFailedToLoad(String error) {
-                                if (callback != null)
-                                    callback.onAdFailedToLoad(error);
-                            }
+                                @Override
+                                public void onAdFailedToLoad(String error) {
+                                    if (callback != null)
+                                        callback.onAdFailedToLoad(error);
+                                }
 
-                            @Override
-                            public void onAdDismissed() {
-                                if (callback != null)
-                                    callback.onAdDismissed();
-                            }
+                                @Override
+                                public void onAdDismissed() {
+                                    if (callback != null)
+                                        callback.onAdDismissed();
+                                    loadRewardedAd(callback);
+                                }
 
-                            @Override
-                            public void onAdCompleted() {
-                                com.partharoypc.adglide.util.PerformanceLogger.log("Rewarded",
-                                        "Completed: "
-                                                + (currentProvider != null ? currentProvider.getClass().getSimpleName()
-                                                        : "Unknown"));
-                                if (callback != null)
-                                    callback.onAdCompleted();
-                            }
-                        });
-            } else {
-                Log.w(TAG, "No ad available to show.");
-                if (callback != null)
-                    callback.onAdFailedToLoad("No ad available");
+                                @Override
+                                public void onAdCompleted() {
+                                    com.partharoypc.adglide.util.PerformanceLogger.log("Rewarded",
+                                            "Completed: "
+                                                    + (currentProvider != null ? currentProvider.getClass().getSimpleName()
+                                                            : "Unknown"));
+                                    if (callback != null)
+                                        callback.onAdCompleted();
+                                }
+                            });
+                } else {
+                    Log.w(TAG, "Rewarded ad not loaded. Skipping show.");
+                    if (callback != null)
+                        callback.onAdDismissed();
+                    loadRewardedAd(callback);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error in showRewardedAd: " + e.getMessage());
+                if (callback != null) callback.onAdDismissed();
             }
         }
 
