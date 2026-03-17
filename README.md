@@ -96,7 +96,7 @@ Open your **app-level `build.gradle`** and add the AdGlide core plus only the ne
 ```gradle
 dependencies {
     // 🚀 AdGlide Core (Required)
-    implementation 'com.github.partharoypc:adglide:2.0.0'
+    implementation 'com.github.partharoypc:adglide:1.6.0'
 
     // 🛡️ GDPR Consent (Required for EU compliance)
     implementation 'com.google.android.ump:user-messaging-platform:4.0.0'
