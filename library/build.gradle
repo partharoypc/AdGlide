@@ -51,7 +51,7 @@ dependencies {
     compileOnly 'com.facebook.infer.annotation:infer-annotation:0.18.0'
 
     // Secondary Ad Networks
-    compileOnly 'com.unity3d.ads:unity-ads:4.12.5'
+    compileOnly 'com.unity3d.ads:unity-ads:4.17.0'
     compileOnly 'com.applovin:applovin-sdk:13.0.1'
     compileOnly 'com.ironsource.sdk:mediationsdk:8.4.0'
     compileOnly 'com.startapp:inapp-sdk:5.3.0'

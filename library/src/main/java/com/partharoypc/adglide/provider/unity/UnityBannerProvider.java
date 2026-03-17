@@ -14,7 +14,7 @@ public class UnityBannerProvider implements BannerProvider {
 
     @Override
     public void loadBanner(Activity activity, String adUnitId, BannerConfig config, BannerListener listener) {
-        bannerView = new BannerView(activity, adUnitId,
+        bannerView = new BannerView((android.content.Context) activity, adUnitId,
                 new UnityBannerSize(Constant.UNITY_ADS_BANNER_WIDTH_MEDIUM,
                         Constant.UNITY_ADS_BANNER_HEIGHT_MEDIUM));
 
