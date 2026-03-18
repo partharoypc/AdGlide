@@ -1,34 +1,103 @@
 <?xml version='1.0' encoding='utf-8'?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="wrap_content" android:clipChildren="false" android:clipToPadding="false" android:orientation="vertical">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:orientation="vertical">
 
-    <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="5dp" app:cardBackgroundColor="@color/adglide_color_background" app:cardCornerRadius="10dp" app:cardElevation="2dp" app:strokeColor="@color/adglide_color_outline" app:strokeWidth="1.5dp"><LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="12dp">
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        app:cardBackgroundColor="@color/adglide_color_background"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="2dp"
+        app:strokeColor="@color/adglide_color_outline"
+        app:strokeWidth="1.5dp">
 
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp">
 
-            <androidx.cardview.widget.CardView android:layout_width="@dimen/adglide_post_thumbnail_width" android:layout_height="@dimen/adglide_post_thumbnail_height" app:cardCornerRadius="10dp" app:cardElevation="0dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-                <ImageView android:id="@+id/native_ad_icon" android:layout_width="match_parent" android:layout_height="match_parent" android:contentDescription="@string/adglide_img_content_description" android:scaleType="centerCrop" />
+                <androidx.cardview.widget.CardView
+                    android:layout_width="@dimen/adglide_post_thumbnail_width"
+                    android:layout_height="@dimen/adglide_post_thumbnail_height"
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="0dp">
 
-            </androidx.cardview.widget.CardView>
+                    <ImageView
+                        android:id="@+id/native_ad_icon"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/adglide_img_content_description"
+                        android:scaleType="centerCrop" />
 
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginStart="@dimen/adglide_item_post_padding_medium" android:orientation="vertical">
+                </androidx.cardview.widget.CardView>
 
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/adglide_item_post_padding_medium"
+                    android:orientation="vertical">
 
-                    <include layout="@layout/adglide_view_native_ad_label" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <include layout="@layout/adglide_view_native_ad_label" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/native_ad_title"
+                        style="@style/AdGlide.Headline"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:gravity="start"
+                        android:maxLines="1"
+                        android:text="" />
+
+                    <TextView
+                        android:id="@+id/native_ad_body"
+                        style="@style/AdGlide.Body"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:gravity="start"
+                        android:maxLines="2"
+                        android:text="" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/native_ad_call_to_action"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/adglide_news_cta_button_height"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:textAllCaps="true"
+                        android:textColor="@color/adglide_color_cta_text"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="@color/adglide_color_cta_background"
+                        app:cornerRadius="10dp" />
 
                 </LinearLayout>
-
-                <TextView android:id="@+id/native_ad_title" style="@style/AdGlide.Headline" android:layout_width="wrap_content" android:layout_height="wrap_content" android:ellipsize="end" android:gravity="start" android:maxLines="1" android:text="" />
-
-                <TextView android:id="@+id/native_ad_body" style="@style/AdGlide.Body" android:layout_width="wrap_content" android:layout_height="wrap_content" android:ellipsize="end" android:gravity="start" android:maxLines="2" android:text="" />
-
-                <com.google.android.material.button.MaterialButton android:id="@+id/native_ad_call_to_action" style="@style/Widget.MaterialComponents.Button" android:layout_width="wrap_content" android:layout_height="@dimen/adglide_news_cta_button_height" app:cornerRadius="10dp" android:insetTop="0dp" android:insetBottom="0dp" app:backgroundTint="@color/adglide_color_cta_background" android:textAllCaps="true" android:textColor="@color/adglide_color_cta_text" android:textSize="12sp" android:textStyle="bold" />
 
             </LinearLayout>
 
         </LinearLayout>
 
-    </LinearLayout>
-
-</com.google.android.material.card.MaterialCardView></LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</LinearLayout>

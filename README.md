@@ -1,7 +1,7 @@
 # AdGlide SDK 🚀
 ### *The Premium Mediation Wrapper for High-Performance Android Apps*
 
-[![Version](https://img.shields.io/badge/Version-1.6.0-blue.svg)](https://github.com/partharoypc/AdGlide)
+[![Version](https://img.shields.io/badge/Version-1.7.0-blue.svg)](https://github.com/partharoypc/AdGlide)
 [![Android](https://img.shields.io/badge/Android-23%2B-green.svg)](https://developer.android.com)
 [![Compile SDK](https://img.shields.io/badge/Compile_SDK-36-green.svg)](https://developer.android.com)
 [![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://openjdk.org/projects/jdk/17/)
@@ -11,18 +11,15 @@
 
 ---
 
-## ✨ What's New in v1.6.0
+## ✨ What's New in v1.7.0
 
-- **IronSource LevelPlay Migration** — Fully migrated to the new LevelPlay Ad Unit APIs (SDK 9.3.0). Higher performance and better mediation orchestration.
-- **Fully Crash-Safe Ad Display** — Every `showAd()` call on every network is now wrapped in a `try-catch` guard. Third-party SDK crashes can never propagate to your app.
-- **Consistent Callback Coverage** — `onAdShowed()` and `onAdShowFailed()` are now reliably fired on all 8 networks.
-- **Plural `backupNetworks()`** — Easily supply an array of backup networks for robust waterfall fill.
-- **`PerformanceLogger` Across All Networks** — Unified event tracking (load, show, fail) for all providers; visible in the live Debug HUD.
-- **Debug HUD v2** — New Waterfall Status panel with real-time ✓/✗ events, plus a "Clear Logs" button.
-- **`AdGlide.preloadRewardedInterstitial()`** — New manual preload API for Rewarded Interstitial format.
-- **`AdGlide.updateConfig()`** — Hot-swap your configuration at runtime without re-initializing.
-- **`AdGlide.requestConsent()`** — Explicit GDPR/UMP consent request flow for Splash screens.
-- **Brand New Demo App** — The repository includes a stunning Material 3 demo app featuring a live Network Selector, Theme Toggle, and interactive integration examples for every format.
+- **Type-Safe Configuration** — New `AdGlideNetwork` enum for cleaner and safer primary/backup network selection.
+- **Improved Waterfall Logic** — Robust plural `backupNetworks()` support with faster fallback and better error recovery.
+- **Enhanced Performance Monitoring** — Significant upgrades to the `PerformanceLogger`; now tracks detailed waterfall timing and retry events.
+- **Global `requestConsent()`** — Unified GDPR/UMP flow that can be triggered from any Activity with a simple callback.
+- **Rewarded Interstitial support** — Now fully operational across AdMob, AppLovin MAX, and Wortise.
+- **Hot-Reload Support** — `AdGlide.updateConfig()` now intelligently handles network re-initialization at runtime.
+- **Internal 16KB Alignment** — Compatibility with latest Android 15 performance requirements via `android-gif-drawable`.
 
 ---
 
@@ -44,7 +41,7 @@ AdGlide supports four integration patterns:
 | **Rewarded** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
 | **Rewarded Interstitial** | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
 | **Native** | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ |
-| **App Open** | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **App Open** | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
 | **Bidding** | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
 | **Waterfall** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
@@ -89,17 +86,16 @@ dependencies {
     // 🚀 AdGlide Core (Required)
     implementation 'com.github.partharoypc:adglide:1.7.0'
 
-    // 🛡️ GDPR Consent (Required for EU compliance)
-    implementation 'com.google.android.ump:user-messaging-platform:4.0.0'
-
     // ─── Choose Your Networks ───────────────────────────────────────
-    implementation 'com.google.android.gms:play-services-ads:25.0.0'    // AdMob ✅
-    // implementation 'com.facebook.android:audience-network-sdk:6.21.0' // Meta
-    // implementation 'com.applovin:applovin-sdk:13.6.1'                  // AppLovin
-    // implementation 'com.startapp:inapp-sdk:5.3.0'                      // StartApp
-    // implementation 'com.wortise:android-sdk:1.7.2'                     // Wortise
-    // implementation 'com.unity3d.ads-mediation:mediation-sdk:9.3.0'     // IronSource (LevelPlay)
-    // implementation 'com.unity3d.ads:unity-ads:4.17.0'                  // Unity Ads
+    implementation 'com.google.android.gms:play-services-ads:25.0.0'       // AdMob ✅
+    // implementation 'com.facebook.android:audience-network-sdk:6.21.0'   // Meta
+    // implementation 'com.applovin:applovin-sdk:13.6.1'                   // AppLovin
+    // implementation 'com.startapp:inapp-sdk:5.3.0'                       // StartApp
+    // implementation 'com.wortise:android-sdk:1.7.2'                      // Wortise
+    // implementation 'com.unity3d.ads-mediation:mediation-sdk:9.3.0'      // IronSource (LevelPlay)
+    // implementation 'com.unity3d.ads:unity-ads:4.17.0'                   // Unity Ads
+    // implementation 'com.unity3d.mediation:mediation-sdk:9.3.0'          // IronSource (LevelPlay)
+    
 }
 ```
 
@@ -128,10 +124,12 @@ dependencies {
 
 ### Step 4: Initialize in Your Application Class
 
-Initialize AdGlide once in your `Application.onCreate()`. Note the use of `com.partharoypc.adglide.util.Constant` parameters for robust configuration.
+Initialize AdGlide once in your `Application.onCreate()`. Use `AdGlideNetwork` enums for a more modern, type-safe configuration.
 
 ```java
-import com.partharoypc.adglide.util.Constant;
+import com.partharoypc.adglide.AdGlide;
+import com.partharoypc.adglide.AdGlideConfig;
+import com.partharoypc.adglide.AdGlideNetwork;
 
 public class MyApplication extends Application {
     @Override
@@ -144,9 +142,9 @@ public class MyApplication extends Application {
             .testMode(false)                         // ⚠️ Set to FALSE for production
             .debug(true)                             // Verbose console logging
 
-            // ─── Waterfall Strategy ──────────────────────────────────────
-            .primaryNetwork(Constant.ADMOB)
-            .backupNetworks(Constant.META, Constant.WORTISE)
+            // ─── Waterfall Strategy (Type-Safe Enum) ─────────────────────
+            .primaryNetwork(AdGlideNetwork.ADMOB)
+            .backupNetworks(AdGlideNetwork.META, AdGlideNetwork.WORTISE)
 
             // ─── Format Toggles ──────────────────────────────────────────
             .bannerEnabled(true)
@@ -170,7 +168,6 @@ public class MyApplication extends Application {
             .excludeOpenAdFrom(SplashActivity.class, PaymentActivity.class)
 
             // ─── AdMob ───────────────────────────────────────────────────
-            .adMobAppId("ca-app-pub-XXXXXXXX~XXXXXXXX")
             .adMobBannerId("ca-app-pub-XXXXXXXX~XXXXXXXX")
             .adMobInterstitialId("ca-app-pub-XXXXXXXX~XXXXXXXX")
             .adMobRewardedId("ca-app-pub-XXXXXXXX~XXXXXXXX")
@@ -312,7 +309,7 @@ AdGlide.preloadRewardedInterstitial(activity);
 
 ### 🎨 3.6 Native Ads
 
-Our "Super Perfect" Native Ad styles are fully Material Design compliant and seamlessly integrate across **all** supported networks (AdMob, Meta, AppLovin, IronSource, StartApp, Wortise).
+Our "Super Perfect" Native Ad styles are fully Material Design compliant and seamlessly integrate across **all** supported networks.
 
 ```java
 // Quick 1-liner
@@ -368,7 +365,7 @@ House Ads keep your inventory monetized even when all ad networks fail to fill. 
 
 ### 🛠️ 4.2 Live Debug HUD
 
-The Debug HUD shows you exactly which network filled, failed, or was rate-limited on your device in real time. It also shows waterfall status with real-time ✓/✗ indicators.
+The Debug HUD shows you exactly which network filled, failed, or was rate-limited on your device in real time.
 
 ```java
 // Trigger via a secret gesture or developer menu
@@ -376,7 +373,7 @@ AdGlide.showDebugHUD(activity);
 ```
 
 > [!TIP]
-> Enable in config with `.debug(true)`. The HUD shows a **Waterfall Status** panel, a full **Performance Log**, and a **Clear Logs** button.
+> Enable in config with `.enableDebugHUD(true)`. The HUD shows a **Waterfall Status** panel, a full **Performance Log**, and a **Clear Logs** button.
 
 ---
 
@@ -412,6 +409,7 @@ Add these rules to your `proguard-rules.pro` file when `minifyEnabled true`:
 -dontwarn com.ironsource.**
 -dontwarn com.unity3d.ads.**
 -dontwarn com.unity3d.services.**
+-dontwarn pl.droidsonroids.gif.**
 ```
 
 ---
@@ -437,8 +435,8 @@ Add these rules to your `proguard-rules.pro` file when `minifyEnabled true`:
 | `enableAds(bool)` | `boolean` | `false` | Master ad on/off toggle |
 | `testMode(bool)` | `boolean` | `false` | Use test ads during development |
 | `debug(bool)` | `boolean` | `true` | Enable verbose logcat output |
-| `primaryNetwork(network)` | `String` | — | Use `Constant.ADMOB` etc. |
-| `backupNetworks(n...)` | `String...` | — | Fallback string constants |
+| `primaryNetwork(network)` | `AdGlideNetwork` | — | Primary network (Enum preferred) |
+| `backupNetworks(n...)` | `AdGlideNetwork...`| — | Fallback networks (Enum preferred) |
 | `bannerEnabled(bool)` | `boolean` | `false` | Toggle banner ads |
 | `interstitialEnabled(bool)` | `boolean` | `false` | Toggle interstitial ads |
 | `rewardedEnabled(bool)` | `boolean` | `false` | Toggle rewarded ads |
@@ -453,10 +451,11 @@ Add these rules to your `proguard-rules.pro` file when `minifyEnabled true`:
 | `excludeOpenAdFrom(Class...)` | `Class<?>...` | — | Blacklist activities from App Open |
 | `enableGDPR(bool)` | `boolean` | `false` | Show UMP consent form |
 | `debugGDPR(bool)` | `boolean` | `false` | Force GDPR dialog in debug |
+| `enableDebugHUD(bool)` | `boolean` | `false` | Enable integrated Debug HUD |
 
 ### Configuration Constants (`com.partharoypc.adglide.util.Constant`)
 
-Use these constants when defining your networks in the `AdGlideConfig.Builder`:
+Use these constants when defining your networks in the `AdGlideConfig.Builder` if you prefer string keys:
 
 | Value | Network |
 | :--- | :--- |
@@ -471,8 +470,6 @@ Use these constants when defining your networks in the `AdGlideConfig.Builder`:
 | `Constant.META_BIDDING_ADMOB` | Meta bidding via AdMob |
 | `Constant.META_BIDDING_APPLOVIN_MAX` | Meta bidding via AppLovin |
 | `Constant.META_BIDDING_IRONSOURCE` | Meta bidding via IronSource |
-
----
 
 ---
 

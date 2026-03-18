@@ -62,26 +62,26 @@
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
-                        <include layout="@layout/adglide_view_native_ad_label"
-                                 android:layout_width="wrap_content"
-                                 android:layout_height="wrap_content"
-                                 android:layout_marginEnd="8dp" />
+                        <include
+                            layout="@layout/adglide_view_native_ad_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp" />
 
                         <TextView
                             android:id="@+id/advertiser"
-                            android:visibility="gone"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:ellipsize="end"
                             android:maxLines="1"
                             android:textColor="@color/adglide_color_text_secondary"
-                            android:textSize="13sp" />
+                            android:textSize="13sp"
+                            android:visibility="gone" />
 
                     </LinearLayout>
 
                     <RatingBar
                         android:id="@+id/stars"
-                        android:visibility="gone"
                         style="?android:attr/ratingBarStyleSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -90,7 +90,8 @@
                         android:numStars="5"
                         android:progressTint="@color/adglide_color_indicator_background"
                         android:stepSize="0.5"
-                        android:theme="@style/Widget.AppCompat.RatingBar.Small" />
+                        android:theme="@style/Widget.AppCompat.RatingBar.Small"
+                        android:visibility="gone" />
                 </LinearLayout>
 
             </LinearLayout>

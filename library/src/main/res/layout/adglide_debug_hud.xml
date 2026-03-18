@@ -84,40 +84,40 @@
     </ScrollView>
 
     <LinearLayout
+        style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        style="?android:attr/buttonBarStyle">
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/refresh_btn"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Refresh"
-            style="?android:attr/buttonBarButtonStyle" />
+            android:text="Refresh" />
 
         <Button
             android:id="@+id/clear_btn"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Clear"
-            style="?android:attr/buttonBarButtonStyle" />
+            android:text="Clear" />
 
         <Button
             android:id="@+id/btn_test_ad"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Test Ad"
-            style="?android:attr/buttonBarButtonStyle" />
+            android:text="Test Ad" />
 
         <Button
             android:id="@+id/btn_close_hud"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Close"
-            style="?android:attr/buttonBarButtonStyle" />
+            android:text="Close" />
     </LinearLayout>
 
 </LinearLayout>
