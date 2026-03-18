@@ -35,6 +35,14 @@ public class AppOpenProviderFactory {
                 className = WORTISE_PROV;
                 checkClass = "com.wortise.ads.appopen.AppOpenAd";
             }
+            case com.partharoypc.adglide.util.Constant.STARTAPP -> {
+                className = "com.partharoypc.adglide.provider.startapp.StartAppAppOpenProvider";
+                checkClass = "com.startapp.sdk.adsbase.StartAppAd";
+            }
+            case com.partharoypc.adglide.util.Constant.IRONSOURCE -> {
+                className = "com.partharoypc.adglide.provider.ironsource.IronSourceAppOpenProvider";
+                checkClass = "com.ironsource.mediationsdk.IronSource";
+            }
         }
 
         if (className != null && (checkClass == null || ReflectionUtils.isClassAvailable(checkClass))) {

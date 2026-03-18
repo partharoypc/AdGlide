@@ -36,7 +36,7 @@ public class MetaRewardedProvider implements RewardedProvider {
                                 "Rewarded Error: [" + adError.getErrorCode() + "] " + adError.getErrorMessage());
                         com.partharoypc.adglide.util.PerformanceLogger.error("Meta",
                                 "Rewarded failed: [" + adError.getErrorCode() + "] " + adError.getErrorMessage());
-                        listener.onAdFailedToLoad(adError.getErrorMessage());
+                        listener.onAdFailedToLoad("[" + adError.getErrorCode() + "] " + adError.getErrorMessage());
                     }
 
                     @Override

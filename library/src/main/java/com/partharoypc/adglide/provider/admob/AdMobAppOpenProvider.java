@@ -16,6 +16,7 @@ public class AdMobAppOpenProvider implements AppOpenProvider {
     private boolean isLoadingAd = false;
     private boolean isShowingAd = false;
     private long loadTime = 0;
+    private String mAdUnitId;
 
     @Override
     public void loadAppOpenAd(Context context, String adUnitId, AppOpenListener listener) {
@@ -39,6 +40,7 @@ public class AdMobAppOpenProvider implements AppOpenProvider {
             public void onAdLoaded(@NonNull AppOpenAd ad) {
                 com.partharoypc.adglide.util.AdMobHelper.resetCooldown(adUnitId);
                 appOpenAd = ad;
+                mAdUnitId = adUnitId;
                 isLoadingAd = false;
                 loadTime = (new Date()).getTime();
                 listener.onAdLoaded();
@@ -68,6 +70,15 @@ public class AdMobAppOpenProvider implements AppOpenProvider {
                 appOpenAd = null;
                 isShowingAd = false;
                 listener.onAdDismissed();
+                if (mAdUnitId != null) {
+                    loadAppOpenAd(activity.getApplicationContext(), mAdUnitId, new AppOpenListener() {
+                        @Override public void onAdLoaded() {}
+                        @Override public void onAdFailedToLoad(String error) {}
+                        @Override public void onAdShowed() {}
+                        @Override public void onAdDismissed() {}
+                        @Override public void onAdShowFailed(String error) {}
+                    });
+                }
             }
 
             @Override

@@ -25,6 +25,7 @@ public class AdMobInterstitialProvider implements InterstitialProvider {
         InterstitialAd.load(activity, adUnitId, adRequest, new InterstitialAdLoadCallback() {
             @Override
             public void onAdLoaded(@NonNull InterstitialAd ad) {
+                com.partharoypc.adglide.util.PerformanceLogger.log("AdMob", "Interstitial loaded: " + adUnitId);
                 com.partharoypc.adglide.util.AdMobHelper.resetCooldown(adUnitId);
                 interstitialAd = ad;
                 listener.onAdLoaded();
@@ -32,6 +33,7 @@ public class AdMobInterstitialProvider implements InterstitialProvider {
 
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                com.partharoypc.adglide.util.PerformanceLogger.error("AdMob", "Interstitial failed: " + loadAdError.getMessage());
                 if (loadAdError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
                     com.partharoypc.adglide.util.AdMobHelper.recordFailure(adUnitId);
                 }
@@ -59,6 +61,7 @@ public class AdMobInterstitialProvider implements InterstitialProvider {
 
                 @Override
                 public void onAdShowedFullScreenContent() {
+                    com.partharoypc.adglide.util.PerformanceLogger.log("AdMob", "Interstitial showed");
                     listener.onAdShowed();
                 }
             });

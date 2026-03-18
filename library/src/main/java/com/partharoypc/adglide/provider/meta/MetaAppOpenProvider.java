@@ -43,9 +43,9 @@ public class MetaAppOpenProvider implements AppOpenProvider {
             @Override
             public void onError(Ad ad, AdError adError) {
                 Log.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META,
-                        "Meta AppOpen failed: " + adError.getErrorMessage());
+                        "Meta AppOpen failed: [" + adError.getErrorCode() + "] " + adError.getErrorMessage());
                 if (activeListener != null)
-                    activeListener.onAdFailedToLoad(adError.getErrorMessage());
+                    activeListener.onAdFailedToLoad("[" + adError.getErrorCode() + "] " + adError.getErrorMessage());
             }
 
             @Override

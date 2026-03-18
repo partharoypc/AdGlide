@@ -20,15 +20,20 @@ public class DebugActivity extends AppCompatActivity {
 
         refreshUI();
         findViewById(R.id.refresh_btn).setOnClickListener(v -> refreshUI());
-        android.widget.Button clearBtn = findViewById(R.id.clear_btn);
-        if (clearBtn != null) {
-            clearBtn.setOnClickListener(v -> {
-                PerformanceLogger.clear();
-                refreshUI();
-            });
-        }
+        findViewById(R.id.clear_btn).setOnClickListener(v -> {
+            PerformanceLogger.clear();
+            refreshUI();
+        });
+        findViewById(R.id.btn_close_hud).setOnClickListener(v -> finish());
+        findViewById(R.id.btn_test_ad).setOnClickListener(v -> {
+            AdGlideConfig config = AdGlide.getConfig();
+            if (config != null) {
+                AdGlide.showInterstitial(this, null);
+            }
+        });
     }
 
+    @SuppressWarnings("SetTextI18n")
     private void refreshUI() {
         TextView configTv = findViewById(R.id.config_text);
         TextView logsTv = findViewById(R.id.logs_text);

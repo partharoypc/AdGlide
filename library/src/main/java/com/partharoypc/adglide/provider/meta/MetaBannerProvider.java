@@ -27,7 +27,7 @@ public class MetaBannerProvider implements BannerProvider {
         AdListener adListener = new AdListener() {
             @Override
             public void onError(Ad ad, AdError adError) {
-                listener.onAdFailedToLoad(adError.getErrorMessage());
+                listener.onAdFailedToLoad("[" + adError.getErrorCode() + "] " + adError.getErrorMessage());
             }
 
             @Override

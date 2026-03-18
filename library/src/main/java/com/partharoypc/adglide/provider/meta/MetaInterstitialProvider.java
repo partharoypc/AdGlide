@@ -36,7 +36,7 @@ public class MetaInterstitialProvider implements InterstitialProvider {
                         "Interstitial Error: [" + adError.getErrorCode() + "] " + adError.getErrorMessage());
                 com.partharoypc.adglide.util.PerformanceLogger.error("Meta",
                         "Interstitial failed: [" + adError.getErrorCode() + "] " + adError.getErrorMessage());
-                listener.onAdFailedToLoad(adError.getErrorMessage());
+                listener.onAdFailedToLoad("[" + adError.getErrorCode() + "] " + adError.getErrorMessage());
             }
 
             @Override

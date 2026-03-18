@@ -30,6 +30,7 @@ public class AdGlide {
     private static RewardedAd.Builder cachedRewarded;
     private static com.partharoypc.adglide.format.RewardedInterstitialAd.Builder cachedRewardedInterstitial;
     private static AppOpenAd.Builder cachedAppOpen;
+    private static java.lang.ref.WeakReference<BannerAd.Builder> cachedBannerBuilder;
 
     private static int interstitialClickCounter = 1;
     private static int rewardedClickCounter = 1;
@@ -75,6 +76,7 @@ public class AdGlide {
                 isAppOpenRegistered = true;
             }
         }
+        com.partharoypc.adglide.util.PerformanceLogger.log("Core", "AdGlide initialized (v1.7.0)");
     }
 
     /**
@@ -415,7 +417,12 @@ public class AdGlide {
     public static void showBanner(Activity activity) {
         if (config == null || !isBannerEnabled())
             return;
-        new BannerAd.Builder(activity).load();
+        if (cachedBannerBuilder != null && cachedBannerBuilder.get() != null) {
+            cachedBannerBuilder.get().destroyAndDetachBanner();
+        }
+        BannerAd.Builder builder = new BannerAd.Builder(activity);
+        cachedBannerBuilder = new java.lang.ref.WeakReference<>(builder);
+        builder.load();
     }
 
     /**
@@ -424,7 +431,12 @@ public class AdGlide {
     public static void showBanner(Activity activity, ViewGroup container) {
         if (config == null || !isBannerEnabled())
             return;
-        new BannerAd.Builder(activity).container(container).load();
+        if (cachedBannerBuilder != null && cachedBannerBuilder.get() != null) {
+            cachedBannerBuilder.get().destroyAndDetachBanner();
+        }
+        BannerAd.Builder builder = new BannerAd.Builder(activity).container(container);
+        cachedBannerBuilder = new java.lang.ref.WeakReference<>(builder);
+        builder.load();
     }
 
     /**

@@ -21,18 +21,7 @@ public class AudienceNetworkInitializeHelper implements AudienceNetworkAds.InitL
      * @param context Application or Activity.
      */
     public static void initialize(Context context) {
-        if (BuildConfig.DEBUG) {
-            AdSettings.turnOnSDKDebugger(context);
-            AdSettings.setTestMode(true);
-            AdSettings.setIntegrationErrorMode(AdSettings.IntegrationErrorMode.INTEGRATION_ERROR_CRASH_DEBUG_MODE);
-        }
-
-        if (!AudienceNetworkAds.isInitialized(context)) {
-            AudienceNetworkAds
-                    .buildInitSettings(context)
-                    .withInitListener(new AudienceNetworkInitializeHelper())
-                    .initialize();
-        }
+        initializeAd(context, BuildConfig.DEBUG);
     }
 
     public static void initializeAd(Context context, boolean debug) {
@@ -40,6 +29,7 @@ public class AudienceNetworkInitializeHelper implements AudienceNetworkAds.InitL
             AdSettings.turnOnSDKDebugger(context);
             AdSettings.setTestMode(true);
             AdSettings.setIntegrationErrorMode(AdSettings.IntegrationErrorMode.INTEGRATION_ERROR_CRASH_DEBUG_MODE);
+            Log.d(AudienceNetworkAds.TAG, "Meta Audience Network initialized in Debug Mode");
         }
 
         if (!AudienceNetworkAds.isInitialized(context)) {
@@ -50,8 +40,16 @@ public class AudienceNetworkInitializeHelper implements AudienceNetworkAds.InitL
         }
     }
 
+    /**
+     * Call this to add specific test devices. Use the hashed ID from the logs.
+     * @param deviceId The hashed ID for the test device.
+     */
+    public static void addTestDevice(String deviceId) {
+        AdSettings.addTestDevice(deviceId);
+    }
+
     @Override
     public void onInitialized(AudienceNetworkAds.InitResult result) {
-        Log.d(AudienceNetworkAds.TAG, result.getMessage());
+        Log.d(AudienceNetworkAds.TAG, "Meta SDK Init Result: " + result.getMessage());
     }
 }

@@ -33,7 +33,7 @@ public class MetaNativeProvider implements NativeProvider {
             public void onError(Ad ad, AdError adError) {
                 Log.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META,
                         "Native Error: [" + adError.getErrorCode() + "] " + adError.getErrorMessage());
-                listener.onAdFailedToLoad(adError.getErrorMessage());
+                listener.onAdFailedToLoad("[" + adError.getErrorCode() + "] " + adError.getErrorMessage());
             }
 
             @Override

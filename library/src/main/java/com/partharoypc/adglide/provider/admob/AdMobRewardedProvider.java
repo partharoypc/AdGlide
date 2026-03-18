@@ -27,6 +27,7 @@ public class AdMobRewardedProvider implements RewardedProvider {
             RewardedInterstitialAd.load(activity, adUnitId, adRequest, new RewardedInterstitialAdLoadCallback() {
                 @Override
                 public void onAdLoaded(@NonNull RewardedInterstitialAd ad) {
+                    com.partharoypc.adglide.util.PerformanceLogger.log("AdMob", "Rewarded Interstitial loaded: " + adUnitId);
                     com.partharoypc.adglide.util.AdMobHelper.resetCooldown(adUnitId);
                     rewardedInterstitialAd = ad;
                     setupInterstitialCallback(listener);
@@ -35,6 +36,7 @@ public class AdMobRewardedProvider implements RewardedProvider {
 
                 @Override
                 public void onAdFailedToLoad(@NonNull LoadAdError adError) {
+                    com.partharoypc.adglide.util.PerformanceLogger.error("AdMob", "Rewarded Interstitial failed: " + adError.getMessage());
                     if (adError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
                         com.partharoypc.adglide.util.AdMobHelper.recordFailure(adUnitId);
                     }
@@ -45,6 +47,7 @@ public class AdMobRewardedProvider implements RewardedProvider {
             RewardedAd.load(activity, adUnitId, adRequest, new RewardedAdLoadCallback() {
                 @Override
                 public void onAdLoaded(@NonNull RewardedAd ad) {
+                    com.partharoypc.adglide.util.PerformanceLogger.log("AdMob", "Rewarded loaded: " + adUnitId);
                     com.partharoypc.adglide.util.AdMobHelper.resetCooldown(adUnitId);
                     rewardedAd = ad;
                     setupRewardedCallback(listener);
@@ -53,6 +56,7 @@ public class AdMobRewardedProvider implements RewardedProvider {
 
                 @Override
                 public void onAdFailedToLoad(@NonNull LoadAdError adError) {
+                    com.partharoypc.adglide.util.PerformanceLogger.error("AdMob", "Rewarded failed: " + adError.getMessage());
                     if (adError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
                         com.partharoypc.adglide.util.AdMobHelper.recordFailure(adUnitId);
                     }
@@ -66,6 +70,7 @@ public class AdMobRewardedProvider implements RewardedProvider {
         rewardedAd.setFullScreenContentCallback(new FullScreenContentCallback() {
             @Override
             public void onAdShowedFullScreenContent() {
+                com.partharoypc.adglide.util.PerformanceLogger.log("AdMob", "Rewarded showed");
                 listener.onAdShowed();
             }
 
@@ -87,6 +92,7 @@ public class AdMobRewardedProvider implements RewardedProvider {
         rewardedInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
             @Override
             public void onAdShowedFullScreenContent() {
+                com.partharoypc.adglide.util.PerformanceLogger.log("AdMob", "Rewarded Interstitial showed");
                 listener.onAdShowed();
             }
 

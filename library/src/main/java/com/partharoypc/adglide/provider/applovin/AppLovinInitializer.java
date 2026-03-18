@@ -30,6 +30,9 @@ public class AppLovinInitializer implements NetworkInitializer {
                 .build();
 
         sharedSdk = AppLovinSdk.getInstance(context);
+        if (config.isDebug() || config.isTestMode()) {
+            sharedSdk.getSettings().setVerboseLogging(true);
+        }
         sharedSdk.initialize(initConfig, configuration -> {
             Log.d(TAG, "AppLovin SDK initialized successfully.");
         });
