@@ -21,13 +21,13 @@ public class Constant {
     public static final String ADMOB_APP_OPEN_AD_ID = "ca-app-pub-3940256099942544/9257395921";
 
     // Meta Audience Network
-    public static final String META_BANNER_ID = "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID";
-    public static final String META_INTERSTITIAL_ID = "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID";
-    public static final String META_REWARDED_ID = "VID_HD_9_16_39S_APP_INSTALL#YOUR_PLACEMENT_ID";
-    public static final String META_NATIVE_ID = "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID";
+    public static final String META_BANNER_ID = "549167759165615_549192715829786";
+    public static final String META_INTERSTITIAL_ID = "549167759165615_549190905829967";
+    public static final String META_REWARDED_ID = "549167759165615_549192132496511";
+    public static final String META_NATIVE_ID = "549167759165615_551513495597708";
 
     // StartApp
-    public static final String STARTAPP_APP_ID = "0";
+    public static final String STARTAPP_APP_ID = "205489527";
     // Note: StartApp does not use separate ad unit IDs — the App ID covers all formats
 
     // Unity Ads
@@ -57,11 +57,11 @@ public class Constant {
     public static final String IRONSOURCE_NATIVE_ID = "DefaultNative";
 
     // Wortise
-    public static final String WORTISE_APP_ID = "test-app-id";
+    public static final String WORTISE_APP_ID = "57659a6d-e448-47fb-9759-dd9ca0e1a6c4";
     public static final String WORTISE_BANNER_ID = "test-banner";
     public static final String WORTISE_INTERSTITIAL_ID = "test-interstitial";
     public static final String WORTISE_REWARDED_ID = "test-rewarded";
-    public static final String WORTISE_REWARDED_INTERSTITIAL_ID = "test-rewarded-interstitial";
+    public static final String WORTISE_REWARDED_INTERSTITIAL_ID = "test-rewarded";
     public static final String WORTISE_NATIVE_ID = "test-native";
     public static final String WORTISE_APP_OPEN_AD_ID = "test-app-open";
 

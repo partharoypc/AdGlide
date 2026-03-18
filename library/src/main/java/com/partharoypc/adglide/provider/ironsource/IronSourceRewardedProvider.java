@@ -1,72 +1,70 @@
 package com.partharoypc.adglide.provider.ironsource;
 
 import android.app.Activity;
-import com.ironsource.mediationsdk.IronSource;
-import com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo;
-import com.ironsource.mediationsdk.logger.IronSourceError;
-import com.ironsource.mediationsdk.model.Placement;
-import com.ironsource.mediationsdk.sdk.LevelPlayRewardedVideoListener;
 import com.partharoypc.adglide.provider.RewardedProvider;
+import com.unity3d.mediation.LevelPlayAdInfo;
+import com.unity3d.mediation.LevelPlayAdError;
+import com.unity3d.mediation.rewarded.LevelPlayRewardedAd;
+import com.unity3d.mediation.rewarded.LevelPlayRewardedAdListener;
+import com.unity3d.mediation.rewarded.LevelPlayReward;
+import androidx.annotation.NonNull;
 
 public class IronSourceRewardedProvider implements RewardedProvider {
-    private boolean isAvailable = false;
+    private LevelPlayRewardedAd rewardedAd;
 
     @Override
     public void loadRewardedAd(Activity activity, String adUnitId, RewardedConfig config, RewardedListener listener) {
-        IronSource.setLevelPlayRewardedVideoListener(new LevelPlayRewardedVideoListener() {
+        rewardedAd = new LevelPlayRewardedAd(adUnitId);
+        rewardedAd.setListener(new LevelPlayRewardedAdListener() {
             @Override
-            public void onAdOpened(AdInfo adInfo) {
-                com.partharoypc.adglide.util.PerformanceLogger.log("IronSource", "Rewarded opened");
-                listener.onAdShowed();
-            }
-
-            @Override
-            public void onAdClosed(AdInfo adInfo) {
-                isAvailable = false;
-                listener.onAdDismissed();
-            }
-
-            @Override
-            public void onAdAvailable(AdInfo adInfo) {
-                isAvailable = true;
+            public void onAdLoaded(@NonNull LevelPlayAdInfo adInfo) {
                 com.partharoypc.adglide.util.PerformanceLogger.log("IronSource", "Rewarded available: " + adUnitId);
                 listener.onAdLoaded();
             }
 
             @Override
-            public void onAdUnavailable() {
-                isAvailable = false;
+            public void onAdLoadFailed(@NonNull LevelPlayAdError error) {
                 com.partharoypc.adglide.util.PerformanceLogger.error("IronSource", "Rewarded unavailable");
-                listener.onAdFailedToLoad("IronSource Rewarded unavailable");
+                listener.onAdFailedToLoad(error.getErrorMessage());
             }
 
             @Override
-            public void onAdShowFailed(IronSourceError ironSourceError, AdInfo adInfo) {
-                isAvailable = false;
-                com.partharoypc.adglide.util.PerformanceLogger.error("IronSource", "Rewarded show failed: " + ironSourceError.getErrorMessage());
-                listener.onAdShowFailed(ironSourceError.getErrorMessage());
+            public void onAdDisplayed(@NonNull LevelPlayAdInfo adInfo) {
+                com.partharoypc.adglide.util.PerformanceLogger.log("IronSource", "Rewarded opened");
+                listener.onAdShowed();
             }
 
             @Override
-            public void onAdRewarded(Placement placement, AdInfo adInfo) {
+            public void onAdDisplayFailed(@NonNull LevelPlayAdError error, @NonNull LevelPlayAdInfo adInfo) {
+                com.partharoypc.adglide.util.PerformanceLogger.error("IronSource", "Rewarded show failed: " + error.getErrorMessage());
+                listener.onAdShowFailed(error.getErrorMessage());
+            }
+
+            @Override
+            public void onAdClicked(@NonNull LevelPlayAdInfo adInfo) {
+            }
+
+            @Override
+            public void onAdClosed(@NonNull LevelPlayAdInfo adInfo) {
+                listener.onAdDismissed();
+            }
+
+            @Override
+            public void onAdRewarded(@NonNull LevelPlayReward reward, @NonNull LevelPlayAdInfo adInfo) {
                 listener.onAdCompleted();
             }
 
             @Override
-            public void onAdClicked(Placement placement, AdInfo adInfo) {
+            public void onAdInfoChanged(@NonNull LevelPlayAdInfo adInfo) {
             }
         });
-        IronSource.loadRewardedVideo();
+        rewardedAd.loadAd();
     }
 
     @Override
     public void showRewardedAd(Activity activity, RewardedListener listener) {
-        if (IronSource.isRewardedVideoAvailable()) {
-            try {
-                IronSource.showRewardedVideo();
-            } catch (Exception e) {
-                listener.onAdShowFailed(e.getMessage());
-            }
+        if (rewardedAd != null && rewardedAd.isAdReady()) {
+            rewardedAd.showAd(activity);
         } else {
             listener.onAdShowFailed("IronSource Rewarded not available");
         }
@@ -74,11 +72,11 @@ public class IronSourceRewardedProvider implements RewardedProvider {
 
     @Override
     public boolean isAdAvailable() {
-        return IronSource.isRewardedVideoAvailable();
+        return rewardedAd != null && rewardedAd.isAdReady();
     }
 
     @Override
     public void destroy() {
-        isAvailable = false;
+        rewardedAd = null;
     }
 }

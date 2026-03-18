@@ -4,11 +4,11 @@ plugins {
 
 android {
     namespace 'com.partharoypc.adglidedemo'
-    compileSdk 35
+    compileSdk 36
     defaultConfig {
         applicationId "com.partharoypc.adglidedemo"
         minSdk 23
-        targetSdk 35
+        targetSdk 36
         versionCode 1
         versionName "1.0.0"
         multiDexEnabled true
@@ -53,21 +53,21 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime:2.10.0'
     implementation 'androidx.lifecycle:lifecycle-common-java8:2.10.0'
     implementation project(':library')
-    
+
     // Ad Networks (Required by Demo App)
-    implementation 'com.google.android.gms:play-services-ads:23.6.0'
-    implementation 'com.applovin:applovin-sdk:13.1.0'
+    implementation 'com.google.android.gms:play-services-ads:25.0.0'
+    implementation 'com.applovin:applovin-sdk:13.6.1'
     implementation 'com.startapp:inapp-sdk:5.3.0'
-    implementation 'com.unity3d.ads:unity-ads:4.12.5'
-    implementation 'com.facebook.android:audience-network-sdk:6.18.0'
-    implementation 'com.ironsource.sdk:mediationsdk:8.6.1'
-    implementation 'com.wortise:android-sdk:1.7.0'
-    
+    implementation 'com.unity3d.ads:unity-ads:4.17.0'
+    implementation 'com.facebook.android:audience-network-sdk:6.21.0'
+    implementation 'com.unity3d.ads-mediation:mediation-sdk:9.3.0'
+    implementation 'com.wortise:android-sdk:1.7.2'
+
     // Mediation adapters if necessary
-    implementation 'com.google.ads.mediation:facebook:6.18.0.0'
-    implementation 'com.google.ads.mediation:applovin:13.0.1.0'
-    implementation 'com.google.ads.mediation:ironsource:8.6.0.0'
-    
+    implementation 'com.google.ads.mediation:facebook:6.21.0.1'
+    implementation 'com.google.ads.mediation:applovin:13.6.0.0'
+    implementation 'com.google.ads.mediation:ironsource:9.3.0.1'
+
     // Force latest version of android-gif-drawable for 16KB alignment support
     //noinspection Aligned16KB
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.31'

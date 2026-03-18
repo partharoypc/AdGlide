@@ -4,20 +4,31 @@ import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 import com.partharoypc.adglide.provider.NetworkInitializer;
-import com.ironsource.mediationsdk.IronSource;
-import com.partharoypc.adglide.helper.AudienceNetworkInitializeHelper;
+import com.unity3d.mediation.LevelPlay;
+import com.unity3d.mediation.LevelPlayInitListener;
+import com.unity3d.mediation.LevelPlayInitRequest;
+import com.unity3d.mediation.LevelPlayConfiguration;
+import com.unity3d.mediation.LevelPlayInitError;
+import androidx.annotation.NonNull;
 
 public class IronSourceInitializer implements NetworkInitializer {
     private static final String TAG = "AdGlide.IronSource";
 
     @Override
     public void initialize(Context context, InitializerConfig config) {
-        if (context instanceof Activity) {
-            Activity activity = (Activity) context;
-            IronSource.init(activity, config.getAppId(), IronSource.AD_UNIT.REWARDED_VIDEO,
-                    IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.BANNER, IronSource.AD_UNIT.NATIVE_AD);
-        } else {
-            Log.e(TAG, "IronSource requires an Activity Context to initialize. Skipping IronSource init.");
-        }
+        LevelPlayInitRequest initRequest = new LevelPlayInitRequest.Builder(config.getAppId())
+                .build();
+
+        LevelPlay.init(context, initRequest, new LevelPlayInitListener() {
+            @Override
+            public void onInitFailed(@NonNull LevelPlayInitError error) {
+                Log.e(TAG, "IronSource LevelPlay init failed: " + error.getErrorMessage());
+            }
+
+            @Override
+            public void onInitSuccess(@NonNull LevelPlayConfiguration configuration) {
+                Log.d(TAG, "IronSource LevelPlay init successful.");
+            }
+        });
     }
 }

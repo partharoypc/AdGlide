@@ -13,6 +13,7 @@ import com.partharoypc.adglide.provider.NetworkInitializerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import static com.partharoypc.adglide.util.Constant.*;
 
 public class AdNetwork {
 
@@ -38,15 +39,15 @@ public class AdNetwork {
         }
 
         private String getAppIdForNetwork(String networkName) {
-            if (config == null) return "";
-            AdGlideNetwork network = AdGlideNetwork.fromString(networkName);
-            return switch (network) {
+            if (config == null || networkName == null) return "";
+            return switch (networkName) {
                 case ADMOB, META_BIDDING_ADMOB -> config.getAdMobAppId();
                 case UNITY -> config.getUnityGameId();
                 case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> config.getAppLovinSdkKey();
                 case IRONSOURCE, META_BIDDING_IRONSOURCE -> config.getIronSourceAppKey();
                 case STARTAPP -> config.getStartAppId();
                 case WORTISE -> config.getWortiseAppId();
+                case META -> ""; // Meta doesn't use a global App ID for init in this SDK
                 default -> "";
             };
         }
@@ -116,15 +117,30 @@ public class AdNetwork {
             }
         }
 
-        private void initializeSdk(String network) {
-            if (context == null || network == null || network.isEmpty()) return;
+        private void initializeSdk(String networkName) {
+            if (context == null || networkName == null || networkName.isEmpty()) return;
             try {
-                NetworkInitializer initializer = NetworkInitializerFactory.getInitializer(network);
+                NetworkInitializer initializer = NetworkInitializerFactory.getInitializer(networkName);
                 if (initializer != null) {
-                    initializer.initialize(context, this);
+                    initializer.initialize(context, new NetworkInitializer.InitializerConfig() {
+                        @Override
+                        public String getAppId() {
+                            return getAppIdForNetwork(networkName);
+                        }
+
+                        @Override
+                        public boolean isDebug() {
+                            return config != null && config.isDebug();
+                        }
+
+                        @Override
+                        public boolean isTestMode() {
+                            return config != null && config.isTestMode();
+                        }
+                    });
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Failed to initialize " + network + " SDK. Error: " + e.getMessage());
+                Log.e(TAG, "Failed to initialize " + networkName + " SDK. Error: " + e.getMessage());
             }
         }
 

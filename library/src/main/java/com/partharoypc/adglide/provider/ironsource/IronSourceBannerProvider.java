@@ -1,59 +1,68 @@
 package com.partharoypc.adglide.provider.ironsource;
 
 import android.app.Activity;
-import android.view.View;
-import android.widget.FrameLayout;
 import com.partharoypc.adglide.provider.BannerProvider;
-import com.ironsource.mediationsdk.ISBannerSize;
-import com.ironsource.mediationsdk.IronSource;
-import com.ironsource.mediationsdk.IronSourceBannerLayout;
-import com.ironsource.mediationsdk.logger.IronSourceError;
-import com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo;
-import com.ironsource.mediationsdk.sdk.LevelPlayBannerListener;
+import com.unity3d.mediation.LevelPlayAdSize;
+import com.unity3d.mediation.banner.LevelPlayBannerAdView;
+import com.unity3d.mediation.banner.LevelPlayBannerAdViewListener;
+import com.unity3d.mediation.LevelPlayAdInfo;
+import com.unity3d.mediation.LevelPlayAdError;
+import androidx.annotation.NonNull;
 
 public class IronSourceBannerProvider implements BannerProvider {
-    private IronSourceBannerLayout ironSourceBannerLayout;
+    private LevelPlayBannerAdView bannerAdView;
 
     @Override
     public void loadBanner(Activity activity, String adUnitId, BannerConfig config, BannerListener listener) {
-        ISBannerSize size = config.isMrec() ? ISBannerSize.RECTANGLE : ISBannerSize.BANNER;
-        ironSourceBannerLayout = IronSource.createBanner(activity, size);
-        ironSourceBannerLayout.setLevelPlayBannerListener(new LevelPlayBannerListener() {
+        LevelPlayAdSize size = config.isMrec() ? LevelPlayAdSize.MEDIUM_RECTANGLE : LevelPlayAdSize.BANNER;
+        LevelPlayBannerAdView.Config adConfig = new LevelPlayBannerAdView.Config.Builder()
+                .setAdSize(size)
+                .build();
+        bannerAdView = new LevelPlayBannerAdView(activity, adUnitId, adConfig);
+        bannerAdView.setBannerListener(new LevelPlayBannerAdViewListener() {
             @Override
-            public void onAdLoaded(AdInfo adInfo) {
-                listener.onAdLoaded(ironSourceBannerLayout);
+            public void onAdLoaded(@NonNull LevelPlayAdInfo adInfo) {
+                listener.onAdLoaded(bannerAdView);
             }
 
             @Override
-            public void onAdLoadFailed(IronSourceError error) {
+            public void onAdLoadFailed(@NonNull LevelPlayAdError error) {
                 listener.onAdFailedToLoad(error.getErrorMessage());
             }
 
             @Override
-            public void onAdClicked(AdInfo adInfo) {
+            public void onAdDisplayed(@NonNull LevelPlayAdInfo adInfo) {
             }
 
             @Override
-            public void onAdScreenPresented(AdInfo adInfo) {
+            public void onAdDisplayFailed(@NonNull LevelPlayAdInfo adInfo, @NonNull LevelPlayAdError error) {
             }
 
             @Override
-            public void onAdScreenDismissed(AdInfo adInfo) {
+            public void onAdClicked(@NonNull LevelPlayAdInfo adInfo) {
             }
 
             @Override
-            public void onAdLeftApplication(AdInfo adInfo) {
+            public void onAdExpanded(@NonNull LevelPlayAdInfo adInfo) {
+            }
+
+            @Override
+            public void onAdCollapsed(@NonNull LevelPlayAdInfo adInfo) {
+            }
+
+            @Override
+            public void onAdLeftApplication(@NonNull LevelPlayAdInfo adInfo) {
             }
         });
 
-        IronSource.loadBanner(ironSourceBannerLayout, adUnitId);
+        bannerAdView.loadAd();
     }
 
     @Override
     public void destroy() {
-        if (ironSourceBannerLayout != null) {
-            IronSource.destroyBanner(ironSourceBannerLayout);
-            ironSourceBannerLayout = null;
+        if (bannerAdView != null) {
+            bannerAdView.destroy();
+            bannerAdView = null;
         }
     }
 }

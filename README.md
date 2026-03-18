@@ -13,6 +13,7 @@
 
 ## ✨ What's New in v1.6.0
 
+- **IronSource LevelPlay Migration** — Fully migrated to the new LevelPlay Ad Unit APIs (SDK 9.3.0). Higher performance and better mediation orchestration.
 - **Fully Crash-Safe Ad Display** — Every `showAd()` call on every network is now wrapped in a `try-catch` guard. Third-party SDK crashes can never propagate to your app.
 - **Consistent Callback Coverage** — `onAdShowed()` and `onAdShowFailed()` are now reliably fired on all 8 networks.
 - **Plural `backupNetworks()`** — Easily supply an array of backup networks for robust waterfall fill.
@@ -47,16 +48,6 @@ AdGlide supports four integration patterns:
 | **Bidding** | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
 | **Waterfall** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
-### 🎨 Native Ad Templates
-
-| Style Value | Layout Type | Ideal Use Case |
-| :--- | :--- | :--- |
-| `"small"` | Compact Radio | List items / Footers |
-| `"medium"` | Standard Box | News feeds / Card views |
-| `"banner"` | Content Blend | Article inline / News style |
-| `"video"` | Immersive Video | High-CPM rewarded media |
-
----
 
 ## ⚡ 2. Step-by-Step Setup Guide
 
@@ -96,19 +87,19 @@ Open your **app-level `build.gradle`** and add the AdGlide core plus only the ne
 ```gradle
 dependencies {
     // 🚀 AdGlide Core (Required)
-    implementation 'com.github.partharoypc:adglide:1.6.0'
+    implementation 'com.github.partharoypc:adglide:1.7.0'
 
     // 🛡️ GDPR Consent (Required for EU compliance)
     implementation 'com.google.android.ump:user-messaging-platform:4.0.0'
 
     // ─── Choose Your Networks ───────────────────────────────────────
-    implementation 'com.google.android.gms:play-services-ads:23.6.0'    // AdMob ✅
-    // implementation 'com.facebook.android:audience-network-sdk:6.18.0' // Meta
-    // implementation 'com.applovin:applovin-sdk:13.0.1'                  // AppLovin
+    implementation 'com.google.android.gms:play-services-ads:25.0.0'    // AdMob ✅
+    // implementation 'com.facebook.android:audience-network-sdk:6.21.0' // Meta
+    // implementation 'com.applovin:applovin-sdk:13.6.1'                  // AppLovin
     // implementation 'com.startapp:inapp-sdk:5.3.0'                      // StartApp
-    // implementation 'com.wortise:android-sdk:1.7.0'                     // Wortise
-    // implementation 'com.ironsource.sdk:mediationsdk:8.4.0'             // IronSource
-    // implementation 'com.unity3d.ads:unity-ads:4.9.2'                   // Unity Ads
+    // implementation 'com.wortise:android-sdk:1.7.2'                     // Wortise
+    // implementation 'com.unity3d.ads-mediation:mediation-sdk:9.3.0'     // IronSource (LevelPlay)
+    // implementation 'com.unity3d.ads:unity-ads:4.17.0'                  // Unity Ads
 }
 ```
 

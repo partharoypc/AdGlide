@@ -5,6 +5,7 @@ import android.util.Log;
 import com.partharoypc.adglide.provider.NetworkInitializer;
 import com.applovin.sdk.AppLovinMediationProvider;
 import com.applovin.sdk.AppLovinSdk;
+import com.applovin.sdk.AppLovinSdkInitializationConfiguration;
 import com.applovin.sdk.AppLovinSdkSettings;
 
 public class AppLovinInitializer implements NetworkInitializer {
@@ -14,16 +15,22 @@ public class AppLovinInitializer implements NetworkInitializer {
     @Override
     public void initialize(Context context, InitializerConfig config) {
         String sdkKey = config.getAppId();
+        AppLovinSdkInitializationConfiguration.Builder builder;
+
         if (sdkKey != null && !sdkKey.trim().isEmpty() && !sdkKey.equals("0")) {
             Log.d(TAG, "Initializing AppLovin SDK with programmatic key.");
-            sharedSdk = AppLovinSdk.getInstance(sdkKey, new AppLovinSdkSettings(context), context);
+            builder = AppLovinSdkInitializationConfiguration.builder(sdkKey, context);
         } else {
             Log.d(TAG, "Initializing AppLovin SDK with manifest key.");
-            sharedSdk = AppLovinSdk.getInstance(context);
+            builder = AppLovinSdkInitializationConfiguration.builder(null, context);
         }
 
-        sharedSdk.setMediationProvider(AppLovinMediationProvider.MAX);
-        sharedSdk.initializeSdk(configuration -> {
+        AppLovinSdkInitializationConfiguration initConfig = builder
+                .setMediationProvider(AppLovinMediationProvider.MAX)
+                .build();
+
+        sharedSdk = AppLovinSdk.getInstance(context);
+        sharedSdk.initialize(initConfig, configuration -> {
             Log.d(TAG, "AppLovin SDK initialized successfully.");
         });
     }
