@@ -71,6 +71,8 @@ dependencyResolutionManagement {
         maven { url 'https://artifacts.applovin.com/android' }         // AppLovin
         maven { url 'https://maven.wortise.com/artifactory/public' }   // Wortise
         maven { url 'https://android-sdk.is.com/' }                    // IronSource
+        maven { url 'https://artifact.bytedance.com/repository/pangle' } // Pangle/Wortise
+        maven { url 'https://cboost.jfrog.io/artifactory/chartboost-ads/' } // Chartboost
     }
 }
 ```
@@ -94,8 +96,6 @@ dependencies {
     // implementation 'com.wortise:android-sdk:1.7.2'                      // Wortise
     // implementation 'com.unity3d.ads-mediation:mediation-sdk:9.3.0'      // IronSource (LevelPlay)
     // implementation 'com.unity3d.ads:unity-ads:4.17.0'                   // Unity Ads
-    // implementation 'com.unity3d.mediation:mediation-sdk:9.3.0'          // IronSource (LevelPlay)
-    
 }
 ```
 
@@ -394,13 +394,31 @@ AdGlide.updateConfig(new AdGlideConfig.Builder()
 
 ### ProGuard / R8 Rules
 
-Add these rules to your `proguard-rules.pro` file when `minifyEnabled true`:
+AdGlide includes a `consumer-rules.pro` that is automatically applied to your project. However, if you are using manual configuration or local AARs, ensure the following rules are in your `proguard-rules.pro`:
 
 ```proguard
 # AdGlide Core
 -keep public class com.partharoypc.adglide.** { *; }
 
-# Ad Networks
+# Ad Network Implementation Classes (Prevent Over-stripping)
+-keep class com.google.android.gms.ads.** { *; }
+-keep class com.facebook.ads.** { *; }
+-keep class com.applovin.** { *; }
+-keep class com.unity3d.ads.** { *; }
+-keep class com.unity3d.services.** { *; }
+-keep class com.ironsource.** { *; }
+-keep class com.startapp.** { *; }
+-keep class com.wortise.** { *; }
+-keep class com.google.android.ump.** { *; }
+
+# Prevent stripping of ad callback interfaces & model classes
+-keep interface com.partharoypc.adglide.util.On*Listener { *; }
+-keep interface com.partharoypc.adglide.util.AdGlideCallback { *; }
+-keep class com.partharoypc.adglide.AdGlideConfig { *; }
+-keep class com.partharoypc.adglide.AdGlideConfig$Builder { *; }
+-keep class com.partharoypc.adglide.AdGlideNativeStyle { *; }
+
+# Ad Network DontWarn (Optional but Recommended)
 -dontwarn com.google.android.gms.ads.**
 -dontwarn com.facebook.ads.**
 -dontwarn com.applovin.**
@@ -408,7 +426,6 @@ Add these rules to your `proguard-rules.pro` file when `minifyEnabled true`:
 -dontwarn com.wortise.**
 -dontwarn com.ironsource.**
 -dontwarn com.unity3d.ads.**
--dontwarn com.unity3d.services.**
 -dontwarn pl.droidsonroids.gif.**
 ```
 
