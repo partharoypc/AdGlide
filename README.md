@@ -490,11 +490,21 @@ Use these constants when defining your networks in the `AdGlideConfig.Builder` i
 
 ---
 
+---
+
+<div align="center">
+
 ## 👨‍💻 Developed By
 
-**Partha Roy**
-*Android Developer & Architecture Enthusiast*
-- 🌐 **GitHub**: [github.com/partharoypc](https://github.com/partharoypc)
+**Partha Roy**  
+*Senior Android Engineer & Architecture Specialist*
 
-*Built for Scale. Optimized for Speed. Perfected for Developers.*
-*© 2026 AdGlide — All rights reserved.*
+[![GitHub](https://img.shields.io/badge/GitHub-partharoypc-181717?style=for-the-badge&logo=github)](https://github.com/partharoypc)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+
+*Built for Scale • Optimized for Speed • Perfected for Developers*
+
+**© 2026 [AdGlide SDK](https://github.com/partharoypc/AdGlide) — All rights reserved.**
+
+</div>
+```
