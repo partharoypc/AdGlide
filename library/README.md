@@ -27,7 +27,7 @@ AdGlide eliminates the need for complex custom XML for most projects by providin
 | :--- | :--- | :--- |
 | `small` | Compact Radio | List items / Small footers |
 | `medium` | Standard Box | News feeds / Card views |
-| `news` | Content Blend | Article inline placements |
+| `banner` | Content Blend | Article inline placements |
 | `video` | Immersive Media | High-CPM video rewards |
 
 > [!TIP]
