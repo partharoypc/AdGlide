@@ -1,4 +1,8 @@
 jdk:
   - openjdk17
+
 before_install:
-  - ./gradlew clean
+  - chmod +x gradlew
+
+install:
+  - ./gradlew clean :library:publishToMavenLocal -Pgroup=com.github.partharoypc -Pversion=${VERSION} -xtest -xlint
