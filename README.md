@@ -1,7 +1,7 @@
 # AdGlide SDK 🚀
 ### *The Premium Mediation Wrapper for High-Performance Android Apps*
 
-[![Version](https://img.shields.io/badge/Version-1.7.0-blue.svg)](https://github.com/partharoypc/AdGlide)
+[![Version](https://img.shields.io/badge/Version-1.8.0-blue.svg)](https://github.com/partharoypc/AdGlide)
 [![Android](https://img.shields.io/badge/Android-23%2B-green.svg)](https://developer.android.com)
 [![Compile SDK](https://img.shields.io/badge/Compile_SDK-36-green.svg)](https://developer.android.com)
 [![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://openjdk.org/projects/jdk/17/)
@@ -11,15 +11,12 @@
 
 ---
 
-## ✨ What's New in v1.7.0
+## ✨ What's New in v1.8.0
 
-- **Type-Safe Configuration** — New `AdGlideNetwork` enum for cleaner and safer primary/backup network selection.
-- **Improved Waterfall Logic** — Robust plural `backupNetworks()` support with faster fallback and better error recovery.
-- **Enhanced Performance Monitoring** — Significant upgrades to the `PerformanceLogger`; now tracks detailed waterfall timing and retry events.
-- **Global `requestConsent()`** — Unified GDPR/UMP flow that can be triggered from any Activity with a simple callback.
-- **Rewarded Interstitial support** — Now fully operational across AdMob, AppLovin MAX, and Wortise.
-- **Hot-Reload Support** — `AdGlide.updateConfig()` now intelligently handles network re-initialization at runtime.
-- **Internal 16KB Alignment** — Compatibility with latest Android 15 performance requirements via `android-gif-drawable`.
+- **AGP 8.13.2 & Gradle 9.3.0 Support** — Fully optimized for the latest Android build tools and Java 17.
+- **Jetifier-Free Performance** — Disabled Jetifier to drastically reduce build times (2x faster builds on CI).
+- **Configuration Cache Optimized** — Migrated to the modern configuration cache API for near-instant build initialization.
+- **SDK 36 Compatibility** — Ready for the next generation of Android with full API 36 support.
 
 ---
 
@@ -86,7 +83,7 @@ Open your **app-level `build.gradle`** and add the AdGlide core plus only the ne
 ```gradle
 dependencies {
     // 🚀 AdGlide Core (Required)
-    implementation 'com.github.partharoypc:adglide:1.7.0'
+    implementation 'com.github.partharoypc:adglide:1.8.0'
 
     // ─── Choose Your Networks ───────────────────────────────────────
     implementation 'com.google.android.gms:play-services-ads:25.0.0'       // AdMob ✅
