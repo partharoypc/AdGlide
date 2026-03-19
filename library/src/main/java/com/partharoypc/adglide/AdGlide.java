@@ -76,7 +76,7 @@ public class AdGlide {
                 isAppOpenRegistered = true;
             }
         }
-        com.partharoypc.adglide.util.PerformanceLogger.log("Core", "AdGlide initialized (v1.7.0)");
+        com.partharoypc.adglide.util.PerformanceLogger.log("Core", "AdGlide initialized (v1.8.0)");
     }
 
     /**

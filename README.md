@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.png" alt="AdGlide SDK Banner" width="800">
+</p>
+
 # AdGlide SDK 🚀
 ### *The Premium Mediation Wrapper for High-Performance Android Apps*
 
