@@ -3,6 +3,7 @@
 </p>
 
 # AdGlide SDK 🚀
+
 ### *The Premium Mediation Wrapper for High-Performance Android Apps*
 
 [![Version](https://img.shields.io/badge/Version-1.9.0-blue.svg)](https://github.com/partharoypc/AdGlide)
@@ -15,13 +16,14 @@
 
 ---
 
-## ✨ What's New in v1.9.0 (Super Perfect Edition)
+## ✨ What's New in v1.9.0
 
-- **🚀 Zero-Wait Engine** — Background pooling for all ad formats (Interstitial, Rewarded, AppOpen, and Native).
-- **🛡️ Sequential Ad Delivery** — Anti-overlap logic ensures ads show "one-by-one" even with rapid user clicks.
-- **📊 Global Diagnostic API** — Monitor load times and network failovers in real-time across your entire app.
-- **🎯 Re-engineered Core** — Centralized `AdLoader` reduced boilerplate by 40% for a more lightweight, professional SDK.
-- **SDK 36 Compatibility** — Ready for the next generation of Android with full API 36 support.
+- **🏠 Offline House Ads** — Intelligent failover to cached House Ads (Banner, Interstitial, Native) when no internet is detected.
+- **⏱️ Configurable Timeouts** — Fine-tune waterfall speed with `.adResponseTimeoutMs()` to prevent slow network delays.
+- **🎨 Native House Ad Support** — Fully customizable House Ads for all native templates (Small, Medium, Video).
+- **🛡️ Enhanced GDPR/UMP** — Universal consent handling for seamless compliance across all ad networks.
+- **🚀 Refactored Ad Pooling** — Generic, lightweight pooling engine for zero-wait ad delivery.
+- **🧩 Fluent Kotlin DSL** — Modern, type-safe configuration via `adGlideConfig { ... }` blocks.
 
 ---
 
@@ -42,11 +44,10 @@ AdGlide supports four integration patterns:
 | **Interstitial** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Rewarded** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
 | **Rewarded Interstitial** | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Native** | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ |
+| **Native** | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ |
 | **App Open** | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
 | **Bidding** | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
 | **Waterfall** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-
 
 ## ⚡ 2. Step-by-Step Setup Guide
 
@@ -178,12 +179,20 @@ public class MyApplication extends Application {
             .adMobNativeId("ca-app-pub-XXXXXXXX~XXXXXXXX")
             .adMobAppOpenId("ca-app-pub-XXXXXXXX~XXXXXXXX")
 
-            // ─── House Ads (Zero-Fill Fallback) ──────────────────────────
+            // ─── House Ads (Offline Failover) ───────────────────────────
             .houseAdEnabled(true)
             .houseAdBannerImage("https://yourcdn.com/promo_banner.jpg")
             .houseAdBannerClickUrl("https://play.google.com/store/apps/details?id=your.app")
             .houseAdInterstitialImage("https://yourcdn.com/promo_full.jpg")
             .houseAdInterstitialClickUrl("https://play.google.com/store/apps/details?id=your.app")
+            
+            // 🆕 Native House Ad 
+            .houseAdNativeTitle("Check Our Other App!")
+            .houseAdNativeDescription("Experience the best productivity today.")
+            .houseAdNativeCTA("Download Now")
+            .houseAdNativeImage("https://yourcdn.com/promo_native_large.jpg")
+            .houseAdNativeIcon("https://yourcdn.com/promo_icon.png")
+            .houseAdNativeClickUrl("https://play.google.com/store/apps/details?id=your.app")
 
             .build();
 
@@ -215,12 +224,14 @@ public class MyApplication extends Application {
 App Open ads are fully automatic. When `appOpenEnabled(true)` is set, the SDK attaches to the Activity lifecycle and shows the ad automatically on each app resume — no additional code required.
 
 #### Excluding Specific Screens
+
 ```java
 // In your AdGlideConfig Builder:
 .excludeOpenAdFrom(SplashActivity.class, PaymentActivity.class)
 ```
 
 #### GDPR Consent on Splash Screen
+
 ```java
 // Call this BEFORE showing any ads, typically in SplashActivity
 AdGlide.requestConsent(this, () -> {
@@ -343,18 +354,22 @@ if (AdGlide.isNativeEnabled()) {
 ```
 
 #### Native Ad Styles Explained
+
 - **`AdGlideNativeStyle.SMALL`** (`"small"`): Compact 1-line radio style. Fits perfectly in recycler views.
-- **`AdGlideNativeStyle.MEDIUM`** (`"medium"`): Standard box with prominent CTA. 
+- **`AdGlideNativeStyle.MEDIUM`** (`"medium"`): Standard box with prominent CTA.
 - **`AdGlideNativeStyle.BANNER`** (`"banner"`): Traditional news feed inline styling.
 - **`AdGlideNativeStyle.VIDEO`** (`"video"`): Large scale immersive video or image container.
 
 ---
 
 ### 📡 3.7 Sequential Ad Delivery (Anti-Overlap)
+
 AdGlide contains a built-in **Sequential Request Queue**. If your users click multiple ad-triggering buttons rapidly, the SDK ensures ads are shown **one-by-one** sequentially rather than overlapping or crashing.
 
 ### 📊 3.8 Global Diagnostic API
+
 Monitor your SDK performance in real-time by registering a global listener.
+
 ```java
 AdGlide.setListener((format, network, status, duration) -> {
     Log.d("AdGlideStats", format + " loaded from " + network + " in " + duration + "ms");
@@ -375,6 +390,13 @@ House Ads keep your inventory monetized even when all ad networks fail to fill. 
 .houseAdBannerClickUrl("https://play.google.com/store/apps/details?id=your.app")
 .houseAdInterstitialImage("https://yourcdn.com/promo_full.jpg")
 .houseAdInterstitialClickUrl("https://play.google.com/store/apps/details?id=your.app")
+
+// 🆕 Native House Ad configuration
+.houseAdNativeTitle("Try AdGlide Pro")
+.houseAdNativeDescription("Unlock all advanced mediation features.")
+.houseAdNativeCTA("Upgrade Now")
+.houseAdNativeImage("https://yourcdn.com/promo_native.jpg")
+.houseAdNativeIcon("https://yourcdn.com/promo_icon.png")
 ```
 
 ---
@@ -410,8 +432,8 @@ AdGlide.updateConfig(new AdGlideConfig.Builder()
 
 ### 🛡️ Zero-Config ProGuard / R8
 
-**AdGlide is fully zero-config for code shrinking and obfuscation.** 
-Our embedded `consumer-rules.pro` automatically propagates the most optimal, tightly-scoped `-keep` and `-dontwarn` protocols directly into your release build. 
+**AdGlide is fully zero-config for code shrinking and obfuscation.**
+Our embedded `consumer-rules.pro` automatically propagates the most optimal, tightly-scoped `-keep` and `-dontwarn` protocols directly into your release build.
 
 You **do not** need to write any manual ProGuard rules for AdGlide or its supported networks when integrating via standard Gradle.
 
@@ -451,6 +473,7 @@ You **do not** need to write any manual ProGuard rules for AdGlide or its suppor
 -dontwarn com.google.android.ump.**
 -dontwarn pl.droidsonroids.gif.**
 ```
+
 </details>
 
 ---
@@ -493,6 +516,7 @@ You **do not** need to write any manual ProGuard rules for AdGlide or its suppor
 | `enableGDPR(bool)` | `boolean` | `false` | Show UMP consent form |
 | `debugGDPR(bool)` | `boolean` | `false` | Force GDPR dialog in debug |
 | `enableDebugHUD(bool)` | `boolean` | `false` | Enable integrated Debug HUD |
+| `adResponseTimeout(ms)` | `int` | `3500` | Max wait for network response |
 
 ### Configuration Constants (`com.partharoypc.adglide.util.Constant`)
 

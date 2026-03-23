@@ -39,9 +39,6 @@ AdGlide integrates the latest Google UMP SDK with support for debug geography an
 
 ## 🛠 4. Developer Experience (DX)
 
-### 🎯 Kotlin DSL Support
-Initialize AdGlide with modern Kotlin syntax using `adGlideConfig { ... }`.
-
 ### 📱 Debug HUD (Secret Menu)
 Monitor waterfall logs and test ad fills in real-time with the built-in Debug HUD.
 
