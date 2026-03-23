@@ -74,11 +74,13 @@ public class AdPoolManager {
     }
 
     public static InterstitialAd.Builder getInterstitial() {
-        return (InterstitialAd.Builder) pools.get(AdFormat.INTERSTITIAL).poll();
+        PoolSet<InterstitialAd.Builder> pool = getPool(AdFormat.INTERSTITIAL);
+        return pool != null ? pool.poll() : null;
     }
 
     public static boolean hasInterstitial() {
-        return pools.get(AdFormat.INTERSTITIAL).hasAvailable(ad -> ad.isAdLoaded());
+        PoolSet<InterstitialAd.Builder> pool = getPool(AdFormat.INTERSTITIAL);
+        return pool != null && pool.hasAvailable(ad -> ad.isAdLoaded());
     }
 
     // --- REWARDED ---
@@ -88,11 +90,13 @@ public class AdPoolManager {
     }
 
     public static RewardedAd.Builder getRewarded() {
-        return (RewardedAd.Builder) pools.get(AdFormat.REWARDED).poll();
+        PoolSet<RewardedAd.Builder> pool = getPool(AdFormat.REWARDED);
+        return pool != null ? pool.poll() : null;
     }
 
     public static boolean hasRewarded() {
-        return pools.get(AdFormat.REWARDED).hasAvailable(ad -> ad.isAdAvailable());
+        PoolSet<RewardedAd.Builder> pool = getPool(AdFormat.REWARDED);
+        return pool != null && pool.hasAvailable(ad -> ad.isAdAvailable());
     }
 
     // --- REWARDED INTERSTITIAL ---
@@ -102,11 +106,13 @@ public class AdPoolManager {
     }
 
     public static RewardedInterstitialAd.Builder getRewardedInterstitial() {
-        return (RewardedInterstitialAd.Builder) pools.get(AdFormat.REWARDED_INTERSTITIAL).poll();
+        PoolSet<RewardedInterstitialAd.Builder> pool = getPool(AdFormat.REWARDED_INTERSTITIAL);
+        return pool != null ? pool.poll() : null;
     }
 
     public static boolean hasRewardedInterstitial() {
-        return pools.get(AdFormat.REWARDED_INTERSTITIAL).hasAvailable(ad -> ad.isAdAvailable());
+        PoolSet<RewardedInterstitialAd.Builder> pool = getPool(AdFormat.REWARDED_INTERSTITIAL);
+        return pool != null && pool.hasAvailable(ad -> ad.isAdAvailable());
     }
 
     // --- APP OPEN ---
@@ -116,11 +122,18 @@ public class AdPoolManager {
     }
 
     public static AppOpenAd.Builder getAppOpen() {
-        return (AppOpenAd.Builder) pools.get(AdFormat.APP_OPEN).poll();
+        PoolSet<AppOpenAd.Builder> pool = getPool(AdFormat.APP_OPEN);
+        return pool != null ? pool.poll() : null;
     }
 
     public static boolean hasAppOpen() {
-        return pools.get(AdFormat.APP_OPEN).hasAvailable(ad -> ad.isAdAvailable());
+        PoolSet<AppOpenAd.Builder> pool = getPool(AdFormat.APP_OPEN);
+        return pool != null && pool.hasAvailable(ad -> ad.isAdAvailable());
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> PoolSet<T> getPool(AdFormat format) {
+        return (PoolSet<T>) pools.get(format);
     }
 
     // --- NATIVE ---
@@ -163,7 +176,8 @@ public class AdPoolManager {
         if (!isFormatEnabled(format)) return;
         
         PoolSet<T> poolSet = (PoolSet<T>) pools.get(format);
-        if (poolSet.size() >= MAX_POOL_SIZE || loadingState.get(format)) return;
+        int limit = (format == AdFormat.REWARDED || format == AdFormat.REWARDED_INTERSTITIAL) ? 1 : MAX_POOL_SIZE;
+        if (poolSet.size() >= limit || loadingState.get(format)) return;
 
         loadingState.put(format, true);
         T builder = provider.create();

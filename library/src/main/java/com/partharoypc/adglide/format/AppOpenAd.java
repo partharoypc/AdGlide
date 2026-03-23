@@ -363,7 +363,6 @@ public class AppOpenAd {
             return new AppOpenAd(this);
         }
 
-        @Deprecated
         public boolean isAdAvailable() {
             return currentProvider != null && currentProvider.isAdAvailable();
         }

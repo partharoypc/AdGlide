@@ -50,11 +50,18 @@ public class AdLoader {
             this.primaryNetwork = (primary != null) ? primary : "";
             List<String> backups = config.getBackupNetworks();
             this.waterfallManager = new WaterfallManager((backups != null) ? backups : new java.util.ArrayList<>());
-            this.timeoutMs = config.getAdResponseTimeoutMs(); 
+            
+            // Use format-specific default if config is at its base default of 3500ms
+            long configTimeout = config.getAdResponseTimeoutMs();
+            if (configTimeout == 3500 && (format == AdFormat.REWARDED || format == AdFormat.REWARDED_INTERSTITIAL)) {
+                this.timeoutMs = 10000; // 10 seconds for video ads
+            } else {
+                this.timeoutMs = configTimeout;
+            }
         } else {
             this.primaryNetwork = "";
             this.waterfallManager = new WaterfallManager();
-            this.timeoutMs = 3500;
+            this.timeoutMs = (format == AdFormat.REWARDED || format == AdFormat.REWARDED_INTERSTITIAL) ? 10000 : 3500;
         }
     }
 

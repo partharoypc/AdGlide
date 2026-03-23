@@ -11,6 +11,8 @@ import androidx.appcompat.widget.Toolbar;
 import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglidedemo.R;
 import com.partharoypc.adglidedemo.data.Constant;
+import com.partharoypc.adglidedemo.database.SharedPref;
+
 import static com.partharoypc.adglidedemo.data.Constant.*;
 
 public class ActivityNative extends AppCompatActivity {

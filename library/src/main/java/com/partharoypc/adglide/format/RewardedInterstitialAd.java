@@ -178,5 +178,9 @@ public class RewardedInterstitialAd {
                 default -> "0";
             };
         }
+
+        public boolean isAdAvailable() {
+            return currentProvider != null && currentProvider.isAdAvailable();
+        }
     }
 }
