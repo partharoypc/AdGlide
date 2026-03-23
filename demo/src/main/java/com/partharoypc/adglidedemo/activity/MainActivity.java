@@ -131,6 +131,25 @@ public class MainActivity extends AppCompatActivity {
                 reinitAds();
             }
         });
+
+        // SDK Listener for Performance Monitoring
+        AdGlide.setListener(new AdGlide.AdGlideListener() {
+            @Override
+            public void onAdStatusChanged(String format, String network, String status) {
+                showToast(format + " " + status + " on " + network);
+            }
+
+            @Override
+            public void onPerformanceMetrics(String format, long loadTimeMs) {
+                showToast("⚡ " + format + " load time: " + loadTimeMs + "ms");
+            }
+        });
+    }
+
+    private void showToast(String message) {
+        runOnUiThread(() -> {
+            com.google.android.material.snackbar.Snackbar.make(findViewById(android.R.id.content), message, com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show();
+        });
     }
 
     private void preselectCurrentNetworkChip() {
@@ -198,6 +217,12 @@ public class MainActivity extends AppCompatActivity {
                         .autoLoadInterstitial(true)
                         .autoLoadRewarded(true)
                         .interstitialInterval(Constant.INTERSTITIAL_AD_INTERVAL)
+                        .rewardedInterval(Constant.REWARDED_AD_INTERVAL)
+                        .appOpenCooldown(Constant.APP_OPEN_COOLDOWN_MINUTES)
+                        .adResponseTimeout(Constant.AD_RESPONSE_TIMEOUT_MS)
+                        .testMode(Constant.TEST_MODE)
+                        .enableDebugHUD(Constant.ENABLE_DEBUG_HUD)
+                        .sequentialQueueEnabled(Constant.SEQUENTIAL_QUEUE_ENABLED)
                         // SDK keys
                         .startAppId(Constant.STARTAPP_APP_ID)
                         .unityGameId(Constant.UNITY_GAME_ID)
@@ -223,13 +248,16 @@ public class MainActivity extends AppCompatActivity {
                         .metaRewardedId(Constant.META_REWARDED_ID)
                         .unityRewardedId(Constant.UNITY_REWARDED_ID)
                         .appLovinRewardedId(Constant.APPLOVIN_MAX_REWARDED_ID)
+                        .appLovinRewardedIntId(Constant.APPLOVIN_REWARDED_INT_ID)
                         .ironSourceRewardedId(Constant.IRONSOURCE_REWARDED_ID)
                         .wortiseRewardedId(Constant.WORTISE_REWARDED_ID)
                         // Rewarded Interstitial
                         .adMobRewardedIntId(Constant.ADMOB_REWARDED_INTERSTITIAL_ID)
+                        .appLovinRewardedIntId(Constant.APPLOVIN_REWARDED_INT_ID)
                         .wortiseRewardedIntId(Constant.WORTISE_REWARDED_INTERSTITIAL_ID)
                         // App Open
                         .adMobAppOpenId(Constant.ADMOB_APP_OPEN_AD_ID)
+                        .metaAppOpenId(Constant.META_APP_OPEN_ID)
                         .appLovinAppOpenId(Constant.APPLOVIN_APP_OPEN_AP_ID)
                         .wortiseAppOpenId(Constant.WORTISE_APP_OPEN_AD_ID)
                         // Native
@@ -243,6 +271,11 @@ public class MainActivity extends AppCompatActivity {
                         .houseAdBannerClickUrl(Constant.HOUSE_AD_BANNER_URL)
                         .houseAdInterstitialImage(Constant.HOUSE_AD_INTERSTITIAL_IMAGE)
                         .houseAdInterstitialClickUrl(Constant.HOUSE_AD_INTERSTITIAL_URL)
+                        .houseAdNativeTitle(Constant.HOUSE_AD_NATIVE_TITLE)
+                        .houseAdNativeDescription(Constant.HOUSE_AD_NATIVE_DESC)
+                        .houseAdNativeCTA(Constant.HOUSE_AD_NATIVE_CTA)
+                        .houseAdNativeImage(Constant.HOUSE_AD_NATIVE_IMAGE)
+                        .houseAdNativeIcon(Constant.HOUSE_AD_NATIVE_ICON)
                         .enableGDPR(true)
                         .excludeOpenAdFrom(ActivitySplash.class, ActivitySettings.class)
                         .debug(com.partharoypc.adglidedemo.BuildConfig.DEBUG)
@@ -264,6 +297,12 @@ public class MainActivity extends AppCompatActivity {
         Constant.NATIVE_STATUS = sharedPref.getIsNativeEnabled();
         Constant.REWARDED_STATUS = sharedPref.getIsRewardedEnabled();
         Constant.REWARDED_INTERSTITIAL_STATUS = sharedPref.getIsRewardedInterstitialEnabled();
+        Constant.INTERSTITIAL_AD_INTERVAL = sharedPref.getInterstitialInterval();
+        Constant.REWARDED_AD_INTERVAL = sharedPref.getRewardedInterval();
+        Constant.TEST_MODE = sharedPref.getTestMode();
+        Constant.ENABLE_DEBUG_HUD = sharedPref.getEnableDebugHud();
+        Constant.AD_RESPONSE_TIMEOUT_MS = sharedPref.getAdResponseTimeoutMs();
+        Constant.APP_OPEN_COOLDOWN_MINUTES = sharedPref.getAppOpenCooldownMinutes();
     }
 
     private void setupDashboard() {

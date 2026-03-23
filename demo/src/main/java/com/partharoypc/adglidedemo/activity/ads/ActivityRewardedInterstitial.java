@@ -31,10 +31,12 @@ public class ActivityRewardedInterstitial extends AppCompatActivity {
 
     private void initViews() {
         Button btnShow = findViewById(R.id.btn_show);
-
-        // Hide load btn or repurpose it
         Button btnLoad = findViewById(R.id.btn_load);
-        btnLoad.setVisibility(android.view.View.GONE);
+
+        btnLoad.setOnClickListener(v -> {
+            Toast.makeText(this, "Loading Rewarded Interstitial...", Toast.LENGTH_SHORT).show();
+            AdGlide.preloadRewardedInterstitial(this);
+        });
 
         btnShow.setOnClickListener(v -> {
             AdGlide.showRewardedInterstitial(this, new com.partharoypc.adglide.util.AdGlideCallback() {
@@ -44,7 +46,7 @@ public class ActivityRewardedInterstitial extends AppCompatActivity {
 
                 @Override
                 public void onAdFailedToLoad(String error) {
-                    Toast.makeText(ActivityRewardedInterstitial.this, "Failed to load/show",
+                    Toast.makeText(ActivityRewardedInterstitial.this, "Not Ready: " + error,
                             Toast.LENGTH_SHORT).show();
                 }
 

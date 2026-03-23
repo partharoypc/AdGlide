@@ -25,6 +25,14 @@ public class MyApplication extends Application {
         Constant.INTERSTITIAL_STATUS = sharedPref.getIsInterstitialEnabled();
         Constant.NATIVE_STATUS = sharedPref.getIsNativeEnabled();
         Constant.REWARDED_STATUS = sharedPref.getIsRewardedEnabled();
+        Constant.REWARDED_INTERSTITIAL_STATUS = sharedPref.getIsRewardedInterstitialEnabled();
+        Constant.TEST_MODE = sharedPref.getTestMode();
+        Constant.ENABLE_DEBUG_HUD = sharedPref.getEnableDebugHud();
+        Constant.SEQUENTIAL_QUEUE_ENABLED = sharedPref.getSequentialQueueEnabled();
+        Constant.INTERSTITIAL_AD_INTERVAL = sharedPref.getInterstitialInterval();
+        Constant.REWARDED_AD_INTERVAL = sharedPref.getRewardedInterval();
+        Constant.AD_RESPONSE_TIMEOUT_MS = sharedPref.getAdResponseTimeoutMs();
+        Constant.APP_OPEN_COOLDOWN_MINUTES = sharedPref.getAppOpenCooldownMinutes();
 
         AdGlideConfig config = new AdGlideConfig.Builder()
                 .enableAds(Constant.AD_STATUS)
@@ -63,6 +71,7 @@ public class MyApplication extends Application {
 
                 // ── Rewarded Interstitial ─────────────────────────────────
                 .adMobRewardedIntId(Constant.ADMOB_REWARDED_INTERSTITIAL_ID)
+                .appLovinRewardedIntId(Constant.APPLOVIN_REWARDED_INT_ID)
                 .wortiseRewardedIntId(Constant.WORTISE_REWARDED_INTERSTITIAL_ID)
 
                 // ── App Open ──────────────────────────────────────────────
@@ -89,6 +98,12 @@ public class MyApplication extends Application {
                 .autoLoadInterstitial(true)
                 .autoLoadRewarded(true)
                 .interstitialInterval(Constant.INTERSTITIAL_AD_INTERVAL)
+                .rewardedInterval(Constant.REWARDED_AD_INTERVAL)
+                .appOpenCooldown(Constant.APP_OPEN_COOLDOWN_MINUTES)
+                .adResponseTimeout(Constant.AD_RESPONSE_TIMEOUT_MS)
+                .sequentialQueueEnabled(Constant.SEQUENTIAL_QUEUE_ENABLED)
+                .testMode(Constant.TEST_MODE)
+                .enableDebugHUD(Constant.ENABLE_DEBUG_HUD)
 
                 // ── Privacy & Debug ───────────────────────────────────────
                 .excludeOpenAdFrom(ActivitySplash.class, ActivitySettings.class)
@@ -102,6 +117,11 @@ public class MyApplication extends Application {
                 .houseAdBannerClickUrl(Constant.HOUSE_AD_BANNER_URL)
                 .houseAdInterstitialImage(Constant.HOUSE_AD_INTERSTITIAL_IMAGE)
                 .houseAdInterstitialClickUrl(Constant.HOUSE_AD_INTERSTITIAL_URL)
+                .houseAdNativeTitle(Constant.HOUSE_AD_NATIVE_TITLE)
+                .houseAdNativeDescription(Constant.HOUSE_AD_NATIVE_DESC)
+                .houseAdNativeCTA(Constant.HOUSE_AD_NATIVE_CTA)
+                .houseAdNativeImage(Constant.HOUSE_AD_NATIVE_IMAGE)
+                .houseAdNativeIcon(Constant.HOUSE_AD_NATIVE_ICON)
 
                 .build();
 

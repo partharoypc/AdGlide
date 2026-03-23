@@ -46,5 +46,12 @@
     <string name="house_ads_title">House Ads (Offline Fallback)</string>
     <string name="enable_house_ads">Enable House Ads</string>
     <string name="house_ads_desc">Mock promos that route inside your app or to a webpage when internet is offline.</string>
+    <string name="sdk_core_settings">🏗️  SDK Core Engine Settings</string>
+    <string name="test_mode">🧪  Enable Test Mode (SDK Units)</string>
+    <string name="debug_hud">📟  Show Built-in SDK Debug HUD</string>
+    <string name="sequential_queue">⚡  Sequential Ad Queue (1 by 1)</string>
+    <string name="rewarded_interval">🎁  Rewarded Ad Interval</string>
+    <string name="ad_timeout">⏱  Ad Response Timeout (ms)</string>
+    <string name="app_open_cooldown">❄️  App Open Cooldown (min)</string>
     
 </resources>

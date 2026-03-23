@@ -118,4 +118,76 @@ public class SharedPref {
         editor.apply();
     }
 
+    public int getRewardedInterval() {
+        return sharedPreferences.getInt("rewarded_interval", 1);
+    }
+
+    public void setRewardedInterval(int interval) {
+        editor.putInt("rewarded_interval", interval);
+        editor.apply();
+    }
+
+    public boolean getTestMode() {
+        return sharedPreferences.getBoolean("test_mode", false);
+    }
+
+    public void setTestMode(boolean testMode) {
+        editor.putBoolean("test_mode", testMode);
+        editor.apply();
+    }
+
+    public boolean getDebugMode() {
+        return sharedPreferences.getBoolean("debug_mode", true);
+    }
+
+    public void setDebugMode(boolean debugMode) {
+        editor.putBoolean("debug_mode", debugMode);
+        editor.apply();
+    }
+
+    public boolean getEnableDebugHud() {
+        return sharedPreferences.getBoolean("enable_debug_hud", true);
+    }
+
+    public void setEnableDebugHud(boolean enable) {
+        editor.putBoolean("enable_debug_hud", enable);
+        editor.apply();
+    }
+
+    public boolean getSequentialQueueEnabled() {
+        return sharedPreferences.getBoolean("sequential_queue_enabled", false);
+    }
+
+    public void setSequentialQueueEnabled(boolean enabled) {
+        editor.putBoolean("sequential_queue_enabled", enabled);
+        editor.apply();
+    }
+
+    public int getAdResponseTimeoutMs() {
+        return sharedPreferences.getInt("ad_response_timeout_ms", 3500);
+    }
+
+    public void setAdResponseTimeoutMs(int timeoutMs) {
+        editor.putInt("ad_response_timeout_ms", timeoutMs);
+        editor.apply();
+    }
+
+    public int getAppOpenCooldownMinutes() {
+        return sharedPreferences.getInt("app_open_cooldown_minutes", 30);
+    }
+
+    public void setAppOpenCooldownMinutes(int minutes) {
+        editor.putInt("app_open_cooldown_minutes", minutes);
+        editor.apply();
+    }
+
+    public String getNativeStyle() {
+        return sharedPreferences.getString("native_style", "medium");
+    }
+
+    public void setNativeStyle(String style) {
+        editor.putString("native_style", style);
+        editor.apply();
+    }
+
 }

@@ -212,6 +212,81 @@ public class ActivitySettings extends AppCompatActivity {
             initAds();
         });
 
+        // Test Mode Switch
+        SwitchMaterial switchTestMode = findViewById(R.id.switch_test_mode);
+        switchTestMode.setChecked(sharedPref.getTestMode());
+        switchTestMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            sharedPref.setTestMode(isChecked);
+            Constant.TEST_MODE = isChecked;
+            initAds();
+        });
+
+        // Debug HUD Switch
+        SwitchMaterial switchDebugHud = findViewById(R.id.switch_debug_hud);
+        switchDebugHud.setChecked(sharedPref.getEnableDebugHud());
+        switchDebugHud.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            sharedPref.setEnableDebugHud(isChecked);
+            Constant.ENABLE_DEBUG_HUD = isChecked;
+            initAds();
+        });
+
+        // Sequential Queue Switch
+        SwitchMaterial switchSequentialQueue = findViewById(R.id.switch_sequential_queue);
+        switchSequentialQueue.setChecked(sharedPref.getSequentialQueueEnabled());
+        switchSequentialQueue.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            sharedPref.setSequentialQueueEnabled(isChecked);
+            Constant.SEQUENTIAL_QUEUE_ENABLED = isChecked;
+            initAds();
+        });
+
+        // Rewarded Interval
+        android.widget.TextView tvRewardedIntervalValue = findViewById(R.id.tv_rewarded_interval_value);
+        tvRewardedIntervalValue.setText(String.valueOf(sharedPref.getRewardedInterval()));
+        findViewById(R.id.btn_rewarded_interval_minus).setOnClickListener(v -> {
+            int current = sharedPref.getRewardedInterval();
+            if (current > 1) {
+                current--;
+                sharedPref.setRewardedInterval(current);
+                tvRewardedIntervalValue.setText(String.valueOf(current));
+                Constant.REWARDED_AD_INTERVAL = current;
+                initAds();
+            }
+        });
+        findViewById(R.id.btn_rewarded_interval_plus).setOnClickListener(v -> {
+            int current = sharedPref.getRewardedInterval();
+            if (current < 10) {
+                current++;
+                sharedPref.setRewardedInterval(current);
+                tvRewardedIntervalValue.setText(String.valueOf(current));
+                Constant.REWARDED_AD_INTERVAL = current;
+                initAds();
+            }
+        });
+
+        // Ad Response Timeout
+        android.widget.TextView tvAdTimeoutValue = findViewById(R.id.tv_ad_timeout_value);
+        tvAdTimeoutValue.setText(String.valueOf(sharedPref.getAdResponseTimeoutMs()));
+        findViewById(R.id.btn_ad_timeout_minus).setOnClickListener(v -> {
+            int current = sharedPref.getAdResponseTimeoutMs();
+            if (current > 1000) {
+                current -= 500;
+                sharedPref.setAdResponseTimeoutMs(current);
+                tvAdTimeoutValue.setText(String.valueOf(current));
+                Constant.AD_RESPONSE_TIMEOUT_MS = current;
+                initAds();
+            }
+        });
+        findViewById(R.id.btn_ad_timeout_plus).setOnClickListener(v -> {
+            int current = sharedPref.getAdResponseTimeoutMs();
+            if (current < 10000) {
+                current += 500;
+                sharedPref.setAdResponseTimeoutMs(current);
+                tvAdTimeoutValue.setText(String.valueOf(current));
+                Constant.AD_RESPONSE_TIMEOUT_MS = current;
+                initAds();
+            }
+        });
+
         Button btnGdpr = findViewById(R.id.btn_gdpr);
         btnGdpr.setOnClickListener(v -> {
             new GDPR(this).resetConsent();
@@ -256,10 +331,12 @@ public class ActivitySettings extends AppCompatActivity {
 
                 // Rewarded Interstitial
                 .adMobRewardedIntId(Constant.ADMOB_REWARDED_INTERSTITIAL_ID)
+                .appLovinRewardedIntId(Constant.APPLOVIN_REWARDED_INT_ID)
                 .wortiseRewardedIntId(Constant.WORTISE_REWARDED_INTERSTITIAL_ID)
 
                 // App Open
                 .adMobAppOpenId(Constant.ADMOB_APP_OPEN_AD_ID)
+                .metaAppOpenId(Constant.META_APP_OPEN_ID)
                 .appLovinAppOpenId(Constant.APPLOVIN_APP_OPEN_AP_ID)
                 .wortiseAppOpenId(Constant.WORTISE_APP_OPEN_AD_ID)
 
@@ -279,6 +356,12 @@ public class ActivitySettings extends AppCompatActivity {
                 .rewardedEnabled(Constant.REWARDED_STATUS)
                 .rewardedInterstitialEnabled(Constant.REWARDED_INTERSTITIAL_STATUS)
                 .interstitialInterval(Constant.INTERSTITIAL_AD_INTERVAL)
+                .rewardedInterval(Constant.REWARDED_AD_INTERVAL)
+                .appOpenCooldown(Constant.APP_OPEN_COOLDOWN_MINUTES)
+                .adResponseTimeout(Constant.AD_RESPONSE_TIMEOUT_MS)
+                .sequentialQueueEnabled(Constant.SEQUENTIAL_QUEUE_ENABLED)
+                .testMode(Constant.TEST_MODE)
+                .enableDebugHUD(Constant.ENABLE_DEBUG_HUD)
                 .excludeOpenAdFrom(ActivitySplash.class, ActivitySettings.class)
                 .enableGDPR(true)
                 .debugGDPR(com.partharoypc.adglidedemo.BuildConfig.DEBUG)
@@ -287,6 +370,11 @@ public class ActivitySettings extends AppCompatActivity {
                 .houseAdBannerClickUrl(Constant.HOUSE_AD_BANNER_URL)
                 .houseAdInterstitialImage(Constant.HOUSE_AD_INTERSTITIAL_IMAGE)
                 .houseAdInterstitialClickUrl(Constant.HOUSE_AD_INTERSTITIAL_URL)
+                .houseAdNativeTitle(Constant.HOUSE_AD_NATIVE_TITLE)
+                .houseAdNativeDescription(Constant.HOUSE_AD_NATIVE_DESC)
+                .houseAdNativeCTA(Constant.HOUSE_AD_NATIVE_CTA)
+                .houseAdNativeImage(Constant.HOUSE_AD_NATIVE_IMAGE)
+                .houseAdNativeIcon(Constant.HOUSE_AD_NATIVE_ICON)
                 .build();
 
         com.partharoypc.adglide.AdGlide.initialize(getApplication(), config);

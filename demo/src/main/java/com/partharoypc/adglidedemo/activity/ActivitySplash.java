@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglidedemo.R;
+import com.partharoypc.adglidedemo.database.SharedPref;
+import com.partharoypc.adglidedemo.data.Constant;
 
 public class ActivitySplash extends AppCompatActivity {
 
@@ -18,11 +20,14 @@ public class ActivitySplash extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
+        // Load saved settings into constants
+        SharedPref sharedPref = new SharedPref(this);
+        Constant.AD_NETWORK = sharedPref.getAdNetwork();
+        Constant.BACKUP_AD_NETWORK = sharedPref.getBackupAdNetwork();
+        Constant.TEST_MODE = sharedPref.getTestMode();
+
         // High-Performance Consent Management (GDPR/UMP)
-        // AdGlide is already globally initialized via MyApplication.java.
-        // We only need to request the consent form UI over this root activity.
         AdGlide.requestConsent(this, () -> {
-            // Once consent is gathered (or skipped if not needed), continue to Main
             new Handler(Looper.getMainLooper()).postDelayed(this::startMainActivity, DELAY_PROGRESS);
         });
     }

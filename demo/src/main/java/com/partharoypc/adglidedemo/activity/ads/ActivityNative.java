@@ -15,11 +15,13 @@ import static com.partharoypc.adglidedemo.data.Constant.*;
 
 public class ActivityNative extends AppCompatActivity {
 
+    private SharedPref sharedPref;
     private LinearLayout nativeAdContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        sharedPref = new SharedPref(this);
         setContentView(R.layout.activity_native);
 
         setupToolbar();
@@ -39,6 +41,7 @@ public class ActivityNative extends AppCompatActivity {
 
     private void initViews() {
         nativeAdContainer = findViewById(R.id.native_ad_container);
+        Constant.NATIVE_STYLE = sharedPref.getNativeStyle();
         Button btnStyle = findViewById(R.id.btn_style);
         Button btnRefresh = findViewById(R.id.btn_refresh);
 
@@ -98,6 +101,7 @@ public class ActivityNative extends AppCompatActivity {
                     Constant.NATIVE_STYLE = STYLE_MEDIUM;
                     break;
             }
+            sharedPref.setNativeStyle(Constant.NATIVE_STYLE);
             loadNativeAd();
         });
         builder.show();

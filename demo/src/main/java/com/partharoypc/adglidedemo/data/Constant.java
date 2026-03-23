@@ -12,6 +12,14 @@ public class Constant {
     public static String AD_NETWORK = "admob";
     public static String BACKUP_AD_NETWORK = "none";
 
+    // SDK Settings
+    public static boolean TEST_MODE = false;
+    public static boolean DEBUG_MODE = true;
+    public static boolean ENABLE_DEBUG_HUD = true;
+    public static boolean SEQUENTIAL_QUEUE_ENABLED = false;
+    public static int AD_RESPONSE_TIMEOUT_MS = 3500;
+    public static int APP_OPEN_COOLDOWN_MINUTES = 30;
+
     // AdMob Test IDs
     public static final String ADMOB_BANNER_ID = "ca-app-pub-3940256099942544/6300978111";
     public static final String ADMOB_INTERSTITIAL_ID = "ca-app-pub-3940256099942544/1033173712";
@@ -77,9 +85,12 @@ public class Constant {
     public static boolean FORCE_TO_SHOW_APP_OPEN_AD_ON_START = true;
     public static boolean OPEN_ADS_ON_START = true;
     public static boolean OPEN_ADS_ON_RESUME = true;
+    public static String META_APP_OPEN_ID = "YOUR_PLACEMENT_ID";
+    public static String APPLOVIN_REWARDED_INT_ID = "98f6a586ed642919";
 
     // Frequency & Interval Config
     public static int INTERSTITIAL_AD_INTERVAL = 1;
+    public static int REWARDED_AD_INTERVAL = 1;
     public static final int NATIVE_AD_INDEX = 2;
     public static final int NATIVE_AD_INTERVAL = 8;
 
@@ -89,5 +100,12 @@ public class Constant {
     public static final String HOUSE_AD_BANNER_URL = "https://play.google.com/store/apps/details?id=com.partharoypc.sample";
     public static final String HOUSE_AD_INTERSTITIAL_IMAGE = "https://images.sampleads.com/inter.png";
     public static final String HOUSE_AD_INTERSTITIAL_URL = "https://play.google.com/store/apps/details?id=com.partharoypc.sample";
+
+    // House Native Ads
+    public static final String HOUSE_AD_NATIVE_TITLE = "AdGlide: Premium Monetization";
+    public static final String HOUSE_AD_NATIVE_DESC = "Experience the future of ad mediation with zero latency and premium fill rates.";
+    public static final String HOUSE_AD_NATIVE_CTA = "Learn More";
+    public static final String HOUSE_AD_NATIVE_IMAGE = "https://images.sampleads.com/native_large.png";
+    public static final String HOUSE_AD_NATIVE_ICON = "https://images.sampleads.com/icon.png";
 
 }

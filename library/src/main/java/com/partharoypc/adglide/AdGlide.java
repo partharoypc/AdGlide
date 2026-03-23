@@ -44,8 +44,17 @@ public class AdGlide {
 
     private static synchronized void processShowRequest(Runnable request) {
         if (config != null && !config.isSequentialQueueEnabled()) {
+            if (isShowingFullScreenAd) {
+                Log.d(TAG, "Ad already showing. Skipping this request (Sequential Queue is DISABLED).");
+                return;
+            }
             isShowingFullScreenAd = true;
-            request.run();
+            try {
+                request.run();
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to execute ad request: " + e.getMessage());
+                onAdShowFinished();
+            }
             return;
         }
 
@@ -54,7 +63,12 @@ public class AdGlide {
             pendingAdRequests.offer(request);
         } else {
             isShowingFullScreenAd = true;
-            request.run();
+            try {
+                request.run();
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to execute ad request: " + e.getMessage());
+                onAdShowFinished();
+            }
         }
     }
 
