@@ -52,6 +52,8 @@ public class NativeAd {
         private boolean darkTheme = false;
         private int nativeBackgroundLight;
         private int nativeBackgroundDark;
+        private View preloadedAdView;
+        private boolean isAdLoaded = false;
 
         private final com.partharoypc.adglide.util.AdLoader adLoader;
 
@@ -73,6 +75,10 @@ public class NativeAd {
         public Builder load() {
             loadNativeAd(null);
             return this;
+        }
+
+        public boolean isAdLoaded() {
+            return isAdLoaded && preloadedAdView != null;
         }
 
         @NonNull
@@ -130,53 +136,18 @@ public class NativeAd {
                 if (callback != null) callback.onAdFailedToLoad("Activity is null");
                 return;
             }
-            loadNativeAdMain(false, callback);
+            if (adLoader == null) return;
+            adLoader.startLoading((networkToLoad, resultCallback) -> {
+                loadAdFromNetwork(networkToLoad, resultCallback, callback);
+            }, callback);
         }
 
-        public void loadBackupNativeAd(AdGlideCallback callback) {
-            loadNativeAdMain(true, callback);
-        }
-
-        private void loadNativeAdMain(boolean isBackup, AdGlideCallback callback) {
-            if (adLoader == null)
-                return;
-            if (!isBackup) {
-                adLoader.startLoading(new com.partharoypc.adglide.util.AdLoader.AdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(String network) {
-                        loadAdFromNetwork(network, callback);
-                    }
-
-                    @Override
-                    public void onAdFailed(String error) {
-                        Log.d(TAG, "Native load failed: " + error);
-                        if (callback != null)
-                            callback.onAdFailedToLoad(error);
-                    }
-                });
-            } else {
-                adLoader.loadNext(new com.partharoypc.adglide.util.AdLoader.AdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(String network) {
-                        loadAdFromNetwork(network, callback);
-                    }
-
-                    @Override
-                    public void onAdFailed(String error) {
-                        Log.d(TAG, "Native backup load failed: " + error);
-                        if (callback != null)
-                            callback.onAdFailedToLoad(error);
-                    }
-                });
-            }
-        }
-
-        private void loadAdFromNetwork(String network, AdGlideCallback callback) {
+        private void loadAdFromNetwork(String network, com.partharoypc.adglide.util.AdLoader.LoadResultCallback resultCallback, AdGlideCallback callback) {
             destroyNativeAd();
             NativeProvider provider = NativeProviderFactory.getProvider(network);
             if (provider == null) {
                 Log.w(TAG, "No provider available for " + network + ". Loading backup.");
-                loadBackupNativeAd(callback);
+                resultCallback.onFailure("Provider null");
                 return;
             }
 
@@ -185,10 +156,9 @@ public class NativeAd {
             Log.d(TAG, "Loading [" + network.toUpperCase(java.util.Locale.ROOT) + "] Native Ad with ID: " + adUnitId);
             if (adUnitId == null || adUnitId.trim().isEmpty() || (adUnitId.equals("0") && !network.equals(STARTAPP))) {
                 Log.d(TAG, "Ad unit ID for " + network + " is invalid. Trying backup.");
-                loadBackupNativeAd(callback);
+                resultCallback.onFailure("Invalid Ad Unit ID");
                 return;
             }
-
 
             NativeProvider.NativeConfig config = new NativeProvider.NativeConfig() {
                 @Override
@@ -205,23 +175,29 @@ public class NativeAd {
             Activity activity = activityRef.get();
             if (activity == null) {
                 Log.e(TAG, "Activity is null. Cannot load Native from network.");
+                resultCallback.onFailure("Activity is null");
                 return;
             }
 
             provider.loadNativeAd(activity, adUnitId, config, new NativeProvider.NativeListener() {
                 @Override
                 public void onAdLoaded(View adView) {
+                    preloadedAdView = adView;
+                    isAdLoaded = true;
+                    resultCallback.onSuccess();
                     if (callback != null)
                         callback.onAdLoaded();
-                    displayAdView(adView, callback);
+                    
+                    // Only display immediately if a container was already provided
+                    if (customContainer != null || activityRef.get() != null && activityRef.get().findViewById(R.id.native_ad_view_container) != null) {
+                        displayAdView(adView, callback);
+                    }
                 }
 
                 @Override
                 public void onAdFailedToLoad(String error) {
                     Log.e(TAG, network + " Native failed: " + error);
-                    if (callback != null)
-                        callback.onAdFailedToLoad(error);
-                    loadBackupNativeAd(callback);
+                    resultCallback.onFailure(error);
                 }
             });
         }
@@ -261,6 +237,19 @@ public class NativeAd {
                 animateIn(nativeAdViewContainer);
                 if (callback != null)
                     callback.onAdShowed();
+            }
+        }
+
+        /**
+         * Attaches a pre-loaded native ad to a container.
+         * Used by AdPoolManager for zero-wait display.
+         */
+        public void attachToContainer(ViewGroup container, AdGlideCallback callback) {
+            this.customContainer = container;
+            if (isAdLoaded()) {
+                displayAdView(preloadedAdView, callback);
+            } else {
+                load(callback);
             }
         }
 

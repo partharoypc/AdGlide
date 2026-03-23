@@ -121,48 +121,13 @@ public class InterstitialAd {
         // --- Core Internal Logic ---
 
         private void loadInterstitialAd(AdGlideCallback callback) {
-            adLoader.startLoading(new com.partharoypc.adglide.util.AdLoader.AdLoadCallback() {
-                @Override
-                public void onAdLoaded(String network) {
-                    loadAdFromNetwork(network, callback);
-                }
-
-                @Override
-                public void onAdFailed(String error) {
-                    Log.d(TAG, "Interstitial load failed: " + error);
-                    if (callback != null) {
-                        callback.onAdFailedToLoad(error);
-                    }
-                    if (showOnLoad && callback != null) {
-                        showOnLoad = false;
-                        callback.onAdDismissed();
-                    }
-                }
-            });
+            if (adLoader == null) return;
+            adLoader.startLoading((networkToLoad, resultCallback) -> {
+                loadAdFromNetwork(networkToLoad, resultCallback, callback);
+            }, callback);
         }
 
-        private void loadBackupInterstitialAd(AdGlideCallback callback) {
-            adLoader.loadNext(new com.partharoypc.adglide.util.AdLoader.AdLoadCallback() {
-                @Override
-                public void onAdLoaded(String network) {
-                    loadAdFromNetwork(network, callback);
-                }
-
-                @Override
-                public void onAdFailed(String error) {
-                    Log.d(TAG, "Interstitial backup load failed: " + error);
-                    if (callback != null) {
-                        callback.onAdFailedToLoad(error);
-                    }
-                    if (showOnLoad && callback != null) {
-                        showOnLoad = false;
-                        callback.onAdDismissed();
-                    }
-                }
-            });
-        }
-
-        private void loadAdFromNetwork(String networkToLoad, AdGlideCallback callback) {
+        private void loadAdFromNetwork(String networkToLoad, com.partharoypc.adglide.util.AdLoader.LoadResultCallback resultCallback, AdGlideCallback callback) {
             try {
                 destroyInterstitialAd();
                 String adUnitId = getAdUnitIdForNetwork(networkToLoad);
@@ -171,13 +136,14 @@ public class InterstitialAd {
                 if (adUnitId == null || adUnitId.trim().isEmpty()
                         || (adUnitId.equals("0") && !networkToLoad.equals(STARTAPP))) {
                     Log.d(TAG, "Ad unit ID for " + networkToLoad + " is invalid. Trying backup.");
-                    loadBackupInterstitialAd(callback);
+                    resultCallback.onFailure("Invalid Ad Unit ID");
                     return;
                 }
 
                 Activity activity = activityRef.get();
                 if (activity == null) {
                     Log.e(TAG, "Activity is null. Cannot load Interstitial from network.");
+                    resultCallback.onFailure("Activity is null");
                     return;
                 }
 
@@ -191,9 +157,7 @@ public class InterstitialAd {
                                     com.partharoypc.adglide.util.PerformanceLogger.log("Interstitial",
                                             "Loaded: " + networkToLoad);
                                     Log.d(TAG, networkToLoad + " Interstitial Ad loaded");
-                                    if (callback != null) {
-                                        callback.onAdLoaded();
-                                    }
+                                    resultCallback.onSuccess();
                                     if (showOnLoad) {
                                         showOnLoad = false;
                                         showInterstitialAd(activity, callback);
@@ -205,7 +169,7 @@ public class InterstitialAd {
                                     com.partharoypc.adglide.util.PerformanceLogger.error("Interstitial",
                                             "Failed [" + networkToLoad + "]: " + error);
                                     Log.e(TAG, networkToLoad + " Interstitial Ad failed to load: " + error);
-                                    loadBackupInterstitialAd(callback);
+                                    resultCallback.onFailure(error);
                                 }
 
                                 @Override
@@ -237,11 +201,11 @@ public class InterstitialAd {
                             });
                 } else {
                     Log.d(TAG, "No provider found for network: " + networkToLoad + ". Trying backup.");
-                    loadBackupInterstitialAd(callback);
+                    resultCallback.onFailure("No provider found");
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Failed to load interstitial for " + networkToLoad + ". Error: " + e.getMessage());
-                loadBackupInterstitialAd(callback);
+                resultCallback.onFailure(e.getMessage());
             }
         }
 

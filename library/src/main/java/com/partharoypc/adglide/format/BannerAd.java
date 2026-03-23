@@ -116,38 +116,13 @@ public class BannerAd {
                 if (callback != null) callback.onAdFailedToLoad("Activity is null");
                 return;
             }
-            adLoader.startLoading(new com.partharoypc.adglide.util.AdLoader.AdLoadCallback() {
-                @Override
-                public void onAdLoaded(String network) {
-                    loadAdFromNetwork(network, callback);
-                }
-
-                @Override
-                public void onAdFailed(String error) {
-                    Log.d(TAG, "Banner load failed: " + error);
-                    if (callback != null)
-                        callback.onAdFailedToLoad(error);
-                }
-            });
+            if (adLoader == null) return;
+            adLoader.startLoading((networkToLoad, resultCallback) -> {
+                loadAdFromNetwork(networkToLoad, resultCallback, callback);
+            }, callback);
         }
 
-        public void loadBackupBannerAd(AdGlideCallback callback) {
-            adLoader.loadNext(new com.partharoypc.adglide.util.AdLoader.AdLoadCallback() {
-                @Override
-                public void onAdLoaded(String network) {
-                    loadAdFromNetwork(network, callback);
-                }
-
-                @Override
-                public void onAdFailed(String error) {
-                    Log.d(TAG, "Banner backup load failed: " + error);
-                    if (callback != null)
-                        callback.onAdFailedToLoad(error);
-                }
-            });
-        }
-
-        private void loadAdFromNetwork(String networkToLoad, AdGlideCallback callback) {
+        private void loadAdFromNetwork(String networkToLoad, com.partharoypc.adglide.util.AdLoader.LoadResultCallback resultCallback, AdGlideCallback callback) {
             try {
                 destroyAndDetachBanner();
                 String adUnitId = getAdUnitIdForNetwork(networkToLoad);
@@ -156,13 +131,14 @@ public class BannerAd {
                 if (adUnitId == null || adUnitId.trim().isEmpty()
                         || (adUnitId.equals("0") && !networkToLoad.equals(STARTAPP))) {
                     Log.d(TAG, "Ad unit ID for " + networkToLoad + " is invalid. Trying backup.");
-                    loadBackupBannerAd(callback);
+                    resultCallback.onFailure("Invalid Ad Unit ID");
                     return;
                 }
 
                 Activity activity = activityRef.get();
                 if (activity == null) {
                     Log.e(TAG, "Activity is null. Cannot load Banner from network.");
+                    resultCallback.onFailure("Activity is null");
                     return;
                 }
 
@@ -174,6 +150,7 @@ public class BannerAd {
                         public void onAdLoaded(View adView) {
                             com.partharoypc.adglide.util.PerformanceLogger.log("Banner",
                                     "Loaded: " + networkToLoad);
+                            resultCallback.onSuccess();
                             if (callback != null)
                                 callback.onAdLoaded();
                             displayAdView(networkToLoad, adView, callback);
@@ -184,17 +161,16 @@ public class BannerAd {
                             com.partharoypc.adglide.util.PerformanceLogger.error("Banner",
                                     "Failed [" + networkToLoad + "]: " + error);
                             Log.e(TAG, "Banner failed to load for " + networkToLoad + ": " + error);
-                            if (callback != null)
-                                callback.onAdFailedToLoad(error);
-                            loadBackupBannerAd(callback);
+                            
+                            resultCallback.onFailure(error);
                         }
                     });
                 } else {
-                    loadBackupBannerAd(callback);
+                    resultCallback.onFailure("Provider is null");
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Failed to load banner for " + networkToLoad + ". Error: " + e.getMessage());
-                loadBackupBannerAd(callback);
+                resultCallback.onFailure(e.getMessage());
             }
         }
 

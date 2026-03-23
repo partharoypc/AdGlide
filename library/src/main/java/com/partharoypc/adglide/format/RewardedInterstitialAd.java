@@ -63,62 +63,17 @@ public class RewardedInterstitialAd {
         }
 
         public void loadRewardedInterstitialAd(AdGlideCallback callback) {
-            loadRewardedAdMain(false, callback);
+            if (adLoader == null) return;
+            adLoader.startLoading((networkToLoad, resultCallback) -> {
+                loadAdFromNetwork(networkToLoad, resultCallback, callback);
+            }, callback);
         }
 
-        public void loadRewardedBackupAd(AdGlideCallback callback) {
-            loadRewardedAdMain(true, callback);
-        }
-
-        private void loadRewardedAdMain(boolean isBackup, AdGlideCallback callback) {
-            if (adLoader == null)
-                return;
-            if (!isBackup) {
-                adLoader.startLoading(new com.partharoypc.adglide.util.AdLoader.AdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(String network) {
-                        loadAdFromNetwork(network, callback);
-                    }
-
-                    @Override
-                    public void onAdFailed(String error) {
-                        Log.d(TAG, "Rewarded interstitial load failed: " + error);
-                        if (callback != null) {
-                            callback.onAdFailedToLoad(error);
-                        }
-                        if (showOnLoad && callback != null) {
-                            showOnLoad = false;
-                            callback.onAdDismissed();
-                        }
-                    }
-                });
-            } else {
-                adLoader.loadNext(new com.partharoypc.adglide.util.AdLoader.AdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(String network) {
-                        loadAdFromNetwork(network, callback);
-                    }
-
-                    @Override
-                    public void onAdFailed(String error) {
-                        Log.d(TAG, "Rewarded interstitial backup load failed: " + error);
-                        if (callback != null) {
-                            callback.onAdFailedToLoad(error);
-                        }
-                        if (showOnLoad && callback != null) {
-                            showOnLoad = false;
-                            callback.onAdDismissed();
-                        }
-                    }
-                });
-            }
-        }
-
-        private void loadAdFromNetwork(String network, AdGlideCallback callback) {
+        private void loadAdFromNetwork(String network, com.partharoypc.adglide.util.AdLoader.LoadResultCallback resultCallback, AdGlideCallback callback) {
             RewardedProvider provider = RewardedProviderFactory.getProvider(network);
             if (provider == null) {
                 Log.w(TAG, "No provider available for " + network + ". Loading backup.");
-                loadRewardedBackupAd(callback);
+                resultCallback.onFailure("No provider available");
                 return;
             }
 
@@ -134,16 +89,16 @@ public class RewardedInterstitialAd {
             };
 
             Activity activity = activityRef.get();
-            if (activity == null)
+            if (activity == null) {
+                resultCallback.onFailure("Activity is null");
                 return;
+            }
 
             provider.loadRewardedAd(activity, adUnitId, config, new RewardedProvider.RewardedListener() {
                 @Override
                 public void onAdLoaded() {
                     Log.d(TAG, network + " Rewarded interstitial loaded");
-                    if (callback != null) {
-                        callback.onAdLoaded();
-                    }
+                    resultCallback.onSuccess();
                     if (showOnLoad) {
                         showOnLoad = false;
                         showRewardedInterstitialAd(activity, callback);
@@ -153,7 +108,7 @@ public class RewardedInterstitialAd {
                 @Override
                 public void onAdFailedToLoad(String error) {
                     Log.e(TAG, network + " Rewarded interstitial failed: " + error);
-                    loadRewardedBackupAd(callback);
+                    resultCallback.onFailure(error);
                 }
 
                 @Override

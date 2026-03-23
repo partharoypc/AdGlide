@@ -122,22 +122,7 @@ public class AdNetwork {
             try {
                 NetworkInitializer initializer = NetworkInitializerFactory.getInitializer(networkName);
                 if (initializer != null) {
-                    initializer.initialize(context, new NetworkInitializer.InitializerConfig() {
-                        @Override
-                        public String getAppId() {
-                            return getAppIdForNetwork(networkName);
-                        }
-
-                        @Override
-                        public boolean isDebug() {
-                            return config != null && config.isDebug();
-                        }
-
-                        @Override
-                        public boolean isTestMode() {
-                            return config != null && config.isTestMode();
-                        }
-                    });
+                    initializer.initialize(context, this);
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Failed to initialize " + networkName + " SDK. Error: " + e.getMessage());

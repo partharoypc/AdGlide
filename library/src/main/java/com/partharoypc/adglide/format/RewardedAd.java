@@ -102,61 +102,17 @@ public class RewardedAd {
         }
 
         public void loadRewardedAd(AdGlideCallback callback) {
-            loadRewardedAdMain(false, callback);
+            if (adLoader == null) return;
+            adLoader.startLoading((networkToLoad, resultCallback) -> {
+                loadAdFromNetwork(networkToLoad, resultCallback, callback);
+            }, callback);
         }
 
-        public void loadRewardedBackupAd(AdGlideCallback callback) {
-            loadRewardedAdMain(true, callback);
-        }
-
-        private void loadRewardedAdMain(boolean isBackup, AdGlideCallback callback) {
-            if (adLoader == null)
-                return;
-            if (!isBackup) {
-                adLoader.startLoading(new com.partharoypc.adglide.util.AdLoader.AdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(String network) {
-                        loadAdFromNetwork(network, callback);
-                    }
-
-                    @Override
-                    public void onAdFailed(String error) {
-                        Log.d(TAG, "Rewarded load failed: " + error);
-                        if (callback != null) {
-                            callback.onAdFailedToLoad(error);
-                        }
-                        if (showOnLoad && callback != null) {
-                            showOnLoad = false;
-                            callback.onAdDismissed();
-                        }
-                    }
-                });
-            } else {
-                adLoader.loadNext(new com.partharoypc.adglide.util.AdLoader.AdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(String network) {
-                        loadAdFromNetwork(network, callback);
-                    }
-
-                    @Override
-                    public void onAdFailed(String error) {
-                        Log.d(TAG, "Rewarded backup load failed: " + error);
-                        if (callback != null) {
-                            callback.onAdFailedToLoad(error);
-                        }
-                        if (showOnLoad && callback != null) {
-                            showOnLoad = false;
-                            callback.onAdDismissed();
-                        }
-                    }
-                });
-            }
-        }
-
-        private void loadAdFromNetwork(String network, AdGlideCallback callback) {
+        private void loadAdFromNetwork(String network, com.partharoypc.adglide.util.AdLoader.LoadResultCallback resultCallback, AdGlideCallback callback) {
             Activity activity = activityRef.get();
             if (activity == null) {
                 Log.e(TAG, "Activity is null. Cannot load Rewarded from network.");
+                resultCallback.onFailure("Activity is null");
                 return;
             }
 
@@ -164,7 +120,7 @@ public class RewardedAd {
             RewardedProvider provider = RewardedProviderFactory.getProvider(network);
             if (provider == null) {
                 Log.w(TAG, "No provider available for " + network + ". Loading backup.");
-                loadRewardedBackupAd(callback);
+                resultCallback.onFailure("No provider available");
                 return;
             }
 
@@ -173,7 +129,7 @@ public class RewardedAd {
             Log.d(TAG, "Loading [" + network.toUpperCase(java.util.Locale.ROOT) + "] Rewarded Ad with ID: " + adUnitId);
             if (adUnitId == null || adUnitId.trim().isEmpty() || (adUnitId.equals("0") && !network.equals(STARTAPP))) {
                 Log.d(TAG, "Ad unit ID for " + network + " is invalid. Trying backup.");
-                loadRewardedBackupAd(callback);
+                resultCallback.onFailure("Invalid Ad Unit ID");
                 return;
             }
 
@@ -190,9 +146,7 @@ public class RewardedAd {
                 public void onAdLoaded() {
                     com.partharoypc.adglide.util.PerformanceLogger.log("Rewarded", "Loaded: " + network);
                     Log.d(TAG, network + " Rewarded ad loaded");
-                    if (callback != null) {
-                        callback.onAdLoaded();
-                    }
+                    resultCallback.onSuccess();
                     if (showOnLoad) {
                         showOnLoad = false;
                         showRewardedAd(activity, callback);
@@ -204,7 +158,7 @@ public class RewardedAd {
                     com.partharoypc.adglide.util.PerformanceLogger.error("Rewarded",
                             "Failed [" + network + "]: " + error);
                     Log.e(TAG, network + " Rewarded ad failed to load: " + error);
-                    loadRewardedBackupAd(callback);
+                    resultCallback.onFailure(error);
                 }
 
                 @Override

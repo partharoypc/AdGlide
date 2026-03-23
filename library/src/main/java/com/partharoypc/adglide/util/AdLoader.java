@@ -1,32 +1,45 @@
 package com.partharoypc.adglide.util;
 
 import android.app.Activity;
-import androidx.annotation.NonNull;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
-import java.util.List;
-import java.util.ArrayList;
+
+import androidx.annotation.NonNull;
 
 import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.AdGlideConfig;
-import com.partharoypc.adglide.AdGlideNetwork;
+
+import java.util.List;
 
 /**
  * Centralized loader for all ad formats.
- * Handles network availability, status checks, and waterfall logic.
+ * Handles network availability, status checks, secure waterfall logic, and timeouts.
  */
 public class AdLoader {
     private static final String TAG = "AdGlide";
 
-    public interface AdLoadCallback {
-        void onAdLoaded(String network);
+    /**
+     * Interface to be implemented by individual Ad Formats to execute the actual provider load.
+     */
+    public interface NetworkExecutor {
+        void loadNetwork(String network, LoadResultCallback resultCallback);
+    }
 
-        void onAdFailed(String error);
+    /**
+     * Callback passed to format executors.
+     */
+    public interface LoadResultCallback {
+        void onSuccess();
+        void onFailure(String error);
     }
 
     private final Activity activity;
     private final AdFormat format;
     private final WaterfallManager waterfallManager;
     private final String primaryNetwork;
+    private final long timeoutMs;
+    private long startTime;
 
     public AdLoader(@NonNull Activity activity, AdFormat format) {
         this.activity = activity;
@@ -37,16 +50,18 @@ public class AdLoader {
             this.primaryNetwork = (primary != null) ? primary : "";
             List<String> backups = config.getBackupNetworks();
             this.waterfallManager = new WaterfallManager((backups != null) ? backups : new java.util.ArrayList<>());
+            // Use config timeout if added in future, else default to 3500ms
+            this.timeoutMs = 3500; 
         } else {
             this.primaryNetwork = "";
             this.waterfallManager = new WaterfallManager();
+            this.timeoutMs = 3500;
         }
     }
 
     public boolean isEnabled() {
         AdGlideConfig config = AdGlide.getConfig();
-        if (config == null || !config.getAdStatus())
-            return false;
+        if (config == null || !config.getAdStatus()) return false;
 
         return switch (format) {
             case BANNER -> config.isBannerEnabled();
@@ -55,49 +70,92 @@ public class AdLoader {
             case REWARDED_INTERSTITIAL -> config.isRewardedInterstitialEnabled();
             case NATIVE -> config.isNativeEnabled();
             case APP_OPEN -> config.isAppOpenEnabled();
+            default -> false;
         };
     }
 
-    public void startLoading(AdLoadCallback callback) {
+    /**
+     * Initiates the loading process starting from the primary network.
+     */
+    public void startLoading(NetworkExecutor executor, AdGlideCallback finalCallback) {
         if (!isEnabled()) {
             Log.d(TAG, format + " Ad is disabled globally or locally.");
-            if (callback != null)
-                callback.onAdFailed("Ad disabled");
+            if (finalCallback != null) finalCallback.onAdDismissed();
             return;
         }
 
         if (!Tools.isNetworkAvailable(activity)) {
             Log.e(TAG, "Internet connection not available for " + format);
-            if (callback != null)
-                callback.onAdFailed("No internet");
+            if (finalCallback != null) finalCallback.onAdFailedToLoad("No internet");
             return;
         }
 
         waterfallManager.reset();
-        if (primaryNetwork == null || primaryNetwork.isEmpty()) {
-            loadNext(callback);
-        } else {
-            loadNetwork(primaryNetwork, callback);
+        this.startTime = System.currentTimeMillis();
+        executeNetwork(primaryNetwork, executor, finalCallback);
+    }
+
+    private void executeNetwork(String network, NetworkExecutor executor, AdGlideCallback finalCallback) {
+        if (network == null || network.isEmpty()) {
+            executeNext(executor, finalCallback);
+            return;
         }
+
+        Log.d(TAG, "Initiating load for " + format + " on [" + network.toUpperCase(java.util.Locale.ROOT) + "]");
+        final boolean[] responded = {false};
+        Handler handler = new Handler(Looper.getMainLooper());
+        
+        Runnable timeoutRunnable = () -> {
+            if (!responded[0]) {
+                responded[0] = true;
+                Log.e(TAG, "Timeout (" + timeoutMs + "ms) reached waiting for " + format + " on [" + network.toUpperCase(java.util.Locale.ROOT) + "]");
+                executeNext(executor, finalCallback);
+            }
+        };
+        
+        handler.postDelayed(timeoutRunnable, timeoutMs);
+
+        executor.loadNetwork(network, new LoadResultCallback() {
+            @Override
+            public void onSuccess() {
+                if (responded[0]) return;
+                responded[0] = true;
+                handler.removeCallbacks(timeoutRunnable);
+
+                long duration = System.currentTimeMillis() - startTime;
+                com.partharoypc.adglide.AdGlide.AdGlideListener listener = com.partharoypc.adglide.AdGlide.getListener();
+                if (listener != null) {
+                    listener.onPerformanceMetrics(format != null ? format.name() : "UNKNOWN", duration);
+                    listener.onAdStatusChanged(format != null ? format.name() : "UNKNOWN", network, "LOADED");
+                }
+
+                if (finalCallback != null) finalCallback.onAdLoaded();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                if (responded[0]) return;
+                responded[0] = true;
+                handler.removeCallbacks(timeoutRunnable);
+                Log.d(TAG, format + " load failed on [" + network.toUpperCase(java.util.Locale.ROOT) + "]: " + error);
+                
+                com.partharoypc.adglide.AdGlide.AdGlideListener listener = com.partharoypc.adglide.AdGlide.getListener();
+                if (listener != null) {
+                    listener.onAdStatusChanged(format != null ? format.name() : "UNKNOWN", network, "FAILED: " + error);
+                }
+
+                executeNext(executor, finalCallback);
+            }
+        });
     }
 
-    private void loadNetwork(String network, AdLoadCallback callback) {
-        Log.d(TAG, "Loading " + format + " from [" + network + "]");
-        // The actual provider-specific loading is still delegated back to the Format
-        // class
-        // but the DECISION to load is centralized here.
-        if (callback != null)
-            callback.onAdLoaded(network);
-    }
-
-    public void loadNext(AdLoadCallback callback) {
+    private void executeNext(NetworkExecutor executor, AdGlideCallback finalCallback) {
         if (waterfallManager.hasNext()) {
             String nextNetwork = waterfallManager.getNext();
-            loadNetwork(nextNetwork, callback);
+            executeNetwork(nextNetwork, executor, finalCallback);
         } else {
             Log.d(TAG, "All waterfall backups exhausted for " + format);
-            if (callback != null)
-                callback.onAdFailed("Backup exhausted");
+            if (finalCallback != null) finalCallback.onAdFailedToLoad("Backup exhausted for " + format);
         }
     }
 }
