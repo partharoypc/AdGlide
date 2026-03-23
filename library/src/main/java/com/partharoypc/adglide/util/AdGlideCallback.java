@@ -11,6 +11,13 @@ public interface AdGlideCallback {
     }
 
     /**
+     * Called when an ad is successfully loaded, providing the name of the winning network.
+     */
+    default void onAdLoaded(String network) {
+        onAdLoaded();
+    }
+
+    /**
      * Called when an ad fails to load.
      * 
      * @param error Descriptive error message.

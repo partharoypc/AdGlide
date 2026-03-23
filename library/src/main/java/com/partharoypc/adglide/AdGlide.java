@@ -43,6 +43,12 @@ public class AdGlide {
     private static final java.util.Queue<Runnable> pendingAdRequests = new java.util.LinkedList<>();
 
     private static synchronized void processShowRequest(Runnable request) {
+        if (config != null && !config.isSequentialQueueEnabled()) {
+            isShowingFullScreenAd = true;
+            request.run();
+            return;
+        }
+
         if (isShowingFullScreenAd) {
             Log.d(TAG, "Ad already showing. Adding request to sequential queue.");
             pendingAdRequests.offer(request);
@@ -107,7 +113,7 @@ public class AdGlide {
                 isAppOpenRegistered = true;
             }
         }
-        com.partharoypc.adglide.util.PerformanceLogger.log("Core", "AdGlide initialized (v2.0.0 - Zero-Wait)");
+        com.partharoypc.adglide.util.PerformanceLogger.log("Core", "AdGlide initialized (v1.9.0 - Zero-Wait)");
     }
 
     /**

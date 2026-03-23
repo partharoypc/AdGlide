@@ -129,7 +129,7 @@ public class AdLoader {
                     listener.onAdStatusChanged(format != null ? format.name() : "UNKNOWN", network, "LOADED");
                 }
 
-                if (finalCallback != null) finalCallback.onAdLoaded();
+                if (finalCallback != null) finalCallback.onAdLoaded(network);
             }
 
             @Override

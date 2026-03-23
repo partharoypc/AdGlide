@@ -50,7 +50,12 @@ public class AppOpenAd {
 
     /** Returns {@code true} if enough time has passed since the last impression. */
     public static boolean isCooldownElapsed() {
-        return lastShownTimeMs == 0 || (System.currentTimeMillis() - lastShownTimeMs) >= cooldownMs;
+        long effectiveCooldownMs = cooldownMs;
+        com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+        if (config != null) {
+            effectiveCooldownMs = (long) config.getAppOpenCooldownMinutes() * 60 * 1000L;
+        }
+        return lastShownTimeMs == 0 || (System.currentTimeMillis() - lastShownTimeMs) >= effectiveCooldownMs;
     }
 
     private java.lang.ref.WeakReference<Activity> activityRef;

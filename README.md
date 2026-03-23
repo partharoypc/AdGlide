@@ -159,6 +159,7 @@ public class MyApplication extends Application {
             // ─── Smart Loading ───────────────────────────────────────────
             .autoLoadInterstitial(true)              // Prefetch after each show
             .autoLoadRewarded(true)                  // Prefetch after each show
+            .appOpenCooldown(15)                     // ⏱️ NEW: Wait 15 mins between app-resume ads
             .interstitialInterval(2)                 // Show every N clicks (0 = always)
             .rewardedInterval(1)                     // Show every N clicks (0 = always)
 

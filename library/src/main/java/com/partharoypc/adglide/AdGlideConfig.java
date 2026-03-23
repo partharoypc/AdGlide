@@ -30,6 +30,7 @@ public class AdGlideConfig {
     private final boolean rewardedStatus;
     private final boolean appOpenStatus;
     private final boolean rewardedInterstitialStatus;
+    private final int appOpenCooldownMinutes;
 
     // App IDs
     private final String adMobAppId;
@@ -111,6 +112,7 @@ public class AdGlideConfig {
         this.rewardedStatus = builder.rewardedStatus;
         this.appOpenStatus = builder.appOpenStatus;
         this.rewardedInterstitialStatus = builder.rewardedInterstitialStatus;
+        this.appOpenCooldownMinutes = builder.appOpenCooldownMinutes;
 
         this.adMobAppId = builder.adMobAppId;
         this.startappAppId = builder.startappAppId;
@@ -213,6 +215,10 @@ public class AdGlideConfig {
 
     public List<String> getOpenAdExcludedActivities() {
         return openAdExcludedActivities;
+    }
+
+    public int getAppOpenCooldownMinutes() {
+        return appOpenCooldownMinutes;
     }
 
     public boolean isEnableGDPR() {
@@ -441,6 +447,7 @@ public class AdGlideConfig {
         private boolean enableGDPR = false;
         private boolean debugGDPR = false;
         private boolean enableDebugHUD = false;
+        private int appOpenCooldownMinutes = 30;
 
         private String adMobAppId = "";
         private String startappAppId = "0";
@@ -578,6 +585,11 @@ public class AdGlideConfig {
 
         public Builder rewardedInterval(int interval) {
             this.rewardedInterval = interval;
+            return this;
+        }
+
+        public Builder appOpenCooldown(int minutes) {
+            this.appOpenCooldownMinutes = minutes;
             return this;
         }
 
