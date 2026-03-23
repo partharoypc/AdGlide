@@ -22,6 +22,7 @@ public class AdGlideConfig {
     private final boolean enableGDPR;
     private final boolean debugGDPR;
     private final boolean enableDebugHUD;
+    private final int adResponseTimeoutMs;
 
     // Granular Ad Type Status
     private final boolean bannerStatus;
@@ -105,6 +106,7 @@ public class AdGlideConfig {
         this.enableGDPR = builder.enableGDPR;
         this.debugGDPR = builder.debugGDPR;
         this.enableDebugHUD = builder.enableDebugHUD;
+        this.adResponseTimeoutMs = builder.adResponseTimeoutMs;
 
         this.bannerStatus = builder.bannerStatus;
         this.interstitialStatus = builder.interstitialStatus;
@@ -231,6 +233,10 @@ public class AdGlideConfig {
 
     public boolean isEnableDebugHUD() {
         return enableDebugHUD;
+    }
+    
+    public int getAdResponseTimeoutMs() {
+        return adResponseTimeoutMs;
     }
 
     public boolean isBannerEnabled() {
@@ -447,6 +453,7 @@ public class AdGlideConfig {
         private boolean enableGDPR = false;
         private boolean debugGDPR = false;
         private boolean enableDebugHUD = false;
+        private int adResponseTimeoutMs = 3500; // Default 3.5 seconds
         private int appOpenCooldownMinutes = 30;
 
         private String adMobAppId = "";
@@ -637,6 +644,11 @@ public class AdGlideConfig {
 
         public Builder enableDebugHUD(boolean enable) {
             this.enableDebugHUD = enable;
+            return this;
+        }
+
+        public Builder adResponseTimeout(int timeoutMs) {
+            this.adResponseTimeoutMs = timeoutMs;
             return this;
         }
 

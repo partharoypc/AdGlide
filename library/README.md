@@ -12,62 +12,39 @@ This module contains the high-performance source code for the **AdGlide SDK**. I
 ## 🏗️ 1. Technical Architecture
 
 ### 🌊 Sequential Waterfall Engine
-The `WaterfallManager` is the orchestrator of AdGlide. It ensures **100% fill rates** by intelligently rotating through backup networks (Meta, AppLovin, StartApp, etc.) only when the primary provider fails to fill a request.
+The `WaterfallManager` is the orchestrator of AdGlide. It ensures **100% fill rates** by intelligently rotating through backup networks (Meta, AppLovin, StartApp, etc.).
+- **New**: Configurable `adResponseTimeoutMs` (default 3500ms) allows tuning for slow network conditions.
 
 ### 🛡️ Intelligent Rate Limiting
-AdGlide includes built-in defensive logic to prevent account flags (like "AdMob Error 3"). The SDK applies exponential backoff to failing ad units in real-time, protecting your developer account health without sacrificing user experience.
+AdGlide applies exponential backoff to failing ad units in real-time, protecting your developer account health without sacrificing user experience.
+
+### ⚡ Zero-Wait Ad Caching (Pool System)
+The `AdPoolManager` pre-warms ads in the background using a dual-pool system to ensure instant delivery from memory.
 
 ---
 
 ## 🎨 2. Premium Native Templates
 
-AdGlide eliminates the need for complex custom XML for most projects by providing 4 distinct, high-converting templates:
-
-| Layout | Descriptor | Ideal Use Case |
-| :--- | :--- | :--- |
-| `small` | Compact Radio | List items / Small footers |
-| `medium` | Standard Box | News feeds / Card views |
-| `banner` | Content Blend | Article inline placements |
-| `video` | Immersive Media | High-CPM video rewards |
-
-> [!TIP]
-> Use the `.style()` API in the `NativeAd.Builder` to switch between these templates effortlessly.
+AdGlide provides 4 distinct templates via the `.style()` API:
+- `small`, `medium`, `banner`, `video`.
 
 ---
 
-## 📦 3. Module Structure
+## 🔐 3. Privacy & Compliance
 
-AdGlide follows a strict **Clean Architecture** principle to ensure zero memory leaks and thread-safe operations:
-
-- **`com.partharoypc.adglide`**: Main entry Facade and Global Configuration.
-- **`format/`**: Lifecycle-aware ad type implementations (AppOpen, Banner, etc.).
-- **`gdpr/`**: Modern UMP consent logic for European privacy compliance.
-- **`util/`**: The core "brain" including the Waterfall engine, Rate Limiter, and Performance Loggers.
+### 🇪🇺 Universal GDPR (UMP)
+AdGlide integrates the latest Google UMP SDK with support for debug geography and child-directed consent.
 
 ---
 
-## 🛠 4. Advanced Development
+## 🛠 4. Developer Experience (DX)
 
-### 🎯 Custom Native Integration
-```java
-new NativeAd.Builder(activity)
-    .style(AdGlideNativeStyle.MEDIUM) // Choose baseline layout
-    .container(myLayout)              // Bind to your UI
-    .backgroundColor(Color.WHITE)      // Optional styling
-    .load();
-```
+### 🎯 Kotlin DSL Support
+Initialize AdGlide with modern Kotlin syntax using `adGlideConfig { ... }`.
 
-### 📱 Manual App Open Logic
-```java
-new AppOpenAd.Builder(activity)
-    .adMobId("YOUR_ID")
-    .load(new OnShowAdCompleteListener() {
-        @Override
-        public void onShowAdComplete() {
-            // Success: Proceed to main activity
-        }
-    });
-```
+### 📱 Debug HUD (Secret Menu)
+Monitor waterfall logs and test ad fills in real-time with the built-in Debug HUD.
+
 
 ---
 

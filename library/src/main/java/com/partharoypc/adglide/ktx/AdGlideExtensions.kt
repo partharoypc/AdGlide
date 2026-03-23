@@ -42,6 +42,44 @@ var AdGlideConfig.Builder.enableGDPR: Boolean
     get() = false
     set(value) { enableGDPR(value) }
 
+var AdGlideConfig.Builder.debugGDPR: Boolean
+    get() = false
+    set(value) { debugGDPR(value) }
+
 var AdGlideConfig.Builder.enableDebugHUD: Boolean
     get() = false
     set(value) { enableDebugHUD(value) }
+
+var AdGlideConfig.Builder.adResponseTimeout: Int
+    get() = 3500
+    set(value) { adResponseTimeout(value) }
+
+var AdGlideConfig.Builder.appOpenCooldownMinutes: Int
+    get() = 30
+    set(value) { appOpenCooldownMinutes(value) }
+
+var AdGlideConfig.Builder.adMobAppId: String
+    get() = ""
+    set(value) { adMobAppId(value) }
+
+var AdGlideConfig.Builder.adMobInterstitialId: String
+    get() = ""
+    set(value) { adMobInterstitialId(value) }
+
+var AdGlideConfig.Builder.adMobRewardedId: String
+    get() = ""
+    set(value) { adMobRewardedId(value) }
+
+var AdGlideConfig.Builder.adMobBannerId: String
+    get() = ""
+    set(value) { adMobBannerId(value) }
+
+var AdGlideConfig.Builder.adMobNativeId: String
+    get() = ""
+    set(value) { adMobNativeId(value) }
+
+var AdGlideConfig.Builder.adMobAppOpenId: String
+    get() = ""
+    set(value) { adMobAppOpenId(value) }
+
+// Add more as needed for other networks...

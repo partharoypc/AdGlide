@@ -50,8 +50,7 @@ public class AdLoader {
             this.primaryNetwork = (primary != null) ? primary : "";
             List<String> backups = config.getBackupNetworks();
             this.waterfallManager = new WaterfallManager((backups != null) ? backups : new java.util.ArrayList<>());
-            // Use config timeout if added in future, else default to 3500ms
-            this.timeoutMs = 3500; 
+            this.timeoutMs = config.getAdResponseTimeoutMs(); 
         } else {
             this.primaryNetwork = "";
             this.waterfallManager = new WaterfallManager();

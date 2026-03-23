@@ -8,251 +8,189 @@ import com.partharoypc.adglide.format.AppOpenAd;
 import com.partharoypc.adglide.format.InterstitialAd;
 import com.partharoypc.adglide.format.RewardedAd;
 import com.partharoypc.adglide.format.RewardedInterstitialAd;
+import com.partharoypc.adglide.format.NativeAd;
 
+import java.util.EnumMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages pools of pre-loaded Zero-Wait Ads for instant delivery.
+ * Refactored to use a more robust, generic architecture.
  */
 public class AdPoolManager {
     private static final String TAG = "AdGlide.Pool";
     private static final int MAX_POOL_SIZE = 2;
 
-    private static final Queue<InterstitialAd.Builder> interstitialPrimaryPool = new LinkedList<>();
-    private static final Queue<InterstitialAd.Builder> interstitialBackupPool = new LinkedList<>();
+    private static final Map<AdFormat, PoolSet<?>> pools = new EnumMap<>(AdFormat.class);
+    private static final Map<String, PoolSet<NativeAd.Builder>> nativePools = new ConcurrentHashMap<>();
+    private static final Map<AdFormat, Boolean> loadingState = new EnumMap<>(AdFormat.class);
 
-    private static final Queue<RewardedAd.Builder> rewardedPrimaryPool = new LinkedList<>();
-    private static final Queue<RewardedAd.Builder> rewardedBackupPool = new LinkedList<>();
+    static {
+        pools.put(AdFormat.INTERSTITIAL, new PoolSet<InterstitialAd.Builder>());
+        pools.put(AdFormat.REWARDED, new PoolSet<RewardedAd.Builder>());
+        pools.put(AdFormat.REWARDED_INTERSTITIAL, new PoolSet<RewardedInterstitialAd.Builder>());
+        pools.put(AdFormat.APP_OPEN, new PoolSet<AppOpenAd.Builder>());
+        
+        for (AdFormat format : AdFormat.values()) {
+            loadingState.put(format, false);
+        }
+    }
 
-    private static final Queue<RewardedInterstitialAd.Builder> rewardedInterstitialPrimaryPool = new LinkedList<>();
-    private static final Queue<RewardedInterstitialAd.Builder> rewardedInterstitialBackupPool = new LinkedList<>();
+    private static class PoolSet<T> {
+        final Queue<T> primary = new LinkedList<>();
+        final Queue<T> backup = new LinkedList<>();
 
-    private static final Queue<AppOpenAd.Builder> appOpenPrimaryPool = new LinkedList<>();
-    private static final Queue<AppOpenAd.Builder> appOpenBackupPool = new LinkedList<>();
+        void offer(T item, boolean isPrimary) {
+            if (isPrimary) primary.offer(item);
+            else backup.offer(item);
+        }
 
-    // Native Pools
-    private static final Queue<com.partharoypc.adglide.format.NativeAd.Builder> nativeSmallPrimaryPool = new LinkedList<>();
-    private static final Queue<com.partharoypc.adglide.format.NativeAd.Builder> nativeSmallBackupPool = new LinkedList<>();
+        T poll() {
+            if (!primary.isEmpty()) return primary.poll();
+            return backup.poll();
+        }
 
-    private static final Queue<com.partharoypc.adglide.format.NativeAd.Builder> nativeMediumPrimaryPool = new LinkedList<>();
-    private static final Queue<com.partharoypc.adglide.format.NativeAd.Builder> nativeMediumBackupPool = new LinkedList<>();
+        boolean hasAvailable(AdCheck<T> check) {
+            if (!primary.isEmpty() && check.isAvailable(primary.peek())) return true;
+            return !backup.isEmpty() && check.isAvailable(backup.peek());
+        }
 
-    private static boolean isLoadingInterstitial = false;
-    private static boolean isLoadingRewarded = false;
-    private static boolean isLoadingRewardedInterstitial = false;
-    private static boolean isLoadingAppOpen = false;
-    private static boolean isLoadingNativeSmall = false;
-    private static boolean isLoadingNativeMedium = false;
+        int size() {
+            return primary.size() + backup.size();
+        }
+    }
+
+    private interface AdCheck<T> {
+        boolean isAvailable(T ad);
+    }
 
     // --- INTERSTITIAL ---
     public static void fillInterstitialPool(Activity activity) {
-        if (!AdGlide.isInterstitialEnabled()) return;
-        int currentTotal = interstitialPrimaryPool.size() + interstitialBackupPool.size();
-        if (currentTotal >= MAX_POOL_SIZE || isLoadingInterstitial) return;
-        
-        isLoadingInterstitial = true;
-        Log.d(TAG, "Filling Interstitial Pool. Current total: " + currentTotal);
-        
-        InterstitialAd.Builder builder = new InterstitialAd.Builder(activity);
-        builder.load(new AdGlideCallback() {
-            @Override
-            public void onAdLoaded(String network) {
-                String primary = AdGlide.getConfig() != null ? AdGlide.getConfig().getPrimaryNetwork() : "";
-                if (network.equals(primary)) {
-                    interstitialPrimaryPool.offer(builder);
-                } else {
-                    interstitialBackupPool.offer(builder);
-                }
-                isLoadingInterstitial = false;
-                fillInterstitialPool(activity);
-            }
-            @Override
-            public void onAdFailedToLoad(String error) {
-                isLoadingInterstitial = false;
-            }
-        });
+        fillGenericPool(activity, AdFormat.INTERSTITIAL, () -> new InterstitialAd.Builder(activity), 
+            (builder, callback) -> builder.load(callback));
     }
 
     public static InterstitialAd.Builder getInterstitial() {
-        if (!interstitialPrimaryPool.isEmpty()) return interstitialPrimaryPool.poll();
-        return interstitialBackupPool.poll();
+        return (InterstitialAd.Builder) pools.get(AdFormat.INTERSTITIAL).poll();
     }
 
     public static boolean hasInterstitial() {
-        if (!interstitialPrimaryPool.isEmpty() && interstitialPrimaryPool.peek().isAdLoaded()) return true;
-        return !interstitialBackupPool.isEmpty() && interstitialBackupPool.peek().isAdLoaded();
+        return pools.get(AdFormat.INTERSTITIAL).hasAvailable(ad -> ad.isAdLoaded());
     }
 
     // --- REWARDED ---
     public static void fillRewardedPool(Activity activity) {
-        if (!AdGlide.isRewardedEnabled()) return;
-        int currentTotal = rewardedPrimaryPool.size() + rewardedBackupPool.size();
-        if (currentTotal >= MAX_POOL_SIZE || isLoadingRewarded) return;
-        
-        isLoadingRewarded = true;
-        Log.d(TAG, "Filling Rewarded Pool. Current total: " + currentTotal);
-        
-        RewardedAd.Builder builder = new RewardedAd.Builder(activity);
-        builder.load(new AdGlideCallback() {
-            @Override
-            public void onAdLoaded(String network) {
-                String primary = AdGlide.getConfig() != null ? AdGlide.getConfig().getPrimaryNetwork() : "";
-                if (network.equals(primary)) {
-                    rewardedPrimaryPool.offer(builder);
-                } else {
-                    rewardedBackupPool.offer(builder);
-                }
-                isLoadingRewarded = false;
-                fillRewardedPool(activity);
-            }
-            @Override
-            public void onAdFailedToLoad(String error) {
-                isLoadingRewarded = false;
-            }
-        });
+        fillGenericPool(activity, AdFormat.REWARDED, () -> new RewardedAd.Builder(activity), 
+            (builder, callback) -> builder.load(callback));
     }
 
     public static RewardedAd.Builder getRewarded() {
-        if (!rewardedPrimaryPool.isEmpty()) return rewardedPrimaryPool.poll();
-        return rewardedBackupPool.poll();
+        return (RewardedAd.Builder) pools.get(AdFormat.REWARDED).poll();
     }
 
     public static boolean hasRewarded() {
-        if (!rewardedPrimaryPool.isEmpty() && rewardedPrimaryPool.peek().isAdAvailable()) return true;
-        return !rewardedBackupPool.isEmpty() && rewardedBackupPool.peek().isAdAvailable();
+        return pools.get(AdFormat.REWARDED).hasAvailable(ad -> ad.isAdAvailable());
     }
 
     // --- REWARDED INTERSTITIAL ---
     public static void fillRewardedInterstitialPool(Activity activity) {
-        if (!AdGlide.isRewardedInterstitialEnabled()) return;
-        int currentTotal = rewardedInterstitialPrimaryPool.size() + rewardedInterstitialBackupPool.size();
-        if (currentTotal >= MAX_POOL_SIZE || isLoadingRewardedInterstitial) return;
-        
-        isLoadingRewardedInterstitial = true;
-        Log.d(TAG, "Filling Rewarded Interstitial Pool. Current total: " + currentTotal);
-        
-        RewardedInterstitialAd.Builder builder = new RewardedInterstitialAd.Builder(activity);
-        builder.loadRewardedInterstitialAd(new AdGlideCallback() {
-            @Override
-            public void onAdLoaded(String network) {
-                String primary = AdGlide.getConfig() != null ? AdGlide.getConfig().getPrimaryNetwork() : "";
-                if (network.equals(primary)) {
-                    rewardedInterstitialPrimaryPool.offer(builder);
-                } else {
-                    rewardedInterstitialBackupPool.offer(builder);
-                }
-                isLoadingRewardedInterstitial = false;
-                fillRewardedInterstitialPool(activity);
-            }
-            @Override
-            public void onAdFailedToLoad(String error) {
-                isLoadingRewardedInterstitial = false;
-            }
-        });
+        fillGenericPool(activity, AdFormat.REWARDED_INTERSTITIAL, () -> new RewardedInterstitialAd.Builder(activity), 
+            (builder, callback) -> builder.loadRewardedInterstitialAd(callback));
     }
 
     public static RewardedInterstitialAd.Builder getRewardedInterstitial() {
-        if (!rewardedInterstitialPrimaryPool.isEmpty()) return rewardedInterstitialPrimaryPool.poll();
-        return rewardedInterstitialBackupPool.poll();
+        return (RewardedInterstitialAd.Builder) pools.get(AdFormat.REWARDED_INTERSTITIAL).poll();
     }
 
     public static boolean hasRewardedInterstitial() {
-        if (!rewardedInterstitialPrimaryPool.isEmpty() && rewardedInterstitialPrimaryPool.peek().isAdAvailable()) return true;
-        return !rewardedInterstitialBackupPool.isEmpty() && rewardedInterstitialBackupPool.peek().isAdAvailable();
+        return pools.get(AdFormat.REWARDED_INTERSTITIAL).hasAvailable(ad -> ad.isAdAvailable());
     }
 
     // --- APP OPEN ---
     public static void fillAppOpenPool(Activity activity) {
-        if (!AdGlide.isAppOpenEnabled()) return;
-        int currentTotal = appOpenPrimaryPool.size() + appOpenBackupPool.size();
-        if (currentTotal >= MAX_POOL_SIZE || isLoadingAppOpen) return;
-        
-        isLoadingAppOpen = true;
-        Log.d(TAG, "Filling App Open Pool. Current total: " + currentTotal);
-        
-        AppOpenAd.Builder builder = new AppOpenAd.Builder(activity);
-        builder.load(new AdGlideCallback() {
-            @Override
-            public void onAdLoaded(String network) {
-                String primary = AdGlide.getConfig() != null ? AdGlide.getConfig().getPrimaryNetwork() : "";
-                if (network.equals(primary)) {
-                    appOpenPrimaryPool.offer(builder);
-                } else {
-                    appOpenBackupPool.offer(builder);
-                }
-                isLoadingAppOpen = false;
-                fillAppOpenPool(activity);
-            }
-            @Override
-            public void onAdFailedToLoad(String error) {
-                isLoadingAppOpen = false;
-            }
-        });
+        fillGenericPool(activity, AdFormat.APP_OPEN, () -> new AppOpenAd.Builder(activity), 
+            (builder, callback) -> builder.load(callback));
     }
 
     public static AppOpenAd.Builder getAppOpen() {
-        if (!appOpenPrimaryPool.isEmpty()) return appOpenPrimaryPool.poll();
-        return appOpenBackupPool.poll();
+        return (AppOpenAd.Builder) pools.get(AdFormat.APP_OPEN).poll();
     }
 
     public static boolean hasAppOpen() {
-        if (!appOpenPrimaryPool.isEmpty() && appOpenPrimaryPool.peek().isAdAvailable()) return true;
-        return !appOpenBackupPool.isEmpty() && appOpenBackupPool.peek().isAdAvailable();
+        return pools.get(AdFormat.APP_OPEN).hasAvailable(ad -> ad.isAdAvailable());
     }
 
     // --- NATIVE ---
     public static void fillNativePool(Activity activity, String style) {
         if (!AdGlide.isNativeEnabled()) return;
-        boolean isSmall = "small".equalsIgnoreCase(style);
-        Queue<com.partharoypc.adglide.format.NativeAd.Builder> primaryPool = isSmall ? nativeSmallPrimaryPool : nativeMediumPrimaryPool;
-        Queue<com.partharoypc.adglide.format.NativeAd.Builder> backupPool = isSmall ? nativeSmallBackupPool : nativeMediumBackupPool;
+        PoolSet<NativeAd.Builder> poolSet = nativePools.computeIfAbsent(style.toLowerCase(), k -> new PoolSet<>());
         
-        int currentTotal = primaryPool.size() + backupPool.size();
-        if (currentTotal >= MAX_POOL_SIZE) return;
-        if (isSmall && isLoadingNativeSmall) return;
-        if (!isSmall && isLoadingNativeMedium) return;
-
-        if (isSmall) isLoadingNativeSmall = true; else isLoadingNativeMedium = true;
-        Log.d(TAG, "Filling Native [" + style + "] Pool. Current total: " + currentTotal);
-
-        com.partharoypc.adglide.format.NativeAd.Builder builder = new com.partharoypc.adglide.format.NativeAd.Builder(activity)
-                .style(style);
+        if (poolSet.size() >= MAX_POOL_SIZE) return;
         
+        NativeAd.Builder builder = new NativeAd.Builder(activity).style(style);
         builder.load(new AdGlideCallback() {
             @Override
             public void onAdLoaded(String network) {
                 String primary = AdGlide.getConfig() != null ? AdGlide.getConfig().getPrimaryNetwork() : "";
-                if (network.equals(primary)) {
-                    primaryPool.offer(builder);
-                } else {
-                    backupPool.offer(builder);
-                }
-                if (isSmall) isLoadingNativeSmall = false; else isLoadingNativeMedium = false;
+                poolSet.offer(builder, network.equals(primary));
                 fillNativePool(activity, style);
             }
             @Override
             public void onAdFailedToLoad(String error) {
-                if (isSmall) isLoadingNativeSmall = false; else isLoadingNativeMedium = false;
             }
         });
     }
 
-    public static com.partharoypc.adglide.format.NativeAd.Builder getNative(String style) {
-        boolean isSmall = "small".equalsIgnoreCase(style);
-        Queue<com.partharoypc.adglide.format.NativeAd.Builder> primaryPool = isSmall ? nativeSmallPrimaryPool : nativeMediumPrimaryPool;
-        Queue<com.partharoypc.adglide.format.NativeAd.Builder> backupPool = isSmall ? nativeSmallBackupPool : nativeMediumBackupPool;
-
-        if (!primaryPool.isEmpty()) return primaryPool.poll();
-        return backupPool.poll();
+    public static NativeAd.Builder getNative(String style) {
+        PoolSet<NativeAd.Builder> poolSet = nativePools.get(style.toLowerCase());
+        return poolSet != null ? poolSet.poll() : null;
     }
 
     public static boolean hasNative(String style) {
-        boolean isSmall = "small".equalsIgnoreCase(style);
-        Queue<com.partharoypc.adglide.format.NativeAd.Builder> primaryPool = isSmall ? nativeSmallPrimaryPool : nativeMediumPrimaryPool;
-        Queue<com.partharoypc.adglide.format.NativeAd.Builder> backupPool = isSmall ? nativeSmallBackupPool : nativeMediumBackupPool;
+        PoolSet<NativeAd.Builder> poolSet = nativePools.get(style.toLowerCase());
+        return poolSet != null && poolSet.hasAvailable(ad -> ad.isAdLoaded());
+    }
 
-        if (!primaryPool.isEmpty() && primaryPool.peek().isAdLoaded()) return true;
-        return !backupPool.isEmpty() && backupPool.peek().isAdLoaded();
+    // --- GENERIC FILLER ---
+    private interface AdBuilderProvider<T> { T create(); }
+    private interface AdLoadAction<T> { void load(T ad, AdGlideCallback callback); }
+
+    @SuppressWarnings("unchecked")
+    private static <T> void fillGenericPool(Activity activity, AdFormat format, AdBuilderProvider<T> provider, AdLoadAction<T> loader) {
+        if (!isFormatEnabled(format)) return;
+        
+        PoolSet<T> poolSet = (PoolSet<T>) pools.get(format);
+        if (poolSet.size() >= MAX_POOL_SIZE || loadingState.get(format)) return;
+
+        loadingState.put(format, true);
+        T builder = provider.create();
+        
+        loader.load(builder, new AdGlideCallback() {
+            @Override
+            public void onAdLoaded(String network) {
+                String primary = AdGlide.getConfig() != null ? AdGlide.getConfig().getPrimaryNetwork() : "";
+                poolSet.offer(builder, network.equals(primary));
+                loadingState.put(format, false);
+                fillGenericPool(activity, format, provider, loader);
+            }
+
+            @Override
+            public void onAdFailedToLoad(String error) {
+                loadingState.put(format, false);
+            }
+        });
+    }
+
+    private static boolean isFormatEnabled(AdFormat format) {
+        return switch (format) {
+            case INTERSTITIAL -> AdGlide.isInterstitialEnabled();
+            case REWARDED -> AdGlide.isRewardedEnabled();
+            case REWARDED_INTERSTITIAL -> AdGlide.isRewardedInterstitialEnabled();
+            case APP_OPEN -> AdGlide.isAppOpenEnabled();
+            default -> false;
+        };
     }
 }

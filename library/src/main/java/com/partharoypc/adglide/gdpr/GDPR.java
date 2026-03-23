@@ -56,41 +56,47 @@ public class GDPR {
     }
 
     @SuppressLint("HardwareIds")
-    public void updateGDPRConsentStatus(String adType, boolean isDebug, boolean childDirected) {
-        switch (adType) {
-            case ADMOB:
-                if (isDebug) {
-                    String androidId = Settings.Secure.getString(activity.getContentResolver(),
-                            Settings.Secure.ANDROID_ID);
-                    String deviceId = md5(androidId).toUpperCase(java.util.Locale.ROOT);
-                    debugSettings = new ConsentDebugSettings.Builder(activity)
-                            .setDebugGeography(ConsentDebugSettings.DebugGeography.DEBUG_GEOGRAPHY_EEA)
-                            .addTestDeviceHashedId(deviceId)
-                            .build();
-                    params = new ConsentRequestParameters.Builder().setConsentDebugSettings(debugSettings)
-                            .setTagForUnderAgeOfConsent(childDirected).build();
-                } else {
-                    params = new ConsentRequestParameters.Builder().setTagForUnderAgeOfConsent(childDirected).build();
-                }
-                consentInformation = UserMessagingPlatform.getConsentInformation(activity);
-                consentInformation.requestConsentInfoUpdate(activity, params,
-                        () -> UserMessagingPlatform.loadAndShowConsentFormIfRequired(
-                                activity, loadAndShowError -> {
-                                    if (consentInformation.canRequestAds()) {
-                                        initializeMobileAdsSdk();
-                                    }
-                                }),
-                        requestConsentError -> {
-                        });
-                if (consentInformation.canRequestAds()) {
-                    initializeMobileAdsSdk();
-                }
-                break;
-            case STARTAPP:
-            case APPLOVIN_MAX:
-
-                break;
+    public void updateGDPRConsentStatus(boolean isDebug, boolean childDirected) {
+        if (isDebug) {
+            String androidId = Settings.Secure.getString(activity.getContentResolver(),
+                    Settings.Secure.ANDROID_ID);
+            String deviceId = md5(androidId).toUpperCase(java.util.Locale.ROOT);
+            debugSettings = new ConsentDebugSettings.Builder(activity)
+                    .setDebugGeography(ConsentDebugSettings.DebugGeography.DEBUG_GEOGRAPHY_EEA)
+                    .addTestDeviceHashedId(deviceId)
+                    .build();
+            params = new ConsentRequestParameters.Builder().setConsentDebugSettings(debugSettings)
+                    .setTagForUnderAgeOfConsent(childDirected).build();
+        } else {
+            params = new ConsentRequestParameters.Builder().setTagForUnderAgeOfConsent(childDirected).build();
         }
+
+        consentInformation = UserMessagingPlatform.getConsentInformation(activity);
+        consentInformation.requestConsentInfoUpdate(activity, params,
+                () -> UserMessagingPlatform.loadAndShowConsentFormIfRequired(
+                        activity, loadAndShowError -> {
+                            if (consentInformation.canRequestAds()) {
+                                initializeMobileAdsSdk();
+                            }
+                        }),
+                requestConsentError -> {
+                    // Fallback if update fails but we can already request ads
+                    if (consentInformation.canRequestAds()) {
+                        initializeMobileAdsSdk();
+                    }
+                });
+
+        if (consentInformation.canRequestAds()) {
+            initializeMobileAdsSdk();
+        }
+    }
+
+    /**
+     * @deprecated Use {@link #updateGDPRConsentStatus(boolean, boolean)} for universal UMP support.
+     */
+    @Deprecated
+    public void updateGDPRConsentStatus(String adType, boolean isDebug, boolean childDirected) {
+        updateGDPRConsentStatus(isDebug, childDirected);
     }
 
     private void initializeMobileAdsSdk() {
