@@ -1,53 +1,47 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# =====================================================================================================
+# AdGlide SDK — Internal ProGuard / R8 Configuration
+# =====================================================================================================
+# This configuration is applied ONLY when compiling the AdGlide library AAR (minifyEnabled true).
+# It ensures the SDK is optimally obfuscated, shrunk, and optimized before distribution.
+# =====================================================================================================
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# -----------------------------------------------------------------------------------------------------
+# 1. Inherit Consumer Rules (DRY Principle - No Duplicate Code)
+# -----------------------------------------------------------------------------------------------------
+# Include consumer-rules.pro to automatically inherit all '-dontwarn' and '-keep' statements
+# defined for the SDK's public API and third-party compileOnly ad networks.
+-include consumer-rules.pro
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# -----------------------------------------------------------------------------------------------------
+# 2. Debugging & Stacktrace Metadata
+# -----------------------------------------------------------------------------------------------------
+# Retain vital debugging metadata so that crash reports map correctly to source code line numbers.
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# If you keep the line number information, uncomment this to
-#-renamesourcefileattribute SourceFile
+# -----------------------------------------------------------------------------------------------------
+# 3. Standard Library Attributes Preservation
+# -----------------------------------------------------------------------------------------------------
+# Preserve essential attributes required for reflection, generic types, and annotations.
+-keepattributes Signature,*Annotation*,Exceptions,InnerClasses,EnclosingMethod
 
-# ============================================================================
-# Optional Ad Network Dependencies (compileOnly)
-# These rules prevent R8/ProGuard from crashing the build with "Missing class"
-# errors when a developer chooses to omit a specific ad network.
-# ============================================================================
+# -----------------------------------------------------------------------------------------------------
+# 4. Advanced Security & Size Optimization
+# -----------------------------------------------------------------------------------------------------
+# Strip out standard Android Log statements to reduce AAR size and prevent leakage of 
+# sensitive SDK analytics or network events in production release builds.
+-assumenosideeffects class android.util.Log {
+    public static boolean isLoggable(java.lang.String, int);
+    public static int v(...);
+    public static int i(...);
+    public static int w(...);
+    public static int d(...);
+    public static int e(...);
+    public static int println(...);
+}
 
-# AdMob (Google Mobile Ads)
--dontwarn com.google.android.gms.ads.**
--dontwarn com.google.ads.mediation.**
-
-# Google UMP
--dontwarn com.google.android.ump.**
-
-# Meta Audience Network (FAN)
--dontwarn com.facebook.ads.**
--dontwarn com.facebook.infer.annotation.**
-
-# AppLovin
--dontwarn com.applovin.**
-
-# Unity Ads
--dontwarn com.unity3d.ads.**
-
-# IronSource
--dontwarn com.ironsource.**
-
-# StartApp
--dontwarn com.startapp.**
-
-# Wortise / Bytedance (Pangle)
--dontwarn com.wortise.**
--dontwarn com.bytedance.**
+# Optimize Enum values() and valueOf() methods to minimize synthetic overhead.
+-assumenosideeffects class java.lang.Enum {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}

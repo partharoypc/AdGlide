@@ -393,16 +393,25 @@ AdGlide.updateConfig(new AdGlideConfig.Builder()
 
 ## 🔒 5. Production & Security
 
-### ProGuard / R8 Rules
+### 🛡️ Zero-Config ProGuard / R8
 
-AdGlide includes a `consumer-rules.pro` that is automatically applied to your project. However, if you are using manual configuration or local AARs, ensure the following rules are in your `proguard-rules.pro`:
+**AdGlide is fully zero-config for code shrinking and obfuscation.** 
+Our embedded `consumer-rules.pro` automatically propagates the most optimal, tightly-scoped `-keep` and `-dontwarn` protocols directly into your release build. 
+
+You **do not** need to write any manual ProGuard rules for AdGlide or its supported networks when integrating via standard Gradle.
+
+<details>
+<summary><b>View Rules (Only required for local .aar manual integration)</b></summary>
 
 ```proguard
-# AdGlide Core
+# AdGlide Core & Interfaces
 -keep public class com.partharoypc.adglide.** { *; }
+-keep interface com.partharoypc.adglide.util.On*Listener { *; }
+-keep interface com.partharoypc.adglide.util.AdGlideCallback { *; }
 
-# Ad Network Implementation Classes (Prevent Over-stripping)
+# Primary Network Integrations
 -keep class com.google.android.gms.ads.** { *; }
+-keep class com.google.ads.mediation.** { *; }
 -keep class com.facebook.ads.** { *; }
 -keep class com.applovin.** { *; }
 -keep class com.unity3d.ads.** { *; }
@@ -410,25 +419,24 @@ AdGlide includes a `consumer-rules.pro` that is automatically applied to your pr
 -keep class com.ironsource.** { *; }
 -keep class com.startapp.** { *; }
 -keep class com.wortise.** { *; }
+-keep class com.bytedance.** { *; }
 -keep class com.google.android.ump.** { *; }
 
-# Prevent stripping of ad callback interfaces & model classes
--keep interface com.partharoypc.adglide.util.On*Listener { *; }
--keep interface com.partharoypc.adglide.util.AdGlideCallback { *; }
--keep class com.partharoypc.adglide.AdGlideConfig { *; }
--keep class com.partharoypc.adglide.AdGlideConfig$Builder { *; }
--keep class com.partharoypc.adglide.AdGlideNativeStyle { *; }
-
-# Ad Network DontWarn (Optional but Recommended)
+# Suppress warnings for omitted compileOnly networks
 -dontwarn com.google.android.gms.ads.**
+-dontwarn com.google.ads.mediation.**
 -dontwarn com.facebook.ads.**
+-dontwarn com.facebook.infer.annotation.**
 -dontwarn com.applovin.**
+-dontwarn com.unity3d.ads.**
+-dontwarn com.ironsource.**
 -dontwarn com.startapp.**
 -dontwarn com.wortise.**
--dontwarn com.ironsource.**
--dontwarn com.unity3d.ads.**
+-dontwarn com.bytedance.**
+-dontwarn com.google.android.ump.**
 -dontwarn pl.droidsonroids.gif.**
 ```
+</details>
 
 ---
 
