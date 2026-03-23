@@ -243,6 +243,7 @@ public class AppOpenAd {
     public static class Builder {
         private final com.partharoypc.adglide.util.AdLoader adLoader;
         private final java.lang.ref.WeakReference<Activity> activityRef;
+        private AppOpenProvider currentProvider;
 
         public Builder(Activity activity) {
             this.activityRef = new java.lang.ref.WeakReference<>(activity);
@@ -303,6 +304,7 @@ public class AppOpenAd {
                 }
                 AppOpenProvider provider = getProvider(network);
                 if (provider != null) {
+                    this.currentProvider = provider;
                     provider.loadAppOpenAd(activity, adUnitId, new AppOpenProvider.AppOpenListener() {
                         @Override
                         public void onAdLoaded() {
@@ -417,15 +419,9 @@ public class AppOpenAd {
                 }
 
                 // Try to show from currently loaded network if available
-                final AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-                if (config == null)
-                    return;
-
-                String network = config.getPrimaryNetwork();
-                AppOpenProvider provider = getProvider(network);
-                if (provider != null && provider.isAdAvailable()) {
+                if (currentProvider != null && currentProvider.isAdAvailable()) {
                     Activity activity = activityRef != null ? activityRef.get() : null;
-                    provider.showAppOpenAd(activity, new AppOpenProvider.AppOpenListener() {
+                    currentProvider.showAppOpenAd(activity, new AppOpenProvider.AppOpenListener() {
                         @Override
                         public void onAdLoaded() {
                         }
@@ -467,8 +463,9 @@ public class AppOpenAd {
             return new AppOpenAd(this);
         }
 
+        @Deprecated
         public boolean isAdAvailable() {
-            return false; // Deprecated, check provider directly if needed
+            return currentProvider != null && currentProvider.isAdAvailable();
         }
     }
 }
