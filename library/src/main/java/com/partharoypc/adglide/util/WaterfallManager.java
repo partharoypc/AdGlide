@@ -34,6 +34,14 @@ public class WaterfallManager {
         return null;
     }
 
+    public void setNetworks(List<String> networks) {
+        this.networks.clear();
+        if (networks != null) {
+            this.networks.addAll(networks);
+        }
+        this.currentIndex = 0;
+    }
+
     public void reset() {
         currentIndex = 0;
     }

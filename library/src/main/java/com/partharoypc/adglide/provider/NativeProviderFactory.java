@@ -41,6 +41,9 @@ public class NativeProviderFactory {
                 Log.w(TAG, "Unity Ads does not support Native Ad format. Trying backup.");
                 return null;
             }
+            case HOUSE_AD -> {
+                return new com.partharoypc.adglide.provider.housead.HouseAdNativeProvider();
+            }
         }
 
         if (className != null && (checkClass == null || ReflectionUtils.isClassAvailable(checkClass))) {

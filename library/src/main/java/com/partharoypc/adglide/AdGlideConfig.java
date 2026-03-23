@@ -89,6 +89,12 @@ public class AdGlideConfig {
     private final String houseAdBannerClickUrl;
     private final String houseAdInterstitialImage;
     private final String houseAdInterstitialClickUrl;
+    private final String houseAdNativeTitle;
+    private final String houseAdNativeDescription;
+    private final String houseAdNativeImage;
+    private final String houseAdNativeIcon;
+    private final String houseAdNativeCTA;
+    private final String houseAdNativeClickUrl;
 
     private AdGlideConfig(Builder builder) {
         this.adStatus = builder.adStatus;
@@ -163,6 +169,12 @@ public class AdGlideConfig {
         this.houseAdBannerClickUrl = builder.houseAdBannerClickUrl;
         this.houseAdInterstitialImage = builder.houseAdInterstitialImage;
         this.houseAdInterstitialClickUrl = builder.houseAdInterstitialClickUrl;
+        this.houseAdNativeTitle = builder.houseAdNativeTitle;
+        this.houseAdNativeDescription = builder.houseAdNativeDescription;
+        this.houseAdNativeImage = builder.houseAdNativeImage;
+        this.houseAdNativeIcon = builder.houseAdNativeIcon;
+        this.houseAdNativeCTA = builder.houseAdNativeCTA;
+        this.houseAdNativeClickUrl = builder.houseAdNativeClickUrl;
 
     }
 
@@ -431,6 +443,30 @@ public class AdGlideConfig {
         return houseAdInterstitialClickUrl;
     }
 
+    public String getHouseAdNativeTitle() {
+        return houseAdNativeTitle;
+    }
+
+    public String getHouseAdNativeDescription() {
+        return houseAdNativeDescription;
+    }
+
+    public String getHouseAdNativeImage() {
+        return houseAdNativeImage;
+    }
+
+    public String getHouseAdNativeIcon() {
+        return houseAdNativeIcon;
+    }
+
+    public String getHouseAdNativeCTA() {
+        return houseAdNativeCTA;
+    }
+
+    public String getHouseAdNativeClickUrl() {
+        return houseAdNativeClickUrl;
+    }
+
     public static class Builder {
         private boolean adStatus = false;
         private String primaryNetwork = "";
@@ -503,6 +539,12 @@ public class AdGlideConfig {
         private String houseAdBannerClickUrl = "";
         private String houseAdInterstitialImage = "";
         private String houseAdInterstitialClickUrl = "";
+        private String houseAdNativeTitle = "";
+        private String houseAdNativeDescription = "";
+        private String houseAdNativeImage = "";
+        private String houseAdNativeIcon = "";
+        private String houseAdNativeCTA = "";
+        private String houseAdNativeClickUrl = "";
 
         public Builder() {
         }
@@ -799,6 +841,36 @@ public class AdGlideConfig {
 
         public Builder appLovinAppOpenId(String id) {
             this.appLovinAppOpenId = id;
+            return this;
+        }
+
+        public Builder houseAdNativeTitle(String title) {
+            this.houseAdNativeTitle = title;
+            return this;
+        }
+
+        public Builder houseAdNativeDescription(String description) {
+            this.houseAdNativeDescription = description;
+            return this;
+        }
+
+        public Builder houseAdNativeImage(String imageUrl) {
+            this.houseAdNativeImage = imageUrl;
+            return this;
+        }
+
+        public Builder houseAdNativeIcon(String iconUrl) {
+            this.houseAdNativeIcon = iconUrl;
+            return this;
+        }
+
+        public Builder houseAdNativeCTA(String ctaText) {
+            this.houseAdNativeCTA = ctaText;
+            return this;
+        }
+
+        public Builder houseAdNativeClickUrl(String clickUrl) {
+            this.houseAdNativeClickUrl = clickUrl;
             return this;
         }
 

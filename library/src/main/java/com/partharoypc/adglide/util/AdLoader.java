@@ -83,10 +83,23 @@ public class AdLoader {
             return;
         }
 
-        if (!Tools.isNetworkAvailable(activity)) {
-            Log.e(TAG, "Internet connection not available for " + format);
-            if (finalCallback != null) finalCallback.onAdFailedToLoad("No internet");
-            return;
+        boolean hasInternet = Tools.isNetworkAvailable(activity);
+        if (!hasInternet) {
+            Log.d(TAG, "No internet connection detected for " + format + ". Checking for offline-capable House Ads.");
+            AdGlideConfig config = AdGlide.getConfig();
+            if (config != null && config.isHouseAdEnabled()) {
+                // If offline but House Ads are enabled, we force the waterfall to ONLY include house_ad.
+                // This allows the SDK to show a cached/offline-ready house ad if available.
+                waterfallManager.setNetworks(java.util.Collections.singletonList(com.partharoypc.adglide.util.Constant.HOUSE_AD));
+                waterfallManager.reset();
+                this.startTime = System.currentTimeMillis();
+                executeNetwork(waterfallManager.getNext(), executor, finalCallback);
+                return;
+            } else {
+                Log.e(TAG, "Internet connection not available and House Ads not enabled for " + format);
+                if (finalCallback != null) finalCallback.onAdFailedToLoad("No internet");
+                return;
+            }
         }
 
         waterfallManager.reset();

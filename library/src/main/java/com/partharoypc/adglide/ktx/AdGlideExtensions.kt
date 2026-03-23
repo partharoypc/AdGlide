@@ -82,4 +82,28 @@ var AdGlideConfig.Builder.adMobAppOpenId: String
     get() = ""
     set(value) { adMobAppOpenId(value) }
 
+var AdGlideConfig.Builder.houseAdNativeTitle: String
+    get() = ""
+    set(value) { houseAdNativeTitle(value) }
+
+var AdGlideConfig.Builder.houseAdNativeDescription: String
+    get() = ""
+    set(value) { houseAdNativeDescription(value) }
+
+var AdGlideConfig.Builder.houseAdNativeImage: String
+    get() = ""
+    set(value) { houseAdNativeImage(value) }
+
+var AdGlideConfig.Builder.houseAdNativeIcon: String
+    get() = ""
+    set(value) { houseAdNativeIcon(value) }
+
+var AdGlideConfig.Builder.houseAdNativeCTA: String
+    get() = ""
+    set(value) { houseAdNativeCTA(value) }
+
+var AdGlideConfig.Builder.houseAdNativeClickUrl: String
+    get() = ""
+    set(value) { houseAdNativeClickUrl(value) }
+
 // Add more as needed for other networks...

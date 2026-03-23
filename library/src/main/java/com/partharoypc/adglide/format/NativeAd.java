@@ -214,6 +214,7 @@ public class NativeAd {
                 case STARTAPP -> !config.getStartAppId().isEmpty() ? config.getStartAppId() : "startapp_id";
                 case IRONSOURCE, META_BIDDING_IRONSOURCE -> config.getIronSourceNativeId();
                 case UNITY -> null; // Unity does not support Native Ads
+                case com.partharoypc.adglide.util.Constant.HOUSE_AD -> "house_ad";
                 default -> "0";
             };
         }
