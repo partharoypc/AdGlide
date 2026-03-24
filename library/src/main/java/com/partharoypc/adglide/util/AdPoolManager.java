@@ -12,6 +12,7 @@ import com.partharoypc.adglide.format.NativeAd;
 
 import java.util.EnumMap;
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -139,7 +140,17 @@ public class AdPoolManager {
     // --- NATIVE ---
     public static void fillNativePool(Activity activity, String style) {
         if (!AdGlide.isNativeEnabled()) return;
-        PoolSet<NativeAd.Builder> poolSet = nativePools.computeIfAbsent(style.toLowerCase(), k -> new PoolSet<>());
+        PoolSet<NativeAd.Builder> poolSet = nativePools.get(style.toLowerCase(Locale.ROOT));
+        if (poolSet == null) {
+            synchronized (nativePools) {
+                poolSet = nativePools.get(style.toLowerCase(Locale.ROOT));
+                if (poolSet == null) {
+                    poolSet = new PoolSet<>();
+                    nativePools.put(style.toLowerCase(Locale.ROOT), poolSet);
+                }
+            }
+        }
+        final PoolSet<NativeAd.Builder> finalPoolSet = poolSet;
         
         if (poolSet.size() >= MAX_POOL_SIZE) return;
         
@@ -148,7 +159,7 @@ public class AdPoolManager {
             @Override
             public void onAdLoaded(String network) {
                 String primary = AdGlide.getConfig() != null ? AdGlide.getConfig().getPrimaryNetwork() : "";
-                poolSet.offer(builder, network.equals(primary));
+                finalPoolSet.offer(builder, network.equals(primary));
                 fillNativePool(activity, style);
             }
             @Override
@@ -158,12 +169,12 @@ public class AdPoolManager {
     }
 
     public static NativeAd.Builder getNative(String style) {
-        PoolSet<NativeAd.Builder> poolSet = nativePools.get(style.toLowerCase());
+        PoolSet<NativeAd.Builder> poolSet = nativePools.get(style.toLowerCase(Locale.ROOT));
         return poolSet != null ? poolSet.poll() : null;
     }
 
     public static boolean hasNative(String style) {
-        PoolSet<NativeAd.Builder> poolSet = nativePools.get(style.toLowerCase());
+        PoolSet<NativeAd.Builder> poolSet = nativePools.get(style.toLowerCase(Locale.ROOT));
         return poolSet != null && poolSet.hasAvailable(ad -> ad.isAdLoaded());
     }
 
