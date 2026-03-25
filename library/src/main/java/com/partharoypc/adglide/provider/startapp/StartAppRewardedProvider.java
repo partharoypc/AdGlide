@@ -10,18 +10,22 @@ import com.startapp.sdk.adsbase.adlisteners.AdEventListener;
 
 public class StartAppRewardedProvider implements RewardedProvider {
     private StartAppAd startAppAd;
+    private boolean isReady = false;
 
     @Override
     public void loadRewardedAd(Activity activity, String adUnitId, RewardedConfig config, RewardedListener listener) {
+        isReady = false;
         startAppAd = new StartAppAd(activity);
         startAppAd.loadAd(StartAppAd.AdMode.REWARDED_VIDEO, new AdEventListener() {
             @Override
             public void onReceiveAd(@NonNull Ad ad) {
+                isReady = true;
                 listener.onAdLoaded();
             }
 
             @Override
             public void onFailedToReceiveAd(Ad ad) {
+                isReady = false;
                 listener.onAdFailedToLoad("StartApp: Failed to receive ad");
             }
         });
@@ -29,8 +33,8 @@ public class StartAppRewardedProvider implements RewardedProvider {
 
     @Override
     public void showRewardedAd(Activity activity, RewardedListener listener) {
-        if (startAppAd != null && startAppAd.isReady()) {
-            startAppAd.setVideoListener(new com.startapp.sdk.adsbase.VideoListener() {
+        if (startAppAd != null && isReady) {
+            startAppAd.setVideoListener(new com.startapp.sdk.adsbase.adlisteners.VideoListener() {
                 @Override
                 public void onVideoCompleted() {
                     listener.onAdCompleted();
@@ -39,6 +43,7 @@ public class StartAppRewardedProvider implements RewardedProvider {
             startAppAd.showAd(new AdDisplayListener() {
                 @Override
                 public void adHidden(Ad ad) {
+                    isReady = false;
                     listener.onAdDismissed();
                 }
 
@@ -54,6 +59,7 @@ public class StartAppRewardedProvider implements RewardedProvider {
 
                 @Override
                 public void adNotDisplayed(Ad ad) {
+                    isReady = false;
                     com.partharoypc.adglide.util.PerformanceLogger.error("StartApp", "Rewarded not displayed: " + (ad != null ? ad.getErrorMessage() : "null"));
                     listener.onAdShowFailed("StartApp Rewarded not displayed");
                 }
@@ -65,7 +71,7 @@ public class StartAppRewardedProvider implements RewardedProvider {
 
     @Override
     public boolean isAdAvailable() {
-        return startAppAd != null && startAppAd.isReady();
+        return startAppAd != null && isReady;
     }
 
     @Override

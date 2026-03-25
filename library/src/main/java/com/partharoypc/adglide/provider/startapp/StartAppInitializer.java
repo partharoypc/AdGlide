@@ -8,9 +8,7 @@ import com.startapp.sdk.adsbase.StartAppSDK;
 public class StartAppInitializer implements NetworkInitializer {
     @Override
     public void initialize(Context context, InitializerConfig config) {
-        StartAppSDK.init(context, config.getAppId(), true);
+        StartAppSDK.init(context, config.getAppId());
         StartAppSDK.setTestAdsEnabled(config.isDebug() || config.isTestMode());
-        StartAppAd.disableSplash();
-        StartAppSDK.enableReturnAds(false);
     }
 }

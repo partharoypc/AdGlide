@@ -19,7 +19,7 @@ public class AdMobAppOpenProvider implements AppOpenProvider {
     private String mAdUnitId;
 
     @Override
-    public void loadAppOpenAd(Context context, String adUnitId, AppOpenListener listener) {
+    public void loadAppOpenAd(Activity activity, String adUnitId, AppOpenListener listener) {
         if (isAdAvailable()) {
             listener.onAdLoaded();
             return;
@@ -35,7 +35,7 @@ public class AdMobAppOpenProvider implements AppOpenProvider {
 
         isLoadingAd = true;
         AdRequest request = new AdRequest.Builder().build();
-        AppOpenAd.load(context, adUnitId, request, new AppOpenAd.AppOpenAdLoadCallback() {
+        AppOpenAd.load(activity, adUnitId, request, new AppOpenAd.AppOpenAdLoadCallback() {
             @Override
             public void onAdLoaded(@NonNull AppOpenAd ad) {
                 com.partharoypc.adglide.util.AdMobHelper.resetCooldown(adUnitId);

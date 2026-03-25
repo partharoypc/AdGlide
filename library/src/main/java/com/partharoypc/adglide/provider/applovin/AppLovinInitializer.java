@@ -19,10 +19,10 @@ public class AppLovinInitializer implements NetworkInitializer {
 
         if (sdkKey != null && !sdkKey.trim().isEmpty() && !sdkKey.equals("0")) {
             AdGlideLog.d(TAG, "Initializing AppLovin SDK with programmatic key.");
-            builder = AppLovinSdkInitializationConfiguration.builder(sdkKey, context);
+            builder = AppLovinSdkInitializationConfiguration.builder(sdkKey);
         } else {
             AdGlideLog.d(TAG, "Initializing AppLovin SDK with manifest key.");
-            builder = AppLovinSdkInitializationConfiguration.builder(null, context);
+            builder = AppLovinSdkInitializationConfiguration.builder(null);
         }
 
         AppLovinSdkInitializationConfiguration initConfig = builder

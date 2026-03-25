@@ -18,9 +18,9 @@ public class MetaAppOpenProvider implements AppOpenProvider {
     private AppOpenListener activeListener;
 
     @Override
-    public void loadAppOpenAd(Context context, String adUnitId, AppOpenListener listener) {
+    public void loadAppOpenAd(Activity activity, String adUnitId, AppOpenListener listener) {
         this.activeListener = listener;
-        interstitialAd = new InterstitialAd(context, adUnitId);
+        interstitialAd = new InterstitialAd(activity, adUnitId);
         InterstitialAdListener interstitialAdListener = new InterstitialAdListener() {
             @Override
             public void onInterstitialDisplayed(Ad ad) {

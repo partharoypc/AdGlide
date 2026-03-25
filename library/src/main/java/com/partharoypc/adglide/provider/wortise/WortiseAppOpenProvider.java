@@ -16,7 +16,7 @@ public class WortiseAppOpenProvider implements AppOpenProvider, AppOpenAd.Listen
     private AppOpenListener listener;
 
     @Override
-    public void loadAppOpenAd(Context context, String adUnitId, AppOpenListener listener) {
+    public void loadAppOpenAd(Activity activity, String adUnitId, AppOpenListener listener) {
         if (isAdAvailable()) {
             listener.onAdLoaded();
             return;
@@ -26,7 +26,7 @@ public class WortiseAppOpenProvider implements AppOpenProvider, AppOpenAd.Listen
         }
         this.listener = listener;
         isLoadingAd = true;
-        appOpenAd = new AppOpenAd(context, adUnitId);
+        appOpenAd = new AppOpenAd(activity, adUnitId);
         appOpenAd.setListener(this);
         appOpenAd.loadAd();
     }

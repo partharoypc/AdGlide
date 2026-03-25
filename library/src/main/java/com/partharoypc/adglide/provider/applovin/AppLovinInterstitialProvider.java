@@ -15,7 +15,7 @@ public class AppLovinInterstitialProvider implements InterstitialProvider {
     @Override
     public void loadInterstitial(Activity activity, String adUnitId, InterstitialConfig config,
             InterstitialListener listener) {
-        maxInterstitialAd = new MaxInterstitialAd(adUnitId, AppLovinInitializer.getSdk(activity), activity);
+        maxInterstitialAd = new MaxInterstitialAd(adUnitId);
         maxInterstitialAd.setListener(new MaxAdListener() {
             @Override
             public void onAdLoaded(MaxAd ad) {
@@ -62,7 +62,7 @@ public class AppLovinInterstitialProvider implements InterstitialProvider {
     public void showInterstitial(Activity activity, InterstitialListener listener) {
         if (maxInterstitialAd != null && maxInterstitialAd.isReady()) {
             try {
-                maxInterstitialAd.showAd();
+                maxInterstitialAd.showAd(activity);
             } catch (Exception e) {
                 AdGlideLog.e(TAG, "Failed to show interstitial: " + e.getMessage());
                 listener.onAdShowFailed(e.getMessage());

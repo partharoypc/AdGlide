@@ -15,7 +15,7 @@ public class IronSourceAppOpenProvider implements AppOpenProvider {
     private AppOpenListener activeListener;
 
     @Override
-    public void loadAppOpenAd(Context context, String adUnitId, AppOpenListener listener) {
+    public void loadAppOpenAd(Activity activity, String adUnitId, AppOpenListener listener) {
         this.activeListener = listener;
         interstitialAd = new LevelPlayInterstitialAd(adUnitId);
         interstitialAd.setListener(new LevelPlayInterstitialAdListener() {

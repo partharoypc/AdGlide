@@ -11,19 +11,23 @@ import com.startapp.sdk.adsbase.adlisteners.AdEventListener;
 
 public class StartAppInterstitialProvider implements InterstitialProvider {
     private StartAppAd startAppAd;
+    private boolean isReady = false;
 
     @Override
     public void loadInterstitial(Activity activity, String adUnitId, InterstitialConfig config,
             InterstitialListener listener) {
+        isReady = false;
         startAppAd = new StartAppAd(activity);
         startAppAd.loadAd(new AdEventListener() {
             @Override
             public void onReceiveAd(Ad ad) {
+                isReady = true;
                 listener.onAdLoaded();
             }
 
             @Override
             public void onFailedToReceiveAd(Ad ad) {
+                isReady = false;
                 AdGlideLog.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_STARTAPP,
                         "Interstitial failed to load: " + ad.getErrorMessage());
                 listener.onAdFailedToLoad("StartApp failed to receive ad");
@@ -33,7 +37,7 @@ public class StartAppInterstitialProvider implements InterstitialProvider {
 
     @Override
     public void showInterstitial(Activity activity, InterstitialListener listener) {
-        if (startAppAd != null && startAppAd.isReady()) {
+        if (startAppAd != null && isReady) {
             startAppAd.showAd(new AdDisplayListener() {
                 @Override
                 public void adDisplayed(Ad ad) {
@@ -42,6 +46,7 @@ public class StartAppInterstitialProvider implements InterstitialProvider {
 
                 @Override
                 public void adHidden(Ad ad) {
+                    isReady = false;
                     listener.onAdDismissed();
                 }
 
@@ -50,6 +55,7 @@ public class StartAppInterstitialProvider implements InterstitialProvider {
                 }
 
                 public void adNotDisplayed(Ad ad) {
+                    isReady = false;
                     listener.onAdShowFailed("StartApp ad not displayed");
                 }
             });
@@ -60,7 +66,7 @@ public class StartAppInterstitialProvider implements InterstitialProvider {
 
     @Override
     public boolean isAdLoaded() {
-        return startAppAd != null && startAppAd.isReady();
+        return startAppAd != null && isReady;
     }
 
     @Override

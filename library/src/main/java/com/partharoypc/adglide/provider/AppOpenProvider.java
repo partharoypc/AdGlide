@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 
 public interface AppOpenProvider {
-    void loadAppOpenAd(Context context, String adUnitId, AppOpenListener listener);
+    void loadAppOpenAd(Activity activity, String adUnitId, AppOpenListener listener);
 
     void showAppOpenAd(Activity activity, AppOpenListener listener);
 

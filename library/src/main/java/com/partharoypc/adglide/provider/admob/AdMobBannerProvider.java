@@ -82,7 +82,7 @@ public class AdMobBannerProvider implements BannerProvider {
         if (!config.isAdaptive()) {
             return AdSize.BANNER;
         }
-        return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(activity,
+        return AdSize.getLargeAnchoredAdaptiveBannerAdSize(activity,
                 Tools.getAdaptiveBannerSize(activity));
     }
 }

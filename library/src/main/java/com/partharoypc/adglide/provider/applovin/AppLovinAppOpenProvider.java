@@ -18,7 +18,7 @@ public class AppLovinAppOpenProvider implements AppOpenProvider, MaxAdListener {
     private AppOpenListener listener;
 
     @Override
-    public void loadAppOpenAd(Context context, String adUnitId, AppOpenListener listener) {
+    public void loadAppOpenAd(Activity activity, String adUnitId, AppOpenListener listener) {
         if (isAdAvailable()) {
             listener.onAdLoaded();
             return;
@@ -28,7 +28,7 @@ public class AppLovinAppOpenProvider implements AppOpenProvider, MaxAdListener {
         }
         this.listener = listener;
         isLoadingAd = true;
-        appOpenAd = new MaxAppOpenAd(adUnitId, context);
+        appOpenAd = new MaxAppOpenAd(adUnitId);
         appOpenAd.setListener(this);
 
         appOpenAd.loadAd();

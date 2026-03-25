@@ -12,21 +12,25 @@ public class StartAppAppOpenProvider implements AppOpenProvider {
     private StartAppAd startAppAd;
     private boolean isShowing = false;
     private static final String TAG = "AdGlide.StartApp";
+    private boolean isReady = false;
     private AppOpenListener activeListener;
 
     @Override
-    public void loadAppOpenAd(Context context, String adUnitId, AppOpenListener listener) {
+    public void loadAppOpenAd(Activity activity, String adUnitId, AppOpenListener listener) {
         this.activeListener = listener;
-        startAppAd = new StartAppAd(context);
+        isReady = false;
+        startAppAd = new StartAppAd(activity);
         startAppAd.loadAd(StartAppAd.AdMode.AUTOMATIC, new AdEventListener() {
             @Override
             public void onReceiveAd(Ad ad) {
+                isReady = true;
                 AdGlideLog.d(TAG, "StartApp AppOpen loaded");
                 if (activeListener != null) activeListener.onAdLoaded();
             }
 
             @Override
             public void onFailedToReceiveAd(Ad ad) {
+                isReady = false;
                 AdGlideLog.e(TAG, "StartApp AppOpen failed to load: " + ad.getErrorMessage());
                 if (activeListener != null) activeListener.onAdFailedToLoad(ad.getErrorMessage());
             }
@@ -35,7 +39,7 @@ public class StartAppAppOpenProvider implements AppOpenProvider {
 
     @Override
     public boolean isAdAvailable() {
-        return startAppAd != null && startAppAd.isReady();
+        return startAppAd != null && isReady;
     }
 
     @Override

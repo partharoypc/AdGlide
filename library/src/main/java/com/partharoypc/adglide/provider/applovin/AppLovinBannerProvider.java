@@ -17,12 +17,13 @@ public class AppLovinBannerProvider implements BannerProvider {
     private static final String TAG = "AdGlide.AppLovin";
 
     @Override
+    @SuppressWarnings("deprecation")
     public void loadBanner(Activity activity, String adUnitId, BannerConfig config, BannerListener listener) {
         if (config.isMrec()) {
-            maxAdView = new MaxAdView(adUnitId, com.applovin.mediation.MaxAdFormat.MREC,
-                    AppLovinInitializer.getSdk(activity), activity);
+            maxAdView = new MaxAdView(adUnitId, com.applovin.mediation.MaxAdFormat.MREC, activity);
         } else {
-            maxAdView = new MaxAdView(adUnitId, AppLovinInitializer.getSdk(activity), activity);
+            maxAdView = new MaxAdView(adUnitId, activity);
+            maxAdView.setExtraParameter("adaptive_banner", "true");
         }
         maxAdView.setListener(new MaxAdViewAdListener() {
             @Override

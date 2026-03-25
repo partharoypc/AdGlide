@@ -21,6 +21,7 @@ public class StartAppNativeProvider implements NativeProvider {
     private StartAppNativeAd startAppNativeAd;
 
     @Override
+    @SuppressWarnings("deprecation")
     public void loadNativeAd(Activity activity, String adUnitId, NativeConfig config, NativeListener listener) {
         startAppNativeAd = new StartAppNativeAd(activity);
         NativeAdPreferences nativePrefs = new NativeAdPreferences()

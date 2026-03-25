@@ -29,7 +29,7 @@ public class HouseAdAppOpenProvider implements AppOpenProvider {
     private boolean isShowing = false;
 
     @Override
-    public void loadAppOpenAd(Context context, String adUnitId, AppOpenListener listener) {
+    public void loadAppOpenAd(Activity activity, String adUnitId, AppOpenListener listener) {
         this.config = AdGlide.getConfig();
         if (config == null || !config.isHouseAdEnabled() || config.getHouseAdInterstitialImage() == null
                 || config.getHouseAdInterstitialImage().isEmpty()) {
@@ -38,7 +38,7 @@ public class HouseAdAppOpenProvider implements AppOpenProvider {
             return;
         }
 
-        ImageDownloader.downloadImage(context, config.getHouseAdInterstitialImage(),
+        ImageDownloader.downloadImage(activity, config.getHouseAdInterstitialImage(),
                 new ImageDownloader.ImageLoaderCallback() {
                     @Override
                     public void onImageLoaded(Bitmap bitmap) {

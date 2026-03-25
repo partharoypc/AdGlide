@@ -18,7 +18,7 @@ public class AppLovinNativeProvider implements NativeProvider {
 
     @Override
     public void loadNativeAd(Activity activity, String adUnitId, NativeConfig config, NativeListener listener) {
-        nativeAdLoader = new MaxNativeAdLoader(adUnitId, AppLovinInitializer.getSdk(activity), activity);
+        nativeAdLoader = new MaxNativeAdLoader(adUnitId);
         nativeAdLoader.setNativeAdListener(new MaxNativeAdListener() {
             @Override
             public void onNativeAdLoaded(MaxNativeAdView nativeAdView, MaxAd ad) {

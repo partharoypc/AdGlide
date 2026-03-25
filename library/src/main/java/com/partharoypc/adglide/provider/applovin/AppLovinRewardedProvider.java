@@ -15,7 +15,7 @@ public class AppLovinRewardedProvider implements RewardedProvider {
 
     @Override
     public void loadRewardedAd(Activity activity, String adUnitId, RewardedConfig config, RewardedListener listener) {
-        rewardedAd = MaxRewardedAd.getInstance(adUnitId, AppLovinInitializer.getSdk(activity), activity);
+        rewardedAd = MaxRewardedAd.getInstance(adUnitId);
         rewardedAd.setListener(new MaxRewardedAdListener() {
             @Override
             public void onUserRewarded(MaxAd ad, MaxReward reward) {
@@ -64,7 +64,7 @@ public class AppLovinRewardedProvider implements RewardedProvider {
     public void showRewardedAd(Activity activity, RewardedListener listener) {
         if (rewardedAd != null && rewardedAd.isReady()) {
             try {
-                rewardedAd.showAd();
+                rewardedAd.showAd(activity);
             } catch (Exception e) {
                 AdGlideLog.e(TAG, "Failed to show rewarded: " + e.getMessage());
                 listener.onAdShowFailed(e.getMessage());
