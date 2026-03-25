@@ -1,6 +1,6 @@
 package com.partharoypc.adglide.provider;
 
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 import com.partharoypc.adglide.util.ReflectionUtils;
 import static com.partharoypc.adglide.util.Constant.*;
 
@@ -52,7 +52,7 @@ public class InterstitialProviderFactory {
         }
 
         if (className != null) {
-            Log.w(TAG, "SDK for Interstitial network [" + network + "] is not added to the project. Skipping.");
+            AdGlideLog.w(TAG, "SDK for Interstitial network [" + network + "] is not added to the project. Skipping.");
         }
 
         return null;

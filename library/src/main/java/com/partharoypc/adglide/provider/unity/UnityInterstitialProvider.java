@@ -1,7 +1,7 @@
 package com.partharoypc.adglide.provider.unity;
 
 import android.app.Activity;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 
 import com.partharoypc.adglide.provider.InterstitialProvider;
 import com.unity3d.ads.IUnityAdsLoadListener;
@@ -21,14 +21,14 @@ public class UnityInterstitialProvider implements InterstitialProvider {
         UnityAds.load(adUnitId, new IUnityAdsLoadListener() {
             @Override
             public void onUnityAdsAdLoaded(String placementId) {
-                Log.d(TAG, "Interstitial Ad loaded: " + placementId);
+                AdGlideLog.d(TAG, "Interstitial Ad loaded: " + placementId);
                 isLoaded = true;
                 listener.onAdLoaded();
             }
 
             @Override
             public void onUnityAdsFailedToLoad(String placementId, UnityAds.UnityAdsLoadError error, String message) {
-                Log.e(TAG, "Interstitial Ad failed to load: [" + error + "] " + message);
+                AdGlideLog.e(TAG, "Interstitial Ad failed to load: [" + error + "] " + message);
                 isLoaded = false;
                 listener.onAdFailedToLoad(message);
             }
@@ -42,7 +42,7 @@ public class UnityInterstitialProvider implements InterstitialProvider {
                 @Override
                 public void onUnityAdsShowFailure(String placementId, UnityAds.UnityAdsShowError error,
                         String message) {
-                    Log.e(TAG, "Interstitial Ad failed to show: [" + error + "] " + message);
+                    AdGlideLog.e(TAG, "Interstitial Ad failed to show: [" + error + "] " + message);
                     isLoaded = false;
                     listener.onAdShowFailed(message);
                 }

@@ -1,6 +1,6 @@
 package com.partharoypc.adglide.provider;
 
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 import com.partharoypc.adglide.util.ReflectionUtils;
 import static com.partharoypc.adglide.util.Constant.*;
 import static com.partharoypc.adglide.util.Constant.UNITY;
@@ -38,7 +38,7 @@ public class NativeProviderFactory {
                 checkClass = "com.ironsource.mediationsdk.IronSource";
             }
             case UNITY -> {
-                Log.w(TAG, "Unity Ads does not support Native Ad format. Trying backup.");
+                AdGlideLog.w(TAG, "Unity Ads does not support Native Ad format. Trying backup.");
                 return null;
             }
             case HOUSE_AD -> {
@@ -51,7 +51,7 @@ public class NativeProviderFactory {
         }
 
         if (className != null) {
-            Log.w(TAG, "SDK for Native network [" + network + "] is not added to the project. Skipping.");
+            AdGlideLog.w(TAG, "SDK for Native network [" + network + "] is not added to the project. Skipping.");
         }
 
         return null;

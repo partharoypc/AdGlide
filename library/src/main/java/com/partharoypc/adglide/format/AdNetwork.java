@@ -3,7 +3,7 @@ package com.partharoypc.adglide.format;
 import android.app.Activity;
 import android.content.Context;
 import com.partharoypc.adglide.AdGlideConfig;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 import androidx.annotation.NonNull;
 import com.partharoypc.adglide.AdGlideNetwork;
 import com.partharoypc.adglide.util.Tools;
@@ -64,7 +64,7 @@ public class AdNetwork {
 
         public Initialize build() {
             if (config == null || context == null) {
-                Log.e(TAG, "AdGlide not initialized: config or context is null.");
+                AdGlideLog.e(TAG, "AdGlide not initialized: config or context is null.");
                 return this;
             }
             initAds();
@@ -75,16 +75,16 @@ public class AdNetwork {
         public void initAds() {
             if (config.getAdStatus()) {
                 if (!Tools.isNetworkAvailable(context)) {
-                    Log.e(TAG, "Internet connection not available. Skipping Primary Ads initialization.");
+                    AdGlideLog.e(TAG, "Internet connection not available. Skipping Primary Ads initialization.");
                     return;
                 }
                 String adNetwork = config.getPrimaryNetwork();
                 AdGlideNetwork primaryNetwork = AdGlideNetwork.fromString(adNetwork);
                 if (primaryNetwork == AdGlideNetwork.NONE && !adNetwork.isEmpty()) {
-                    Log.w(TAG, "Unknown Primary Ad Network: [" + adNetwork + "]. Skipping initialization.");
+                    AdGlideLog.w(TAG, "Unknown Primary Ad Network: [" + adNetwork + "]. Skipping initialization.");
                 } else {
                     initializeSdk(adNetwork);
-                    Log.d(TAG, "[" + adNetwork + "] is selected as Primary Ads");
+                    AdGlideLog.d(TAG, "[" + adNetwork + "] is selected as Primary Ads");
                 }
             }
         }
@@ -92,27 +92,35 @@ public class AdNetwork {
         public void initBackupAds() {
             if (config.getAdStatus()) {
                 if (!Tools.isNetworkAvailable(context)) {
-                    Log.e(TAG, "Internet connection not available. Skipping Backup Ads initialization.");
+                    AdGlideLog.e(TAG, "Internet connection not available. Skipping Backup Ads initialization.");
                     return;
                 }
 
                 List<String> backupAdNetworks = config.getBackupNetworks();
                 String primaryNetwork = config.getPrimaryNetwork();
 
+                // 1. Prioritize Bidding Networks to ensure they are ready for real-time auctions
                 for (String network : backupAdNetworks) {
-                    AdGlideNetwork backupNetwork = AdGlideNetwork.fromString(network);
-                    if (backupNetwork == AdGlideNetwork.NONE && !network.isEmpty()) {
-                        Log.w(TAG, "Unknown Backup Ad Network: [" + network + "]. Skipping initialization.");
+                    if (network.contains("bidding") && !network.equals(primaryNetwork)) {
+                        initializeSdk(network);
+                        AdGlideLog.d(TAG, "[" + network + "] Bidding Network initialized with priority.");
+                    }
+                }
+
+                // 2. Initialize remaining backup networks
+                for (String network : backupAdNetworks) {
+                    if (network.contains("bidding") || network.equals(primaryNetwork)) {
                         continue;
                     }
 
-                    // Skip if it's the same as the primary network (already initialized)
-                    if (network.equals(primaryNetwork)) {
+                    AdGlideNetwork backupNetwork = AdGlideNetwork.fromString(network);
+                    if (backupNetwork == AdGlideNetwork.NONE && !network.isEmpty()) {
+                        AdGlideLog.w(TAG, "Unknown Backup Ad Network: [" + network + "]. Skipping initialization.");
                         continue;
                     }
 
                     initializeSdk(network);
-                    Log.d(TAG, "[" + network + "] is selected as Backup Ads");
+                    AdGlideLog.d(TAG, "[" + network + "] is selected as Backup Ads");
                 }
             }
         }
@@ -125,7 +133,7 @@ public class AdNetwork {
                     initializer.initialize(context, this);
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Failed to initialize " + networkName + " SDK. Error: " + e.getMessage());
+                AdGlideLog.e(TAG, "Failed to initialize " + networkName + " SDK. Error: " + e.getMessage());
             }
         }
 

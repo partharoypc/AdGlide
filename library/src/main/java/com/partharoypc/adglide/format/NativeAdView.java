@@ -1,7 +1,7 @@
 package com.partharoypc.adglide.format;
 
 import android.app.Activity;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -129,24 +129,24 @@ public class NativeAdView {
             try {
                 if (adStatus) {
                     if (!Tools.isNetworkAvailable(activity)) {
-                        Log.e(TAG, "Internet connection not available. Skipping Primary Native Ad load.");
+                        AdGlideLog.e(TAG, "Internet connection not available. Skipping Primary Native Ad load.");
                         return;
                     }
                     if (waterfallManager != null) {
                         waterfallManager.reset();
                     }
                     if (view == null) {
-                        Log.e(TAG, "Native Ad View is null. Cannot find container.");
+                        AdGlideLog.e(TAG, "Native Ad View is null. Cannot find container.");
                         return;
                     }
                     nativeAdViewContainer = view.findViewById(R.id.native_ad_view_container);
-                    Log.d(TAG, "Native Ad is enabled");
+                    AdGlideLog.d(TAG, "Native Ad is enabled");
                     loadAdFromNetwork(adNetwork);
                 } else {
-                    Log.d(TAG, "Native Ad is disabled");
+                    AdGlideLog.d(TAG, "Native Ad is disabled");
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Error loading Native Ad: " + e.getMessage());
+                AdGlideLog.e(TAG, "Error loading Native Ad: " + e.getMessage());
             }
         }
 
@@ -154,7 +154,7 @@ public class NativeAdView {
             try {
                 if (adStatus) {
                     if (!Tools.isNetworkAvailable(activity)) {
-                        Log.e(TAG, "Internet connection not available. Skipping Backup Native Ad load.");
+                        AdGlideLog.e(TAG, "Internet connection not available. Skipping Backup Native Ad load.");
                         return;
                     }
                     if (waterfallManager == null) {
@@ -167,15 +167,15 @@ public class NativeAdView {
 
                     String networkToLoad = waterfallManager.getNext();
                     if (networkToLoad == null) {
-                        Log.d(TAG, "All backup native ads failed to load");
+                        AdGlideLog.d(TAG, "All backup native ads failed to load");
                         return;
                     }
 
-                    Log.d(TAG, "[" + networkToLoad + "] is selected as Backup Native Ad");
+                    AdGlideLog.d(TAG, "[" + networkToLoad + "] is selected as Backup Native Ad");
                     loadAdFromNetwork(networkToLoad);
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Error loading Backup Native Ad: " + e.getMessage());
+                AdGlideLog.e(TAG, "Error loading Backup Native Ad: " + e.getMessage());
             }
         }
 
@@ -199,16 +199,16 @@ public class NativeAdView {
 
                         @Override
                         public void onAdFailedToLoad(String error) {
-                            Log.e(TAG, "Native Ad failed to load for " + networkToLoad + ": " + error);
+                            AdGlideLog.e(TAG, "Native Ad failed to load for " + networkToLoad + ": " + error);
                             loadBackupNativeAd();
                         }
                     });
                 } else {
-                    Log.w(TAG, "No NativeProvider available for " + networkToLoad);
+                    AdGlideLog.w(TAG, "No NativeProvider available for " + networkToLoad);
                     loadBackupNativeAd();
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Failed to load native ad for " + networkToLoad + ". Error: " + e.getMessage());
+                AdGlideLog.e(TAG, "Failed to load native ad for " + networkToLoad + ". Error: " + e.getMessage());
                 loadBackupNativeAd();
             }
         }
@@ -242,7 +242,7 @@ public class NativeAdView {
                         currentNativeAdView = adView;
                     }
                 } catch (Exception e) {
-                    Log.e(TAG, "Error displaying native ad view: " + e.getMessage());
+                    AdGlideLog.e(TAG, "Error displaying native ad view: " + e.getMessage());
                 }
             });
         }

@@ -1,7 +1,7 @@
 package com.partharoypc.adglide.helper;
 
 import android.content.Context;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 
 import com.facebook.ads.AdSettings;
 import com.facebook.ads.AudienceNetworkAds;
@@ -21,7 +21,9 @@ public class AudienceNetworkInitializeHelper implements AudienceNetworkAds.InitL
      * @param context Application or Activity.
      */
     public static void initialize(Context context) {
-        initializeAd(context, BuildConfig.DEBUG);
+        com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+        boolean isDebug = config != null && config.isDebug();
+        initializeAd(context, isDebug);
     }
 
     public static void initializeAd(Context context, boolean debug) {
@@ -29,7 +31,7 @@ public class AudienceNetworkInitializeHelper implements AudienceNetworkAds.InitL
             AdSettings.turnOnSDKDebugger(context);
             AdSettings.setTestMode(true);
             AdSettings.setIntegrationErrorMode(AdSettings.IntegrationErrorMode.INTEGRATION_ERROR_CRASH_DEBUG_MODE);
-            Log.d(AudienceNetworkAds.TAG, "Meta Audience Network initialized in Debug Mode");
+            AdGlideLog.d(AudienceNetworkAds.TAG, "Meta Audience Network initialized in Debug Mode");
         }
 
         if (!AudienceNetworkAds.isInitialized(context)) {
@@ -50,6 +52,6 @@ public class AudienceNetworkInitializeHelper implements AudienceNetworkAds.InitL
 
     @Override
     public void onInitialized(AudienceNetworkAds.InitResult result) {
-        Log.d(AudienceNetworkAds.TAG, "Meta SDK Init Result: " + result.getMessage());
+        AdGlideLog.d(AudienceNetworkAds.TAG, "Meta SDK Init Result: " + result.getMessage());
     }
 }

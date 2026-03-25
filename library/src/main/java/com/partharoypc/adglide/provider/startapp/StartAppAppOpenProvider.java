@@ -2,7 +2,7 @@ package com.partharoypc.adglide.provider.startapp;
 
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 import com.partharoypc.adglide.provider.AppOpenProvider;
 import com.startapp.sdk.adsbase.Ad;
 import com.startapp.sdk.adsbase.StartAppAd;
@@ -21,13 +21,13 @@ public class StartAppAppOpenProvider implements AppOpenProvider {
         startAppAd.loadAd(StartAppAd.AdMode.AUTOMATIC, new AdEventListener() {
             @Override
             public void onReceiveAd(Ad ad) {
-                Log.d(TAG, "StartApp AppOpen loaded");
+                AdGlideLog.d(TAG, "StartApp AppOpen loaded");
                 if (activeListener != null) activeListener.onAdLoaded();
             }
 
             @Override
             public void onFailedToReceiveAd(Ad ad) {
-                Log.e(TAG, "StartApp AppOpen failed to load: " + ad.getErrorMessage());
+                AdGlideLog.e(TAG, "StartApp AppOpen failed to load: " + ad.getErrorMessage());
                 if (activeListener != null) activeListener.onAdFailedToLoad(ad.getErrorMessage());
             }
         });

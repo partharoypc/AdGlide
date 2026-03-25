@@ -16,14 +16,14 @@
 
 ---
 
-## ✨ What's New in v1.9.0
+## ✨ What's New in v1.9.0 (Super Perfect Edition)
 
-- **🏠 Offline House Ads** — Intelligent failover to cached House Ads (Banner, Interstitial, Native) when no internet is detected.
-- **⏱️ Configurable Timeouts** — Fine-tune waterfall speed with `.adResponseTimeoutMs()` to prevent slow network delays.
-- **🎨 Native House Ad Support** — Fully customizable House Ads for all native templates (Small, Medium, Video).
-- **🛡️ Enhanced GDPR/UMP** — Universal consent handling for seamless compliance across all ad networks.
-- **🚀 Refactored Ad Pooling** — Generic, lightweight pooling engine for zero-wait ad delivery.
-- **🧩 Fluent Kotlin DSL** — Modern, type-safe configuration via `adGlideConfig { ... }` blocks.
+- **📱 "Super Perfect" App Open Ads** — New rotation-proof lifecycle management. Ads only trigger on true app-resume, never during screen rotations.
+- **🛠️ Centralized Smart Test Mode** — Use a single `.testMode(true)` flag to automatically sync all SDK logs, HUD, and network debuggers.
+- **🌊 Intelligent Multi-Backup Waterfall** — Automatic redundant loader filtering for faster transitions to backup networks.
+- **⚡ "Zero-Wait" Pre-loading** — Optimized pooling engine with immediate background refills for instant ad delivery.
+- **🔄 Banner Auto-Refresh** — Background-rotation for banners with flicker-free replacement.
+- **🏠 Expanded House Ads** — Native House Ads now support full click-tracking and optimized video templates.
 
 ---
 
@@ -42,10 +42,10 @@ AdGlide supports four integration patterns:
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Banner** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Interstitial** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Rewarded** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| **Rewarded Interstitial** | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Rewarded** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Rewarded Interstitial** | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
 | **Native** | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ |
-| **App Open** | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **App Open** | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ |
 | **Bidding** | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
 | **Waterfall** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
@@ -142,12 +142,13 @@ public class MyApplication extends Application {
         AdGlideConfig config = new AdGlideConfig.Builder()
             // ─── Global Settings ─────────────────────────────────────────
             .enableAds(true)                         // Master on/off switch
-            .testMode(false)                         // ⚠️ Set to FALSE for production
-            .debug(true)                             // Verbose console logging
+            .testMode(true)                          // 🛡️ NEW: Centralized one-flag diagnostics
+            // .debug(true)                          // (Optional) TestMode already enables this
+            // .enableDebugHUD(true)                 // (Optional) TestMode already enables this
 
             // ─── Waterfall Strategy (Type-Safe Enum) ─────────────────────
             .primaryNetwork(AdGlideNetwork.ADMOB)
-            .backupNetworks(AdGlideNetwork.META, AdGlideNetwork.WORTISE)
+            .backupNetworks(AdGlideNetwork.META, AdGlideNetwork.UNITY, AdGlideNetwork.IRONSOURCE)
 
             // ─── Format Toggles ──────────────────────────────────────────
             .bannerEnabled(true)
@@ -178,6 +179,12 @@ public class MyApplication extends Application {
             .adMobRewardedIntId("ca-app-pub-XXXXXXXX~XXXXXXXX")
             .adMobNativeId("ca-app-pub-XXXXXXXX~XXXXXXXX")
             .adMobAppOpenId("ca-app-pub-XXXXXXXX~XXXXXXXX")
+
+            // ─── Bidding & Mediation (New in v2.7.0) ─────────────────────
+            .unityRewardedIntId("unity_rewarded_int")
+            .ironSourceRewardedIntId("iron_rewarded_int")
+            .ironSourceAppOpenId("iron_app_open")
+            .startAppAppOpenId("startapp_app_open")
 
             // ─── House Ads (Offline Failover) ───────────────────────────
             .houseAdEnabled(true)
@@ -252,6 +259,7 @@ AdGlide.showBanner(activity, binding.bannerContainer);
 new BannerAd.Builder(activity)
     .container(binding.bannerContainer)
     .collapsible(true) // ↗️ Up to 5× eCPM boost (AdMob only)
+    .autoRefresh(30)   // 🔄 NEW: Auto-refresh with flicker-free background load
     .load();
 ```
 

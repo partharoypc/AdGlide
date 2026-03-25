@@ -1,6 +1,7 @@
 package com.partharoypc.adglide.provider.startapp;
 
 import android.app.Activity;
+import com.partharoypc.adglide.util.AdGlideLog;
 import android.view.View;
 import com.partharoypc.adglide.provider.BannerProvider;
 import com.startapp.sdk.ads.banner.Banner;
@@ -19,7 +20,7 @@ public class StartAppBannerProvider implements BannerProvider {
 
                 @Override
                 public void onFailedToReceiveAd(View view) {
-                    android.util.Log.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_STARTAPP,
+                    AdGlideLog.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_STARTAPP,
                             "MREC failed to load");
                     listener.onAdFailedToLoad("StartApp failed to receive ad");
                 }
@@ -41,7 +42,7 @@ public class StartAppBannerProvider implements BannerProvider {
 
                 @Override
                 public void onFailedToReceiveAd(View view) {
-                    android.util.Log.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_STARTAPP,
+                    AdGlideLog.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_STARTAPP,
                             "Banner failed to load");
                     listener.onAdFailedToLoad("StartApp failed to receive ad");
                 }
@@ -63,8 +64,6 @@ public class StartAppBannerProvider implements BannerProvider {
 
     @Override
     public void destroy() {
-        // StartApp Banner doesn't have a direct destroy() in the snippet,
-        // but it's good practice if it did.
         banner = null;
     }
 }

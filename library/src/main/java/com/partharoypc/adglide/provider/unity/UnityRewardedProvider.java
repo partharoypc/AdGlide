@@ -1,7 +1,7 @@
 package com.partharoypc.adglide.provider.unity;
 
 import android.app.Activity;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 
 import com.partharoypc.adglide.provider.RewardedProvider;
 import com.unity3d.ads.IUnityAdsLoadListener;
@@ -19,14 +19,14 @@ public class UnityRewardedProvider implements RewardedProvider {
         UnityAds.load(adUnitId, new IUnityAdsLoadListener() {
             @Override
             public void onUnityAdsAdLoaded(String placementId) {
-                Log.d(TAG, "Rewarded Ad loaded: " + placementId);
+                AdGlideLog.d(TAG, "Rewarded Ad loaded: " + placementId);
                 isAvailable = true;
                 listener.onAdLoaded();
             }
 
             @Override
             public void onUnityAdsFailedToLoad(String placementId, UnityAds.UnityAdsLoadError error, String message) {
-                Log.e(TAG, "Rewarded Ad failed to load: [" + error + "] " + message);
+                AdGlideLog.e(TAG, "Rewarded Ad failed to load: [" + error + "] " + message);
                 isAvailable = false;
                 listener.onAdFailedToLoad(message);
             }
@@ -49,7 +49,7 @@ public class UnityRewardedProvider implements RewardedProvider {
                 @Override
                 public void onUnityAdsShowFailure(String placementId, UnityAds.UnityAdsShowError error,
                         String message) {
-                    Log.e(TAG, "Rewarded Ad failed to show: [" + error + "] " + message);
+                    AdGlideLog.e(TAG, "Rewarded Ad failed to show: [" + error + "] " + message);
                     isAvailable = false;
                     listener.onAdShowFailed(message);
                 }

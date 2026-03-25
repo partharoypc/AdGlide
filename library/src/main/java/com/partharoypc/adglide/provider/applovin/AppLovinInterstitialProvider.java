@@ -1,7 +1,7 @@
 package com.partharoypc.adglide.provider.applovin;
 
 import android.app.Activity;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 import com.partharoypc.adglide.provider.InterstitialProvider;
 import com.applovin.mediation.MaxAd;
 import com.applovin.mediation.MaxAdListener;
@@ -19,20 +19,20 @@ public class AppLovinInterstitialProvider implements InterstitialProvider {
         maxInterstitialAd.setListener(new MaxAdListener() {
             @Override
             public void onAdLoaded(MaxAd ad) {
-                Log.d(TAG, "Interstitial Ad loaded");
+                AdGlideLog.d(TAG, "Interstitial Ad loaded");
                 com.partharoypc.adglide.util.PerformanceLogger.log(TAG, "Interstitial loaded: " + adUnitId);
                 listener.onAdLoaded();
             }
 
             @Override
             public void onAdLoadFailed(String adUnitId, MaxError error) {
-                Log.e(TAG, "Interstitial Ad failed to load: [" + error.getCode() + "] " + error.getMessage());
+                AdGlideLog.e(TAG, "Interstitial Ad failed to load: [" + error.getCode() + "] " + error.getMessage());
                 listener.onAdFailedToLoad(error.getMessage());
             }
 
             @Override
             public void onAdDisplayFailed(MaxAd ad, MaxError error) {
-                Log.e(TAG, "Interstitial Ad failed to display: [" + error.getCode() + "] " + error.getMessage());
+                AdGlideLog.e(TAG, "Interstitial Ad failed to display: [" + error.getCode() + "] " + error.getMessage());
                 listener.onAdShowFailed(error.getMessage());
             }
 
@@ -54,7 +54,7 @@ public class AppLovinInterstitialProvider implements InterstitialProvider {
 
 
 
-        Log.d(TAG, "Loading Interstitial Ad: " + adUnitId);
+        AdGlideLog.d(TAG, "Loading Interstitial Ad: " + adUnitId);
         maxInterstitialAd.loadAd();
     }
 
@@ -64,7 +64,7 @@ public class AppLovinInterstitialProvider implements InterstitialProvider {
             try {
                 maxInterstitialAd.showAd();
             } catch (Exception e) {
-                Log.e(TAG, "Failed to show interstitial: " + e.getMessage());
+                AdGlideLog.e(TAG, "Failed to show interstitial: " + e.getMessage());
                 listener.onAdShowFailed(e.getMessage());
             }
         } else {

@@ -1,7 +1,7 @@
 package com.partharoypc.adglide.provider.applovin;
 
 import android.content.Context;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 import com.partharoypc.adglide.provider.NetworkInitializer;
 import com.applovin.sdk.AppLovinMediationProvider;
 import com.applovin.sdk.AppLovinSdk;
@@ -18,10 +18,10 @@ public class AppLovinInitializer implements NetworkInitializer {
         AppLovinSdkInitializationConfiguration.Builder builder;
 
         if (sdkKey != null && !sdkKey.trim().isEmpty() && !sdkKey.equals("0")) {
-            Log.d(TAG, "Initializing AppLovin SDK with programmatic key.");
+            AdGlideLog.d(TAG, "Initializing AppLovin SDK with programmatic key.");
             builder = AppLovinSdkInitializationConfiguration.builder(sdkKey, context);
         } else {
-            Log.d(TAG, "Initializing AppLovin SDK with manifest key.");
+            AdGlideLog.d(TAG, "Initializing AppLovin SDK with manifest key.");
             builder = AppLovinSdkInitializationConfiguration.builder(null, context);
         }
 
@@ -34,7 +34,7 @@ public class AppLovinInitializer implements NetworkInitializer {
             sharedSdk.getSettings().setVerboseLogging(true);
         }
         sharedSdk.initialize(initConfig, configuration -> {
-            Log.d(TAG, "AppLovin SDK initialized successfully.");
+            AdGlideLog.d(TAG, "AppLovin SDK initialized successfully.");
         });
     }
 

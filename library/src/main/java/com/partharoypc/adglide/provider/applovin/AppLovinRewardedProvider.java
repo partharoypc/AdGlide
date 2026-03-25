@@ -1,7 +1,7 @@
 package com.partharoypc.adglide.provider.applovin;
 
 import android.app.Activity;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 import com.applovin.mediation.MaxAd;
 import com.applovin.mediation.MaxError;
 import com.applovin.mediation.MaxReward;
@@ -24,7 +24,7 @@ public class AppLovinRewardedProvider implements RewardedProvider {
 
             @Override
             public void onAdLoaded(MaxAd ad) {
-                Log.d(TAG, "Rewarded Ad loaded");
+                AdGlideLog.d(TAG, "Rewarded Ad loaded");
                 listener.onAdLoaded();
             }
 
@@ -45,21 +45,18 @@ public class AppLovinRewardedProvider implements RewardedProvider {
 
             @Override
             public void onAdLoadFailed(String adUnitId, MaxError error) {
-                Log.e(TAG, "Rewarded Ad failed to load: [" + error.getCode() + "] " + error.getMessage());
+                AdGlideLog.e(TAG, "Rewarded Ad failed to load: [" + error.getCode() + "] " + error.getMessage());
                 listener.onAdFailedToLoad(error.getMessage());
             }
 
             @Override
             public void onAdDisplayFailed(MaxAd ad, MaxError error) {
-                Log.e(TAG, "Rewarded Ad failed to display: [" + error.getCode() + "] " + error.getMessage());
+                AdGlideLog.e(TAG, "Rewarded Ad failed to display: [" + error.getCode() + "] " + error.getMessage());
                 com.partharoypc.adglide.util.PerformanceLogger.error(TAG, "Rewarded show failed: " + error.getMessage());
                 listener.onAdShowFailed(error.getMessage());
             }
         });
-
-
-
-        Log.d(TAG, "Loading Rewarded Ad: " + adUnitId);
+        AdGlideLog.d(TAG, "Loading Rewarded Ad: " + adUnitId);
         rewardedAd.loadAd();
     }
 
@@ -69,7 +66,7 @@ public class AppLovinRewardedProvider implements RewardedProvider {
             try {
                 rewardedAd.showAd();
             } catch (Exception e) {
-                Log.e(TAG, "Failed to show rewarded: " + e.getMessage());
+                AdGlideLog.e(TAG, "Failed to show rewarded: " + e.getMessage());
                 listener.onAdShowFailed(e.getMessage());
             }
         } else {

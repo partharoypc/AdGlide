@@ -1,7 +1,7 @@
 package com.partharoypc.adglide.provider.admob;
 
 import android.content.Context;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 import com.partharoypc.adglide.provider.NetworkInitializer;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.initialization.AdapterStatus;
@@ -18,7 +18,7 @@ public class AdMobInitializer implements NetworkInitializer {
             for (String adapterClass : statusMap.keySet()) {
                 AdapterStatus adapterStatus = statusMap.get(adapterClass);
                 if (adapterStatus != null) {
-                    Log.d(TAG, String.format("Adapter name: %s, Description: %s, Latency: %d",
+                    AdGlideLog.d(TAG, String.format("Adapter name: %s, Description: %s, Latency: %d",
                             adapterClass, adapterStatus.getDescription(), adapterStatus.getLatency()));
                 }
             }

@@ -1,6 +1,7 @@
 package com.partharoypc.adglide.util;
 
-import android.util.Log;
+import com.partharoypc.adglide.AdGlideConfig;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +40,12 @@ public class PerformanceLogger {
     }
 
     private static synchronized void log(String category, String message, String level) {
-        Log.d(TAG, "[" + category + "] " + message);
+        AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+        if (config != null && !config.isDebug()) {
+            return;
+        }
+
+        AdGlideLog.d(TAG, "[" + category + "] " + message);
         if (logs.size() >= MAX_LOGS) {
             logs.remove(0);
         }

@@ -25,7 +25,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.switchmaterial.SwitchMaterial;
-import com.partharoypc.adglide.gdpr.GDPR;
+import com.partharoypc.adglide.AdGlide;
+import com.partharoypc.adglide.util.AdGlideLog;
 import com.partharoypc.adglidedemo.R;
 import com.partharoypc.adglidedemo.adapter.AdapterNetwork;
 import com.partharoypc.adglidedemo.data.Constant;
@@ -281,7 +282,9 @@ public class ActivitySettings extends AppCompatActivity {
 
         Button btnGdpr = findViewById(R.id.btn_gdpr);
         btnGdpr.setOnClickListener(v -> {
-            new GDPR(this).resetConsent();
+            AdGlide.requestConsent(this, () -> {
+                AdGlideLog.d("Settings", "Consent reset requested and updated");
+            });
         });
     }
 
@@ -295,7 +298,7 @@ public class ActivitySettings extends AppCompatActivity {
                 .appLovinSdkKey(getResources().getString(R.string.app_lovin_sdk_key))
                 .ironSourceAppKey(Constant.IRONSOURCE_APP_KEY)
                 .wortiseAppId(Constant.WORTISE_APP_ID)
-                .debug(com.partharoypc.adglidedemo.BuildConfig.DEBUG)
+                .testMode(Constant.TEST_MODE)
 
                 // Banner
                 .adMobBannerId(Constant.ADMOB_BANNER_ID)
@@ -324,12 +327,16 @@ public class ActivitySettings extends AppCompatActivity {
                 // Rewarded Interstitial
                 .adMobRewardedIntId(Constant.ADMOB_REWARDED_INTERSTITIAL_ID)
                 .appLovinRewardedIntId(Constant.APPLOVIN_REWARDED_INT_ID)
+                .unityRewardedIntId(Constant.UNITY_REWARDED_INT_ID)
+                .ironSourceRewardedIntId(Constant.IRONSOURCE_REWARDED_INT_ID)
                 .wortiseRewardedIntId(Constant.WORTISE_REWARDED_INTERSTITIAL_ID)
 
                 // App Open
                 .adMobAppOpenId(Constant.ADMOB_APP_OPEN_AD_ID)
                 .metaAppOpenId(Constant.META_APP_OPEN_ID)
                 .appLovinAppOpenId(Constant.APPLOVIN_APP_OPEN_AP_ID)
+                .startAppAppOpenId(Constant.STARTAPP_APP_OPEN_ID)
+                .ironSourceAppOpenId(Constant.IRONSOURCE_APP_OPEN_ID)
                 .wortiseAppOpenId(Constant.WORTISE_APP_OPEN_AD_ID)
 
                 // Native
@@ -355,17 +362,10 @@ public class ActivitySettings extends AppCompatActivity {
                 .enableDebugHUD(Constant.ENABLE_DEBUG_HUD)
                 .excludeOpenAdFrom(ActivitySplash.class, ActivitySettings.class)
                 .enableGDPR(true)
-                .debugGDPR(com.partharoypc.adglidedemo.BuildConfig.DEBUG)
-                .houseAdEnabled(Constant.HOUSE_AD_ENABLE)
-                .houseAdBannerImage(Constant.HOUSE_AD_BANNER_IMAGE)
-                .houseAdBannerClickUrl(Constant.HOUSE_AD_BANNER_URL)
-                .houseAdInterstitialImage(Constant.HOUSE_AD_INTERSTITIAL_IMAGE)
-                .houseAdInterstitialClickUrl(Constant.HOUSE_AD_INTERSTITIAL_URL)
-                .houseAdNativeTitle(Constant.HOUSE_AD_NATIVE_TITLE)
-                .houseAdNativeDescription(Constant.HOUSE_AD_NATIVE_DESC)
                 .houseAdNativeCTA(Constant.HOUSE_AD_NATIVE_CTA)
                 .houseAdNativeImage(Constant.HOUSE_AD_NATIVE_IMAGE)
                 .houseAdNativeIcon(Constant.HOUSE_AD_NATIVE_ICON)
+                .houseAdNativeClickUrl(Constant.HOUSE_AD_NATIVE_URL)
                 .build();
 
         com.partharoypc.adglide.AdGlide.initialize(getApplication(), config);

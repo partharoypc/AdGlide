@@ -1,7 +1,7 @@
 package com.partharoypc.adglide.provider.wortise;
 
 import android.app.Activity;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 import androidx.annotation.NonNull;
 import com.partharoypc.adglide.provider.InterstitialProvider;
 import com.wortise.ads.AdError;
@@ -69,7 +69,7 @@ public class WortiseInterstitialProvider implements InterstitialProvider {
             try {
                 interstitialAd.showAd();
             } catch (Exception e) {
-                Log.e("AdGlide.Wortise", "Failed to show interstitial: " + e.getMessage());
+                AdGlideLog.e("AdGlide.Wortise", "Failed to show interstitial: " + e.getMessage());
                 listener.onAdShowFailed(e.getMessage());
             }
         } else {

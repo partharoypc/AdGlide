@@ -6,7 +6,7 @@ import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Base64;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -47,7 +47,7 @@ public class ImageDownloader {
                 if (cacheFile.exists()) {
                     Bitmap offlineBitmap = BitmapFactory.decodeStream(new FileInputStream(cacheFile));
                     if (offlineBitmap != null) {
-                        Log.d(TAG, "Loaded House Ad from offline disk cache");
+                        AdGlideLog.d(TAG, "Loaded House Ad from offline disk cache");
                         mainHandler.post(() -> callback.onImageLoaded(offlineBitmap));
                         return;
                     }
@@ -76,7 +76,7 @@ public class ImageDownloader {
                     mainHandler.post(() -> callback.onError(new Exception("Failed to decode image from " + urlString)));
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Error downloading image: " + e.getMessage());
+                AdGlideLog.e(TAG, "Error downloading image: " + e.getMessage());
                 mainHandler.post(() -> callback.onError(e));
             }
         });

@@ -1,7 +1,7 @@
 package com.partharoypc.adglide.format;
 
 import android.app.Activity;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -39,6 +39,10 @@ public class BannerAd {
         private boolean darkTheme = false;
         private boolean collapsibleBanner = false;
         private boolean adaptiveBanner = true;
+        
+        private int autoRefreshSeconds = 0; // 0 means no auto-refresh
+        private android.os.Handler refreshHandler;
+        private Runnable refreshRunnable;
 
         public Builder(Activity activity) {
             this.activityRef = new java.lang.ref.WeakReference<>(activity);
@@ -108,12 +112,17 @@ public class BannerAd {
             this.customContainer = container;
             return this;
         }
+        
+        @NonNull
+        public Builder autoRefresh(int seconds) {
+            this.autoRefreshSeconds = seconds;
+            return this;
+        }
 
         public void loadBannerAd(AdGlideCallback callback) {
             Activity activity = activityRef != null ? activityRef.get() : null;
-            if (activity == null) {
-                Log.e(TAG, "Cannot load Banner Ad: Activity reference is null.");
-                if (callback != null) callback.onAdFailedToLoad("Activity is null");
+            if (activity == null || activity.isFinishing()) {
+                stopAutoRefresh();
                 return;
             }
             if (adLoader == null) return;
@@ -124,27 +133,26 @@ public class BannerAd {
 
         private void loadAdFromNetwork(String networkToLoad, com.partharoypc.adglide.util.AdLoader.LoadResultCallback resultCallback, AdGlideCallback callback) {
             try {
-                destroyAndDetachBanner();
+                // Do not destroy current banner immediately to avoid flicker during background refresh
                 String adUnitId = getAdUnitIdForNetwork(networkToLoad);
-                Log.d(TAG, "Loading [" + networkToLoad.toUpperCase(java.util.Locale.ROOT) + "] Banner Ad with ID: "
+                AdGlideLog.d(TAG, "Loading [" + networkToLoad.toUpperCase(java.util.Locale.ROOT) + "] Banner Ad with ID: "
                         + adUnitId);
                 if (adUnitId == null || adUnitId.trim().isEmpty()
                         || (adUnitId.equals("0") && !networkToLoad.equals(STARTAPP))) {
-                    Log.d(TAG, "Ad unit ID for " + networkToLoad + " is invalid. Trying backup.");
+                    AdGlideLog.d(TAG, "Ad unit ID for " + networkToLoad + " is invalid. Trying backup.");
                     resultCallback.onFailure("Invalid Ad Unit ID");
                     return;
                 }
 
                 Activity activity = activityRef.get();
                 if (activity == null) {
-                    Log.e(TAG, "Activity is null. Cannot load Banner from network.");
+                    AdGlideLog.e(TAG, "Activity is null. Cannot load Banner from network.");
                     resultCallback.onFailure("Activity is null");
                     return;
                 }
 
                 BannerProvider provider = BannerProviderFactory.getProvider(networkToLoad);
                 if (provider != null) {
-                    currentProvider = provider;
                     provider.loadBanner(activity, adUnitId, this, new BannerProvider.BannerListener() {
                         @Override
                         public void onAdLoaded(View adView) {
@@ -153,24 +161,51 @@ public class BannerAd {
                             resultCallback.onSuccess();
                             if (callback != null)
                                 callback.onAdLoaded();
+                            
+                            // Destroy old banner ONLY after new one is loaded
+                            if (currentProvider != null && currentProvider != provider) {
+                                currentProvider.destroy();
+                            }
+                            currentProvider = provider;
                             displayAdView(networkToLoad, adView, callback);
+                            scheduleAutoRefresh();
                         }
 
                         @Override
                         public void onAdFailedToLoad(String error) {
                             com.partharoypc.adglide.util.PerformanceLogger.error("Banner",
                                     "Failed [" + networkToLoad + "]: " + error);
-                            Log.e(TAG, "Banner failed to load for " + networkToLoad + ": " + error);
+                            AdGlideLog.e(TAG, "Banner failed to load for " + networkToLoad + ": " + error);
                             
                             resultCallback.onFailure(error);
+                            // Even if it fails, we should retry auto-refresh if enabled
+                            scheduleAutoRefresh();
                         }
                     });
                 } else {
                     resultCallback.onFailure("Provider is null");
+                    scheduleAutoRefresh();
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Failed to load banner for " + networkToLoad + ". Error: " + e.getMessage());
+                AdGlideLog.e(TAG, "Failed to load banner for " + networkToLoad + ". Error: " + e.getMessage());
                 resultCallback.onFailure(e.getMessage());
+                scheduleAutoRefresh();
+            }
+        }
+
+        private void scheduleAutoRefresh() {
+            if (autoRefreshSeconds <= 0) return;
+            if (refreshHandler == null) {
+                refreshHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+                refreshRunnable = () -> loadBannerAd(null);
+            }
+            refreshHandler.removeCallbacks(refreshRunnable);
+            refreshHandler.postDelayed(refreshRunnable, autoRefreshSeconds * 1000L);
+        }
+
+        private void stopAutoRefresh() {
+            if (refreshHandler != null && refreshRunnable != null) {
+                refreshHandler.removeCallbacks(refreshRunnable);
             }
         }
 
@@ -194,7 +229,7 @@ public class BannerAd {
         private void displayAdView(String network, View adView, AdGlideCallback callback) {
             Activity activity = activityRef != null ? activityRef.get() : null;
             if (activity == null) {
-                Log.e(TAG, "Activity reference is null, cannot display banner.");
+                AdGlideLog.e(TAG, "Activity reference is null, cannot display banner.");
                 return;
             }
             activity.runOnUiThread(() -> {
@@ -208,11 +243,11 @@ public class BannerAd {
                         if (callback != null)
                             callback.onAdShowed();
                     } else {
-                        Log.e(TAG, "No container found for Banner [" + network
+                        AdGlideLog.e(TAG, "No container found for Banner [" + network
                                 + "]. Use .container() or provide default XML ID.");
                     }
                 } catch (Exception e) {
-                    Log.e(TAG, "Error displaying ad view: " + e.getMessage());
+                    AdGlideLog.e(TAG, "Error displaying ad view: " + e.getMessage());
                 }
             });
         }
@@ -251,6 +286,7 @@ public class BannerAd {
         }
 
         public void destroyAndDetachBanner() {
+            stopAutoRefresh();
             if (currentProvider != null) {
                 currentProvider.destroy();
                 currentProvider = null;

@@ -2,7 +2,7 @@ package com.partharoypc.adglide.provider.ironsource;
 
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 import com.partharoypc.adglide.provider.NetworkInitializer;
 import com.unity3d.mediation.LevelPlay;
 import com.unity3d.mediation.LevelPlayInitListener;
@@ -22,12 +22,12 @@ public class IronSourceInitializer implements NetworkInitializer {
         LevelPlay.init(context, initRequest, new LevelPlayInitListener() {
             @Override
             public void onInitFailed(@NonNull LevelPlayInitError error) {
-                Log.e(TAG, "IronSource LevelPlay init failed: " + error.getErrorMessage());
+                AdGlideLog.e(TAG, "IronSource LevelPlay init failed: " + error.getErrorMessage());
             }
 
             @Override
             public void onInitSuccess(@NonNull LevelPlayConfiguration configuration) {
-                Log.d(TAG, "IronSource LevelPlay init successful.");
+                AdGlideLog.d(TAG, "IronSource LevelPlay init successful.");
             }
         });
     }

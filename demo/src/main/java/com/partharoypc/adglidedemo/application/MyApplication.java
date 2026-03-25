@@ -42,7 +42,7 @@ public class MyApplication extends Application {
                 .appLovinSdkKey(getResources().getString(com.partharoypc.adglidedemo.R.string.app_lovin_sdk_key))
                 .ironSourceAppKey(Constant.IRONSOURCE_APP_KEY)
                 .wortiseAppId(Constant.WORTISE_APP_ID)
-                .debug(com.partharoypc.adglidedemo.BuildConfig.DEBUG)
+                .testMode(Constant.TEST_MODE)
 
                 // ── Banner ────────────────────────────────────────────────
                 .adMobBannerId(Constant.ADMOB_BANNER_ID)
@@ -71,11 +71,16 @@ public class MyApplication extends Application {
                 // ── Rewarded Interstitial ─────────────────────────────────
                 .adMobRewardedIntId(Constant.ADMOB_REWARDED_INTERSTITIAL_ID)
                 .appLovinRewardedIntId(Constant.APPLOVIN_REWARDED_INT_ID)
+                .unityRewardedIntId(Constant.UNITY_REWARDED_INT_ID)
+                .ironSourceRewardedIntId(Constant.IRONSOURCE_REWARDED_INT_ID)
                 .wortiseRewardedIntId(Constant.WORTISE_REWARDED_INTERSTITIAL_ID)
 
                 // ── App Open ──────────────────────────────────────────────
                 .adMobAppOpenId(Constant.ADMOB_APP_OPEN_AD_ID)
+                .metaAppOpenId(Constant.META_APP_OPEN_ID)
                 .appLovinAppOpenId(Constant.APPLOVIN_APP_OPEN_AP_ID)
+                .startAppAppOpenId(Constant.STARTAPP_APP_OPEN_ID)
+                .ironSourceAppOpenId(Constant.IRONSOURCE_APP_OPEN_ID)
                 .wortiseAppOpenId(Constant.WORTISE_APP_OPEN_AD_ID)
 
                 // ── Native ────────────────────────────────────────────────
@@ -100,14 +105,10 @@ public class MyApplication extends Application {
                 .rewardedInterval(Constant.REWARDED_AD_INTERVAL)
                 .appOpenCooldown(Constant.APP_OPEN_COOLDOWN_MINUTES)
                 .adResponseTimeout(Constant.AD_RESPONSE_TIMEOUT_MS)
-                .testMode(Constant.TEST_MODE)
-                .enableDebugHUD(Constant.ENABLE_DEBUG_HUD)
 
                 // ── Privacy & Debug ───────────────────────────────────────
                 .excludeOpenAdFrom(ActivitySplash.class, ActivitySettings.class)
                 .enableGDPR(true)
-                .debugGDPR(com.partharoypc.adglidedemo.BuildConfig.DEBUG)
-                .enableDebugHUD(com.partharoypc.adglidedemo.BuildConfig.DEBUG)
 
                 // ── House Ads Fallback ────────────────────────────────────
                 .houseAdEnabled(Constant.HOUSE_AD_ENABLE)
@@ -120,11 +121,18 @@ public class MyApplication extends Application {
                 .houseAdNativeCTA(Constant.HOUSE_AD_NATIVE_CTA)
                 .houseAdNativeImage(Constant.HOUSE_AD_NATIVE_IMAGE)
                 .houseAdNativeIcon(Constant.HOUSE_AD_NATIVE_ICON)
+                .houseAdNativeClickUrl(Constant.HOUSE_AD_NATIVE_URL)
 
                 .build();
 
         // Initialize globally
         AdGlide.initialize(this, config);
+
+        // Demonstrate "Zero-Wait" by pre-loading pools
+        if (config.getAdStatus()) {
+            AdGlide.preloadInterstitial(null); // 'null' Activity works as it uses Application context internally for pool fill
+            AdGlide.preloadRewarded(null);
+        }
     }
 
     @Override

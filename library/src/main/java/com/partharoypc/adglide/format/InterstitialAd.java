@@ -15,7 +15,7 @@ import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import com.partharoypc.adglide.AdGlideConfig;
 import android.app.Activity;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -95,7 +95,7 @@ public class InterstitialAd {
             if (activity != null) {
                 showInterstitialAd(activity, null);
             } else {
-                Log.e(TAG, "Cannot show Interstitial Ad: Activity reference is null.");
+                AdGlideLog.e(TAG, "Cannot show Interstitial Ad: Activity reference is null.");
             }
         }
 
@@ -108,7 +108,7 @@ public class InterstitialAd {
             if (activity != null) {
                 showInterstitialAd(activity, callback);
             } else {
-                Log.e(TAG, "Cannot show Interstitial Ad: Activity reference is null.");
+                AdGlideLog.e(TAG, "Cannot show Interstitial Ad: Activity reference is null.");
                 if (callback != null) callback.onAdDismissed();
             }
         }
@@ -131,18 +131,18 @@ public class InterstitialAd {
             try {
                 destroyInterstitialAd();
                 String adUnitId = getAdUnitIdForNetwork(networkToLoad);
-                Log.d(TAG, "Loading [" + networkToLoad.toUpperCase(java.util.Locale.ROOT)
+                AdGlideLog.d(TAG, "Loading [" + networkToLoad.toUpperCase(java.util.Locale.ROOT)
                         + "] Interstitial Ad with ID: " + adUnitId);
                 if (adUnitId == null || adUnitId.trim().isEmpty()
                         || (adUnitId.equals("0") && !networkToLoad.equals(STARTAPP))) {
-                    Log.d(TAG, "Ad unit ID for " + networkToLoad + " is invalid. Trying backup.");
+                    AdGlideLog.d(TAG, "Ad unit ID for " + networkToLoad + " is invalid. Trying backup.");
                     resultCallback.onFailure("Invalid Ad Unit ID");
                     return;
                 }
 
                 Activity activity = activityRef.get();
                 if (activity == null) {
-                    Log.e(TAG, "Activity is null. Cannot load Interstitial from network.");
+                    AdGlideLog.e(TAG, "Activity is null. Cannot load Interstitial from network.");
                     resultCallback.onFailure("Activity is null");
                     return;
                 }
@@ -156,7 +156,7 @@ public class InterstitialAd {
                                 public void onAdLoaded() {
                                     com.partharoypc.adglide.util.PerformanceLogger.log("Interstitial",
                                             "Loaded: " + networkToLoad);
-                                    Log.d(TAG, networkToLoad + " Interstitial Ad loaded");
+                                    AdGlideLog.d(TAG, networkToLoad + " Interstitial Ad loaded");
                                     resultCallback.onSuccess();
                                     if (showOnLoad) {
                                         showOnLoad = false;
@@ -168,7 +168,7 @@ public class InterstitialAd {
                                 public void onAdFailedToLoad(String error) {
                                     com.partharoypc.adglide.util.PerformanceLogger.error("Interstitial",
                                             "Failed [" + networkToLoad + "]: " + error);
-                                    Log.e(TAG, networkToLoad + " Interstitial Ad failed to load: " + error);
+                                    AdGlideLog.e(TAG, networkToLoad + " Interstitial Ad failed to load: " + error);
                                     resultCallback.onFailure(error);
                                 }
 
@@ -182,7 +182,7 @@ public class InterstitialAd {
 
                                 @Override
                                 public void onAdShowFailed(String error) {
-                                    Log.e(TAG, networkToLoad + " Interstitial Ad failed to show: " + error);
+                                    AdGlideLog.e(TAG, networkToLoad + " Interstitial Ad failed to show: " + error);
                                     if (callback != null) {
                                         callback.onAdDismissed();
                                     }
@@ -193,18 +193,18 @@ public class InterstitialAd {
                                 public void onAdShowed() {
                                     com.partharoypc.adglide.util.PerformanceLogger.log("Interstitial",
                                             "Showed: " + networkToLoad);
-                                    Log.d(TAG, networkToLoad + " Interstitial Ad showed");
+                                    AdGlideLog.d(TAG, networkToLoad + " Interstitial Ad showed");
                                     if (callback != null) {
                                         callback.onAdShowed();
                                     }
                                 }
                             });
                 } else {
-                    Log.d(TAG, "No provider found for network: " + networkToLoad + ". Trying backup.");
+                    AdGlideLog.d(TAG, "No provider found for network: " + networkToLoad + ". Trying backup.");
                     resultCallback.onFailure("No provider found");
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Failed to load interstitial for " + networkToLoad + ". Error: " + e.getMessage());
+                AdGlideLog.e(TAG, "Failed to load interstitial for " + networkToLoad + ". Error: " + e.getMessage());
                 resultCallback.onFailure(e.getMessage());
             }
         }
@@ -229,7 +229,7 @@ public class InterstitialAd {
         public void showInterstitialAd(Activity displayActivity, AdGlideCallback callback) {
             try {
                 if (!com.partharoypc.adglide.AdGlide.isInterstitialEnabled()) {
-                    Log.d(TAG, "Interstitial Ad is disabled globally or locally. Calling dismissed listener.");
+                    AdGlideLog.d(TAG, "Interstitial Ad is disabled globally or locally. Calling dismissed listener.");
                     if (callback != null) {
                         callback.onAdDismissed();
                     }
@@ -251,7 +251,7 @@ public class InterstitialAd {
                                 }
                                 @Override
                                 public void onAdShowFailed(String error) {
-                                    Log.e(TAG, "Interstitial Ad failed to show: " + error);
+                                    AdGlideLog.e(TAG, "Interstitial Ad failed to show: " + error);
                                     if (callback != null) callback.onAdDismissed();
                                     loadInterstitialAd(callback);
                                 }
@@ -261,12 +261,12 @@ public class InterstitialAd {
                                 }
                             });
                 } else {
-                    Log.d(TAG, "Interstitial ad not loaded. Skipping show and calling dismissed listener.");
+                    AdGlideLog.d(TAG, "Interstitial ad not loaded. Skipping show and calling dismissed listener.");
                     if (callback != null) callback.onAdDismissed();
                     loadInterstitialAd(callback);
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Error in showInterstitialAd: " + e.getMessage());
+                AdGlideLog.e(TAG, "Error in showInterstitialAd: " + e.getMessage());
                 if (callback != null) callback.onAdDismissed();
             }
         }

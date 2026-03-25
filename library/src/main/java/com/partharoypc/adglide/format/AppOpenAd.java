@@ -11,7 +11,7 @@ import static com.partharoypc.adglide.util.Constant.WORTISE;
 import android.annotation.SuppressLint;
 import com.partharoypc.adglide.AdGlideConfig;
 import android.app.Activity;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -62,18 +62,17 @@ public class AppOpenAd {
     private com.partharoypc.adglide.util.AdLoader adLoader;
 
     // Provider management
-    private static final Map<String, AppOpenProvider> providers = new HashMap<>();
+    private static final java.util.Map<String, AppOpenProvider> providers = new java.util.concurrent.ConcurrentHashMap<>();
 
     public AppOpenAd() {
     }
 
     private AppOpenAd(Builder builder) {
         this.activityRef = builder.activityRef;
-        this.adLoader = new com.partharoypc.adglide.util.AdLoader(activityRef.get(),
-                com.partharoypc.adglide.util.AdFormat.APP_OPEN);
+        this.adLoader = builder.adLoader;
     }
 
-    private static synchronized AppOpenProvider getProvider(String network) {
+    private static AppOpenProvider getProvider(String network) {
         AppOpenProvider provider = providers.get(network);
         if (provider == null) {
             provider = AppOpenProviderFactory.getProvider(network);
@@ -94,7 +93,7 @@ public class AppOpenAd {
                 showAdIfAvailable(activity, null);
             }
         } catch (Exception e) {
-            Log.e(TAG, "Error in onStartLifecycleObserver: " + e.getMessage());
+            AdGlideLog.e(TAG, "Error in onStartLifecycleObserver: " + e.getMessage());
         }
     }
 
@@ -106,7 +105,7 @@ public class AppOpenAd {
                         com.partharoypc.adglide.util.AdFormat.APP_OPEN);
             }
         } catch (Exception e) {
-            Log.e(TAG, "Error in onStartActivityLifecycleCallbacks: " + e.getMessage());
+            AdGlideLog.e(TAG, "Error in onStartActivityLifecycleCallbacks: " + e.getMessage());
         }
     }
 
@@ -120,7 +119,7 @@ public class AppOpenAd {
 
             // Cooldown check
             if (!isCooldownElapsed()) {
-                Log.d(TAG, "App Open Ad skipped — cooldown not elapsed yet.");
+                AdGlideLog.d(TAG, "App Open Ad skipped — cooldown not elapsed yet.");
                 if (callback != null)
                     callback.onAdDismissed();
                 return;
@@ -169,7 +168,7 @@ public class AppOpenAd {
                 }
             }, callback);
         } catch (Exception e) {
-            Log.e(TAG, "Error in showAdIfAvailable: " + e.getMessage());
+            AdGlideLog.e(TAG, "Error in showAdIfAvailable: " + e.getMessage());
             if (callback != null) {
                 callback.onAdDismissed();
             }
@@ -218,15 +217,15 @@ public class AppOpenAd {
         private void loadAdFromNetwork(String network, com.partharoypc.adglide.util.AdLoader.LoadResultCallback resultCallback, AdGlideCallback callback) {
             try {
                 String adUnitId = getAdUnitIdForNetwork(network);
-                if (adUnitId == null || adUnitId.trim().isEmpty() || (adUnitId.equals("0") && !network.equals("startapp"))) {
-                    Log.d(TAG, "Ad unit ID for " + network + " is invalid. Trying backup.");
+                if (adUnitId == null || adUnitId.trim().isEmpty() || (adUnitId.equals("0") && !network.equals(com.partharoypc.adglide.util.Constant.STARTAPP))) {
+                    AdGlideLog.d(TAG, "Ad unit ID for " + network + " is invalid. Skipping.");
                     resultCallback.onFailure("Invalid Ad Unit ID");
                     return;
                 }
 
                 Activity activity = activityRef.get();
                 if (activity == null) {
-                    Log.e(TAG, "Activity is null. Cannot load App Open from network.");
+                    AdGlideLog.e(TAG, "Activity is null. Cannot load App Open from network.");
                     resultCallback.onFailure("Activity is null");
                     return;
                 }
@@ -237,12 +236,12 @@ public class AppOpenAd {
                         @Override
                         public void onAdLoaded() {
                             com.partharoypc.adglide.util.PerformanceLogger.log("AppOpen", "Loaded: " + network);
-                            Log.d(TAG, "AppOpen ad loaded from [" + network.toUpperCase(java.util.Locale.ROOT) + "]. Showing now.");
+                            AdGlideLog.d(TAG, "AppOpen ad loaded from [" + network.toUpperCase(java.util.Locale.ROOT) + "]. Showing now.");
                             resultCallback.onSuccess();
                             if (callback != null) callback.onAdLoaded();
                             
                             if (!isCooldownElapsed()) {
-                                Log.d(TAG, "App Open Ad skipped — cooldown not elapsed yet.");
+                                AdGlideLog.d(TAG, "App Open Ad skipped — cooldown not elapsed yet.");
                                 if (callback != null) callback.onAdDismissed();
                                 return;
                             }
@@ -257,7 +256,7 @@ public class AppOpenAd {
                         @Override
                         public void onAdFailedToLoad(String error) {
                             com.partharoypc.adglide.util.PerformanceLogger.error("AppOpen", "Failed [" + network + "]: " + error);
-                            Log.e(TAG, "AppOpen failed to load from [" + network.toUpperCase(java.util.Locale.ROOT) + "]: " + error);
+                            AdGlideLog.e(TAG, "AppOpen failed to load from [" + network.toUpperCase(java.util.Locale.ROOT) + "]: " + error);
                             if (callback != null) callback.onAdFailedToLoad(error);
                             resultCallback.onFailure(error);
                         }
@@ -269,14 +268,14 @@ public class AppOpenAd {
 
                         @Override
                         public void onAdShowFailed(String error) {
-                            Log.e(TAG, "AppOpen failed to show from [" + network.toUpperCase(java.util.Locale.ROOT) + "]: " + error);
+                            AdGlideLog.e(TAG, "AppOpen failed to show from [" + network.toUpperCase(java.util.Locale.ROOT) + "]: " + error);
                             if (callback != null) callback.onAdDismissed();
                         }
 
                         @Override
                         public void onAdShowed() {
                             com.partharoypc.adglide.util.PerformanceLogger.log("AppOpen", "Showed: " + network);
-                            Log.d(TAG, "AppOpen ad showed from [" + network.toUpperCase(java.util.Locale.ROOT) + "]");
+                            AdGlideLog.d(TAG, "AppOpen ad showed from [" + network.toUpperCase(java.util.Locale.ROOT) + "]");
                             lastShownTimeMs = System.currentTimeMillis();
                             if (callback != null) callback.onAdShowed();
                         }
@@ -285,7 +284,7 @@ public class AppOpenAd {
                     resultCallback.onFailure("Provider null");
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Failed loading AppOpen from " + network + ": " + e.getMessage());
+                AdGlideLog.e(TAG, "Failed loading AppOpen from " + network + ": " + e.getMessage());
                 resultCallback.onFailure(e.getMessage());
             }
         }
@@ -299,6 +298,9 @@ public class AppOpenAd {
                 case META -> config.getMetaAppOpenId();
                 case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> config.getAppLovinAppOpenId();
                 case WORTISE -> config.getWortiseAppOpenId();
+                case com.partharoypc.adglide.util.Constant.STARTAPP -> config.getStartAppAppOpenId();
+                case com.partharoypc.adglide.util.Constant.IRONSOURCE, com.partharoypc.adglide.util.Constant.META_BIDDING_IRONSOURCE -> config.getIronSourceAppOpenId();
+                case com.partharoypc.adglide.util.Constant.HOUSE_AD -> "house_ad";
                 default -> "0";
             };
         }
@@ -312,7 +314,7 @@ public class AppOpenAd {
                 }
 
                 if (!isCooldownElapsed()) {
-                    Log.d(TAG, "App Open Ad skipped — cooldown not elapsed yet.");
+                    AdGlideLog.d(TAG, "App Open Ad skipped — cooldown not elapsed yet.");
                     if (callback != null)
                         callback.onAdDismissed();
                     return;
@@ -353,7 +355,7 @@ public class AppOpenAd {
                     callback.onAdDismissed();
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Error in showAppOpenAd: " + e.getMessage());
+                AdGlideLog.e(TAG, "Error in showAppOpenAd: " + e.getMessage());
                 if (callback != null)
                     callback.onAdDismissed();
             }

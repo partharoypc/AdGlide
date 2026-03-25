@@ -1,6 +1,6 @@
 package com.partharoypc.adglide.provider;
 
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 import com.partharoypc.adglide.util.ReflectionUtils;
 import static com.partharoypc.adglide.util.Constant.*;
 
@@ -52,7 +52,7 @@ public class BannerProviderFactory {
         }
 
         if (className != null) {
-            Log.w(TAG, "SDK for Banner network [" + network + "] is not added to the project. Skipping.");
+            AdGlideLog.w(TAG, "SDK for Banner network [" + network + "] is not added to the project. Skipping.");
         }
 
         return null;

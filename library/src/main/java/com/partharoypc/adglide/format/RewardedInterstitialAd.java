@@ -9,7 +9,7 @@ import static com.partharoypc.adglide.util.Constant.NONE;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import android.app.Activity;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -72,7 +72,7 @@ public class RewardedInterstitialAd {
         private void loadAdFromNetwork(String network, com.partharoypc.adglide.util.AdLoader.LoadResultCallback resultCallback, AdGlideCallback callback) {
             RewardedProvider provider = RewardedProviderFactory.getProvider(network);
             if (provider == null) {
-                Log.w(TAG, "No provider available for " + network + ". Loading backup.");
+                AdGlideLog.w(TAG, "No provider available for " + network + ". Loading backup.");
                 resultCallback.onFailure("No provider available");
                 return;
             }
@@ -97,7 +97,7 @@ public class RewardedInterstitialAd {
             provider.loadRewardedAd(activity, adUnitId, config, new RewardedProvider.RewardedListener() {
                 @Override
                 public void onAdLoaded() {
-                    Log.d(TAG, network + " Rewarded interstitial loaded");
+                    AdGlideLog.d(TAG, network + " Rewarded interstitial loaded");
                     resultCallback.onSuccess();
                     if (showOnLoad) {
                         showOnLoad = false;
@@ -107,7 +107,7 @@ public class RewardedInterstitialAd {
 
                 @Override
                 public void onAdFailedToLoad(String error) {
-                    Log.e(TAG, network + " Rewarded interstitial failed: " + error);
+                    AdGlideLog.e(TAG, network + " Rewarded interstitial failed: " + error);
                     resultCallback.onFailure(error);
                 }
 
@@ -161,7 +161,7 @@ public class RewardedInterstitialAd {
                             }
                         });
             } else {
-                Log.w(TAG, "No ad available to show.");
+                AdGlideLog.w(TAG, "No ad available to show.");
                 if (callback != null)
                     callback.onAdFailedToLoad("No ad available");
             }
@@ -174,6 +174,8 @@ public class RewardedInterstitialAd {
             return switch (network) {
                 case ADMOB, META_BIDDING_ADMOB -> config.getAdMobRewardedIntId();
                 case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> config.getAppLovinRewardedIntId();
+                case com.partharoypc.adglide.util.Constant.UNITY -> config.getUnityRewardedIntId();
+                case com.partharoypc.adglide.util.Constant.IRONSOURCE, com.partharoypc.adglide.util.Constant.META_BIDDING_IRONSOURCE -> config.getIronSourceRewardedIntId();
                 case WORTISE -> config.getWortiseRewardedIntId();
                 default -> "0";
             };

@@ -1,7 +1,7 @@
 package com.partharoypc.adglide.util;
 
 import android.os.SystemClock;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class AdMobHelper {
     private static final String TAG = "AdGlide.AdMob";
-    private static final long COOLDOWN_DURATION_MS = 60000; // 60 seconds
+    private static final long COOLDOWN_DURATION_MS = 30000; // 30 seconds
     private static final Map<String, Long> lastFailTimeMap = new ConcurrentHashMap<>();
 
     private AdMobHelper() {
@@ -35,12 +35,20 @@ public class AdMobHelper {
             long elapsedTime = SystemClock.elapsedRealtime() - lastFailTime;
             if (elapsedTime < COOLDOWN_DURATION_MS) {
                 long remainingSeconds = (COOLDOWN_DURATION_MS - elapsedTime) / 1000;
-                Log.d(TAG, "Request blocked for ad unit: " + adUnitId +
-                        ". Cooldown active for " + remainingSeconds + " more seconds.");
+                
+                com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+                if (config != null) {
+                    AdGlideLog.d(TAG, "Request blocked for ad unit: " + adUnitId +
+                            ". Cooldown active for " + remainingSeconds + " more seconds.");
+                }
                 return false;
             } else {
                 lastFailTimeMap.remove(adUnitId);
-                Log.d(TAG, "Cooldown expired for ad unit: " + adUnitId + ". Request allowed.");
+                
+                com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+                if (config != null) {
+                    AdGlideLog.d(TAG, "Cooldown expired for ad unit: " + adUnitId + ". Request allowed.");
+                }
             }
         }
         return true;
@@ -55,7 +63,11 @@ public class AdMobHelper {
         if (adUnitId == null || adUnitId.isEmpty())
             return;
         lastFailTimeMap.put(adUnitId, SystemClock.elapsedRealtime());
-        Log.d(TAG, "Recorded failure for ad unit: " + adUnitId + ". Cooldown started.");
+        
+        com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+        if (config != null) {
+            AdGlideLog.d(TAG, "Recorded failure for ad unit: " + adUnitId + ". Cooldown started.");
+        }
     }
 
     /**

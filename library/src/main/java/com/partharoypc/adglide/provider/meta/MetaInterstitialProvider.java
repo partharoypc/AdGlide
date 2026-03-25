@@ -1,7 +1,7 @@
 package com.partharoypc.adglide.provider.meta;
 
 import android.app.Activity;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 
 import com.partharoypc.adglide.provider.InterstitialProvider;
 import com.facebook.ads.Ad;
@@ -32,7 +32,7 @@ public class MetaInterstitialProvider implements InterstitialProvider {
             @Override
             public void onError(Ad ad, AdError adError) {
                 interstitialAd = null;
-                Log.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META,
+                AdGlideLog.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META,
                         "Interstitial Error: [" + adError.getErrorCode() + "] " + adError.getErrorMessage());
                 com.partharoypc.adglide.util.PerformanceLogger.error("Meta",
                         "Interstitial failed: [" + adError.getErrorCode() + "] " + adError.getErrorMessage());
@@ -62,7 +62,7 @@ public class MetaInterstitialProvider implements InterstitialProvider {
             try {
                 interstitialAd.show();
             } catch (Exception e) {
-                Log.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META, "Failed to show interstitial: " + e.getMessage());
+                AdGlideLog.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META, "Failed to show interstitial: " + e.getMessage());
                 listener.onAdShowFailed(e.getMessage());
             }
         } else {

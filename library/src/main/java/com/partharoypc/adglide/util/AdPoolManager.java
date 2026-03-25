@@ -1,7 +1,6 @@
 package com.partharoypc.adglide.util;
 
 import android.app.Activity;
-import android.util.Log;
 
 import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.format.AppOpenAd;
@@ -17,6 +16,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.lang.ref.WeakReference;
 
 /**
  * Manages pools of pre-loaded Zero-Wait Ads for instant delivery.
@@ -28,7 +29,7 @@ public class AdPoolManager {
 
     private static final Map<AdFormat, PoolSet<?>> pools = new EnumMap<>(AdFormat.class);
     private static final Map<String, PoolSet<NativeAd.Builder>> nativePools = new ConcurrentHashMap<>();
-    private static final Map<AdFormat, Boolean> loadingState = Collections.synchronizedMap(new EnumMap<>(AdFormat.class));
+    private static final Map<AdFormat, AtomicBoolean> loadingState = new EnumMap<>(AdFormat.class);
 
     static {
         pools.put(AdFormat.INTERSTITIAL, new PoolSet<InterstitialAd.Builder>());
@@ -37,7 +38,7 @@ public class AdPoolManager {
         pools.put(AdFormat.APP_OPEN, new PoolSet<AppOpenAd.Builder>());
         
         for (AdFormat format : AdFormat.values()) {
-            loadingState.put(format, false);
+            loadingState.put(format, new AtomicBoolean(false));
         }
     }
 
@@ -143,7 +144,7 @@ public class AdPoolManager {
 
     // --- NATIVE ---
     public static void fillNativePool(Activity activity, String style) {
-        if (!AdGlide.isNativeEnabled()) return;
+        if (!AdGlide.isNativeEnabled() || activity == null) return;
         PoolSet<NativeAd.Builder> poolSet = nativePools.get(style.toLowerCase(Locale.ROOT));
         if (poolSet == null) {
             synchronized (nativePools) {
@@ -158,13 +159,18 @@ public class AdPoolManager {
         
         if (poolSet.size() >= MAX_POOL_SIZE) return;
         
+        final WeakReference<Activity> activityRef = new WeakReference<>(activity);
         NativeAd.Builder builder = new NativeAd.Builder(activity).style(style);
         builder.load(new AdGlideCallback() {
             @Override
             public void onAdLoaded(String network) {
                 String primary = AdGlide.getConfig() != null ? AdGlide.getConfig().getPrimaryNetwork() : "";
                 finalPoolSet.offer(builder, network.equals(primary));
-                fillNativePool(activity, style);
+                
+                Activity currentActivity = activityRef.get();
+                if (currentActivity != null && !currentActivity.isFinishing()) {
+                    fillNativePool(currentActivity, style);
+                }
             }
             @Override
             public void onAdFailedToLoad(String error) {
@@ -188,27 +194,35 @@ public class AdPoolManager {
 
     @SuppressWarnings("unchecked")
     private static <T> void fillGenericPool(Activity activity, AdFormat format, AdBuilderProvider<T> provider, AdLoadAction<T> loader) {
-        if (!isFormatEnabled(format)) return;
+        if (!isFormatEnabled(format) || activity == null) return;
         
         PoolSet<T> poolSet = (PoolSet<T>) pools.get(format);
-        int limit = (format == AdFormat.REWARDED || format == AdFormat.REWARDED_INTERSTITIAL) ? 1 : MAX_POOL_SIZE;
-        if (poolSet.size() >= limit || loadingState.get(format)) return;
+        int limit = (format == AdFormat.REWARDED || format == AdFormat.REWARDED_INTERSTITIAL || format == AdFormat.APP_OPEN) ? 1 : MAX_POOL_SIZE;
+        
+        AtomicBoolean loading = loadingState.get(format);
+        if (poolSet.size() >= limit || (loading != null && loading.get())) return;
 
-        loadingState.put(format, true);
+        if (loading != null && !loading.compareAndSet(false, true)) return;
+
+        final WeakReference<Activity> activityRef = new WeakReference<>(activity);
         T builder = provider.create();
         
         loader.load(builder, new AdGlideCallback() {
             @Override
             public void onAdLoaded(String network) {
+                if (loading != null) loading.set(false);
                 String primary = AdGlide.getConfig() != null ? AdGlide.getConfig().getPrimaryNetwork() : "";
                 poolSet.offer(builder, network.equals(primary));
-                loadingState.put(format, false);
-                fillGenericPool(activity, format, provider, loader);
+                
+                Activity currentActivity = activityRef.get();
+                if (currentActivity != null && !currentActivity.isFinishing()) {
+                    fillGenericPool(currentActivity, format, provider, loader);
+                }
             }
 
             @Override
             public void onAdFailedToLoad(String error) {
-                loadingState.put(format, false);
+                if (loading != null) loading.set(false);
             }
         });
     }

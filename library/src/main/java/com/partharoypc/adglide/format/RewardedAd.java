@@ -15,7 +15,7 @@ import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import com.partharoypc.adglide.AdGlideConfig;
 import android.app.Activity;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -111,7 +111,7 @@ public class RewardedAd {
         private void loadAdFromNetwork(String network, com.partharoypc.adglide.util.AdLoader.LoadResultCallback resultCallback, AdGlideCallback callback) {
             Activity activity = activityRef.get();
             if (activity == null) {
-                Log.e(TAG, "Activity is null. Cannot load Rewarded from network.");
+                AdGlideLog.e(TAG, "Activity is null. Cannot load Rewarded from network.");
                 resultCallback.onFailure("Activity is null");
                 return;
             }
@@ -119,16 +119,16 @@ public class RewardedAd {
             destroy();
             RewardedProvider provider = RewardedProviderFactory.getProvider(network);
             if (provider == null) {
-                Log.w(TAG, "No provider available for " + network + ". Loading backup.");
+                AdGlideLog.w(TAG, "No provider available for " + network + ". Loading backup.");
                 resultCallback.onFailure("No provider available");
                 return;
             }
 
             this.currentProvider = provider;
             String adUnitId = getAdUnitIdForNetwork(network);
-            Log.d(TAG, "Loading [" + network.toUpperCase(java.util.Locale.ROOT) + "] Rewarded Ad with ID: " + adUnitId);
+            AdGlideLog.d(TAG, "Loading [" + network.toUpperCase(java.util.Locale.ROOT) + "] Rewarded Ad with ID: " + adUnitId);
             if (adUnitId == null || adUnitId.trim().isEmpty() || (adUnitId.equals("0") && !network.equals(STARTAPP))) {
-                Log.d(TAG, "Ad unit ID for " + network + " is invalid. Trying backup.");
+                AdGlideLog.d(TAG, "Ad unit ID for " + network + " is invalid. Trying backup.");
                 resultCallback.onFailure("Invalid Ad Unit ID");
                 return;
             }
@@ -145,7 +145,7 @@ public class RewardedAd {
                 @Override
                 public void onAdLoaded() {
                     com.partharoypc.adglide.util.PerformanceLogger.log("Rewarded", "Loaded: " + network);
-                    Log.d(TAG, network + " Rewarded ad loaded");
+                    AdGlideLog.d(TAG, network + " Rewarded ad loaded");
                     resultCallback.onSuccess();
                     if (showOnLoad) {
                         showOnLoad = false;
@@ -155,9 +155,7 @@ public class RewardedAd {
 
                 @Override
                 public void onAdFailedToLoad(String error) {
-                    com.partharoypc.adglide.util.PerformanceLogger.error("Rewarded",
-                            "Failed [" + network + "]: " + error);
-                    Log.e(TAG, network + " Rewarded ad failed to load: " + error);
+                    AdGlideLog.e(TAG, network + " Rewarded ad failed to load: " + error);
                     resultCallback.onFailure(error);
                 }
 
@@ -181,7 +179,7 @@ public class RewardedAd {
             if (activity != null) {
                 showRewardedAd(activity, callback);
             } else {
-                Log.e(TAG, "Cannot show Rewarded Ad: Activity reference is null.");
+                AdGlideLog.e(TAG, "Cannot show Rewarded Ad: Activity reference is null.");
                 if (callback != null) callback.onAdDismissed();
             }
         }
@@ -220,13 +218,13 @@ public class RewardedAd {
                                 }
                             });
                 } else {
-                    Log.w(TAG, "Rewarded ad not loaded. Skipping show.");
+                    AdGlideLog.w(TAG, "Rewarded ad not loaded. Skipping show.");
                     if (callback != null)
                         callback.onAdDismissed();
                     loadRewardedAd(callback);
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Error in showRewardedAd: " + e.getMessage());
+                AdGlideLog.e(TAG, "Error in showRewardedAd: " + e.getMessage());
                 if (callback != null) callback.onAdDismissed();
             }
         }
@@ -243,6 +241,7 @@ public class RewardedAd {
                 case IRONSOURCE, META_BIDDING_IRONSOURCE -> config.getIronSourceRewardedId();
                 case STARTAPP -> !config.getStartAppId().isEmpty() ? config.getStartAppId() : "startapp_id";
                 case WORTISE -> config.getWortiseRewardedId();
+                case com.partharoypc.adglide.util.Constant.HOUSE_AD -> "house_ad";
                 default -> "0";
             };
         }

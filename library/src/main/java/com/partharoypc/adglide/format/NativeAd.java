@@ -15,7 +15,7 @@ import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import com.partharoypc.adglide.AdGlideConfig;
 import android.app.Activity;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -132,7 +132,7 @@ public class NativeAd {
         public void loadNativeAd(AdGlideCallback callback) {
             Activity activity = activityRef != null ? activityRef.get() : null;
             if (activity == null) {
-                Log.e(TAG, "Cannot load Native Ad: Activity reference is null.");
+                AdGlideLog.e(TAG, "Cannot load Native Ad: Activity reference is null.");
                 if (callback != null) callback.onAdFailedToLoad("Activity is null");
                 return;
             }
@@ -146,16 +146,16 @@ public class NativeAd {
             destroyNativeAd();
             NativeProvider provider = NativeProviderFactory.getProvider(network);
             if (provider == null) {
-                Log.w(TAG, "No provider available for " + network + ". Loading backup.");
+                AdGlideLog.w(TAG, "No provider available for " + network + ". Loading backup.");
                 resultCallback.onFailure("Provider null");
                 return;
             }
 
             this.currentProvider = provider;
             String adUnitId = getAdUnitIdForNetwork(network);
-            Log.d(TAG, "Loading [" + network.toUpperCase(java.util.Locale.ROOT) + "] Native Ad with ID: " + adUnitId);
+            AdGlideLog.d(TAG, "Loading [" + network.toUpperCase(java.util.Locale.ROOT) + "] Native Ad with ID: " + adUnitId);
             if (adUnitId == null || adUnitId.trim().isEmpty() || (adUnitId.equals("0") && !network.equals(STARTAPP))) {
-                Log.d(TAG, "Ad unit ID for " + network + " is invalid. Trying backup.");
+                AdGlideLog.d(TAG, "Ad unit ID for " + network + " is invalid. Trying backup.");
                 resultCallback.onFailure("Invalid Ad Unit ID");
                 return;
             }
@@ -174,7 +174,7 @@ public class NativeAd {
 
             Activity activity = activityRef.get();
             if (activity == null) {
-                Log.e(TAG, "Activity is null. Cannot load Native from network.");
+                AdGlideLog.e(TAG, "Activity is null. Cannot load Native from network.");
                 resultCallback.onFailure("Activity is null");
                 return;
             }
@@ -196,7 +196,7 @@ public class NativeAd {
 
                 @Override
                 public void onAdFailedToLoad(String error) {
-                    Log.e(TAG, network + " Native failed: " + error);
+                    AdGlideLog.e(TAG, network + " Native failed: " + error);
                     resultCallback.onFailure(error);
                 }
             });
@@ -222,7 +222,7 @@ public class NativeAd {
         private void displayAdView(View adView, AdGlideCallback callback) {
             Activity activity = activityRef != null ? activityRef.get() : null;
             if (activity == null) {
-                Log.e(TAG, "Activity reference is null, cannot display native ad.");
+                AdGlideLog.e(TAG, "Activity reference is null, cannot display native ad.");
                 return;
             }
 

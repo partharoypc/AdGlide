@@ -55,6 +55,7 @@ public class ActivityBanner extends AppCompatActivity {
                 .container(bannerContainer)
                 .collapsible(switchCollapsible.isChecked())
                 .adaptive(switchAdaptive.isChecked())
+                .autoRefresh(30) // Demonstrate 30s auto-refresh
                 .load();
     }
 

@@ -11,7 +11,7 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.ads.mediation.admob.AdMobAdapter;
 import android.os.Bundle;
-import android.util.Log;
+
 import androidx.annotation.NonNull;
 import com.partharoypc.adglide.util.Tools;
 

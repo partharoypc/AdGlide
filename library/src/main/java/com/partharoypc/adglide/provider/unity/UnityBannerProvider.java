@@ -1,7 +1,7 @@
 package com.partharoypc.adglide.provider.unity;
 
 import android.app.Activity;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 import android.view.View;
 import com.partharoypc.adglide.provider.BannerProvider;
 import com.unity3d.services.banners.BannerErrorInfo;
@@ -21,7 +21,7 @@ public class UnityBannerProvider implements BannerProvider {
         bannerView.setListener(new BannerView.IListener() {
             @Override
             public void onBannerLoaded(BannerView bannerAdView) {
-                Log.d(com.partharoypc.adglide.util.Constant.AD_NETWORK_UNITY, "Banner Ad loaded: " + adUnitId);
+                AdGlideLog.d(com.partharoypc.adglide.util.Constant.AD_NETWORK_UNITY, "Banner Ad loaded: " + adUnitId);
                 listener.onAdLoaded(bannerAdView);
             }
 
@@ -31,7 +31,7 @@ public class UnityBannerProvider implements BannerProvider {
 
             @Override
             public void onBannerFailedToLoad(BannerView bannerAdView, BannerErrorInfo errorInfo) {
-                Log.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_UNITY,
+                AdGlideLog.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_UNITY,
                         "Banner Ad failed to load: [" + errorInfo.errorCode + "] " + errorInfo.errorMessage);
                 listener.onAdFailedToLoad(errorInfo.errorMessage);
             }

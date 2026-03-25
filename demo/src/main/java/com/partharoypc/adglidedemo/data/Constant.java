@@ -32,6 +32,7 @@ public class Constant {
     public static final String META_INTERSTITIAL_ID = "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID";
     public static final String META_REWARDED_ID = "VID_HD_9_16_39S_APP_INSTALL#YOUR_PLACEMENT_ID";
     public static final String META_NATIVE_ID = "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID";
+    public static final String META_APP_OPEN_ID = "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID";
 
     // StartApp
     public static final String STARTAPP_APP_ID = "205489527";
@@ -42,6 +43,7 @@ public class Constant {
     public static final String UNITY_BANNER_ID = "banner";
     public static final String UNITY_INTERSTITIAL_ID = "video";
     public static final String UNITY_REWARDED_ID = "rewardedVideo";
+    public static final String UNITY_REWARDED_INT_ID = "rewardedVideo";
 
     // AppLovin MAX
     public static final String APPLOVIN_BANNER_ID = "da17eff31ae69f15";
@@ -49,6 +51,7 @@ public class Constant {
     public static final String APPLOVIN_MAX_REWARDED_ID = "98f6a586ed642919";
     public static final String APPLOVIN_NATIVE_MANUAL_ID = "87343269587e8998";
     public static final String APPLOVIN_APP_OPEN_AP_ID = "de9f381d132b859a";
+    public static final String APPLOVIN_REWARDED_INT_ID = "98f6a586ed642919";
 
     // AppLovin Discovery Zone IDs
     public static final String APPLOVIN_BANNER_ZONE_ID = "afb7122672e86340";
@@ -62,6 +65,8 @@ public class Constant {
     public static final String IRONSOURCE_INTERSTITIAL_ID = "DefaultInterstitial";
     public static final String IRONSOURCE_REWARDED_ID = "DefaultRewardedVideo";
     public static final String IRONSOURCE_NATIVE_ID = "DefaultNative";
+    public static final String IRONSOURCE_APP_OPEN_ID = "DefaultAppOpen";
+    public static final String IRONSOURCE_REWARDED_INT_ID = "DefaultRewardedVideo";
 
     // Wortise
     public static final String WORTISE_APP_ID = "57659a6d-e448-47fb-9759-dd9ca0e1a6c4";
@@ -84,8 +89,9 @@ public class Constant {
     public static boolean FORCE_TO_SHOW_APP_OPEN_AD_ON_START = true;
     public static boolean OPEN_ADS_ON_START = true;
     public static boolean OPEN_ADS_ON_RESUME = true;
-    public static String META_APP_OPEN_ID = "YOUR_PLACEMENT_ID";
-    public static String APPLOVIN_REWARDED_INT_ID = "98f6a586ed642919";
+    public static String META_APP_OPEN_ID_LEGACY = "YOUR_PLACEMENT_ID";
+    public static String APPLOVIN_REWARDED_INT_ID_LEGACY = "98f6a586ed642919";
+    public static final String STARTAPP_APP_OPEN_ID = "startapp_app_open";
 
     // Frequency & Interval Config
     public static int INTERSTITIAL_AD_INTERVAL = 1;
@@ -106,5 +112,6 @@ public class Constant {
     public static final String HOUSE_AD_NATIVE_CTA = "Learn More";
     public static final String HOUSE_AD_NATIVE_IMAGE = "https://images.sampleads.com/native_large.png";
     public static final String HOUSE_AD_NATIVE_ICON = "https://images.sampleads.com/icon.png";
+    public static final String HOUSE_AD_NATIVE_URL = "https://play.google.com/store/apps/details?id=com.partharoypc.sample";
 
 }

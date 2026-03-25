@@ -1,7 +1,7 @@
 package com.partharoypc.adglide.provider.meta;
 
 import android.app.Activity;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 
 import com.facebook.ads.Ad;
 import com.facebook.ads.AdError;
@@ -32,7 +32,7 @@ public class MetaRewardedProvider implements RewardedProvider {
                     @Override
                     public void onError(Ad ad, AdError adError) {
                         isAvailable = false;
-                        Log.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META,
+                        AdGlideLog.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META,
                                 "Rewarded Error: [" + adError.getErrorCode() + "] " + adError.getErrorMessage());
                         com.partharoypc.adglide.util.PerformanceLogger.error("Meta",
                                 "Rewarded failed: [" + adError.getErrorCode() + "] " + adError.getErrorMessage());
@@ -64,7 +64,7 @@ public class MetaRewardedProvider implements RewardedProvider {
             try {
                 rewardedVideoAd.show();
             } catch (Exception e) {
-                Log.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META, "Failed to show rewarded: " + e.getMessage());
+                AdGlideLog.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META, "Failed to show rewarded: " + e.getMessage());
                 listener.onAdShowFailed(e.getMessage());
             }
         } else {

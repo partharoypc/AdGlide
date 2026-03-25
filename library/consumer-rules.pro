@@ -89,5 +89,3 @@
 -dontwarn com.wortise.**
 -dontwarn com.bytedance.**
 
-# GIF rendering (16KB alignment polyfill)
--dontwarn pl.droidsonroids.gif.**

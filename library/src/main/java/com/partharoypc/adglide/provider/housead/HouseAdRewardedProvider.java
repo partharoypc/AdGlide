@@ -7,35 +7,34 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.AdGlideConfig;
-import com.partharoypc.adglide.provider.InterstitialProvider;
-import com.partharoypc.adglide.util.AdGlideCallback;
+import com.partharoypc.adglide.R;
+import com.partharoypc.adglide.provider.RewardedProvider;
 import com.partharoypc.adglide.util.ImageDownloader;
 import androidx.core.content.ContextCompat;
-import com.partharoypc.adglide.R;
 
-public class HouseAdInterstitialProvider implements InterstitialProvider {
+public class HouseAdRewardedProvider implements RewardedProvider {
 
     private Bitmap cachedAdImage = null;
     private AdGlideConfig config;
 
     @Override
-    public void loadInterstitial(Activity activity, String adUnitId, InterstitialConfig unusedConfig,
-            InterstitialListener listener) {
+    public void loadRewardedAd(Activity activity, String adUnitId, RewardedConfig unusedConfig, RewardedListener listener) {
         this.config = AdGlide.getConfig();
         if (config == null || !config.isHouseAdEnabled() || config.getHouseAdInterstitialImage() == null
                 || config.getHouseAdInterstitialImage().isEmpty()) {
             if (listener != null)
-                listener.onAdFailedToLoad("House Ad interstitial not configured or disabled");
+                listener.onAdFailedToLoad("House Ad rewarded not configured or disabled");
             return;
         }
 
@@ -57,15 +56,14 @@ public class HouseAdInterstitialProvider implements InterstitialProvider {
     }
 
     @Override
-    public void showInterstitial(Activity activity, InterstitialListener listener) {
+    public void showRewardedAd(Activity activity, RewardedListener listener) {
         if (activity == null || activity.isFinishing() || activity.isDestroyed()) {
             if (listener != null) listener.onAdShowFailed("Activity is invalid");
             return;
         }
 
         if (cachedAdImage == null) {
-            if (listener != null)
-                listener.onAdFailedToLoad("House ad image not loaded");
+            if (listener != null) listener.onAdShowFailed("House ad image not loaded");
             return;
         }
 
@@ -127,6 +125,7 @@ public class HouseAdInterstitialProvider implements InterstitialProvider {
 
         dialog.setOnDismissListener(d -> {
             if (listener != null) {
+                listener.onAdCompleted(); // Reward the user for house ad
                 listener.onAdDismissed();
             }
         });
@@ -144,7 +143,7 @@ public class HouseAdInterstitialProvider implements InterstitialProvider {
     }
 
     @Override
-    public boolean isAdLoaded() {
+    public boolean isAdAvailable() {
         return cachedAdImage != null;
     }
 

@@ -9,7 +9,6 @@ public class AdGlideConfig {
     // Global Settings
     private final boolean adStatus;
     private final String primaryNetwork;
-    private final String backupNetwork;
     private final List<String> backupNetworks;
     private final boolean testMode;
     private final boolean debug;
@@ -69,12 +68,16 @@ public class AdGlideConfig {
     // Rewarded Interstitial
     private final String adMobRewardedIntId;
     private final String appLovinRewardedIntId;
+    private final String unityRewardedIntId;
+    private final String ironSourceRewardedIntId;
     private final String wortiseRewardedIntId;
 
     // App Open
     private final String adMobAppOpenId;
     private final String metaAppOpenId;
     private final String appLovinAppOpenId;
+    private final String startappAppOpenId;
+    private final String ironSourceAppOpenId;
     private final String wortiseAppOpenId;
 
     // Native
@@ -99,7 +102,6 @@ public class AdGlideConfig {
     private AdGlideConfig(Builder builder) {
         this.adStatus = builder.adStatus;
         this.primaryNetwork = builder.primaryNetwork;
-        this.backupNetwork = builder.backupNetwork;
         this.backupNetworks = builder.backupNetworks;
         this.testMode = builder.testMode;
         this.debug = builder.debug;
@@ -152,11 +154,15 @@ public class AdGlideConfig {
 
         this.adMobRewardedIntId = builder.adMobRewardedIntId;
         this.appLovinRewardedIntId = builder.appLovinRewardedIntId;
+        this.unityRewardedIntId = builder.unityRewardedIntId;
+        this.ironSourceRewardedIntId = builder.ironSourceRewardedIntId;
         this.wortiseRewardedIntId = builder.wortiseRewardedIntId;
 
         this.adMobAppOpenId = builder.adMobAppOpenId;
         this.metaAppOpenId = builder.metaAppOpenId;
         this.appLovinAppOpenId = builder.appLovinAppOpenId;
+        this.startappAppOpenId = builder.startappAppOpenId;
+        this.ironSourceAppOpenId = builder.ironSourceAppOpenId;
         this.wortiseAppOpenId = builder.wortiseAppOpenId;
 
         this.adMobNativeId = builder.adMobNativeId;
@@ -187,9 +193,6 @@ public class AdGlideConfig {
         return primaryNetwork;
     }
 
-    public String getBackupNetwork() {
-        return backupNetwork;
-    }
 
     public List<String> getBackupNetworks() {
         return backupNetworks;
@@ -267,9 +270,6 @@ public class AdGlideConfig {
         return rewardedStatus;
     }
 
-    public boolean isAppOpenEnabledGlobal() {
-        return appOpenStatus;
-    }
 
     public boolean isRewardedInterstitialEnabled() {
         return rewardedInterstitialStatus;
@@ -384,6 +384,14 @@ public class AdGlideConfig {
         return appLovinRewardedIntId;
     }
 
+    public String getUnityRewardedIntId() {
+        return unityRewardedIntId;
+    }
+
+    public String getIronSourceRewardedIntId() {
+        return ironSourceRewardedIntId;
+    }
+
     public String getWortiseRewardedIntId() {
         return wortiseRewardedIntId;
     }
@@ -399,6 +407,14 @@ public class AdGlideConfig {
 
     public String getAppLovinAppOpenId() {
         return appLovinAppOpenId;
+    }
+
+    public String getStartAppAppOpenId() {
+        return startappAppOpenId;
+    }
+
+    public String getIronSourceAppOpenId() {
+        return ironSourceAppOpenId;
     }
 
     public String getWortiseAppOpenId() {
@@ -470,7 +486,6 @@ public class AdGlideConfig {
     public static class Builder {
         private boolean adStatus = false;
         private String primaryNetwork = "";
-        private String backupNetwork = "";
         private final List<String> backupNetworks = new ArrayList<>();
         private boolean testMode = false;
         private boolean debug = true;
@@ -493,7 +508,7 @@ public class AdGlideConfig {
         private int appOpenCooldownMinutes = 30;
 
         private String adMobAppId = "";
-        private String startappAppId = "0";
+        private String startappAppId = "";
         private String unityGameId = "";
         private String appLovinSdkKey = "";
         private String ironSourceAppKey = "";
@@ -522,11 +537,15 @@ public class AdGlideConfig {
 
         private String adMobRewardedIntId = "";
         private String appLovinRewardedIntId = "";
+        private String unityRewardedIntId = "";
+        private String ironSourceRewardedIntId = "";
         private String wortiseRewardedIntId = "";
 
         private String adMobAppOpenId = "";
         private String metaAppOpenId = "";
         private String appLovinAppOpenId = "";
+        private String startappAppOpenId = "";
+        private String ironSourceAppOpenId = "";
         private String wortiseAppOpenId = "";
 
         private String adMobNativeId = "";
@@ -564,19 +583,6 @@ public class AdGlideConfig {
             return this;
         }
 
-        public Builder backupNetwork(AdGlideNetwork network) {
-            this.backupNetwork = network.getValue();
-            if (!this.backupNetworks.contains(this.backupNetwork))
-                this.backupNetworks.add(this.backupNetwork);
-            return this;
-        }
-
-        public Builder backupNetwork(String network) {
-            this.backupNetwork = network;
-            if (!this.backupNetworks.contains(this.backupNetwork))
-                this.backupNetworks.add(this.backupNetwork);
-            return this;
-        }
 
         public Builder backupNetworks(AdGlideNetwork... networks) {
             this.backupNetworks.clear();
@@ -584,21 +590,32 @@ public class AdGlideConfig {
                 if (n != null)
                     this.backupNetworks.add(n.getValue());
             }
-            if (!this.backupNetworks.isEmpty())
-                this.backupNetwork = this.backupNetworks.get(0);
+            if (!this.backupNetworks.isEmpty()) {
+                // Done
+            }
             return this;
         }
 
         public Builder backupNetworks(String... networks) {
             this.backupNetworks.clear();
             this.backupNetworks.addAll(Arrays.asList(networks));
-            if (!this.backupNetworks.isEmpty())
-                this.backupNetwork = this.backupNetworks.get(0);
+            if (!this.backupNetworks.isEmpty()) {
+                // Done
+            }
             return this;
         }
 
         public Builder testMode(boolean testMode) {
             this.testMode = testMode;
+            if (testMode) {
+                this.debug = true;
+                this.debugGDPR = true;
+                this.enableDebugHUD = true;
+            } else {
+                this.debug = false;
+                this.debugGDPR = false;
+                this.enableDebugHUD = false;
+            }
             return this;
         }
 
@@ -824,6 +841,16 @@ public class AdGlideConfig {
             return this;
         }
 
+        public Builder unityRewardedIntId(String id) {
+            this.unityRewardedIntId = id;
+            return this;
+        }
+
+        public Builder ironSourceRewardedIntId(String id) {
+            this.ironSourceRewardedIntId = id;
+            return this;
+        }
+
         public Builder wortiseRewardedIntId(String id) {
             this.wortiseRewardedIntId = id;
             return this;
@@ -841,6 +868,16 @@ public class AdGlideConfig {
 
         public Builder appLovinAppOpenId(String id) {
             this.appLovinAppOpenId = id;
+            return this;
+        }
+
+        public Builder startAppAppOpenId(String id) {
+            this.startappAppOpenId = id;
+            return this;
+        }
+
+        public Builder ironSourceAppOpenId(String id) {
+            this.ironSourceAppOpenId = id;
             return this;
         }
 

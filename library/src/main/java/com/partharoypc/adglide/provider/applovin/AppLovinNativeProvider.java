@@ -1,7 +1,7 @@
 package com.partharoypc.adglide.provider.applovin;
 
 import android.app.Activity;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 import android.view.View;
 import android.widget.FrameLayout;
 import com.applovin.mediation.MaxAd;
@@ -22,7 +22,7 @@ public class AppLovinNativeProvider implements NativeProvider {
         nativeAdLoader.setNativeAdListener(new MaxNativeAdListener() {
             @Override
             public void onNativeAdLoaded(MaxNativeAdView nativeAdView, MaxAd ad) {
-                Log.d(TAG, "Native Ad loaded");
+                AdGlideLog.d(TAG, "Native Ad loaded");
                 if (maxNativeAd != null) {
                     nativeAdLoader.destroy(maxNativeAd);
                 }
@@ -47,11 +47,11 @@ public class AppLovinNativeProvider implements NativeProvider {
 
             @Override
             public void onNativeAdLoadFailed(String adUnitId, MaxError error) {
-                Log.e(TAG, "Native Ad failed to load: [" + error.getCode() + "] " + error.getMessage());
+                AdGlideLog.e(TAG, "Native Ad failed to load: [" + error.getCode() + "] " + error.getMessage());
                 listener.onAdFailedToLoad(error.getMessage());
             }
         });
-        Log.d(TAG, "Loading Native Ad: " + adUnitId);
+        AdGlideLog.d(TAG, "Loading Native Ad: " + adUnitId);
         nativeAdLoader.loadAd();
     }
 

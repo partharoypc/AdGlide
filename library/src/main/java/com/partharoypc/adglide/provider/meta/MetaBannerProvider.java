@@ -1,7 +1,7 @@
 package com.partharoypc.adglide.provider.meta;
 
 import android.app.Activity;
-import android.util.Log;
+
 import android.view.View;
 import com.partharoypc.adglide.provider.BannerProvider;
 import com.facebook.ads.Ad;

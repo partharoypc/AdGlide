@@ -1,7 +1,9 @@
 package com.partharoypc.adglide.provider.startapp;
 
 import android.app.Activity;
+
 import com.partharoypc.adglide.provider.InterstitialProvider;
+import com.partharoypc.adglide.util.AdGlideLog;
 import com.startapp.sdk.adsbase.Ad;
 import com.startapp.sdk.adsbase.StartAppAd;
 import com.startapp.sdk.adsbase.adlisteners.AdDisplayListener;
@@ -22,7 +24,7 @@ public class StartAppInterstitialProvider implements InterstitialProvider {
 
             @Override
             public void onFailedToReceiveAd(Ad ad) {
-                android.util.Log.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_STARTAPP,
+                AdGlideLog.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_STARTAPP,
                         "Interstitial failed to load: " + ad.getErrorMessage());
                 listener.onAdFailedToLoad("StartApp failed to receive ad");
             }

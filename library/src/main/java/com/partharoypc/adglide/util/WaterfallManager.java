@@ -50,7 +50,3 @@ public class WaterfallManager {
         return networks;
     }
 }
-
-
-
-

@@ -132,18 +132,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // SDK Listener for Performance Monitoring
-        AdGlide.setListener(new AdGlide.AdGlideListener() {
-            @Override
-            public void onAdStatusChanged(String format, String network, String status) {
-                showToast(format + " " + status + " on " + network);
-            }
-
-            @Override
-            public void onPerformanceMetrics(String format, long loadTimeMs) {
-                showToast("⚡ " + format + " load time: " + loadTimeMs + "ms");
-            }
-        });
     }
 
     private void showToast(String message) {
@@ -228,6 +216,7 @@ public class MainActivity extends AppCompatActivity {
                         .appLovinSdkKey(getResources().getString(R.string.app_lovin_sdk_key))
                         .ironSourceAppKey(Constant.IRONSOURCE_APP_KEY)
                         .wortiseAppId(Constant.WORTISE_APP_ID)
+                        .testMode(Constant.TEST_MODE)
                         // Banner IDs
                         .adMobBannerId(Constant.ADMOB_BANNER_ID)
                         .metaBannerId(Constant.META_BANNER_ID)
@@ -253,11 +242,15 @@ public class MainActivity extends AppCompatActivity {
                         // Rewarded Interstitial
                         .adMobRewardedIntId(Constant.ADMOB_REWARDED_INTERSTITIAL_ID)
                         .appLovinRewardedIntId(Constant.APPLOVIN_REWARDED_INT_ID)
+                        .unityRewardedIntId(Constant.UNITY_REWARDED_INT_ID)
+                        .ironSourceRewardedIntId(Constant.IRONSOURCE_REWARDED_INT_ID)
                         .wortiseRewardedIntId(Constant.WORTISE_REWARDED_INTERSTITIAL_ID)
                         // App Open
                         .adMobAppOpenId(Constant.ADMOB_APP_OPEN_AD_ID)
                         .metaAppOpenId(Constant.META_APP_OPEN_ID)
                         .appLovinAppOpenId(Constant.APPLOVIN_APP_OPEN_AP_ID)
+                        .startAppAppOpenId(Constant.STARTAPP_APP_OPEN_ID)
+                        .ironSourceAppOpenId(Constant.IRONSOURCE_APP_OPEN_ID)
                         .wortiseAppOpenId(Constant.WORTISE_APP_OPEN_AD_ID)
                         // Native
                         .adMobNativeId(Constant.ADMOB_NATIVE_ID)
@@ -275,9 +268,9 @@ public class MainActivity extends AppCompatActivity {
                         .houseAdNativeCTA(Constant.HOUSE_AD_NATIVE_CTA)
                         .houseAdNativeImage(Constant.HOUSE_AD_NATIVE_IMAGE)
                         .houseAdNativeIcon(Constant.HOUSE_AD_NATIVE_ICON)
+                        .houseAdNativeClickUrl(Constant.HOUSE_AD_NATIVE_URL)
                         .enableGDPR(true)
                         .excludeOpenAdFrom(ActivitySplash.class, ActivitySettings.class)
-                        .debug(com.partharoypc.adglidedemo.BuildConfig.DEBUG)
                         .build();
 
         AdGlide.initialize(getApplication(), config);

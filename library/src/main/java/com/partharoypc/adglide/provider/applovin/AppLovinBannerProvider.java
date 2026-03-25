@@ -1,7 +1,7 @@
 package com.partharoypc.adglide.provider.applovin;
 
 import android.app.Activity;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
@@ -27,13 +27,13 @@ public class AppLovinBannerProvider implements BannerProvider {
         maxAdView.setListener(new MaxAdViewAdListener() {
             @Override
             public void onAdLoaded(MaxAd ad) {
-                Log.d(TAG, "Banner Ad loaded");
+                AdGlideLog.d(TAG, "Banner Ad loaded");
                 listener.onAdLoaded(maxAdView);
             }
 
             @Override
             public void onAdLoadFailed(String adUnitId, MaxError error) {
-                Log.e(TAG, "Banner Ad failed to load: [" + error.getCode() + "] " + error.getMessage());
+                AdGlideLog.e(TAG, "Banner Ad failed to load: [" + error.getCode() + "] " + error.getMessage());
                 listener.onAdFailedToLoad(error.getMessage());
             }
 
@@ -75,7 +75,7 @@ public class AppLovinBannerProvider implements BannerProvider {
             heightPx = AppLovinSdkUtils.dpToPx(activity, bannerHeight);
             maxAdView.setLayoutParams(new FrameLayout.LayoutParams(width, heightPx));
         }
-        Log.d(TAG, "Loading Banner Ad: " + adUnitId);
+        AdGlideLog.d(TAG, "Loading Banner Ad: " + adUnitId);
         maxAdView.loadAd();
     }
 

@@ -43,6 +43,10 @@ public class AppOpenProviderFactory {
                 className = "com.partharoypc.adglide.provider.ironsource.IronSourceAppOpenProvider";
                 checkClass = "com.ironsource.mediationsdk.IronSource";
             }
+            case com.partharoypc.adglide.util.Constant.HOUSE_AD -> {
+                className = "com.partharoypc.adglide.provider.housead.HouseAdAppOpenProvider";
+                checkClass = "android.app.Dialog";
+            }
         }
 
         if (className != null && (checkClass == null || ReflectionUtils.isClassAvailable(checkClass))) {

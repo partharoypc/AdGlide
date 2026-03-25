@@ -2,7 +2,7 @@ package com.partharoypc.adglide.provider.meta;
 
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 import com.facebook.ads.Ad;
 import com.facebook.ads.AdError;
 import com.facebook.ads.InterstitialAd;
@@ -42,7 +42,7 @@ public class MetaAppOpenProvider implements AppOpenProvider {
 
             @Override
             public void onError(Ad ad, AdError adError) {
-                Log.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META,
+                AdGlideLog.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META,
                         "Meta AppOpen failed: [" + adError.getErrorCode() + "] " + adError.getErrorMessage());
                 if (activeListener != null)
                     activeListener.onAdFailedToLoad("[" + adError.getErrorCode() + "] " + adError.getErrorMessage());
@@ -50,7 +50,7 @@ public class MetaAppOpenProvider implements AppOpenProvider {
 
             @Override
             public void onAdLoaded(Ad ad) {
-                Log.d(TAG, "Meta AppOpen loaded");
+                AdGlideLog.d(TAG, "Meta AppOpen loaded");
                 if (activeListener != null)
                     activeListener.onAdLoaded();
             }

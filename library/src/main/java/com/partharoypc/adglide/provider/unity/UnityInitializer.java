@@ -1,7 +1,7 @@
 package com.partharoypc.adglide.provider.unity;
 
 import android.content.Context;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 import com.partharoypc.adglide.provider.NetworkInitializer;
 import com.unity3d.ads.IUnityAdsInitializationListener;
 import com.unity3d.ads.UnityAds;
@@ -15,13 +15,13 @@ public class UnityInitializer implements NetworkInitializer {
                 new IUnityAdsInitializationListener() {
                     @Override
                     public void onInitializationComplete() {
-                        Log.d(TAG, "Unity Ads Initialization Complete");
+                        AdGlideLog.d(TAG, "Unity Ads Initialization Complete");
                     }
 
                     @Override
                     public void onInitializationFailed(UnityAds.UnityAdsInitializationError error,
                             String message) {
-                        Log.d(TAG, "Unity Ads Initialization Failed: " + error + " - " + message);
+                        AdGlideLog.d(TAG, "Unity Ads Initialization Failed: " + error + " - " + message);
                     }
                 });
     }

@@ -2,6 +2,7 @@ package com.partharoypc.adglide.provider.housead;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -12,34 +13,32 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.AdGlideConfig;
-import com.partharoypc.adglide.provider.InterstitialProvider;
-import com.partharoypc.adglide.util.AdGlideCallback;
+import com.partharoypc.adglide.R;
+import com.partharoypc.adglide.provider.AppOpenProvider;
 import com.partharoypc.adglide.util.ImageDownloader;
 import androidx.core.content.ContextCompat;
-import com.partharoypc.adglide.R;
 
-public class HouseAdInterstitialProvider implements InterstitialProvider {
+public class HouseAdAppOpenProvider implements AppOpenProvider {
 
     private Bitmap cachedAdImage = null;
     private AdGlideConfig config;
+    private boolean isShowing = false;
 
     @Override
-    public void loadInterstitial(Activity activity, String adUnitId, InterstitialConfig unusedConfig,
-            InterstitialListener listener) {
+    public void loadAppOpenAd(Context context, String adUnitId, AppOpenListener listener) {
         this.config = AdGlide.getConfig();
         if (config == null || !config.isHouseAdEnabled() || config.getHouseAdInterstitialImage() == null
                 || config.getHouseAdInterstitialImage().isEmpty()) {
             if (listener != null)
-                listener.onAdFailedToLoad("House Ad interstitial not configured or disabled");
+                listener.onAdFailedToLoad("House Ad AppOpen not configured or disabled");
             return;
         }
 
-        ImageDownloader.downloadImage(activity, config.getHouseAdInterstitialImage(),
+        ImageDownloader.downloadImage(context, config.getHouseAdInterstitialImage(),
                 new ImageDownloader.ImageLoaderCallback() {
                     @Override
                     public void onImageLoaded(Bitmap bitmap) {
@@ -57,15 +56,14 @@ public class HouseAdInterstitialProvider implements InterstitialProvider {
     }
 
     @Override
-    public void showInterstitial(Activity activity, InterstitialListener listener) {
+    public void showAppOpenAd(Activity activity, AppOpenListener listener) {
         if (activity == null || activity.isFinishing() || activity.isDestroyed()) {
             if (listener != null) listener.onAdShowFailed("Activity is invalid");
             return;
         }
 
         if (cachedAdImage == null) {
-            if (listener != null)
-                listener.onAdFailedToLoad("House ad image not loaded");
+            if (listener != null) listener.onAdShowFailed("House ad image not loaded");
             return;
         }
 
@@ -126,17 +124,20 @@ public class HouseAdInterstitialProvider implements InterstitialProvider {
         dialog.setContentView(rootLayout);
 
         dialog.setOnDismissListener(d -> {
+            isShowing = false;
             if (listener != null) {
                 listener.onAdDismissed();
             }
         });
 
         try {
+            isShowing = true;
             dialog.show();
             if (listener != null) {
                 listener.onAdShowed();
             }
         } catch (Exception e) {
+            isShowing = false;
             if (listener != null) {
                 listener.onAdShowFailed(e.getMessage());
             }
@@ -144,8 +145,13 @@ public class HouseAdInterstitialProvider implements InterstitialProvider {
     }
 
     @Override
-    public boolean isAdLoaded() {
+    public boolean isAdAvailable() {
         return cachedAdImage != null;
+    }
+
+    @Override
+    public boolean isShowingAd() {
+        return isShowing;
     }
 
     @Override

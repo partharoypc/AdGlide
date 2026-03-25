@@ -2,7 +2,7 @@ package com.partharoypc.adglide.util;
 
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 
 import androidx.annotation.NonNull;
 
@@ -54,7 +54,7 @@ public class ConsentManager {
                         activity,
                         loadAndShowError -> {
                             if (loadAndShowError != null) {
-                                Log.w(TAG, String.format("%s: %s",
+                                AdGlideLog.w(TAG, String.format("%s: %s",
                                         loadAndShowError.getErrorCode(),
                                         loadAndShowError.getMessage()));
                             }
@@ -66,7 +66,7 @@ public class ConsentManager {
                         }),
                 requestError -> {
                     if (requestError != null) {
-                        Log.w(TAG, String.format("%s: %s",
+                        AdGlideLog.w(TAG, String.format("%s: %s",
                                 requestError.getErrorCode(),
                                 requestError.getMessage()));
                     }

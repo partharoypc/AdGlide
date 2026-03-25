@@ -1,7 +1,7 @@
 package com.partharoypc.adglide.provider.wortise;
 
 import android.app.Activity;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 import androidx.annotation.NonNull;
 import com.partharoypc.adglide.provider.RewardedProvider;
 import com.wortise.ads.AdError;
@@ -72,7 +72,7 @@ public class WortiseRewardedProvider implements RewardedProvider {
             try {
                 rewardedAd.showAd();
             } catch (Exception e) {
-                Log.e("AdGlide.Wortise", "Failed to show rewarded: " + e.getMessage());
+                AdGlideLog.e("AdGlide.Wortise", "Failed to show rewarded: " + e.getMessage());
                 listener.onAdShowFailed(e.getMessage());
             }
         } else {

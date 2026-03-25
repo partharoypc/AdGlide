@@ -2,7 +2,7 @@ package com.partharoypc.adglide.util;
 
 import android.app.Activity;
 import android.os.Build;
-import android.util.Log;
+import com.partharoypc.adglide.util.AdGlideLog;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
@@ -47,11 +47,11 @@ public class Tools {
                         return true;
                     }
                 } catch (Exception e) {
-                    Log.i(TAG, "Exception in isNetworkAvailable: " + e.getMessage());
+                    AdGlideLog.i(TAG, "Exception in isNetworkAvailable: " + e.getMessage());
                 }
             }
         }
-        Log.i(TAG, "No internet connection available.");
+        AdGlideLog.i(TAG, "No internet connection available.");
         return false;
     }
 
