@@ -3,6 +3,7 @@ package com.partharoypc.adglidedemo.data;
 public class Constant {
 
     // AdMob Test IDs
+    public static final String ADMOB_APP_ID = "ca-app-pub-3940256099942544~3347511713";
     public static final String ADMOB_BANNER_ID = "ca-app-pub-3940256099942544/6300978111";
     public static final String ADMOB_INTERSTITIAL_ID = "ca-app-pub-3940256099942544/1033173712";
     public static final String ADMOB_REWARDED_ID = "ca-app-pub-3940256099942544/5224354917";

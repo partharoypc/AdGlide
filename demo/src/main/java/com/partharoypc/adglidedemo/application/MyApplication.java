@@ -24,6 +24,7 @@ public class MyApplication extends Application {
 
         AdGlideConfig config = new AdGlideConfig.Builder()
                 .enableAds(sharedPref.getAdStatus())
+                .adMobAppId(Constant.ADMOB_APP_ID)
                 .primaryNetwork(sharedPref.getAdNetwork())
                 .backupNetworks(sharedPref.getBackupAdNetwork())
                 .startAppId(Constant.STARTAPP_APP_ID)
