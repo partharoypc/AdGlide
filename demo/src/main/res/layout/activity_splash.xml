@@ -9,6 +9,7 @@
 
     <!-- Glow Circle behind logo -->
     <FrameLayout
+        android:id="@+id/logo_container"
         android:layout_width="160dp"
         android:layout_height="160dp"
         android:background="@drawable/bg_splash_glow">
@@ -25,6 +26,7 @@
 
     <!-- Brand name -->
     <TextView
+        android:id="@+id/brand_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="AdGlide"
@@ -37,6 +39,7 @@
 
     <!-- Tagline -->
     <TextView
+        android:id="@+id/tagline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Premium Ad Mediation SDK"

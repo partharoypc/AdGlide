@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.partharoypc.adglide.AdGlide;
+import com.partharoypc.adglide.util.AdGlideCallback;
 import com.partharoypc.adglidedemo.R;
 
 public class ActivityInterstitial extends AppCompatActivity {
@@ -49,30 +50,17 @@ public class ActivityInterstitial extends AppCompatActivity {
     }
 
     private void showInterstitialAd() {
-        appendLog("Triggering Interstitial Ad Show...");
-        AdGlide.showInterstitial(this, new com.partharoypc.adglide.util.AdGlideCallback() {
-            @Override
-            public void onAdLoaded() {
-            }
-
+        appendLog("💎 Triggering Interstitial Ad Show...");
+        AdGlide.showInterstitial(this, new AdGlideCallback() {
             @Override
             public void onAdFailedToLoad(String error) {
-                appendLog("Ad Failed: " + error);
-            }
-
-            @Override
-            public void onAdShowed() {
+                appendLog("🛑 Ad Failed: " + error);
             }
 
             @Override
             public void onAdDismissed() {
-                appendLog("Interstitial Ad Dismissed");
+                appendLog("👋 Interstitial Ad Dismissed");
                 Log.d(TAG, "onAdDismissed");
-            }
-
-            @Override
-            public void onAdCompleted() {
-                appendLog("Ad interaction completed");
             }
         });
     }

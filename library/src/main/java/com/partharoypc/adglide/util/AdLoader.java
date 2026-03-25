@@ -199,8 +199,8 @@ public class AdLoader {
     }
 
     private void executeNext(NetworkExecutor executor, AdGlideCallback finalCallback) {
-        if (waterfallManager.hasNext()) {
-            String nextNetwork = waterfallManager.getNext();
+        String nextNetwork = waterfallManager.getNext();
+        if (nextNetwork != null && !nextNetwork.isEmpty()) {
             executeNetwork(nextNetwork, executor, finalCallback);
         } else {
             AdGlideLog.d(TAG, "All waterfall backups exhausted for " + format);

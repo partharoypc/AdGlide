@@ -263,10 +263,12 @@ public class NativeAd {
         }
 
         public void setNativeAdPadding(int left, int top, int right, int bottom) {
-            Activity activity = activityRef.get();
-            if (activity == null)
-                return;
-            nativeAdViewContainer = activity.findViewById(R.id.native_ad_view_container);
+            if (nativeAdViewContainer == null) {
+                Activity activity = activityRef.get();
+                if (activity != null) {
+                    nativeAdViewContainer = activity.findViewById(R.id.native_ad_view_container);
+                }
+            }
             if (nativeAdViewContainer != null) {
                 nativeAdViewContainer.setPadding(left, top, right, bottom);
                 int colorRes = darkTheme ? nativeBackgroundDark : nativeBackgroundLight;
@@ -275,10 +277,12 @@ public class NativeAd {
         }
 
         public void setNativeAdMargin(int left, int top, int right, int bottom) {
-            Activity activity = activityRef.get();
-            if (activity == null)
-                return;
-            nativeAdViewContainer = activity.findViewById(R.id.native_ad_view_container);
+            if (nativeAdViewContainer == null) {
+                Activity activity = activityRef.get();
+                if (activity != null) {
+                    nativeAdViewContainer = activity.findViewById(R.id.native_ad_view_container);
+                }
+            }
             if (nativeAdViewContainer != null) {
                 if (nativeAdViewContainer.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
                     ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) nativeAdViewContainer
@@ -290,10 +294,12 @@ public class NativeAd {
         }
 
         public void setNativeAdBackgroundResource(int drawableBackground) {
-            Activity activity = activityRef.get();
-            if (activity == null)
-                return;
-            nativeAdViewContainer = activity.findViewById(R.id.native_ad_view_container);
+            if (nativeAdViewContainer == null) {
+                Activity activity = activityRef.get();
+                if (activity != null) {
+                    nativeAdViewContainer = activity.findViewById(R.id.native_ad_view_container);
+                }
+            }
             if (nativeAdViewContainer != null) {
                 nativeAdViewContainer.setBackgroundResource(drawableBackground);
             }

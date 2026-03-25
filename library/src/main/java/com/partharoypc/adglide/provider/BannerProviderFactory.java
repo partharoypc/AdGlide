@@ -8,6 +8,7 @@ public class BannerProviderFactory {
     private static final String TAG = "AdGlide.BannerFactory";
 
     public static BannerProvider getProvider(String network) {
+        if (network == null || network.isEmpty()) return null;
         String className = null;
         String checkClass = null;
 

@@ -6,6 +6,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import com.partharoypc.adglide.AdGlide;
+import com.partharoypc.adglide.util.AdGlideCallback;
 import com.partharoypc.adglidedemo.R;
 
 public class ActivityRewardedInterstitial extends AppCompatActivity {
@@ -39,29 +40,21 @@ public class ActivityRewardedInterstitial extends AppCompatActivity {
         });
 
         btnShow.setOnClickListener(v -> {
-            AdGlide.showRewardedInterstitial(this, new com.partharoypc.adglide.util.AdGlideCallback() {
-                @Override
-                public void onAdLoaded() {
-                }
-
+            AdGlide.showRewardedInterstitial(this, new AdGlideCallback() {
                 @Override
                 public void onAdFailedToLoad(String error) {
-                    Toast.makeText(ActivityRewardedInterstitial.this, "Not Ready: " + error,
+                    Toast.makeText(ActivityRewardedInterstitial.this, "🛑 Not Ready: " + error,
                             Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
-                public void onAdShowed() {
-                }
-
-                @Override
                 public void onAdDismissed() {
-                    Toast.makeText(ActivityRewardedInterstitial.this, "Ad Closed", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ActivityRewardedInterstitial.this, "👋 Ad Closed", Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
                 public void onAdCompleted() {
-                    Toast.makeText(ActivityRewardedInterstitial.this, "Reward Granted!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ActivityRewardedInterstitial.this, "🏆 Reward Granted!", Toast.LENGTH_SHORT).show();
                 }
             });
         });

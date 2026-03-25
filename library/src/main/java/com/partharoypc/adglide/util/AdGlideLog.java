@@ -5,32 +5,41 @@ import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.AdGlideConfig;
 
 /**
- * Internal logging utility that respects the global debug flag.
+ * Premium logging utility for the AdGlide SDK.
+ * Respects global debug flags and provides formatted output.
  */
 public class AdGlideLog {
-    private static final String TAG = "AdGlide";
+    private static final String TAG = "AdGlideSDK";
+    private static final String PREFIX = "💎 ";
 
     public static void d(String subTag, String message) {
         if (isDebugEnabled()) {
-            Log.d(TAG, "[" + subTag + "] " + message);
+            Log.d(TAG, PREFIX + "[" + subTag + "] " + message);
         }
     }
 
     public static void e(String subTag, String message) {
+        // Errors are always logged if they are critical, but we can filter by debug for premium feel
         if (isDebugEnabled()) {
-            Log.e(TAG, "[" + subTag + "] " + message);
+            Log.e(TAG, PREFIX + "🛑 [" + subTag + "] " + message);
+        }
+    }
+    
+    public static void e(String subTag, String message, Throwable throwable) {
+        if (isDebugEnabled()) {
+            Log.e(TAG, PREFIX + "🛑 [" + subTag + "] " + message, throwable);
         }
     }
 
     public static void w(String subTag, String message) {
         if (isDebugEnabled()) {
-            Log.w(TAG, "[" + subTag + "] " + message);
+            Log.w(TAG, PREFIX + "⚠️ [" + subTag + "] " + message);
         }
     }
 
     public static void i(String subTag, String message) {
         if (isDebugEnabled()) {
-            Log.i(TAG, "[" + subTag + "] " + message);
+            Log.i(TAG, PREFIX + "💡 [" + subTag + "] " + message);
         }
     }
 

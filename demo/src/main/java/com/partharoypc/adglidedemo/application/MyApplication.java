@@ -20,34 +20,18 @@ public class MyApplication extends Application {
     }
 
     public static void initializeAdGlide(android.content.Context context) {
-        // Fetch settings from SharedPref
         SharedPref sharedPref = new SharedPref(context);
-        Constant.AD_NETWORK = sharedPref.getAdNetwork();
-        Constant.BACKUP_AD_NETWORK = sharedPref.getBackupAdNetwork();
-        Constant.OPEN_ADS_ON_START = sharedPref.getIsAppOpenAdEnabled();
-        Constant.BANNER_STATUS = sharedPref.getIsBannerEnabled();
-        Constant.INTERSTITIAL_STATUS = sharedPref.getIsInterstitialEnabled();
-        Constant.NATIVE_STATUS = sharedPref.getIsNativeEnabled();
-        Constant.REWARDED_STATUS = sharedPref.getIsRewardedEnabled();
-        Constant.REWARDED_INTERSTITIAL_STATUS = sharedPref.getIsRewardedInterstitialEnabled();
-        Constant.AD_STATUS = sharedPref.getAdStatus();
-        Constant.TEST_MODE = sharedPref.getTestMode();
-        Constant.ENABLE_DEBUG_HUD = sharedPref.getEnableDebugHud();
-        Constant.INTERSTITIAL_AD_INTERVAL = sharedPref.getInterstitialInterval();
-        Constant.REWARDED_AD_INTERVAL = sharedPref.getRewardedInterval();
-        Constant.AD_RESPONSE_TIMEOUT_MS = sharedPref.getAdResponseTimeoutMs();
-        Constant.APP_OPEN_COOLDOWN_MINUTES = sharedPref.getAppOpenCooldownMinutes();
 
         AdGlideConfig config = new AdGlideConfig.Builder()
-                .enableAds(Constant.AD_STATUS)
-                .primaryNetwork(Constant.AD_NETWORK)
-                .backupNetworks(Constant.BACKUP_AD_NETWORK)
+                .enableAds(sharedPref.getAdStatus())
+                .primaryNetwork(sharedPref.getAdNetwork())
+                .backupNetworks(sharedPref.getBackupAdNetwork())
                 .startAppId(Constant.STARTAPP_APP_ID)
                 .unityGameId(Constant.UNITY_GAME_ID)
                 .appLovinSdkKey(context.getResources().getString(com.partharoypc.adglidedemo.R.string.app_lovin_sdk_key))
                 .ironSourceAppKey(Constant.IRONSOURCE_APP_KEY)
                 .wortiseAppId(Constant.WORTISE_APP_ID)
-                .testMode(Constant.TEST_MODE)
+                .testMode(sharedPref.getTestMode())
 
                 // ── Banner ────────────────────────────────────────────────
                 .adMobBannerId(Constant.ADMOB_BANNER_ID)
@@ -96,27 +80,27 @@ public class MyApplication extends Application {
                 .wortiseNativeId(Constant.WORTISE_NATIVE_ID)
 
                 // ── Format Toggles ────────────────────────────────────────
-                .bannerEnabled(Constant.BANNER_STATUS)
-                .interstitialEnabled(Constant.INTERSTITIAL_STATUS)
-                .nativeEnabled(Constant.NATIVE_STATUS)
-                .rewardedEnabled(Constant.REWARDED_STATUS)
-                .rewardedInterstitialEnabled(Constant.REWARDED_INTERSTITIAL_STATUS)
-                .appOpenEnabled(Constant.OPEN_ADS_ON_START)
+                .bannerEnabled(sharedPref.getIsBannerEnabled())
+                .interstitialEnabled(sharedPref.getIsInterstitialEnabled())
+                .nativeEnabled(sharedPref.getIsNativeEnabled())
+                .rewardedEnabled(sharedPref.getIsRewardedEnabled())
+                .rewardedInterstitialEnabled(sharedPref.getIsRewardedInterstitialEnabled())
+                .appOpenEnabled(sharedPref.getIsAppOpenAdEnabled())
 
                 // ── Smart Loading & Intervals ─────────────────────────────
                 .autoLoadInterstitial(true)
                 .autoLoadRewarded(true)
-                .interstitialInterval(Constant.INTERSTITIAL_AD_INTERVAL)
-                .rewardedInterval(Constant.REWARDED_AD_INTERVAL)
-                .appOpenCooldown(Constant.APP_OPEN_COOLDOWN_MINUTES)
-                .adResponseTimeout(Constant.AD_RESPONSE_TIMEOUT_MS)
+                .interstitialInterval(sharedPref.getInterstitialInterval())
+                .rewardedInterval(sharedPref.getRewardedInterval())
+                .appOpenCooldown(sharedPref.getAppOpenCooldownMinutes())
+                .adResponseTimeout(sharedPref.getAdResponseTimeoutMs())
 
                 // ── Privacy & Debug ───────────────────────────────────────
                 .excludeOpenAdFrom(ActivitySplash.class, ActivitySettings.class)
                 .enableGDPR(true)
 
                 // ── House Ads Fallback ────────────────────────────────────
-                .houseAdEnabled(Constant.HOUSE_AD_ENABLE)
+                .houseAdEnabled(sharedPref.getIsHouseAdEnabled())
                 .houseAdBannerImage(Constant.HOUSE_AD_BANNER_IMAGE)
                 .houseAdBannerClickUrl(Constant.HOUSE_AD_BANNER_URL)
                 .houseAdInterstitialImage(Constant.HOUSE_AD_INTERSTITIAL_IMAGE)

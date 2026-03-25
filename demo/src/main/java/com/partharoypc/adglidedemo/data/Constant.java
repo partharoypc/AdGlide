@@ -2,23 +2,6 @@ package com.partharoypc.adglidedemo.data;
 
 public class Constant {
 
-    public static boolean AD_STATUS = true;
-    public static boolean BANNER_STATUS = true;
-    public static boolean INTERSTITIAL_STATUS = true;
-    public static boolean NATIVE_STATUS = true;
-    public static boolean REWARDED_STATUS = true;
-    public static boolean REWARDED_INTERSTITIAL_STATUS = true;
-
-    public static String AD_NETWORK = "admob";
-    public static String BACKUP_AD_NETWORK = "none";
-
-    // SDK Settings
-    public static boolean TEST_MODE = false;
-    public static boolean DEBUG_MODE = true;
-    public static boolean ENABLE_DEBUG_HUD = true;
-    public static int AD_RESPONSE_TIMEOUT_MS = 3500;
-    public static int APP_OPEN_COOLDOWN_MINUTES = 0;
-
     // AdMob Test IDs
     public static final String ADMOB_BANNER_ID = "ca-app-pub-3940256099942544/6300978111";
     public static final String ADMOB_INTERSTITIAL_ID = "ca-app-pub-3940256099942544/1033173712";
@@ -53,12 +36,6 @@ public class Constant {
     public static final String APPLOVIN_APP_OPEN_AP_ID = "de9f381d132b859a";
     public static final String APPLOVIN_REWARDED_INT_ID = "98f6a586ed642919";
 
-    // AppLovin Discovery Zone IDs
-    public static final String APPLOVIN_BANNER_ZONE_ID = "afb7122672e86340";
-    public static final String APPLOVIN_BANNER_MREC_ZONE_ID = "81287b697d935c32";
-    public static final String APPLOVIN_INTERSTITIAL_ZONE_ID = "b6eba8b976279ea5";
-    public static final String APPLOVIN_DISC_REWARDED_ZONE_ID = "b6eba8b976279ea5";
-
     // IronSource
     public static final String IRONSOURCE_APP_KEY = "85460dcd";
     public static final String IRONSOURCE_BANNER_ID = "DefaultBanner";
@@ -85,19 +62,7 @@ public class Constant {
     public static final String STYLE_VIDEO = "video";
 
     // App Open Ad Config
-    public static boolean isAppOpen = false;
-    public static boolean FORCE_TO_SHOW_APP_OPEN_AD_ON_START = true;
-    public static boolean OPEN_ADS_ON_START = true;
-    public static boolean OPEN_ADS_ON_RESUME = true;
-    public static String META_APP_OPEN_ID_LEGACY = "YOUR_PLACEMENT_ID";
-    public static String APPLOVIN_REWARDED_INT_ID_LEGACY = "98f6a586ed642919";
     public static final String STARTAPP_APP_OPEN_ID = "startapp_app_open";
-
-    // Frequency & Interval Config
-    public static int INTERSTITIAL_AD_INTERVAL = 1;
-    public static int REWARDED_AD_INTERVAL = 1;
-    public static final int NATIVE_AD_INDEX = 2;
-    public static final int NATIVE_AD_INTERVAL = 8;
 
     // House Ad Config
     public static boolean HOUSE_AD_ENABLE = true;

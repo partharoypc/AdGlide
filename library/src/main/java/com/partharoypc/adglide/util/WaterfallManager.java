@@ -23,18 +23,18 @@ public class WaterfallManager {
         this.currentIndex = 0;
     }
 
-    public boolean hasNext() {
+    public synchronized boolean hasNext() {
         return currentIndex < networks.size();
     }
 
-    public String getNext() {
-        if (hasNext()) {
+    public synchronized String getNext() {
+        if (currentIndex < networks.size()) {
             return networks.get(currentIndex++);
         }
         return null;
     }
 
-    public void setNetworks(List<String> networks) {
+    public synchronized void setNetworks(List<String> networks) {
         this.networks.clear();
         if (networks != null) {
             this.networks.addAll(networks);
@@ -42,11 +42,11 @@ public class WaterfallManager {
         this.currentIndex = 0;
     }
 
-    public void reset() {
+    public synchronized void reset() {
         currentIndex = 0;
     }
 
-    public List<String> getNetworks() {
-        return networks;
+    public synchronized List<String> getNetworks() {
+        return new ArrayList<>(networks);
     }
 }

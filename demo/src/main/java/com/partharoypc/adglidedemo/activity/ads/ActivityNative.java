@@ -9,6 +9,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import com.partharoypc.adglide.AdGlide;
+import com.partharoypc.adglide.util.AdGlideLog;
+import com.partharoypc.adglide.util.AdGlideCallback;
 import com.partharoypc.adglidedemo.R;
 import com.partharoypc.adglidedemo.data.Constant;
 import com.partharoypc.adglidedemo.database.SharedPref;
@@ -71,11 +73,21 @@ public class ActivityNative extends AppCompatActivity {
                 break;
         }
 
-        // Flagship Elite Builder API:
+        // Flagship Premium Builder API:
         new com.partharoypc.adglide.format.NativeAd.Builder(this)
                 .container(nativeAdContainer)
                 .style(style)
-                .load();
+                .load(new AdGlideCallback() {
+                    @Override
+                    public void onAdLoaded() {
+                        AdGlideLog.d("ActivityNative", "💎 Native Ad Loaded Successfully");
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(String error) {
+                        AdGlideLog.e("ActivityNative", "🛑 Native Ad Failed: " + error);
+                    }
+                });
     }
 
     private void destroyNative() {

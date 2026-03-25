@@ -103,7 +103,6 @@ public class ActivitySettings extends AppCompatActivity {
         recyclerViewPrimary.setLayoutManager(new LinearLayoutManager(this));
         adapterPrimary = new AdapterNetwork(this, primaryNetworks, sharedPref.getAdNetwork(), item -> {
             sharedPref.setAdNetwork(item.adNetworkId);
-            Constant.AD_NETWORK = item.adNetworkId;
             initAds();
         });
         recyclerViewPrimary.setAdapter(adapterPrimary);
@@ -113,7 +112,6 @@ public class ActivitySettings extends AppCompatActivity {
         recyclerViewBackup.setLayoutManager(new LinearLayoutManager(this));
         adapterBackup = new AdapterNetwork(this, backupNetworks, sharedPref.getBackupAdNetwork(), item -> {
             sharedPref.setBackupAdNetwork(item.adNetworkId);
-            Constant.BACKUP_AD_NETWORK = item.adNetworkId;
             initAds(); // Re-initialize immediately
         });
         recyclerViewBackup.setAdapter(adapterBackup);
@@ -131,7 +129,6 @@ public class ActivitySettings extends AppCompatActivity {
         switchAllAds.setChecked(sharedPref.getAdStatus());
         switchAllAds.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sharedPref.setAdStatus(isChecked);
-            Constant.AD_STATUS = isChecked;
             initAds();
         });
 
@@ -140,7 +137,6 @@ public class ActivitySettings extends AppCompatActivity {
         switchAppOpenAd.setChecked(sharedPref.getIsAppOpenAdEnabled());
         switchAppOpenAd.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sharedPref.setIsAppOpenAdEnabled(isChecked);
-            Constant.OPEN_ADS_ON_START = isChecked;
             initAds();
         });
 
@@ -149,7 +145,6 @@ public class ActivitySettings extends AppCompatActivity {
         switchBanner.setChecked(sharedPref.getIsBannerEnabled());
         switchBanner.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sharedPref.setIsBannerEnabled(isChecked);
-            Constant.BANNER_STATUS = isChecked;
             initAds();
         });
 
@@ -158,7 +153,6 @@ public class ActivitySettings extends AppCompatActivity {
         switchInterstitial.setChecked(sharedPref.getIsInterstitialEnabled());
         switchInterstitial.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sharedPref.setIsInterstitialEnabled(isChecked);
-            Constant.INTERSTITIAL_STATUS = isChecked;
             initAds();
         });
 
@@ -167,7 +161,6 @@ public class ActivitySettings extends AppCompatActivity {
         switchNative.setChecked(sharedPref.getIsNativeEnabled());
         switchNative.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sharedPref.setIsNativeEnabled(isChecked);
-            Constant.NATIVE_STATUS = isChecked;
             initAds();
         });
 
@@ -176,7 +169,6 @@ public class ActivitySettings extends AppCompatActivity {
         switchRewarded.setChecked(sharedPref.getIsRewardedEnabled());
         switchRewarded.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sharedPref.setIsRewardedEnabled(isChecked);
-            Constant.REWARDED_STATUS = isChecked;
             initAds();
         });
 
@@ -185,7 +177,6 @@ public class ActivitySettings extends AppCompatActivity {
         switchRewardedInt.setChecked(sharedPref.getIsRewardedInterstitialEnabled());
         switchRewardedInt.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sharedPref.setIsRewardedInterstitialEnabled(isChecked);
-            Constant.REWARDED_INTERSTITIAL_STATUS = isChecked;
             initAds();
         });
 
@@ -198,7 +189,6 @@ public class ActivitySettings extends AppCompatActivity {
                 current--;
                 sharedPref.setInterstitialInterval(current);
                 tvIntervalValue.setText(String.valueOf(current));
-                Constant.INTERSTITIAL_AD_INTERVAL = current;
                 initAds();
             }
         });
@@ -208,7 +198,6 @@ public class ActivitySettings extends AppCompatActivity {
                 current++;
                 sharedPref.setInterstitialInterval(current);
                 tvIntervalValue.setText(String.valueOf(current));
-                Constant.INTERSTITIAL_AD_INTERVAL = current;
                 initAds();
             }
         });
@@ -218,7 +207,6 @@ public class ActivitySettings extends AppCompatActivity {
         switchHouseAd.setChecked(sharedPref.getIsHouseAdEnabled());
         switchHouseAd.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sharedPref.setIsHouseAdEnabled(isChecked);
-            Constant.HOUSE_AD_ENABLE = isChecked;
             initAds();
         });
 
@@ -227,7 +215,6 @@ public class ActivitySettings extends AppCompatActivity {
         switchTestMode.setChecked(sharedPref.getTestMode());
         switchTestMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sharedPref.setTestMode(isChecked);
-            Constant.TEST_MODE = isChecked;
             initAds();
         });
 
@@ -236,7 +223,6 @@ public class ActivitySettings extends AppCompatActivity {
         switchDebugHud.setChecked(sharedPref.getEnableDebugHud());
         switchDebugHud.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sharedPref.setEnableDebugHud(isChecked);
-            Constant.ENABLE_DEBUG_HUD = isChecked;
             initAds();
         });
 
@@ -250,7 +236,6 @@ public class ActivitySettings extends AppCompatActivity {
                 current--;
                 sharedPref.setRewardedInterval(current);
                 tvRewardedIntervalValue.setText(String.valueOf(current));
-                Constant.REWARDED_AD_INTERVAL = current;
                 initAds();
             }
         });
@@ -260,7 +245,6 @@ public class ActivitySettings extends AppCompatActivity {
                 current++;
                 sharedPref.setRewardedInterval(current);
                 tvRewardedIntervalValue.setText(String.valueOf(current));
-                Constant.REWARDED_AD_INTERVAL = current;
                 initAds();
             }
         });
@@ -274,7 +258,6 @@ public class ActivitySettings extends AppCompatActivity {
                 current -= 500;
                 sharedPref.setAdResponseTimeoutMs(current);
                 tvAdTimeoutValue.setText(String.valueOf(current));
-                Constant.AD_RESPONSE_TIMEOUT_MS = current;
                 initAds();
             }
         });
@@ -284,7 +267,6 @@ public class ActivitySettings extends AppCompatActivity {
                 current += 500;
                 sharedPref.setAdResponseTimeoutMs(current);
                 tvAdTimeoutValue.setText(String.valueOf(current));
-                Constant.AD_RESPONSE_TIMEOUT_MS = current;
                 initAds();
             }
         });

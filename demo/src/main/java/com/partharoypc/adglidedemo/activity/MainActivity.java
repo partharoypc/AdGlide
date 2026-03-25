@@ -127,7 +127,6 @@ public class MainActivity extends AppCompatActivity {
             int chipId = checkedIds.get(0);
             String newNetwork = networkIdForChip(chipId);
             if (newNetwork != null) {
-                Constant.AD_NETWORK = newNetwork;
                 sharedPref.setAdNetwork(newNetwork);
                 updateActiveNetworkLabel();
                 reinitAds();
@@ -143,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void preselectCurrentNetworkChip() {
-        int chipId = chipIdForNetwork(Constant.AD_NETWORK);
+        int chipId = chipIdForNetwork(sharedPref.getAdNetwork());
         if (chipId != View.NO_ID) {
             Chip chip = chipGroupNetworks.findViewById(chipId);
             if (chip != null) chip.setChecked(true);
@@ -151,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateActiveNetworkLabel() {
-        tvActiveNetwork.setText(labelForNetwork(Constant.AD_NETWORK));
+        tvActiveNetwork.setText(labelForNetwork(sharedPref.getAdNetwork()));
     }
 
     private String networkIdForChip(int chipId) {
@@ -201,9 +200,7 @@ public class MainActivity extends AppCompatActivity {
     // ─────────────────────────────────────────────────────────────────────────
 
     private void initAppConfig() {
-        Constant.AD_NETWORK = sharedPref.getAdNetwork();
-        Constant.AD_STATUS = sharedPref.getAdStatus();
-        // The rest are handled by MyApplication.initializeAdGlide which is called globally or via reinitAds
+        // SharedPref is the source of truth, SDK is initialized in onCreate via reinitAds or directly
     }
 
     private void setupDashboard() {

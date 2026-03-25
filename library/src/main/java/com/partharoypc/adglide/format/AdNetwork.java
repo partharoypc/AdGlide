@@ -32,10 +32,12 @@ public class AdNetwork {
             return this;
         }
 
+        private String currentInitializingNetwork;
+
         @Override
         public String getAppId() {
-            if (config == null) return "";
-            return getAppIdForNetwork(config.getPrimaryNetwork());
+            if (config == null || currentInitializingNetwork == null) return "";
+            return getAppIdForNetwork(currentInitializingNetwork);
         }
 
         private String getAppIdForNetwork(String networkName) {
@@ -47,7 +49,7 @@ public class AdNetwork {
                 case IRONSOURCE, META_BIDDING_IRONSOURCE -> config.getIronSourceAppKey();
                 case STARTAPP -> config.getStartAppId();
                 case WORTISE -> config.getWortiseAppId();
-                case META -> ""; // Meta doesn't use a global App ID for init in this SDK
+                case META -> ""; 
                 default -> "";
             };
         }
@@ -84,7 +86,6 @@ public class AdNetwork {
                     AdGlideLog.w(TAG, "Unknown Primary Ad Network: [" + adNetwork + "]. Skipping initialization.");
                 } else {
                     initializeSdk(adNetwork);
-                    AdGlideLog.d(TAG, "[" + adNetwork + "] is selected as Primary Ads");
                 }
             }
         }
@@ -99,15 +100,12 @@ public class AdNetwork {
                 List<String> backupAdNetworks = config.getBackupNetworks();
                 String primaryNetwork = config.getPrimaryNetwork();
 
-                // 1. Prioritize Bidding Networks to ensure they are ready for real-time auctions
                 for (String network : backupAdNetworks) {
                     if (network.contains("bidding") && !network.equals(primaryNetwork)) {
                         initializeSdk(network);
-                        AdGlideLog.d(TAG, "[" + network + "] Bidding Network initialized with priority.");
                     }
                 }
 
-                // 2. Initialize remaining backup networks
                 for (String network : backupAdNetworks) {
                     if (network.contains("bidding") || network.equals(primaryNetwork)) {
                         continue;
@@ -120,17 +118,18 @@ public class AdNetwork {
                     }
 
                     initializeSdk(network);
-                    AdGlideLog.d(TAG, "[" + network + "] is selected as Backup Ads");
                 }
             }
         }
 
         private void initializeSdk(String networkName) {
             if (context == null || networkName == null || networkName.isEmpty()) return;
+            this.currentInitializingNetwork = networkName;
             try {
                 NetworkInitializer initializer = NetworkInitializerFactory.getInitializer(networkName);
                 if (initializer != null) {
                     initializer.initialize(context, this);
+                    AdGlideLog.d(TAG, "[" + networkName.toUpperCase() + "] SDK initialized successfully.");
                 }
             } catch (Exception e) {
                 AdGlideLog.e(TAG, "Failed to initialize " + networkName + " SDK. Error: " + e.getMessage());

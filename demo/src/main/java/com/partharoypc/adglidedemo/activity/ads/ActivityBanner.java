@@ -9,6 +9,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.partharoypc.adglide.AdGlide;
+import com.partharoypc.adglide.util.AdGlideLog;
+import com.partharoypc.adglide.util.AdGlideCallback;
 import com.partharoypc.adglidedemo.R;
 
 public class ActivityBanner extends AppCompatActivity {
@@ -50,13 +52,23 @@ public class ActivityBanner extends AppCompatActivity {
         SwitchMaterial switchCollapsible = findViewById(R.id.switch_collapsible);
         SwitchMaterial switchAdaptive = findViewById(R.id.switch_adaptive);
 
-        // Professional Elite API:
+        // Professional Premium API:
         new com.partharoypc.adglide.format.BannerAd.Builder(this)
                 .container(bannerContainer)
                 .collapsible(switchCollapsible.isChecked())
                 .adaptive(switchAdaptive.isChecked())
                 .autoRefresh(30) // Demonstrate 30s auto-refresh
-                .load();
+                .load(new AdGlideCallback() {
+                    @Override
+                    public void onAdLoaded() {
+                        AdGlideLog.d("ActivityBanner", "💎 Banner Ad Loaded");
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(String error) {
+                        AdGlideLog.e("ActivityBanner", "🛑 Banner Ad Failed: " + error);
+                    }
+                });
     }
 
     private void destroyBanner() {

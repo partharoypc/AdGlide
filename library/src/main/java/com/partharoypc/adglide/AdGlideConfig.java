@@ -1,5 +1,7 @@
 package com.partharoypc.adglide;
 
+import com.partharoypc.adglide.util.AdGlideLog;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +24,7 @@ public class AdGlideConfig {
     private final boolean debugGDPR;
     private final boolean enableDebugHUD;
     private final int adResponseTimeoutMs;
+    private boolean isValid = true;
 
     // Granular Ad Type Status
     private final boolean bannerStatus;
@@ -181,7 +184,14 @@ public class AdGlideConfig {
         this.houseAdNativeIcon = builder.houseAdNativeIcon;
         this.houseAdNativeCTA = builder.houseAdNativeCTA;
         this.houseAdNativeClickUrl = builder.houseAdNativeClickUrl;
+    }
 
+    public boolean isValid() {
+        return isValid;
+    }
+
+    protected void setValid(boolean valid) {
+        isValid = valid;
     }
 
     // Getters for Global Settings
@@ -968,7 +978,29 @@ public class AdGlideConfig {
         }
 
         public AdGlideConfig build() {
-            return new AdGlideConfig(this);
+            AdGlideConfig config = new AdGlideConfig(this);
+            validate(config);
+            return config;
+        }
+
+        private void validate(AdGlideConfig config) {
+            if (!config.getAdStatus()) return;
+            
+            String primary = config.getPrimaryNetwork();
+            if (primary == null || primary.isEmpty()) {
+                AdGlideLog.w("Config", "Primary network is not set. Ads may not load correctly.");
+            }
+            
+            if ("admob".equalsIgnoreCase(primary) && (config.getAdMobAppId() == null || config.getAdMobAppId().isEmpty())) {
+                AdGlideLog.e("Config", "AdMob is primary but App ID is missing!");
+                config.setValid(false);
+            }
+            
+            if (config.isValid()) {
+                AdGlideLog.i("Config", "SDK Configuration validated successfully.");
+            } else {
+                AdGlideLog.e("Config", "SDK Configuration validation failed. Check your setup.");
+            }
         }
     }
 }

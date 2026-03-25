@@ -236,4 +236,16 @@ public class AdPoolManager {
             default -> false;
         };
     }
+
+    public static void clear() {
+        for (PoolSet<?> pool : pools.values()) {
+            pool.primary.clear();
+            pool.backup.clear();
+        }
+        nativePools.clear();
+        for (AtomicBoolean loading : loadingState.values()) {
+            loading.set(false);
+        }
+        AdGlideLog.d(TAG, "Ad pools cleared.");
+    }
 }

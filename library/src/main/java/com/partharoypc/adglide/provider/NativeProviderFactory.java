@@ -9,6 +9,7 @@ public class NativeProviderFactory {
     private static final String TAG = "AdGlide.NativeFactory";
 
     public static NativeProvider getProvider(String network) {
+        if (network == null || network.isEmpty()) return null;
         String className = null;
         String checkClass = null;
 

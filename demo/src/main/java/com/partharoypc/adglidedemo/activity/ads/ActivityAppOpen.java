@@ -51,32 +51,22 @@ public class ActivityAppOpen extends AppCompatActivity {
     }
 
     private void showAppOpenAd() {
-        appendLog("Triggering App Open Ad Show (from pool if ready)...");
+        appendLog("💎 Triggering App Open Ad Show (from pool if ready)...");
         AdGlide.showAppOpenAd(this, new AdGlideCallback() {
             @Override
-            public void onAdLoaded() {
-                appendLog("Ad Loaded callback fired (already ready in pool or loaded on fly)");
-            }
-
-            @Override
             public void onAdFailedToLoad(String error) {
-                appendLog("Ad Failed to Load: " + error);
+                appendLog("🛑 Ad Failed: " + error);
             }
 
             @Override
             public void onAdShowed() {
-                appendLog("App Open Ad Showed successfully");
+                appendLog("👁️ App Open Ad Showed successfully");
             }
 
             @Override
             public void onAdDismissed() {
-                appendLog("App Open Ad Dismissed");
+                appendLog("👋 App Open Ad Dismissed");
                 Log.d(TAG, "onAdDismissed");
-            }
-
-            @Override
-            public void onAdCompleted() {
-                appendLog("Ad interaction completed");
             }
         });
     }
