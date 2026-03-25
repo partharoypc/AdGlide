@@ -88,10 +88,10 @@ public class WortiseAppOpenProvider implements AppOpenProvider, AppOpenAd.Listen
         isShowingAd = false;
         if (listener != null)
             listener.onAdDismissed();
-        // Clear listener BEFORE prefetch so the stale show-listener
-        // is not called when the next ad loads automatically.
+        // Clear listener so the stale show-listener
+        // is not called when the next ad loads.
         listener = null;
-        ad.loadAd();
+        // Removed redundant internal auto-load to prevent double loading
     }
 
     @Override

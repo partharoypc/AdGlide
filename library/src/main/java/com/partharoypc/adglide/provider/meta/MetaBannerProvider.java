@@ -37,11 +37,14 @@ public class MetaBannerProvider implements BannerProvider {
 
             @Override
             public void onAdClicked(Ad ad) {
+                listener.onAdClicked();
             }
 
             @Override
             public void onLoggingImpression(Ad ad) {
+                listener.onAdShowed();
             }
+
         };
 
         adView.loadAd(adView.buildLoadAdConfig().withAdListener(adListener).build());

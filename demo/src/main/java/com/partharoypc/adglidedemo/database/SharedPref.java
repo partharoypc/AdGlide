@@ -19,6 +19,15 @@ public class SharedPref {
         editor = sharedPreferences.edit();
     }
 
+    public Boolean getAdStatus() {
+        return sharedPreferences.getBoolean("ad_status", true);
+    }
+
+    public void setAdStatus(Boolean isEnabled) {
+        editor.putBoolean("ad_status", isEnabled);
+        editor.apply();
+    }
+
     public Boolean getIsDarkTheme() {
         return sharedPreferences.getBoolean("theme", false);
     }

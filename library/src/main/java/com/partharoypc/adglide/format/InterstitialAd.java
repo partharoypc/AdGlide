@@ -13,6 +13,7 @@ import static com.partharoypc.adglide.util.Constant.HOUSE_AD;
 import static com.partharoypc.adglide.util.Constant.UNITY;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
+import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.AdGlideConfig;
 import android.app.Activity;
 import com.partharoypc.adglide.util.AdGlideLog;
@@ -35,8 +36,10 @@ public class InterstitialAd {
         private final com.partharoypc.adglide.util.AdLoader adLoader;
         private final java.lang.ref.WeakReference<Activity> activityRef;
         private InterstitialProvider currentProvider;
+        private String currentNetwork;
         private boolean showOnLoad = false;
         private AdGlideCallback callback;
+
 
         public Builder(@NonNull Activity activity) {
             this.activityRef = new java.lang.ref.WeakReference<>(activity);
@@ -150,7 +153,9 @@ public class InterstitialAd {
                 InterstitialProvider provider = InterstitialProviderFactory.getProvider(networkToLoad);
                 if (provider != null) {
                     currentProvider = provider;
+                    currentNetwork = networkToLoad;
                     provider.loadInterstitial(activity, adUnitId, this,
+
                             new InterstitialProvider.InterstitialListener() {
                                 @Override
                                 public void onAdLoaded() {
@@ -174,11 +179,13 @@ public class InterstitialAd {
 
                                 @Override
                                 public void onAdDismissed() {
+                                    AdGlide.notifyAdDismissed("INTERSTITIAL", networkToLoad);
                                     if (callback != null) {
                                         callback.onAdDismissed();
                                     }
-                                    loadInterstitialAd(callback); // Load next ad after dismissal
+                                    // Removed redundant auto-load call to prevent double loading
                                 }
+
 
                                 @Override
                                 public void onAdShowFailed(String error) {
@@ -186,7 +193,7 @@ public class InterstitialAd {
                                     if (callback != null) {
                                         callback.onAdDismissed();
                                     }
-                                    loadInterstitialAd(callback); // Load next ad after show failure
+                                    // Removed redundant auto-load call to prevent double loading
                                 }
 
                                 @Override
@@ -194,10 +201,17 @@ public class InterstitialAd {
                                     com.partharoypc.adglide.util.PerformanceLogger.log("Interstitial",
                                             "Showed: " + networkToLoad);
                                     AdGlideLog.d(TAG, networkToLoad + " Interstitial Ad showed");
+                                    AdGlide.notifyAdShowed("INTERSTITIAL", networkToLoad);
                                     if (callback != null) {
                                         callback.onAdShowed();
                                     }
                                 }
+
+                                @Override
+                                public void onAdClicked() {
+                                    AdGlide.notifyAdClicked("INTERSTITIAL", networkToLoad);
+                                }
+
                             });
                 } else {
                     AdGlideLog.d(TAG, "No provider found for network: " + networkToLoad + ". Trying backup.");
@@ -247,23 +261,30 @@ public class InterstitialAd {
                                 @Override
                                 public void onAdDismissed() {
                                     if (callback != null) callback.onAdDismissed();
-                                    loadInterstitialAd(callback);
+                                    // Removed redundant auto-load call to prevent double loading
                                 }
                                 @Override
                                 public void onAdShowFailed(String error) {
                                     AdGlideLog.e(TAG, "Interstitial Ad failed to show: " + error);
                                     if (callback != null) callback.onAdDismissed();
-                                    loadInterstitialAd(callback);
+                                    // Removed redundant auto-load call to prevent double loading
                                 }
                                 @Override
                                 public void onAdShowed() {
+                                    AdGlide.notifyAdShowed("INTERSTITIAL", currentNetwork);
                                     if (callback != null) callback.onAdShowed();
                                 }
+
+                                @Override
+                                public void onAdClicked() {
+                                    AdGlide.notifyAdClicked("INTERSTITIAL", currentNetwork);
+                                }
+
                             });
                 } else {
                     AdGlideLog.d(TAG, "Interstitial ad not loaded. Skipping show and calling dismissed listener.");
                     if (callback != null) callback.onAdDismissed();
-                    loadInterstitialAd(callback);
+                    // Removed redundant auto-load call to prevent double loading
                 }
             } catch (Exception e) {
                 AdGlideLog.e(TAG, "Error in showInterstitialAd: " + e.getMessage());

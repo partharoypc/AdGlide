@@ -9,8 +9,12 @@ import static com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import android.annotation.SuppressLint;
+
+import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.AdGlideConfig;
 import android.app.Activity;
+import android.content.Context;
+
 import com.partharoypc.adglide.util.AdGlideLog;
 
 import androidx.annotation.NonNull;
@@ -20,6 +24,7 @@ import com.partharoypc.adglide.AdGlideNetwork;
 import com.partharoypc.adglide.provider.AppOpenProvider;
 import com.partharoypc.adglide.provider.AppOpenProviderFactory;
 import com.partharoypc.adglide.util.AdGlideCallback;
+import com.partharoypc.adglide.util.AdGlidePrefs;
 import com.partharoypc.adglide.util.Tools;
 import com.partharoypc.adglide.util.WaterfallManager;
 
@@ -32,9 +37,10 @@ public class AppOpenAd {
 
 
     /**
-     * Timestamp (ms) of the last time an App Open Ad was shown. 0 = never shown.
+     * Internal preference helper for persistent cooldowns.
      */
-    private static long lastShownTimeMs = 0;
+    private static AdGlidePrefs adGlidePrefs;
+
 
     /** Cooldown between App Open Ad impressions: default 30 minutes. */
     private static long cooldownMs = 30 * 60 * 1000L;
@@ -49,7 +55,11 @@ public class AppOpenAd {
     }
 
     /** Returns {@code true} if enough time has passed since the last impression. */
-    public static boolean isCooldownElapsed() {
+    public static boolean isCooldownElapsed(Context context) {
+        if (adGlidePrefs == null && context != null) {
+            adGlidePrefs = new AdGlidePrefs(context);
+        }
+        long lastShownTimeMs = adGlidePrefs != null ? adGlidePrefs.getAppOpenLastShown() : 0;
         long effectiveCooldownMs = cooldownMs;
         com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
         if (config != null) {
@@ -110,6 +120,10 @@ public class AppOpenAd {
     }
 
     public void showAdIfAvailable(@NonNull Activity activity, @Nullable AdGlideCallback callback) {
+        showAdIfAvailable(activity, false, callback);
+    }
+
+    public void showAdIfAvailable(@NonNull Activity activity, boolean ignoreCooldown, @Nullable AdGlideCallback callback) {
         try {
             if (!com.partharoypc.adglide.AdGlide.isAppOpenEnabled()) {
                 if (callback != null)
@@ -118,7 +132,7 @@ public class AppOpenAd {
             }
 
             // Cooldown check
-            if (!isCooldownElapsed()) {
+            if (!ignoreCooldown && !isCooldownElapsed(activity)) {
                 AdGlideLog.d(TAG, "App Open Ad skipped — cooldown not elapsed yet.");
                 if (callback != null)
                     callback.onAdDismissed();
@@ -147,8 +161,10 @@ public class AppOpenAd {
 
                         @Override
                         public void onAdDismissed() {
+                            AdGlide.notifyAdDismissed("APP_OPEN", network);
                             if (callback != null) callback.onAdDismissed();
                         }
+
 
                         @Override
                         public void onAdShowFailed(String error) {
@@ -158,10 +174,18 @@ public class AppOpenAd {
 
                         @Override
                         public void onAdShowed() {
-                            lastShownTimeMs = System.currentTimeMillis();
-                            resultCallback.onSuccess();
-                            if (callback != null) callback.onAdShowed();
+                            long now = System.currentTimeMillis();
+                            if (adGlidePrefs != null) adGlidePrefs.setAppOpenLastShown(now);
+                            AdGlide.notifyAdShowed("APP_OPEN", network);
+                            if (callback != null)
+                                callback.onAdShowed();
                         }
+
+                        @Override
+                        public void onAdClicked() {
+                            AdGlide.notifyAdClicked("APP_OPEN", network);
+                        }
+
                     });
                 } else {
                     resultCallback.onFailure("Provider null");
@@ -181,6 +205,9 @@ public class AppOpenAd {
         private final com.partharoypc.adglide.util.AdLoader adLoader;
         private final java.lang.ref.WeakReference<Activity> activityRef;
         private AppOpenProvider currentProvider;
+        private boolean showOnLoad = false;
+        private boolean ignoreCooldown = false;
+        private AdGlideCallback callback;
 
         public Builder(Activity activity) {
             this.activityRef = new java.lang.ref.WeakReference<>(activity);
@@ -194,19 +221,33 @@ public class AppOpenAd {
             return this;
         }
 
-        @NonNull
         public Builder load() {
+            this.showOnLoad = false;
             loadAppOpenAd(null);
             return this;
         }
 
         @NonNull
         public Builder load(AdGlideCallback callback) {
+            this.showOnLoad = false;
+            loadAppOpenAd(callback);
+            return this;
+        }
+
+        public Builder loadAndShow(Activity displayActivity, AdGlideCallback callback) {
+            return loadAndShow(displayActivity, true, callback);
+        }
+
+        public Builder loadAndShow(Activity displayActivity, boolean ignoreCooldown, AdGlideCallback callback) {
+            this.showOnLoad = true;
+            this.ignoreCooldown = ignoreCooldown;
+            this.callback = callback;
             loadAppOpenAd(callback);
             return this;
         }
 
         public void loadAppOpenAd(AdGlideCallback callback) {
+            this.callback = callback;
             if (adLoader == null)
                 return;
             adLoader.startLoading((networkToLoad, resultCallback) -> {
@@ -240,16 +281,19 @@ public class AppOpenAd {
                             resultCallback.onSuccess();
                             if (callback != null) callback.onAdLoaded();
                             
-                            if (!isCooldownElapsed()) {
-                                AdGlideLog.d(TAG, "App Open Ad skipped — cooldown not elapsed yet.");
-                                if (callback != null) callback.onAdDismissed();
-                                return;
-                            }
-                            Activity currentActivity = activityRef.get();
-                            if (currentActivity != null) {
-                                provider.showAppOpenAd(currentActivity, this);
-                            } else if (callback != null) {
-                                callback.onAdDismissed();
+                            if (showOnLoad) {
+                                showOnLoad = false;
+                                if (!ignoreCooldown && !isCooldownElapsed(activityRef.get())) {
+                                    AdGlideLog.d(TAG, "App Open Ad skipped — cooldown not elapsed yet.");
+                                    if (callback != null) callback.onAdDismissed();
+                                    return;
+                                }
+                                Activity currentActivity = activityRef.get();
+                                if (currentActivity != null) {
+                                    provider.showAppOpenAd(currentActivity, this);
+                                } else if (callback != null) {
+                                    callback.onAdDismissed();
+                                }
                             }
                         }
 
@@ -263,8 +307,10 @@ public class AppOpenAd {
 
                         @Override
                         public void onAdDismissed() {
+                            AdGlide.notifyAdDismissed("APP_OPEN", network);
                             if (callback != null) callback.onAdDismissed();
                         }
+
 
                         @Override
                         public void onAdShowFailed(String error) {
@@ -276,9 +322,17 @@ public class AppOpenAd {
                         public void onAdShowed() {
                             com.partharoypc.adglide.util.PerformanceLogger.log("AppOpen", "Showed: " + network);
                             AdGlideLog.d(TAG, "AppOpen ad showed from [" + network.toUpperCase(java.util.Locale.ROOT) + "]");
-                            lastShownTimeMs = System.currentTimeMillis();
+                            long now = System.currentTimeMillis();
+                            if (adGlidePrefs != null) adGlidePrefs.setAppOpenLastShown(now);
+                            AdGlide.notifyAdShowed("APP_OPEN", network);
                             if (callback != null) callback.onAdShowed();
                         }
+
+                        @Override
+                        public void onAdClicked() {
+                            AdGlide.notifyAdClicked("APP_OPEN", network);
+                        }
+
                     });
                 } else {
                     resultCallback.onFailure("Provider null");
@@ -306,6 +360,10 @@ public class AppOpenAd {
         }
 
         public void showAppOpenAd(AdGlideCallback callback) {
+            showAppOpenAd(false, callback);
+        }
+
+        public void showAppOpenAd(boolean ignoreCooldown, AdGlideCallback callback) {
             try {
                 if (!com.partharoypc.adglide.AdGlide.isAppOpenEnabled()) {
                     if (callback != null)
@@ -313,7 +371,9 @@ public class AppOpenAd {
                     return;
                 }
 
-                if (!isCooldownElapsed()) {
+                Activity activity = activityRef != null ? activityRef.get() : null;
+                if (!ignoreCooldown && !isCooldownElapsed(activity)) {
+
                     AdGlideLog.d(TAG, "App Open Ad skipped — cooldown not elapsed yet.");
                     if (callback != null)
                         callback.onAdDismissed();
@@ -322,8 +382,8 @@ public class AppOpenAd {
 
                 // Try to show from currently loaded network if available
                 if (currentProvider != null && currentProvider.isAdAvailable()) {
-                    Activity activity = activityRef != null ? activityRef.get() : null;
                     currentProvider.showAppOpenAd(activity, new AppOpenProvider.AppOpenListener() {
+
                         @Override
                         public void onAdLoaded() {
                         }
@@ -346,7 +406,8 @@ public class AppOpenAd {
 
                         @Override
                         public void onAdShowed() {
-                            lastShownTimeMs = System.currentTimeMillis();
+                            if (adGlidePrefs != null) adGlidePrefs.setAppOpenLastShown(System.currentTimeMillis());
+
                             if (callback != null)
                                 callback.onAdShowed();
                         }

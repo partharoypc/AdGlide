@@ -12,9 +12,10 @@
         android:layout_margin="5dp"
         app:cardBackgroundColor="@color/adglide_color_background"
         app:cardCornerRadius="10dp"
-        app:cardElevation="2dp"
+        app:cardElevation="1dp"
         app:strokeColor="@color/adglide_color_outline"
-        app:strokeWidth="1.5dp">
+        app:strokeWidth="1dp">
+
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -28,9 +29,9 @@
                 <com.google.android.gms.ads.nativead.MediaView
                     android:id="@+id/media_view"
                     android:layout_width="match_parent"
-                    android:layout_height="160dp" />
+                    android:layout_height="180dp"
+                    android:background="@color/adglide_color_surface" />
 
-                <!-- Badge overlay onto MediaView -->
                 <include
                     layout="@layout/adglide_view_native_ad_label"
                     android:layout_width="wrap_content"
@@ -107,16 +108,18 @@
                     android:id="@+id/cta"
                     style="@style/Widget.MaterialComponents.Button"
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp"
+                    android:layout_height="44dp"
+                    android:background="@drawable/adglide_cta_gradient"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
-                    android:paddingHorizontal="16dp"
-                    android:textAllCaps="true"
+                    android:paddingHorizontal="20dp"
+                    android:textAllCaps="false"
                     android:textColor="@color/adglide_color_cta_text"
-                    android:textSize="12sp"
+                    android:textSize="14sp"
                     android:textStyle="bold"
-                    app:backgroundTint="@color/adglide_color_cta_background"
-                    app:cornerRadius="10dp" />
+                    app:backgroundTint="@null"
+                    app:cornerRadius="12dp" />
+
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

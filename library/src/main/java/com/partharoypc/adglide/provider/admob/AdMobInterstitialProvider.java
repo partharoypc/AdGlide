@@ -64,6 +64,13 @@ public class AdMobInterstitialProvider implements InterstitialProvider {
                     com.partharoypc.adglide.util.PerformanceLogger.log("AdMob", "Interstitial showed");
                     listener.onAdShowed();
                 }
+
+                @Override
+                public void onAdClicked() {
+
+                    listener.onAdClicked();
+                }
+
             });
             try {
                 interstitialAd.show(activity);

@@ -57,10 +57,13 @@ public class MetaAppOpenProvider implements AppOpenProvider {
 
             @Override
             public void onAdClicked(Ad ad) {
+                if (activeListener != null)
+                    activeListener.onAdClicked();
             }
-
             @Override
             public void onLoggingImpression(Ad ad) {
+                if (activeListener != null)
+                    activeListener.onAdShowed();
             }
         };
 

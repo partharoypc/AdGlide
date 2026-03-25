@@ -70,9 +70,16 @@ public class AdMobRewardedProvider implements RewardedProvider {
         rewardedAd.setFullScreenContentCallback(new FullScreenContentCallback() {
             @Override
             public void onAdShowedFullScreenContent() {
-                com.partharoypc.adglide.util.PerformanceLogger.log("AdMob", "Rewarded showed");
+                com.partharoypc.adglide.util.PerformanceLogger.log("AdMob", "Rewarded ad showed");
                 listener.onAdShowed();
             }
+
+            @Override
+            public void onAdClicked() {
+
+                listener.onAdClicked();
+            }
+
 
             @Override
             public void onAdDismissedFullScreenContent() {

@@ -32,8 +32,9 @@ public class AdMobBannerProvider implements BannerProvider {
         AdRequest.Builder builder = new AdRequest.Builder();
         if (config.isCollapsible() && !config.isMrec()) {
             Bundle extras = new Bundle();
-            extras.putString("collapsible", "bottom");
+            extras.putString("collapsible", config.getCollapsiblePosition());
             builder.addNetworkExtrasBundle(AdMobAdapter.class, extras);
+
         }
 
         adView.setAdListener(new AdListener() {
@@ -50,6 +51,17 @@ public class AdMobBannerProvider implements BannerProvider {
                 }
                 listener.onAdFailedToLoad(adError.getMessage());
             }
+
+            @Override
+            public void onAdOpened() {
+                listener.onAdClicked();
+            }
+
+            @Override
+            public void onAdImpression() {
+                listener.onAdShowed();
+            }
+
         });
 
         adView.loadAd(builder.build());

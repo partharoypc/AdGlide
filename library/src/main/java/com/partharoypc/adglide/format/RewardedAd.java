@@ -13,6 +13,7 @@ import static com.partharoypc.adglide.util.Constant.STARTAPP;
 import static com.partharoypc.adglide.util.Constant.UNITY;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
+import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.AdGlideConfig;
 import android.app.Activity;
 import com.partharoypc.adglide.util.AdGlideLog;
@@ -42,8 +43,10 @@ public class RewardedAd {
         private final com.partharoypc.adglide.util.AdLoader adLoader;
         private final java.lang.ref.WeakReference<Activity> activityRef;
         private RewardedProvider currentProvider;
+        private String currentNetwork;
         private boolean showOnLoad = false;
         private AdGlideCallback callback;
+
 
         public Builder(@NonNull Activity activity) {
             this.activityRef = new java.lang.ref.WeakReference<>(activity);
@@ -125,7 +128,9 @@ public class RewardedAd {
             }
 
             this.currentProvider = provider;
+            this.currentNetwork = network;
             String adUnitId = getAdUnitIdForNetwork(network);
+
             AdGlideLog.d(TAG, "Loading [" + network.toUpperCase(java.util.Locale.ROOT) + "] Rewarded Ad with ID: " + adUnitId);
             if (adUnitId == null || adUnitId.trim().isEmpty() || (adUnitId.equals("0") && !network.equals(STARTAPP))) {
                 AdGlideLog.d(TAG, "Ad unit ID for " + network + " is invalid. Trying backup.");
@@ -161,16 +166,31 @@ public class RewardedAd {
 
                 @Override
                 public void onAdDismissed() {
+                    Activity activity = activityRef.get();
+                    AdGlide.notifyAdDismissed("REWARDED", network);
                     if (callback != null)
                         callback.onAdDismissed();
-                    loadRewardedAd(callback);
+                    // Removed redundant auto-load call to prevent double loading
                 }
+
 
                 @Override
                 public void onAdCompleted() {
+                    AdGlide.notifyAdCompleted("REWARDED", network);
                     if (callback != null)
                         callback.onAdCompleted();
                 }
+
+                @Override
+                public void onAdShowed() {
+                    AdGlide.notifyAdShowed("REWARDED", network);
+                }
+
+                @Override
+                public void onAdClicked() {
+                    AdGlide.notifyAdClicked("REWARDED", network);
+                }
+
             });
         }
 
@@ -204,11 +224,12 @@ public class RewardedAd {
                                 public void onAdDismissed() {
                                     if (callback != null)
                                         callback.onAdDismissed();
-                                    loadRewardedAd(callback);
+                                    // Removed redundant auto-load call to prevent double loading
                                 }
 
                                 @Override
                                 public void onAdCompleted() {
+                                    AdGlide.notifyAdCompleted("REWARDED", currentNetwork);
                                     com.partharoypc.adglide.util.PerformanceLogger.log("Rewarded",
                                             "Completed: "
                                                     + (currentProvider != null ? currentProvider.getClass().getSimpleName()
@@ -216,12 +237,23 @@ public class RewardedAd {
                                     if (callback != null)
                                         callback.onAdCompleted();
                                 }
+
+                                @Override
+                                public void onAdShowed() {
+                                    AdGlide.notifyAdShowed("REWARDED", currentNetwork);
+                                }
+
+                                @Override
+                                public void onAdClicked() {
+                                    AdGlide.notifyAdClicked("REWARDED", currentNetwork);
+                                }
+
                             });
                 } else {
                     AdGlideLog.w(TAG, "Rewarded ad not loaded. Skipping show.");
                     if (callback != null)
                         callback.onAdDismissed();
-                    loadRewardedAd(callback);
+                    // Removed redundant auto-load call to prevent double loading
                 }
             } catch (Exception e) {
                 AdGlideLog.e(TAG, "Error in showRewardedAd: " + e.getMessage());

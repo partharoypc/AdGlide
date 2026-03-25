@@ -102,10 +102,10 @@ public class AppLovinAppOpenProvider implements AppOpenProvider, MaxAdListener {
         isShowingAd = false;
         if (listener != null)
             listener.onAdDismissed();
-        // Clear listener BEFORE prefetch so the stale show-listener
-        // is not called when the next ad loads automatically.
+        // Clear listener so the stale show-listener
+        // is not called when the next ad loads.
         listener = null;
-        appOpenAd.loadAd();
+        // Removed redundant internal auto-load to prevent double loading
     }
 
     @Override

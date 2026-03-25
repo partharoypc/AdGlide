@@ -5,6 +5,7 @@ import android.content.Context;
 import androidx.multidex.MultiDex;
 import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.AdGlideConfig;
+import com.partharoypc.adglide.util.AdGlideLog;
 import com.partharoypc.adglidedemo.activity.ActivitySplash;
 import com.partharoypc.adglidedemo.activity.ActivitySettings;
 import com.partharoypc.adglidedemo.data.Constant;
@@ -15,9 +16,12 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        initializeAdGlide(this);
+    }
 
-        // Fetch settings from SharedPref natively
-        SharedPref sharedPref = new SharedPref(this);
+    public static void initializeAdGlide(android.content.Context context) {
+        // Fetch settings from SharedPref
+        SharedPref sharedPref = new SharedPref(context);
         Constant.AD_NETWORK = sharedPref.getAdNetwork();
         Constant.BACKUP_AD_NETWORK = sharedPref.getBackupAdNetwork();
         Constant.OPEN_ADS_ON_START = sharedPref.getIsAppOpenAdEnabled();
@@ -26,6 +30,7 @@ public class MyApplication extends Application {
         Constant.NATIVE_STATUS = sharedPref.getIsNativeEnabled();
         Constant.REWARDED_STATUS = sharedPref.getIsRewardedEnabled();
         Constant.REWARDED_INTERSTITIAL_STATUS = sharedPref.getIsRewardedInterstitialEnabled();
+        Constant.AD_STATUS = sharedPref.getAdStatus();
         Constant.TEST_MODE = sharedPref.getTestMode();
         Constant.ENABLE_DEBUG_HUD = sharedPref.getEnableDebugHud();
         Constant.INTERSTITIAL_AD_INTERVAL = sharedPref.getInterstitialInterval();
@@ -39,7 +44,7 @@ public class MyApplication extends Application {
                 .backupNetworks(Constant.BACKUP_AD_NETWORK)
                 .startAppId(Constant.STARTAPP_APP_ID)
                 .unityGameId(Constant.UNITY_GAME_ID)
-                .appLovinSdkKey(getResources().getString(com.partharoypc.adglidedemo.R.string.app_lovin_sdk_key))
+                .appLovinSdkKey(context.getResources().getString(com.partharoypc.adglidedemo.R.string.app_lovin_sdk_key))
                 .ironSourceAppKey(Constant.IRONSOURCE_APP_KEY)
                 .wortiseAppId(Constant.WORTISE_APP_ID)
                 .testMode(Constant.TEST_MODE)
@@ -126,14 +131,42 @@ public class MyApplication extends Application {
                 .build();
 
         // Initialize globally
-        AdGlide.initialize(this, config);
+        android.app.Application application = (android.app.Application) context.getApplicationContext();
+        AdGlide.initialize(application, config);
 
-        // Demonstrate "Zero-Wait" by pre-loading pools
-        if (config.getAdStatus()) {
-            AdGlide.preloadInterstitial(null); // 'null' Activity works as it uses Application context internally for pool fill
-            AdGlide.preloadRewarded(null);
-        }
+        AdGlide.setGlobalAdListener(new AdGlide.GlobalAdListener() {
+            @Override
+            public void onAdLoaded(String format, String network) {
+                AdGlideLog.d("DemoTracker", "✅ AD LOADED: [" + format + "] from [" + network + "]");
+            }
+
+            @Override
+            public void onAdFailedToLoad(String format, String network, String error) {
+                AdGlideLog.e("DemoTracker", "❌ AD FAILED: [" + format + "] from [" + network + "] error: " + error);
+            }
+
+            @Override
+            public void onAdShowed(String format, String network) {
+                AdGlideLog.d("DemoTracker", "👁️ AD SHOWED: [" + format + "] from [" + network + "]");
+            }
+
+            @Override
+            public void onAdClicked(String format, String network) {
+                AdGlideLog.d("DemoTracker", "💰 AD CLICKED: [" + format + "] from [" + network + "]");
+            }
+
+            @Override
+            public void onAdDismissed(String format, String network) {
+                AdGlideLog.d("DemoTracker", "👋 AD DISMISSED: [" + format + "] from [" + network + "]");
+            }
+
+            @Override
+            public void onAdCompleted(String format, String network) {
+                AdGlideLog.d("DemoTracker", "🏆 AD COMPLETED: [" + format + "] from [" + network + "]");
+            }
+        });
     }
+
 
     @Override
     protected void attachBaseContext(Context base) {

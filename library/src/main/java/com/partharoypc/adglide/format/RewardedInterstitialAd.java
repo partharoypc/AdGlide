@@ -9,6 +9,8 @@ import static com.partharoypc.adglide.util.Constant.NONE;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 
 import android.app.Activity;
+
+import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.util.AdGlideLog;
 
 import androidx.annotation.NonNull;
@@ -37,6 +39,8 @@ public class RewardedInterstitialAd {
         private boolean showOnLoad = false;
         private AdGlideCallback callback;
         private RewardedProvider currentProvider;
+        private String currentNetwork;
+
 
         public Builder(Activity activity) {
             this.activityRef = new java.lang.ref.WeakReference<>(activity);
@@ -78,7 +82,9 @@ public class RewardedInterstitialAd {
             }
 
             this.currentProvider = provider;
+            this.currentNetwork = network;
             String adUnitId = getAdUnitIdForNetwork(network);
+
 
 
             RewardedProvider.RewardedConfig config = new RewardedProvider.RewardedConfig() {
@@ -113,16 +119,30 @@ public class RewardedInterstitialAd {
 
                 @Override
                 public void onAdDismissed() {
+                    AdGlide.notifyAdDismissed("REWARDED_INTERSTITIAL", network);
                     if (callback != null)
                         callback.onAdDismissed();
-                    loadRewardedInterstitialAd(callback);
+                    // Removed redundant auto-load call to prevent double loading
                 }
+
 
                 @Override
                 public void onAdCompleted() {
+                    AdGlide.notifyAdCompleted("REWARDED_INTERSTITIAL", network);
                     if (callback != null)
                         callback.onAdCompleted();
                 }
+
+                @Override
+                public void onAdShowed() {
+                    AdGlide.notifyAdShowed("REWARDED_INTERSTITIAL", network);
+                }
+
+                @Override
+                public void onAdClicked() {
+                    AdGlide.notifyAdClicked("REWARDED_INTERSTITIAL", network);
+                }
+
             });
         }
 
@@ -156,9 +176,21 @@ public class RewardedInterstitialAd {
 
                             @Override
                             public void onAdCompleted() {
+                                AdGlide.notifyAdCompleted("REWARDED_INTERSTITIAL", currentNetwork);
                                 if (callback != null)
                                     callback.onAdCompleted();
                             }
+
+                            @Override
+                            public void onAdShowed() {
+                                AdGlide.notifyAdShowed("REWARDED_INTERSTITIAL", currentNetwork);
+                            }
+
+                            @Override
+                            public void onAdClicked() {
+                                AdGlide.notifyAdClicked("REWARDED_INTERSTITIAL", currentNetwork);
+                            }
+
                         });
             } else {
                 AdGlideLog.w(TAG, "No ad available to show.");

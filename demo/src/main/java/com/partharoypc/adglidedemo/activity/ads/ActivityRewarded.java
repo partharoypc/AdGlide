@@ -21,10 +21,8 @@ public class ActivityRewarded extends AppCompatActivity {
 
         setupToolbar();
         initViews();
-
-        // AdGlide automatically caches ads via AdGlideConfig,
-        // but if we want to manually trigger preloading we can use the facade:
         AdGlide.preloadRewarded(this);
+
     }
 
     private void setupToolbar() {
@@ -63,6 +61,7 @@ public class ActivityRewarded extends AppCompatActivity {
 
             @Override
             public void onAdShowed() {
+                appendLog("Rewarded Ad Showed");
             }
 
             @Override
@@ -85,6 +84,5 @@ public class ActivityRewarded extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // AdGlide manages the cache, no need to manually destroy.
     }
 }

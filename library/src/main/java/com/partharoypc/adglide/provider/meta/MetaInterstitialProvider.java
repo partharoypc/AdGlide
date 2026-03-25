@@ -47,11 +47,14 @@ public class MetaInterstitialProvider implements InterstitialProvider {
 
             @Override
             public void onAdClicked(Ad ad) {
+                listener.onAdClicked();
             }
 
             @Override
             public void onLoggingImpression(Ad ad) {
+                listener.onAdShowed();
             }
+
         };
         interstitialAd.loadAd(interstitialAd.buildLoadAdConfig().withAdListener(adListener).build());
     }

@@ -27,5 +27,8 @@ public interface InterstitialProvider {
         void onAdShowFailed(String error);
 
         void onAdShowed();
+
+        void onAdClicked();
     }
+
 }

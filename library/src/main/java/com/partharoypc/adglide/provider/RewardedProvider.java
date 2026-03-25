@@ -32,5 +32,10 @@ public interface RewardedProvider {
         default void onAdShowFailed(String error) {
             // Default no-op: override to handle show failures
         }
+
+        default void onAdClicked() {
+            // Default no-op
+        }
     }
+
 }

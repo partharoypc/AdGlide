@@ -49,6 +49,7 @@
 
 
         <activity android:name="com.partharoypc.adglidedemo.activity.ads.ActivityRewardedInterstitial" />
+        <activity android:name="com.partharoypc.adglidedemo.activity.ads.ActivityAppOpen" />
 
         <activity
             android:name="com.partharoypc.adglide.util.DebugActivity"

@@ -117,6 +117,18 @@
                     android:paddingVertical="4dp">
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switch_all_ads"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:paddingHorizontal="20dp"
+                        android:text="🚀  Enable All Ads (Master Toggle)"
+                        android:textStyle="bold"
+                        app:thumbTint="@color/colorPrimary"/>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="?attr/colorOutline" android:alpha="0.3"/>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/switch_dark_mode"
                         android:layout_width="match_parent"
                         android:layout_height="56dp"

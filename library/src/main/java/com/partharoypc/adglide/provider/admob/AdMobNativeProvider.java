@@ -45,6 +45,21 @@ public class AdMobNativeProvider implements NativeProvider {
                         }
                         listener.onAdFailedToLoad(adError.getMessage());
                     }
+
+                    @Override
+                    public void onAdLoaded() {
+                        super.onAdLoaded();
+                    }
+
+                    @Override
+                    public void onAdOpened() {
+                        listener.onAdClicked();
+                    }
+
+                    @Override
+                    public void onAdImpression() {
+                        listener.onAdShowed();
+                    }
                 })
                 .build();
 

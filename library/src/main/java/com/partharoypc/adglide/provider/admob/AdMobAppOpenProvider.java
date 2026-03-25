@@ -70,15 +70,7 @@ public class AdMobAppOpenProvider implements AppOpenProvider {
                 appOpenAd = null;
                 isShowingAd = false;
                 listener.onAdDismissed();
-                if (mAdUnitId != null) {
-                    loadAppOpenAd(activity.getApplicationContext(), mAdUnitId, new AppOpenListener() {
-                        @Override public void onAdLoaded() {}
-                        @Override public void onAdFailedToLoad(String error) {}
-                        @Override public void onAdShowed() {}
-                        @Override public void onAdDismissed() {}
-                        @Override public void onAdShowFailed(String error) {}
-                    });
-                }
+                // Removed redundant internal auto-load to prevent double loading
             }
 
             @Override
@@ -93,6 +85,13 @@ public class AdMobAppOpenProvider implements AppOpenProvider {
                 isShowingAd = true;
                 listener.onAdShowed();
             }
+
+            @Override
+            public void onAdClicked() {
+
+                listener.onAdClicked();
+            }
+
         });
 
         appOpenAd.show(activity);

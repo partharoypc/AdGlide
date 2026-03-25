@@ -17,11 +17,21 @@ public interface BannerProvider {
         boolean isMrec();
 
         boolean isAdaptive();
+
+        default String getCollapsiblePosition() {
+            return "bottom";
+        }
     }
+
 
     interface BannerListener {
         void onAdLoaded(View adView);
 
         void onAdFailedToLoad(String error);
+
+        default void onAdShowed() {}
+
+        default void onAdClicked() {}
     }
+
 }

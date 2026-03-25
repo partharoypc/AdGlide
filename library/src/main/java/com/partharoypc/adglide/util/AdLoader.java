@@ -168,6 +168,10 @@ public class AdLoader {
                 PerformanceLogger.log(format != null ? format.name() : "UNKNOWN", "Loaded in " + duration + "ms from [" + network + "]");
 
                 if (finalCallback != null) finalCallback.onAdLoaded(network);
+                // Internal notification for global listener
+                AdGlide.notifyAdLoaded(format != null ? format.name() : "UNKNOWN", network);
+
+
             }
 
             @Override
@@ -178,6 +182,11 @@ public class AdLoader {
                 AdGlideLog.d(TAG, format + " load failed on [" + network.toUpperCase(java.util.Locale.ROOT) + "]: " + error);
                 
                 PerformanceLogger.error(format != null ? format.name() : "UNKNOWN", "Failed to load from [" + network + "]: " + error);
+                
+                // Internal notification for global listener
+                AdGlide.notifyAdFailedToLoad(format != null ? format.name() : "UNKNOWN", network, error);
+
+
 
                 // If error indicates a configuration issue, blacklist for session to avoid 3.5s timeouts
                 if (error != null && (error.toLowerCase().contains("invalid") || error.toLowerCase().contains("not found"))) {

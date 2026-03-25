@@ -1,6 +1,8 @@
 package com.partharoypc.adglide.format;
 
 import android.app.Activity;
+
+import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.util.AdGlideLog;
 import android.view.View;
 import android.view.ViewGroup;
@@ -194,14 +196,22 @@ public class NativeAdView {
                     provider.loadNativeAd(activity, adUnitId, this, new NativeProvider.NativeListener() {
                         @Override
                         public void onAdLoaded(View adView) {
+                            AdGlide.notifyAdShowed("NATIVE", networkToLoad);
                             displayAdView(adView);
                         }
+
 
                         @Override
                         public void onAdFailedToLoad(String error) {
                             AdGlideLog.e(TAG, "Native Ad failed to load for " + networkToLoad + ": " + error);
                             loadBackupNativeAd();
                         }
+
+                        @Override
+                        public void onAdClicked() {
+                            AdGlide.notifyAdClicked("NATIVE", networkToLoad);
+                        }
+
                     });
                 } else {
                     AdGlideLog.w(TAG, "No NativeProvider available for " + networkToLoad);

@@ -2,7 +2,7 @@ package com.partharoypc.adglidedemo.data;
 
 public class Constant {
 
-    public static final boolean AD_STATUS = true;
+    public static boolean AD_STATUS = true;
     public static boolean BANNER_STATUS = true;
     public static boolean INTERSTITIAL_STATUS = true;
     public static boolean NATIVE_STATUS = true;
@@ -17,7 +17,7 @@ public class Constant {
     public static boolean DEBUG_MODE = true;
     public static boolean ENABLE_DEBUG_HUD = true;
     public static int AD_RESPONSE_TIMEOUT_MS = 3500;
-    public static int APP_OPEN_COOLDOWN_MINUTES = 30;
+    public static int APP_OPEN_COOLDOWN_MINUTES = 0;
 
     // AdMob Test IDs
     public static final String ADMOB_BANNER_ID = "ca-app-pub-3940256099942544/6300978111";

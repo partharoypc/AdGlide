@@ -8,29 +8,31 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.partharoypc.adglide.AdGlide;
+import com.partharoypc.adglide.util.AdGlideCallback;
 import com.partharoypc.adglidedemo.R;
 
-public class ActivityInterstitial extends AppCompatActivity {
+public class ActivityAppOpen extends AppCompatActivity {
 
-    private static final String TAG = "ActivityInterstitial";
+    private static final String TAG = "ActivityAppOpen";
     private TextView logTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_interstitial);
+        setContentView(R.layout.activity_app_open);
 
         setupToolbar();
         initViews();
-        AdGlide.preloadInterstitial(this);
-
+        
+        appendLog("Preloading App Open pool...");
+        AdGlide.preloadAppOpen(this);
     }
 
     private void setupToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Interstitial Ad");
+            getSupportActionBar().setTitle("App Open Ad");
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             toolbar.setNavigationOnClickListener(v -> onBackPressed());
         }
@@ -41,32 +43,34 @@ public class ActivityInterstitial extends AppCompatActivity {
         Button btnShow = findViewById(R.id.btn_show);
         Button btnLoad = findViewById(R.id.btn_load);
 
-        btnShow.setOnClickListener(v -> showInterstitialAd());
+        btnShow.setOnClickListener(v -> showAppOpenAd());
         btnLoad.setOnClickListener(v -> {
-            appendLog("Manually Loading Interstitial Ad...");
-            AdGlide.preloadInterstitial(this);
+            appendLog("Manually Loading/Replenishing App Open Pool...");
+            AdGlide.preloadAppOpen(this);
         });
     }
 
-    private void showInterstitialAd() {
-        appendLog("Triggering Interstitial Ad Show...");
-        AdGlide.showInterstitial(this, new com.partharoypc.adglide.util.AdGlideCallback() {
+    private void showAppOpenAd() {
+        appendLog("Triggering App Open Ad Show (from pool if ready)...");
+        AdGlide.showAppOpenAd(this, new AdGlideCallback() {
             @Override
             public void onAdLoaded() {
+                appendLog("Ad Loaded callback fired (already ready in pool or loaded on fly)");
             }
 
             @Override
             public void onAdFailedToLoad(String error) {
-                appendLog("Ad Failed: " + error);
+                appendLog("Ad Failed to Load: " + error);
             }
 
             @Override
             public void onAdShowed() {
+                appendLog("App Open Ad Showed successfully");
             }
 
             @Override
             public void onAdDismissed() {
-                appendLog("Interstitial Ad Dismissed");
+                appendLog("App Open Ad Dismissed");
                 Log.d(TAG, "onAdDismissed");
             }
 
@@ -78,12 +82,11 @@ public class ActivityInterstitial extends AppCompatActivity {
     }
 
     private void appendLog(String text) {
-        logTextView.append(text + "\n");
+        logTextView.append("• " + text + "\n");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // AdGlide manages the cache, no need to manually destroy.
     }
 }

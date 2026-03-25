@@ -47,10 +47,12 @@ public class MetaNativeProvider implements NativeProvider {
 
             @Override
             public void onAdClicked(Ad ad) {
+                listener.onAdClicked();
             }
 
             @Override
             public void onLoggingImpression(Ad ad) {
+                listener.onAdShowed();
             }
         };
         nativeAd.loadAd(nativeAd.buildLoadAdConfig().withAdListener(nativeAdListener).build());

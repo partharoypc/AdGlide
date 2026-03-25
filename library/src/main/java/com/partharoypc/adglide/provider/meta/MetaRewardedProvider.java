@@ -47,14 +47,15 @@ public class MetaRewardedProvider implements RewardedProvider {
                     }
 
                     @Override
-                    public void onAdClicked(Ad ad) {
-                    }
+            public void onAdClicked(Ad ad) {
+                listener.onAdClicked();
+            }
 
-                    @Override
-                    public void onLoggingImpression(Ad ad) {
-                        com.partharoypc.adglide.util.PerformanceLogger.log("Meta", "Rewarded impression logged");
-                        listener.onAdShowed();
-                    }
+            @Override
+            public void onLoggingImpression(Ad ad) {
+                com.partharoypc.adglide.util.PerformanceLogger.log("Meta", "Rewarded impression logged");
+                listener.onAdShowed();
+            }
                 }).build());
     }
 

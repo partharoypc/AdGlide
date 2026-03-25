@@ -19,5 +19,10 @@ public interface NativeProvider {
         void onAdLoaded(View adView);
 
         void onAdFailedToLoad(String error);
+
+        default void onAdShowed() {}
+
+        default void onAdClicked() {}
     }
+
 }

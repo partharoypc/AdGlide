@@ -1,6 +1,8 @@
 package com.partharoypc.adglide.format;
 
 import android.app.Activity;
+
+import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.util.AdGlideLog;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,7 +40,9 @@ public class BannerAd {
         private ViewGroup customContainer;
         private boolean darkTheme = false;
         private boolean collapsibleBanner = false;
+        private String collapsiblePosition = "bottom";
         private boolean adaptiveBanner = true;
+
         
         private int autoRefreshSeconds = 0; // 0 means no auto-refresh
         private android.os.Handler refreshHandler;
@@ -70,6 +74,12 @@ public class BannerAd {
             return adaptiveBanner;
         }
 
+        @Override
+        public String getCollapsiblePosition() {
+            return collapsiblePosition;
+        }
+
+
         @NonNull
         public Builder build() {
             return this;
@@ -100,6 +110,14 @@ public class BannerAd {
             this.collapsibleBanner = collapsibleBanner;
             return this;
         }
+
+        @NonNull
+        public Builder collapsible(boolean collapsibleBanner, String position) {
+            this.collapsibleBanner = collapsibleBanner;
+            this.collapsiblePosition = position;
+            return this;
+        }
+
 
         @NonNull
         public Builder adaptive(boolean adaptiveBanner) {
@@ -168,8 +186,15 @@ public class BannerAd {
                             }
                             currentProvider = provider;
                             displayAdView(networkToLoad, adView, callback);
+                            AdGlide.notifyAdShowed("BANNER", networkToLoad);
                             scheduleAutoRefresh();
                         }
+
+                        @Override
+                        public void onAdClicked() {
+                            AdGlide.notifyAdClicked("BANNER", networkToLoad);
+                        }
+
 
                         @Override
                         public void onAdFailedToLoad(String error) {

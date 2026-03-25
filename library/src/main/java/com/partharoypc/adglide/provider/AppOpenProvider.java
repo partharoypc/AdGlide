@@ -24,5 +24,8 @@ public interface AppOpenProvider {
         void onAdShowFailed(String error);
 
         void onAdShowed();
+
+        default void onAdClicked() {}
     }
+
 }
