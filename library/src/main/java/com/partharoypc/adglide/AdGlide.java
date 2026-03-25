@@ -42,6 +42,7 @@ public class AdGlide {
      * 
      * @return The active AdGlideConfig.
      */
+    @Nullable
     public static AdGlideConfig getConfig() {
         return config;
     }
@@ -52,7 +53,7 @@ public class AdGlide {
      * @param application The exact Application instance.
      * @param glideConfig The global configuration for AdGlide.
      */
-    public static void initialize(Application application, AdGlideConfig glideConfig) {
+    public static void initialize(@Nullable Application application, @Nullable AdGlideConfig glideConfig) {
         if (isInitialized) {
             AdGlideLog.w(TAG, "AdGlide is already initialized. Updating config instead.");
             updateConfig(glideConfig);
@@ -83,7 +84,7 @@ public class AdGlide {
                 isAppOpenRegistered = true;
             }
         }
-        PerformanceLogger.log("Core", "AdGlide initialized (v2.0.0 - Premium)");
+        PerformanceLogger.log("Core", "AdGlide initialized (v" + BuildConfig.VERSION_NAME + " - Premium)");
     }
 
     /**

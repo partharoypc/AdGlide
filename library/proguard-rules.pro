@@ -45,3 +45,11 @@
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
+
+# -----------------------------------------------------------------------------------------------------
+# 5. SDK Preservation
+# -----------------------------------------------------------------------------------------------------
+# Preserve the BuildConfig and entry points to ensure total stability.
+-keep class com.partharoypc.adglide.AdGlide { *; }
+-keep class com.partharoypc.adglide.BuildConfig { *; }
+-keep class com.partharoypc.adglide.AdGlideConfig { *; }

@@ -10,7 +10,7 @@
 [![Android](https://img.shields.io/badge/Android-23%2B-green.svg)](https://developer.android.com)
 [![Compile SDK](https://img.shields.io/badge/Compile_SDK-36-green.svg)](https://developer.android.com)
 [![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://openjdk.org/projects/jdk/17/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-Apache_2.0-yellow.svg)](LICENSE)
 
 **AdGlide** is an industrial-grade ad mediation SDK for professional Android developers. It eliminates the friction of multi-network integration with a **"Just Copy-Paste"** architecture that handles initialization, waterfall orchestration, rate limiting, pre-fetching, and crash protection out of the box across **8 ad networks**.
 
@@ -19,10 +19,10 @@
 ## ✨ What's New in v1.9.0 (Super Perfect Edition)
 
 - **📱 "Super Perfect" App Open Ads** — New rotation-proof lifecycle management. Ads only trigger on true app-resume, never during screen rotations.
-- **🛠️ Centralized Smart Test Mode** — Use a single `.testMode(true)` flag to automatically sync all SDK logs, HUD, and network debuggers.
-- **🌊 Intelligent Multi-Backup Waterfall** — Automatic redundant loader filtering for faster transitions to backup networks.
+- **💎 100% Lint-Free Quality** — Industrial-grade codebase with zero warnings (Locale/I18n fixed) for maximum stability and performance.
+- **🛡️ Refined Zero-Config ProGuard** — Embedded `consumer-rules.pro` now features even tighter, more secure scopes for all 8+ mediation networks.
 - **⚡ "Zero-Wait" Pre-loading** — Optimized pooling engine with immediate background refills for instant ad delivery.
-- **🔄 Banner Auto-Refresh** — Background-rotation for banners with flicker-free replacement.
+- **🔄 Dynamic Versioning** — SDK logs and performance metrics now automatically sync with your Gradle versioning.
 - **🏠 Expanded House Ads** — Native House Ads now support full click-tracking and optimized video templates.
 
 ---
@@ -450,9 +450,11 @@ You **do not** need to write any manual ProGuard rules for AdGlide or its suppor
 
 ```proguard
 # AdGlide Core & Interfaces
--keep public class com.partharoypc.adglide.** { *; }
--keep interface com.partharoypc.adglide.util.On*Listener { *; }
--keep interface com.partharoypc.adglide.util.AdGlideCallback { *; }
+-keep public class com.partharoypc.adglide.AdGlide { *; }
+-keep public class com.partharoypc.adglide.AdGlideConfig { public *; }
+-keep public class com.partharoypc.adglide.AdGlideConfig$Builder { public *; }
+-keep class com.partharoypc.adglide.BuildConfig { *; }
+-keepattributes Signature,*Annotation*,Exceptions,InnerClasses,EnclosingMethod
 
 # Primary Network Integrations
 -keep class com.google.android.gms.ads.** { *; }
@@ -480,6 +482,10 @@ You **do not** need to write any manual ProGuard rules for AdGlide or its suppor
 -dontwarn com.bytedance.**
 -dontwarn com.google.android.ump.**
 -dontwarn pl.droidsonroids.gif.**
+
+# General Library Suppressions
+-dontwarn androidx.annotation.**
+-dontwarn com.google.errorprone.annotations.**
 ```
 
 </details>
@@ -556,7 +562,7 @@ Use these constants when defining your networks in the `AdGlideConfig.Builder` i
 *Senior Android Engineer & Architecture Specialist*
 
 [![GitHub](https://img.shields.io/badge/GitHub-partharoypc-181717?style=for-the-badge&logo=github)](https://github.com/partharoypc)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+[![License](https://img.shields.io/badge/License-Apache_2.0-yellow.svg?style=for-the-badge)](LICENSE)
 
 *Built for Scale • Optimized for Speed • Perfected for Developers*
 

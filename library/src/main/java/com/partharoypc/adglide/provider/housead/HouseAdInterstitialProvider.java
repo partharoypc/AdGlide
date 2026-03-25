@@ -95,7 +95,7 @@ public class HouseAdInterstitialProvider implements InterstitialProvider {
 
         // Ad Label (Top Left)
         TextView adLabel = new TextView(activity);
-        adLabel.setText("Ad ");
+        adLabel.setText(R.string.adglide_txt_ad);
         adLabel.setTextColor(Color.WHITE);
         adLabel.setTextSize(10);
         adLabel.setTypeface(null, Typeface.BOLD);

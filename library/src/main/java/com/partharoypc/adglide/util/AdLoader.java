@@ -189,7 +189,7 @@ public class AdLoader {
 
 
                 // If error indicates a configuration issue, blacklist for session to avoid 3.5s timeouts
-                if (error != null && (error.toLowerCase().contains("invalid") || error.toLowerCase().contains("not found"))) {
+                if (error != null && (error.toLowerCase(java.util.Locale.ROOT).contains("invalid") || error.toLowerCase(java.util.Locale.ROOT).contains("not found"))) {
                     sessionBlacklist.add(network);
                 }
 

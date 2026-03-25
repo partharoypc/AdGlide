@@ -9,10 +9,12 @@
 # -----------------------------------------------------------------------------------------------------
 # 1. Core SDK & Public Interfaces
 # -----------------------------------------------------------------------------------------------------
-# Preserve the primary configuration, initialization structures, and models
+# Preserve the primary entry point, configuration, and models
+-keep public class com.partharoypc.adglide.AdGlide { *; }
 -keep public class com.partharoypc.adglide.AdGlideConfig { public *; }
 -keep public class com.partharoypc.adglide.AdGlideConfig$Builder { public *; }
 -keep public class com.partharoypc.adglide.AdGlideNativeStyle { public *; }
+-keep class com.partharoypc.adglide.BuildConfig { *; }
 
 # Preserve all public packages containing ad formats, GDPR forms, helpers, and UI elements
 -keep public class com.partharoypc.adglide.format.** { public *; }
@@ -24,6 +26,9 @@
 # Strictly preserve callback interfaces so they are successfully triggered by network responses
 -keep interface com.partharoypc.adglide.util.On*Listener { *; }
 -keep interface com.partharoypc.adglide.util.AdGlideCallback { *; }
+
+# Preserve vital attributes for reflection and annotations
+-keepattributes Signature,*Annotation*,Exceptions,InnerClasses,EnclosingMethod
 
 # -----------------------------------------------------------------------------------------------------
 # 2. Third-Party Ad Networks & Mediation Preservation
@@ -88,4 +93,11 @@
 # Wortise / Pangle
 -dontwarn com.wortise.**
 -dontwarn com.bytedance.**
+
+# General Suppressions for common library warnings
+-dontwarn androidx.annotation.**
+-dontwarn com.google.errorprone.annotations.**
+-dontwarn javax.annotation.**
+-dontwarn org.checkerframework.**
+-dontwarn com.google.j2objc.annotations.**
 

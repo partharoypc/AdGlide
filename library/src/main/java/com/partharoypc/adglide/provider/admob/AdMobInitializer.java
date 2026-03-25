@@ -18,7 +18,7 @@ public class AdMobInitializer implements NetworkInitializer {
             for (String adapterClass : statusMap.keySet()) {
                 AdapterStatus adapterStatus = statusMap.get(adapterClass);
                 if (adapterStatus != null) {
-                    AdGlideLog.d(TAG, String.format("Adapter name: %s, Description: %s, Latency: %d",
+                    AdGlideLog.d(TAG, String.format(java.util.Locale.ROOT, "Adapter name: %s, Description: %s, Latency: %d",
                             adapterClass, adapterStatus.getDescription(), adapterStatus.getLatency()));
                 }
             }

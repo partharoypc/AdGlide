@@ -129,7 +129,7 @@ public class AdNetwork {
                 NetworkInitializer initializer = NetworkInitializerFactory.getInitializer(networkName);
                 if (initializer != null) {
                     initializer.initialize(context, this);
-                    AdGlideLog.d(TAG, "[" + networkName.toUpperCase() + "] SDK initialized successfully.");
+                    AdGlideLog.d(TAG, "[" + networkName.toUpperCase(java.util.Locale.ROOT) + "] SDK initialized successfully.");
                 }
             } catch (Exception e) {
                 AdGlideLog.e(TAG, "Failed to initialize " + networkName + " SDK. Error: " + e.getMessage());
