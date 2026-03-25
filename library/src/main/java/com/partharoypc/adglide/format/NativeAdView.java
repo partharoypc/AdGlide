@@ -135,6 +135,10 @@ public class NativeAdView {
                     if (waterfallManager != null) {
                         waterfallManager.reset();
                     }
+                    if (view == null) {
+                        Log.e(TAG, "Native Ad View is null. Cannot find container.");
+                        return;
+                    }
                     nativeAdViewContainer = view.findViewById(R.id.native_ad_view_container);
                     Log.d(TAG, "Native Ad is enabled");
                     loadAdFromNetwork(adNetwork);

@@ -10,12 +10,13 @@ import com.partharoypc.adglide.format.RewardedAd;
 import com.partharoypc.adglide.format.RewardedInterstitialAd;
 import com.partharoypc.adglide.format.NativeAd;
 
+import java.util.Collections;
 import java.util.EnumMap;
-import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Manages pools of pre-loaded Zero-Wait Ads for instant delivery.
@@ -27,7 +28,7 @@ public class AdPoolManager {
 
     private static final Map<AdFormat, PoolSet<?>> pools = new EnumMap<>(AdFormat.class);
     private static final Map<String, PoolSet<NativeAd.Builder>> nativePools = new ConcurrentHashMap<>();
-    private static final Map<AdFormat, Boolean> loadingState = new EnumMap<>(AdFormat.class);
+    private static final Map<AdFormat, Boolean> loadingState = Collections.synchronizedMap(new EnumMap<>(AdFormat.class));
 
     static {
         pools.put(AdFormat.INTERSTITIAL, new PoolSet<InterstitialAd.Builder>());
@@ -41,8 +42,8 @@ public class AdPoolManager {
     }
 
     private static class PoolSet<T> {
-        final Queue<T> primary = new LinkedList<>();
-        final Queue<T> backup = new LinkedList<>();
+        final Queue<T> primary = new ConcurrentLinkedQueue<>();
+        final Queue<T> backup = new ConcurrentLinkedQueue<>();
 
         void offer(T item, boolean isPrimary) {
             if (isPrimary) primary.offer(item);
@@ -50,13 +51,16 @@ public class AdPoolManager {
         }
 
         T poll() {
-            if (!primary.isEmpty()) return primary.poll();
+            T item = primary.poll();
+            if (item != null) return item;
             return backup.poll();
         }
 
         boolean hasAvailable(AdCheck<T> check) {
-            if (!primary.isEmpty() && check.isAvailable(primary.peek())) return true;
-            return !backup.isEmpty() && check.isAvailable(backup.peek());
+            T pHead = primary.peek();
+            if (pHead != null && check.isAvailable(pHead)) return true;
+            T bHead = backup.peek();
+            return bHead != null && check.isAvailable(bHead);
         }
 
         int size() {

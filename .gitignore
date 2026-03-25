@@ -35,6 +35,8 @@ local.properties
 
 # Output of the build
 build/
+/kotlin-profile/
+/.kotlin/
 
 # Android Studio
 /captures/

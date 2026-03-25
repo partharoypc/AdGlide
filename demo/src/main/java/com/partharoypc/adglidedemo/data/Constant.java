@@ -16,7 +16,6 @@ public class Constant {
     public static boolean TEST_MODE = false;
     public static boolean DEBUG_MODE = true;
     public static boolean ENABLE_DEBUG_HUD = true;
-    public static boolean SEQUENTIAL_QUEUE_ENABLED = false;
     public static int AD_RESPONSE_TIMEOUT_MS = 3500;
     public static int APP_OPEN_COOLDOWN_MINUTES = 30;
 

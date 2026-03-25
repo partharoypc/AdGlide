@@ -28,7 +28,6 @@ public class MyApplication extends Application {
         Constant.REWARDED_INTERSTITIAL_STATUS = sharedPref.getIsRewardedInterstitialEnabled();
         Constant.TEST_MODE = sharedPref.getTestMode();
         Constant.ENABLE_DEBUG_HUD = sharedPref.getEnableDebugHud();
-        Constant.SEQUENTIAL_QUEUE_ENABLED = sharedPref.getSequentialQueueEnabled();
         Constant.INTERSTITIAL_AD_INTERVAL = sharedPref.getInterstitialInterval();
         Constant.REWARDED_AD_INTERVAL = sharedPref.getRewardedInterval();
         Constant.AD_RESPONSE_TIMEOUT_MS = sharedPref.getAdResponseTimeoutMs();
@@ -101,7 +100,6 @@ public class MyApplication extends Application {
                 .rewardedInterval(Constant.REWARDED_AD_INTERVAL)
                 .appOpenCooldown(Constant.APP_OPEN_COOLDOWN_MINUTES)
                 .adResponseTimeout(Constant.AD_RESPONSE_TIMEOUT_MS)
-                .sequentialQueueEnabled(Constant.SEQUENTIAL_QUEUE_ENABLED)
                 .testMode(Constant.TEST_MODE)
                 .enableDebugHUD(Constant.ENABLE_DEBUG_HUD)
 

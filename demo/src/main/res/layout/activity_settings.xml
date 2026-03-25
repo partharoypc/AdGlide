@@ -287,15 +287,6 @@
                     <View android:layout_width="match_parent" android:layout_height="1dp"
                         android:background="?attr/colorOutline" android:alpha="0.3"/>
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/switch_sequential_queue"
-                        android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:paddingHorizontal="20dp"
-                        android:text="@string/sequential_queue"/>
-
-                    <View android:layout_width="match_parent" android:layout_height="1dp"
-                        android:background="?attr/colorOutline" android:alpha="0.3"/>
 
                     <!-- Rewarded Interval stepper -->
                     <LinearLayout

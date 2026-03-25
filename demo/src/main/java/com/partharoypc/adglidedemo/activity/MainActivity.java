@@ -222,7 +222,6 @@ public class MainActivity extends AppCompatActivity {
                         .adResponseTimeout(Constant.AD_RESPONSE_TIMEOUT_MS)
                         .testMode(Constant.TEST_MODE)
                         .enableDebugHUD(Constant.ENABLE_DEBUG_HUD)
-                        .sequentialQueueEnabled(Constant.SEQUENTIAL_QUEUE_ENABLED)
                         // SDK keys
                         .startAppId(Constant.STARTAPP_APP_ID)
                         .unityGameId(Constant.UNITY_GAME_ID)

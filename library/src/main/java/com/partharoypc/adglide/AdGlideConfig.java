@@ -23,7 +23,6 @@ public class AdGlideConfig {
     private final boolean debugGDPR;
     private final boolean enableDebugHUD;
     private final int adResponseTimeoutMs;
-    private final boolean sequentialQueueEnabled;
 
     // Granular Ad Type Status
     private final boolean bannerStatus;
@@ -114,7 +113,6 @@ public class AdGlideConfig {
         this.debugGDPR = builder.debugGDPR;
         this.enableDebugHUD = builder.enableDebugHUD;
         this.adResponseTimeoutMs = builder.adResponseTimeoutMs;
-        this.sequentialQueueEnabled = builder.sequentialQueueEnabled;
 
         this.bannerStatus = builder.bannerStatus;
         this.interstitialStatus = builder.interstitialStatus;
@@ -251,10 +249,6 @@ public class AdGlideConfig {
     
     public int getAdResponseTimeoutMs() {
         return adResponseTimeoutMs;
-    }
-
-    public boolean isSequentialQueueEnabled() {
-        return sequentialQueueEnabled;
     }
 
     public boolean isBannerEnabled() {
@@ -496,7 +490,6 @@ public class AdGlideConfig {
         private boolean debugGDPR = false;
         private boolean enableDebugHUD = false;
         private int adResponseTimeoutMs = 3500; // Default 3.5 seconds
-        private boolean sequentialQueueEnabled = false;
         private int appOpenCooldownMinutes = 30;
 
         private String adMobAppId = "";
@@ -698,11 +691,6 @@ public class AdGlideConfig {
 
         public Builder adResponseTimeout(int timeoutMs) {
             this.adResponseTimeoutMs = timeoutMs;
-            return this;
-        }
-
-        public Builder sequentialQueueEnabled(boolean enabled) {
-            this.sequentialQueueEnabled = enabled;
             return this;
         }
 

@@ -230,14 +230,6 @@ public class ActivitySettings extends AppCompatActivity {
             initAds();
         });
 
-        // Sequential Queue Switch
-        SwitchMaterial switchSequentialQueue = findViewById(R.id.switch_sequential_queue);
-        switchSequentialQueue.setChecked(sharedPref.getSequentialQueueEnabled());
-        switchSequentialQueue.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            sharedPref.setSequentialQueueEnabled(isChecked);
-            Constant.SEQUENTIAL_QUEUE_ENABLED = isChecked;
-            initAds();
-        });
 
         // Rewarded Interval
         android.widget.TextView tvRewardedIntervalValue = findViewById(R.id.tv_rewarded_interval_value);
@@ -359,7 +351,6 @@ public class ActivitySettings extends AppCompatActivity {
                 .rewardedInterval(Constant.REWARDED_AD_INTERVAL)
                 .appOpenCooldown(Constant.APP_OPEN_COOLDOWN_MINUTES)
                 .adResponseTimeout(Constant.AD_RESPONSE_TIMEOUT_MS)
-                .sequentialQueueEnabled(Constant.SEQUENTIAL_QUEUE_ENABLED)
                 .testMode(Constant.TEST_MODE)
                 .enableDebugHUD(Constant.ENABLE_DEBUG_HUD)
                 .excludeOpenAdFrom(ActivitySplash.class, ActivitySettings.class)

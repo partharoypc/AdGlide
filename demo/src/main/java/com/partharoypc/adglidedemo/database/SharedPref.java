@@ -154,14 +154,6 @@ public class SharedPref {
         editor.apply();
     }
 
-    public boolean getSequentialQueueEnabled() {
-        return sharedPreferences.getBoolean("sequential_queue_enabled", false);
-    }
-
-    public void setSequentialQueueEnabled(boolean enabled) {
-        editor.putBoolean("sequential_queue_enabled", enabled);
-        editor.apply();
-    }
 
     public int getAdResponseTimeoutMs() {
         return sharedPreferences.getInt("ad_response_timeout_ms", 3500);

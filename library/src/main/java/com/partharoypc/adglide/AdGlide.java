@@ -39,47 +39,6 @@ public class AdGlide {
         return globalListener;
     }
 
-    private static boolean isShowingFullScreenAd = false;
-    private static final java.util.Queue<Runnable> pendingAdRequests = new java.util.LinkedList<>();
-
-    private static synchronized void processShowRequest(Runnable request) {
-        if (config != null && !config.isSequentialQueueEnabled()) {
-            if (isShowingFullScreenAd) {
-                Log.d(TAG, "Ad already showing. Skipping this request (Sequential Queue is DISABLED).");
-                return;
-            }
-            isShowingFullScreenAd = true;
-            try {
-                request.run();
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to execute ad request: " + e.getMessage());
-                onAdShowFinished();
-            }
-            return;
-        }
-
-        if (isShowingFullScreenAd) {
-            Log.d(TAG, "Ad already showing. Adding request to sequential queue.");
-            pendingAdRequests.offer(request);
-        } else {
-            isShowingFullScreenAd = true;
-            try {
-                request.run();
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to execute ad request: " + e.getMessage());
-                onAdShowFinished();
-            }
-        }
-    }
-
-    private static synchronized void onAdShowFinished() {
-        isShowingFullScreenAd = false;
-        if (!pendingAdRequests.isEmpty()) {
-            Log.d(TAG, "Popping next ad from sequential queue.");
-            processShowRequest(pendingAdRequests.poll());
-        }
-    }
-
     // Cached Buidlers
     private static java.lang.ref.WeakReference<BannerAd.Builder> cachedBannerBuilder;
 
@@ -89,7 +48,6 @@ public class AdGlide {
     private static boolean isInitialized = false;
     private static boolean isAppOpenRegistered = false;
 
-    private static java.lang.ref.WeakReference<Activity> currentActivityRef;
 
     /**
      * Retrieves the global AdGlide configuration.
@@ -288,65 +246,59 @@ public class AdGlide {
             return;
         }
 
-        processShowRequest(() -> {
-            com.partharoypc.adglide.util.PerformanceLogger.log("INTERSTITIAL", "Showing Interstitial Ad");
+        com.partharoypc.adglide.util.PerformanceLogger.log("INTERSTITIAL", "Showing Interstitial Ad");
 
-            if (com.partharoypc.adglide.util.AdPoolManager.hasInterstitial()) {
-                InterstitialAd.Builder pooledAd = com.partharoypc.adglide.util.AdPoolManager.getInterstitial();
-                pooledAd.show(activity, new AdGlideCallback() {
-                    @Override
-                    public void onAdShowed() {
-                        if (config.isAutoLoadInterstitial()) {
-                            preloadInterstitial(activity);
-                        }
-                        if (callback != null) callback.onAdShowed();
+        if (com.partharoypc.adglide.util.AdPoolManager.hasInterstitial()) {
+            InterstitialAd.Builder pooledAd = com.partharoypc.adglide.util.AdPoolManager.getInterstitial();
+            pooledAd.show(activity, new AdGlideCallback() {
+                @Override
+                public void onAdShowed() {
+                    if (config.isAutoLoadInterstitial()) {
+                        preloadInterstitial(activity);
                     }
+                    if (callback != null) callback.onAdShowed();
+                }
 
-                    @Override
-                    public void onAdDismissed() {
-                        interstitialClickCounter = 1; // Reset after successfully showing
-                        if (config.isAutoLoadInterstitial()) {
-                            preloadInterstitial(activity);
-                        }
-                        if (callback != null) callback.onAdDismissed();
-                        onAdShowFinished();
+                @Override
+                public void onAdDismissed() {
+                    interstitialClickCounter = 1; // Reset after successfully showing
+                    if (config.isAutoLoadInterstitial()) {
+                        preloadInterstitial(activity);
                     }
+                    if (callback != null) callback.onAdDismissed();
+                }
 
-                    @Override
-                    public void onAdFailedToLoad(String error) {
-                        if (callback != null) callback.onAdFailedToLoad(error);
-                        onAdShowFinished();
+                @Override
+                public void onAdFailedToLoad(String error) {
+                    if (callback != null) callback.onAdFailedToLoad(error);
+                }
+            });
+        } else {
+            // Fallback: load and show on the fly
+            new InterstitialAd.Builder(activity).loadAndShow(activity, new AdGlideCallback() {
+                @Override
+                public void onAdShowed() {
+                    if (config.isAutoLoadInterstitial()) {
+                        preloadInterstitial(activity);
                     }
-                });
-            } else {
-                // Fallback: load and show on the fly
-                new InterstitialAd.Builder(activity).loadAndShow(activity, new AdGlideCallback() {
-                    @Override
-                    public void onAdShowed() {
-                        if (config.isAutoLoadInterstitial()) {
-                            preloadInterstitial(activity);
-                        }
-                        if (callback != null) callback.onAdShowed();
-                    }
+                    if (callback != null) callback.onAdShowed();
+                }
 
-                    @Override
-                    public void onAdDismissed() {
-                        interstitialClickCounter = 1; // Reset after fallback show/attempt
-                        if (config.isAutoLoadInterstitial()) {
-                            preloadInterstitial(activity);
-                        }
-                        if (callback != null) callback.onAdDismissed();
-                        onAdShowFinished();
+                @Override
+                public void onAdDismissed() {
+                    interstitialClickCounter = 1; // Reset after fallback show/attempt
+                    if (config.isAutoLoadInterstitial()) {
+                        preloadInterstitial(activity);
                     }
+                    if (callback != null) callback.onAdDismissed();
+                }
 
-                    @Override
-                    public void onAdFailedToLoad(String error) {
-                        if (callback != null) callback.onAdFailedToLoad(error);
-                        onAdShowFinished();
-                    }
-                });
-            }
-        });
+                @Override
+                public void onAdFailedToLoad(String error) {
+                    if (callback != null) callback.onAdFailedToLoad(error);
+                }
+            });
+        }
     }
 
     /**
@@ -375,73 +327,67 @@ public class AdGlide {
             return;
         }
 
-        processShowRequest(() -> {
-            if (com.partharoypc.adglide.util.AdPoolManager.hasRewarded()) {
-                RewardedAd.Builder pooledAd = com.partharoypc.adglide.util.AdPoolManager.getRewarded();
-                pooledAd.showRewardedAd(activity, new AdGlideCallback() {
-                    @Override
-                    public void onAdShowed() {
-                        if (config.isAutoLoadRewarded()) {
-                            preloadRewarded(activity);
-                        }
-                        if (callback != null) callback.onAdShowed();
+        if (com.partharoypc.adglide.util.AdPoolManager.hasRewarded()) {
+            RewardedAd.Builder pooledAd = com.partharoypc.adglide.util.AdPoolManager.getRewarded();
+            pooledAd.showRewardedAd(activity, new AdGlideCallback() {
+                @Override
+                public void onAdShowed() {
+                    if (config.isAutoLoadRewarded()) {
+                        preloadRewarded(activity);
                     }
+                    if (callback != null) callback.onAdShowed();
+                }
 
-                    @Override
-                    public void onAdDismissed() {
-                        rewardedClickCounter = 1; // Reset after successfully showing
-                        if (config.isAutoLoadRewarded()) {
-                            preloadRewarded(activity);
-                        }
-                        if (callback != null) callback.onAdDismissed();
-                        onAdShowFinished();
+                @Override
+                public void onAdDismissed() {
+                    rewardedClickCounter = 1; // Reset after successfully showing
+                    if (config.isAutoLoadRewarded()) {
+                        preloadRewarded(activity);
                     }
+                    if (callback != null) callback.onAdDismissed();
+                }
 
-                    @Override
-                    public void onAdCompleted() {
-                        if (callback != null) callback.onAdCompleted();
-                    }
+                @Override
+                public void onAdCompleted() {
+                    if (callback != null) callback.onAdCompleted();
+                }
 
-                    @Override
-                    public void onAdFailedToLoad(String error) {
-                        if (callback != null) callback.onAdFailedToLoad(error);
-                        onAdShowFinished();
+                @Override
+                public void onAdFailedToLoad(String error) {
+                    if (callback != null) callback.onAdFailedToLoad(error);
+                }
+            });
+        } else {
+            // Fallback: load and show on the fly
+            new RewardedAd.Builder(activity).loadAndShow(activity, new AdGlideCallback() {
+                @Override
+                public void onAdShowed() {
+                    if (config.isAutoLoadRewarded()) {
+                        preloadRewarded(activity);
                     }
-                });
-            } else {
-                // Fallback: load and show on the fly
-                new RewardedAd.Builder(activity).loadAndShow(activity, new AdGlideCallback() {
-                    @Override
-                    public void onAdShowed() {
-                        if (config.isAutoLoadRewarded()) {
-                            preloadRewarded(activity);
-                        }
-                        if (callback != null) callback.onAdShowed();
-                    }
+                    if (callback != null) callback.onAdShowed();
+                }
 
-                    @Override
-                    public void onAdDismissed() {
-                        rewardedClickCounter = 1; // Reset after fallback show/attempt
-                        if (config.isAutoLoadRewarded()) {
-                            preloadRewarded(activity);
-                        }
-                        if (callback != null) callback.onAdDismissed();
-                        onAdShowFinished();
+                @Override
+                public void onAdDismissed() {
+                    rewardedClickCounter = 1; // Reset after fallback show/attempt
+                    if (config.isAutoLoadRewarded()) {
+                        preloadRewarded(activity);
                     }
+                    if (callback != null) callback.onAdDismissed();
+                }
 
-                    @Override
-                    public void onAdCompleted() {
-                        if (callback != null) callback.onAdCompleted();
-                    }
+                @Override
+                public void onAdCompleted() {
+                    if (callback != null) callback.onAdCompleted();
+                }
 
-                    @Override
-                    public void onAdFailedToLoad(String error) {
-                        if (callback != null) callback.onAdFailedToLoad(error);
-                        onAdShowFinished();
-                    }
-                });
-            }
-        });
+                @Override
+                public void onAdFailedToLoad(String error) {
+                    if (callback != null) callback.onAdFailedToLoad(error);
+                }
+            });
+        }
     }
 
     /**
@@ -472,104 +418,97 @@ public class AdGlide {
             return;
         }
 
-        processShowRequest(() -> {
-            if (com.partharoypc.adglide.util.AdPoolManager.hasRewardedInterstitial()) {
-                com.partharoypc.adglide.format.RewardedInterstitialAd.Builder pooledAd = com.partharoypc.adglide.util.AdPoolManager.getRewardedInterstitial();
-                pooledAd.showRewardedInterstitialAd(activity, new AdGlideCallback() {
-                    @Override
-                    public void onAdShowed() {
-                        if (config.isAutoLoadRewarded()) {
-                            preloadRewardedInterstitial(activity);
-                        }
-                        if (callback != null) callback.onAdShowed();
+        if (com.partharoypc.adglide.util.AdPoolManager.hasRewardedInterstitial()) {
+            com.partharoypc.adglide.format.RewardedInterstitialAd.Builder pooledAd = com.partharoypc.adglide.util.AdPoolManager.getRewardedInterstitial();
+            pooledAd.showRewardedInterstitialAd(activity, new AdGlideCallback() {
+                @Override
+                public void onAdShowed() {
+                    if (config.isAutoLoadRewarded()) {
+                        preloadRewardedInterstitial(activity);
                     }
+                    if (callback != null) callback.onAdShowed();
+                }
 
-                    @Override
-                    public void onAdDismissed() {
-                        rewardedInterstitialClickCounter = 1;
-                        if (config.isAutoLoadRewarded()) {
-                            preloadRewardedInterstitial(activity);
-                        }
-                        if (callback != null) callback.onAdDismissed();
-                        onAdShowFinished();
+                @Override
+                public void onAdDismissed() {
+                    rewardedInterstitialClickCounter = 1;
+                    if (config.isAutoLoadRewarded()) {
+                        preloadRewardedInterstitial(activity);
                     }
+                    if (callback != null) callback.onAdDismissed();
+                }
 
-                    @Override
-                    public void onAdCompleted() {
-                        if (callback != null) callback.onAdCompleted();
-                    }
+                @Override
+                public void onAdCompleted() {
+                    if (callback != null) callback.onAdCompleted();
+                }
 
-                    @Override
-                    public void onAdFailedToLoad(String error) {
-                        // Cache missed or failed. Fallback to loadAndShow
-                        new com.partharoypc.adglide.format.RewardedInterstitialAd.Builder(activity)
-                                .loadAndShow(activity, new AdGlideCallback() {
-                                    @Override
-                                    public void onAdShowed() {
-                                        if (config.isAutoLoadRewarded()) {
-                                            preloadRewardedInterstitial(activity);
-                                        }
-                                        if (callback != null) callback.onAdShowed();
+                @Override
+                public void onAdFailedToLoad(String error) {
+                    // Cache missed or failed. Fallback to loadAndShow
+                    new com.partharoypc.adglide.format.RewardedInterstitialAd.Builder(activity)
+                            .loadAndShow(activity, new AdGlideCallback() {
+                                @Override
+                                public void onAdShowed() {
+                                    if (config.isAutoLoadRewarded()) {
+                                        preloadRewardedInterstitial(activity);
                                     }
-
-                                    @Override
-                                    public void onAdDismissed() {
-                                        rewardedInterstitialClickCounter = 1;
-                                        if (config.isAutoLoadRewarded()) {
-                                            preloadRewardedInterstitial(activity);
-                                        }
-                                        if (callback != null) callback.onAdDismissed();
-                                        onAdShowFinished();
-                                    }
-
-                                    @Override
-                                    public void onAdCompleted() {
-                                        if (callback != null) callback.onAdCompleted();
-                                    }
-
-                                    @Override
-                                    public void onAdFailedToLoad(String error2) {
-                                        if (callback != null) callback.onAdFailedToLoad(error2);
-                                        onAdShowFinished();
-                                    }
-                                });
-                    }
-                });
-            } else {
-                // Fallback immediately
-                new com.partharoypc.adglide.format.RewardedInterstitialAd.Builder(activity).loadAndShow(activity,
-                        new AdGlideCallback() {
-                            @Override
-                            public void onAdShowed() {
-                                if (config.isAutoLoadRewarded()) {
-                                    preloadRewardedInterstitial(activity);
+                                    if (callback != null) callback.onAdShowed();
                                 }
-                                if (callback != null) callback.onAdShowed();
-                            }
 
-                            @Override
-                            public void onAdDismissed() {
-                                rewardedInterstitialClickCounter = 1;
-                                if (config.isAutoLoadRewarded()) {
-                                    preloadRewardedInterstitial(activity);
+                                @Override
+                                public void onAdDismissed() {
+                                    rewardedInterstitialClickCounter = 1;
+                                    if (config.isAutoLoadRewarded()) {
+                                        preloadRewardedInterstitial(activity);
+                                    }
+                                    if (callback != null) callback.onAdDismissed();
                                 }
-                                if (callback != null) callback.onAdDismissed();
-                                onAdShowFinished();
-                            }
 
-                            @Override
-                            public void onAdCompleted() {
-                                if (callback != null) callback.onAdCompleted();
-                            }
+                                @Override
+                                public void onAdCompleted() {
+                                    if (callback != null) callback.onAdCompleted();
+                                }
 
-                            @Override
-                            public void onAdFailedToLoad(String error) {
-                                if (callback != null) callback.onAdFailedToLoad(error);
-                                onAdShowFinished();
+                                @Override
+                                public void onAdFailedToLoad(String error2) {
+                                    if (callback != null) callback.onAdFailedToLoad(error2);
+                                }
+                            });
+                }
+            });
+        } else {
+            // Fallback immediately
+            new com.partharoypc.adglide.format.RewardedInterstitialAd.Builder(activity).loadAndShow(activity,
+                    new AdGlideCallback() {
+                        @Override
+                        public void onAdShowed() {
+                            if (config.isAutoLoadRewarded()) {
+                                preloadRewardedInterstitial(activity);
                             }
-                        });
-            }
-        });
+                            if (callback != null) callback.onAdShowed();
+                        }
+
+                        @Override
+                        public void onAdDismissed() {
+                            rewardedInterstitialClickCounter = 1;
+                            if (config.isAutoLoadRewarded()) {
+                                preloadRewardedInterstitial(activity);
+                            }
+                            if (callback != null) callback.onAdDismissed();
+                        }
+
+                        @Override
+                        public void onAdCompleted() {
+                            if (callback != null) callback.onAdCompleted();
+                        }
+
+                        @Override
+                        public void onAdFailedToLoad(String error) {
+                            if (callback != null) callback.onAdFailedToLoad(error);
+                        }
+                    });
+        }
     }
 
     /**
@@ -672,7 +611,6 @@ public class AdGlide {
 
             @Override
             public void onActivityStarted(@NonNull Activity activity) {
-                currentActivityRef = new java.lang.ref.WeakReference<>(activity);
                 // Show App Open Ad automatically if it isn't Specifically Excluded
                 if (config != null && config.getAdStatus() && config.isAppOpenEnabled()) {
                     // Check exclusion list
@@ -684,7 +622,6 @@ public class AdGlide {
 
             @Override
             public void onActivityResumed(@NonNull Activity activity) {
-                currentActivityRef = new java.lang.ref.WeakReference<>(activity);
             }
 
             @Override
@@ -706,59 +643,52 @@ public class AdGlide {
     }
 
     private static void showAppOpenAd(Activity activity) {
-        processShowRequest(() -> {
-            if (com.partharoypc.adglide.util.AdPoolManager.hasAppOpen()) {
-                AppOpenAd.Builder pooledAd = com.partharoypc.adglide.util.AdPoolManager.getAppOpen();
-                pooledAd.showAppOpenAd(new AdGlideCallback() {
-                    @Override
-                    public void onAdShowed() {
-                        com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
-                    }
+        if (com.partharoypc.adglide.util.AdPoolManager.hasAppOpen()) {
+            AppOpenAd.Builder pooledAd = com.partharoypc.adglide.util.AdPoolManager.getAppOpen();
+            pooledAd.showAppOpenAd(new AdGlideCallback() {
+                @Override
+                public void onAdShowed() {
+                    com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
+                }
 
-                    @Override
-                    public void onAdDismissed() {
-                        com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
-                        onAdShowFinished();
-                    }
+                @Override
+                public void onAdDismissed() {
+                    com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
+                }
 
-                    @Override
-                    public void onAdFailedToLoad(String error) {
-                        onAdShowFinished();
-                    }
-                });
-            } else {
-                // Initiate background load immediately
-                com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
+                @Override
+                public void onAdFailedToLoad(String error) {
+                }
+            });
+        } else {
+            // Initiate background load immediately
+            com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
 
-                // Load and show on the fly for this explicit request
-                new AppOpenAd.Builder(activity).load(new AdGlideCallback() {
-                    @Override
-                    public void onAdLoaded() {
-                        new AppOpenAd.Builder(activity).showAppOpenAd(new AdGlideCallback() {
-                            @Override
-                            public void onAdShowed() {
-                                com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
-                            }
+            // Load and show on the fly for this explicit request
+            new AppOpenAd.Builder(activity).load(new AdGlideCallback() {
+                @Override
+                public void onAdLoaded() {
+                    new AppOpenAd.Builder(activity).showAppOpenAd(new AdGlideCallback() {
+                        @Override
+                        public void onAdShowed() {
+                            com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
+                        }
 
-                            @Override
-                            public void onAdDismissed() {
-                                com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
-                                onAdShowFinished();
-                            }
+                        @Override
+                        public void onAdDismissed() {
+                            com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
+                        }
 
-                            @Override
-                            public void onAdFailedToLoad(String error) {
-                                onAdShowFinished();
-                            }
-                        });
-                    }
+                        @Override
+                        public void onAdFailedToLoad(String error) {
+                        }
+                    });
+                }
 
-                    @Override
-                    public void onAdFailedToLoad(String error) {
-                        onAdShowFinished();
-                    }
-                });
-            }
-        });
+                @Override
+                public void onAdFailedToLoad(String error) {
+                }
+            });
+        }
     }
 }
