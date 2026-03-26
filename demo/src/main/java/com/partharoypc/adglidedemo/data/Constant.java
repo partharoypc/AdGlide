@@ -68,17 +68,18 @@ public class Constant {
 
     // House Ad Config
     public static boolean HOUSE_AD_ENABLE = true;
-    public static final String HOUSE_AD_BANNER_IMAGE = "https://raw.githubusercontent.com/partharoypc/AdGlide-Assets/main/house_ad/banner.png";
+    public static final String HOUSE_AD_BANNER_IMAGE = "https://raw.githubusercontent.com/partharoypc/AdGlide/main/assets/house_ad/banner.png";
     public static final String HOUSE_AD_BANNER_URL = "https://play.google.com/store/apps/details?id=com.datamatrixlab.savebox";
-    public static final String HOUSE_AD_INTERSTITIAL_IMAGE = "https://raw.githubusercontent.com/partharoypc/AdGlide-Assets/main/house_ad/interstitial.png";
+    public static final String HOUSE_AD_INTERSTITIAL_IMAGE = "https://raw.githubusercontent.com/partharoypc/AdGlide/main/assets/house_ad/interstitial.png";
     public static final String HOUSE_AD_INTERSTITIAL_URL = "https://play.google.com/store/apps/details?id=com.datamatrixlab.savebox";
 
     // House Native Ads
-    public static final String HOUSE_AD_NATIVE_TITLE = "AdGlide: Premium Monetization";
-    public static final String HOUSE_AD_NATIVE_DESC = "Experience the future of ad mediation with zero latency and premium fill rates.";
-    public static final String HOUSE_AD_NATIVE_CTA = "Learn More";
-    public static final String HOUSE_AD_NATIVE_IMAGE = "https://raw.githubusercontent.com/partharoypc/AdGlide-Assets/main/house_ad/native_large.png";
-    public static final String HOUSE_AD_NATIVE_ICON = "https://raw.githubusercontent.com/partharoypc/AdGlide-Assets/main/house_ad/icon.png";
+    public static final String HOUSE_AD_NATIVE_TITLE = "SaveBox: Video & Status Saver";
+    public static final String HOUSE_AD_NATIVE_DESC = "All-in-one downloader & private gallery vault for your mobile device.";
+    public static final String HOUSE_AD_NATIVE_CTA = "Install Now";
+    public static final String HOUSE_AD_NATIVE_IMAGE = "https://raw.githubusercontent.com/partharoypc/AdGlide/main/assets/house_ad/native.png";
+    public static final String HOUSE_AD_NATIVE_ICON = "https://raw.githubusercontent.com/partharoypc/AdGlide/main/assets/house_ad/icon.png";
     public static final String HOUSE_AD_NATIVE_URL = "https://play.google.com/store/apps/details?id=com.datamatrixlab.savebox";
+
 
 }
