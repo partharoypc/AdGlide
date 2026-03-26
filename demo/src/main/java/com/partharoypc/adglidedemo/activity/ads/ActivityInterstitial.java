@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.partharoypc.adglide.AdGlide;
+import com.partharoypc.adglide.util.AdFormat;
 import com.partharoypc.adglide.util.AdGlideCallback;
 import com.partharoypc.adglidedemo.R;
 
@@ -23,7 +24,7 @@ public class ActivityInterstitial extends AppCompatActivity {
 
         setupToolbar();
         initViews();
-        AdGlide.preloadInterstitial(this);
+        AdGlide.preload(this, AdFormat.INTERSTITIAL);
 
     }
 
@@ -45,7 +46,7 @@ public class ActivityInterstitial extends AppCompatActivity {
         btnShow.setOnClickListener(v -> showInterstitialAd());
         btnLoad.setOnClickListener(v -> {
             appendLog("Manually Loading Interstitial Ad...");
-            AdGlide.preloadInterstitial(this);
+            AdGlide.preload(this, AdFormat.INTERSTITIAL);
         });
     }
 

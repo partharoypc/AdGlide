@@ -89,8 +89,7 @@ public class MyApplication extends Application {
                 .appOpenEnabled(sharedPref.getIsAppOpenAdEnabled())
 
                 // ── Smart Loading & Intervals ─────────────────────────────
-                .autoLoadInterstitial(true)
-                .autoLoadRewarded(true)
+                .autoLoad(true)
                 .interstitialInterval(sharedPref.getInterstitialInterval())
                 .rewardedInterval(sharedPref.getRewardedInterval())
                 .appOpenCooldown(sharedPref.getAppOpenCooldownMinutes())

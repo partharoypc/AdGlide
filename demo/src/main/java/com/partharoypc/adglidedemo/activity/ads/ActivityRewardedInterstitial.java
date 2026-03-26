@@ -6,6 +6,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import com.partharoypc.adglide.AdGlide;
+import com.partharoypc.adglide.util.AdFormat;
 import com.partharoypc.adglide.util.AdGlideCallback;
 import com.partharoypc.adglidedemo.R;
 
@@ -36,7 +37,7 @@ public class ActivityRewardedInterstitial extends AppCompatActivity {
 
         btnLoad.setOnClickListener(v -> {
             Toast.makeText(this, "Loading Rewarded Interstitial...", Toast.LENGTH_SHORT).show();
-            AdGlide.preloadRewardedInterstitial(this);
+            AdGlide.preload(this, AdFormat.REWARDED_INTERSTITIAL);
         });
 
         btnShow.setOnClickListener(v -> {

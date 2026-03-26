@@ -14,8 +14,7 @@ public class AdGlideConfig {
     private final List<String> backupNetworks;
     private final boolean testMode;
     private final boolean debug;
-    private final boolean autoLoadInterstitial;
-    private final boolean autoLoadRewarded;
+    private final boolean autoLoad;
     private final boolean enableHouseAd;
     private final int interstitialInterval;
     private final int rewardedInterval;
@@ -108,8 +107,7 @@ public class AdGlideConfig {
         this.backupNetworks = builder.backupNetworks;
         this.testMode = builder.testMode;
         this.debug = builder.debug;
-        this.autoLoadInterstitial = builder.autoLoadInterstitial;
-        this.autoLoadRewarded = builder.autoLoadRewarded;
+        this.autoLoad = builder.autoLoad;
         this.enableHouseAd = builder.enableHouseAd;
         this.interstitialInterval = builder.interstitialInterval;
         this.rewardedInterval = builder.rewardedInterval;
@@ -216,12 +214,8 @@ public class AdGlideConfig {
         return debug;
     }
 
-    public boolean isAutoLoadInterstitial() {
-        return autoLoadInterstitial;
-    }
-
-    public boolean isAutoLoadRewarded() {
-        return autoLoadRewarded;
+    public boolean isAutoLoadEnabled() {
+        return autoLoad;
     }
 
     public boolean isAppOpenEnabled() {
@@ -499,8 +493,7 @@ public class AdGlideConfig {
         private final List<String> backupNetworks = new ArrayList<>();
         private boolean testMode = false;
         private boolean debug = true;
-        private boolean autoLoadInterstitial = false;
-        private boolean autoLoadRewarded = false;
+        private boolean autoLoad = true;
         private boolean bannerStatus = false;
         private boolean interstitialStatus = false;
         private boolean nativeStatus = false;
@@ -634,13 +627,8 @@ public class AdGlideConfig {
             return this;
         }
 
-        public Builder autoLoadInterstitial(boolean autoLoadInterstitial) {
-            this.autoLoadInterstitial = autoLoadInterstitial;
-            return this;
-        }
-
-        public Builder autoLoadRewarded(boolean autoLoadRewarded) {
-            this.autoLoadRewarded = autoLoadRewarded;
+        public Builder autoLoad(boolean enable) {
+            this.autoLoad = enable;
             return this;
         }
 

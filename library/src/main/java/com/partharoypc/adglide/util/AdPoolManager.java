@@ -73,10 +73,33 @@ public class AdPoolManager {
         boolean isAvailable(T ad);
     }
 
-    // --- INTERSTITIAL ---
-    public static void fillInterstitialPool(Activity activity) {
-        fillGenericPool(activity, AdFormat.INTERSTITIAL, () -> new InterstitialAd.Builder(activity), 
-            (builder, callback) -> builder.load(callback));
+    /**
+     * Entry point to fill any ad pool.
+     */
+    public static void fillPool(Activity activity, AdFormat format, String nativeStyle) {
+        switch (format) {
+            case INTERSTITIAL:
+                fillGenericPool(activity, AdFormat.INTERSTITIAL, () -> new InterstitialAd.Builder(activity),
+                        (builder, callback) -> builder.load(callback));
+                break;
+            case REWARDED:
+                fillGenericPool(activity, AdFormat.REWARDED, () -> new RewardedAd.Builder(activity),
+                        (builder, callback) -> builder.load(callback));
+                break;
+            case REWARDED_INTERSTITIAL:
+                fillGenericPool(activity, AdFormat.REWARDED_INTERSTITIAL, () -> new RewardedInterstitialAd.Builder(activity),
+                        (builder, callback) -> builder.loadRewardedInterstitialAd(callback));
+                break;
+            case APP_OPEN:
+                fillGenericPool(activity, AdFormat.APP_OPEN, () -> new AppOpenAd.Builder(activity),
+                        (builder, callback) -> builder.load(callback));
+                break;
+            case NATIVE:
+                fillNativePool(activity, nativeStyle);
+                break;
+            default:
+                break;
+        }
     }
 
     public static InterstitialAd.Builder getInterstitial() {
@@ -89,12 +112,6 @@ public class AdPoolManager {
         return pool != null && pool.hasAvailable(ad -> ad.isAdLoaded());
     }
 
-    // --- REWARDED ---
-    public static void fillRewardedPool(Activity activity) {
-        fillGenericPool(activity, AdFormat.REWARDED, () -> new RewardedAd.Builder(activity), 
-            (builder, callback) -> builder.load(callback));
-    }
-
     public static RewardedAd.Builder getRewarded() {
         PoolSet<RewardedAd.Builder> pool = getPool(AdFormat.REWARDED);
         return pool != null ? pool.poll() : null;
@@ -103,12 +120,6 @@ public class AdPoolManager {
     public static boolean hasRewarded() {
         PoolSet<RewardedAd.Builder> pool = getPool(AdFormat.REWARDED);
         return pool != null && pool.hasAvailable(ad -> ad.isAdAvailable());
-    }
-
-    // --- REWARDED INTERSTITIAL ---
-    public static void fillRewardedInterstitialPool(Activity activity) {
-        fillGenericPool(activity, AdFormat.REWARDED_INTERSTITIAL, () -> new RewardedInterstitialAd.Builder(activity), 
-            (builder, callback) -> builder.loadRewardedInterstitialAd(callback));
     }
 
     public static RewardedInterstitialAd.Builder getRewardedInterstitial() {
@@ -121,12 +132,6 @@ public class AdPoolManager {
         return pool != null && pool.hasAvailable(ad -> ad.isAdAvailable());
     }
 
-    // --- APP OPEN ---
-    public static void fillAppOpenPool(Activity activity) {
-        fillGenericPool(activity, AdFormat.APP_OPEN, () -> new AppOpenAd.Builder(activity), 
-            (builder, callback) -> builder.load(callback));
-    }
-
     public static AppOpenAd.Builder getAppOpen() {
         PoolSet<AppOpenAd.Builder> pool = getPool(AdFormat.APP_OPEN);
         return pool != null ? pool.poll() : null;
@@ -135,47 +140,6 @@ public class AdPoolManager {
     public static boolean hasAppOpen() {
         PoolSet<AppOpenAd.Builder> pool = getPool(AdFormat.APP_OPEN);
         return pool != null && pool.hasAvailable(ad -> ad.isAdAvailable());
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> PoolSet<T> getPool(AdFormat format) {
-        return (PoolSet<T>) pools.get(format);
-    }
-
-    // --- NATIVE ---
-    public static void fillNativePool(Activity activity, String style) {
-        if (!AdGlide.isNativeEnabled() || activity == null) return;
-        PoolSet<NativeAd.Builder> poolSet = nativePools.get(style.toLowerCase(Locale.ROOT));
-        if (poolSet == null) {
-            synchronized (nativePools) {
-                poolSet = nativePools.get(style.toLowerCase(Locale.ROOT));
-                if (poolSet == null) {
-                    poolSet = new PoolSet<>();
-                    nativePools.put(style.toLowerCase(Locale.ROOT), poolSet);
-                }
-            }
-        }
-        final PoolSet<NativeAd.Builder> finalPoolSet = poolSet;
-        
-        if (poolSet.size() >= MAX_POOL_SIZE) return;
-        
-        final WeakReference<Activity> activityRef = new WeakReference<>(activity);
-        NativeAd.Builder builder = new NativeAd.Builder(activity).style(style);
-        builder.load(new AdGlideCallback() {
-            @Override
-            public void onAdLoaded(String network) {
-                String primary = AdGlide.getConfig() != null ? AdGlide.getConfig().getPrimaryNetwork() : "";
-                finalPoolSet.offer(builder, network.equals(primary));
-                
-                Activity currentActivity = activityRef.get();
-                if (currentActivity != null && !currentActivity.isFinishing()) {
-                    fillNativePool(currentActivity, style);
-                }
-            }
-            @Override
-            public void onAdFailedToLoad(String error) {
-            }
-        });
     }
 
     public static NativeAd.Builder getNative(String style) {
@@ -188,17 +152,22 @@ public class AdPoolManager {
         return poolSet != null && poolSet.hasAvailable(ad -> ad.isAdLoaded());
     }
 
-    // --- GENERIC FILLER ---
+    @SuppressWarnings("unchecked")
+    private static <T> PoolSet<T> getPool(AdFormat format) {
+        return (PoolSet<T>) pools.get(format);
+    }
+
+    // --- GENERIC FILLERS ---
     private interface AdBuilderProvider<T> { T create(); }
     private interface AdLoadAction<T> { void load(T ad, AdGlideCallback callback); }
 
     @SuppressWarnings("unchecked")
     private static <T> void fillGenericPool(Activity activity, AdFormat format, AdBuilderProvider<T> provider, AdLoadAction<T> loader) {
-        if (!isFormatEnabled(format) || activity == null) return;
-        
+        if (!isFormatEnabled(format) || activity == null || activity.isFinishing()) return;
+
         PoolSet<T> poolSet = (PoolSet<T>) pools.get(format);
         int limit = (format == AdFormat.REWARDED || format == AdFormat.REWARDED_INTERSTITIAL || format == AdFormat.APP_OPEN) ? 1 : MAX_POOL_SIZE;
-        
+
         AtomicBoolean loading = loadingState.get(format);
         if (poolSet.size() >= limit || (loading != null && loading.get())) return;
 
@@ -206,23 +175,64 @@ public class AdPoolManager {
 
         final WeakReference<Activity> activityRef = new WeakReference<>(activity);
         T builder = provider.create();
-        
+
         loader.load(builder, new AdGlideCallback() {
             @Override
             public void onAdLoaded(String network) {
                 if (loading != null) loading.set(false);
                 String primary = AdGlide.getConfig() != null ? AdGlide.getConfig().getPrimaryNetwork() : "";
                 poolSet.offer(builder, network.equals(primary));
-                
-                Activity currentActivity = activityRef.get();
-                if (currentActivity != null && !currentActivity.isFinishing()) {
-                    fillGenericPool(currentActivity, format, provider, loader);
-                }
+
+                // Decouple refill call to prevent StackOverflow on immediate callbacks
+                new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                    Activity currentActivity = activityRef.get();
+                    if (currentActivity != null && !currentActivity.isFinishing()) {
+                        fillGenericPool(currentActivity, format, provider, loader);
+                    }
+                });
             }
 
             @Override
             public void onAdFailedToLoad(String error) {
                 if (loading != null) loading.set(false);
+            }
+        });
+    }
+
+    private static void fillNativePool(Activity activity, String style) {
+        if (!AdGlide.isNativeEnabled() || activity == null || activity.isFinishing() || style == null) return;
+        
+        PoolSet<NativeAd.Builder> poolSet = nativePools.get(style.toLowerCase(Locale.ROOT));
+        if (poolSet == null) {
+            synchronized (nativePools) {
+                poolSet = nativePools.get(style.toLowerCase(Locale.ROOT));
+                if (poolSet == null) {
+                    poolSet = new PoolSet<>();
+                    nativePools.put(style.toLowerCase(Locale.ROOT), poolSet);
+                }
+            }
+        }
+        final PoolSet<NativeAd.Builder> finalPoolSet = poolSet;
+
+        if (poolSet.size() >= MAX_POOL_SIZE) return;
+
+        final WeakReference<Activity> activityRef = new WeakReference<>(activity);
+        NativeAd.Builder builder = new NativeAd.Builder(activity).style(style);
+        builder.load(new AdGlideCallback() {
+            @Override
+            public void onAdLoaded(String network) {
+                String primary = AdGlide.getConfig() != null ? AdGlide.getConfig().getPrimaryNetwork() : "";
+                finalPoolSet.offer(builder, network.equals(primary));
+
+                new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                    Activity currentActivity = activityRef.get();
+                    if (currentActivity != null && !currentActivity.isFinishing()) {
+                        fillNativePool(currentActivity, style);
+                    }
+                });
+            }
+            @Override
+            public void onAdFailedToLoad(String error) {
             }
         });
     }

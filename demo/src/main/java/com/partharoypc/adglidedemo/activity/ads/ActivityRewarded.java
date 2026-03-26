@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.partharoypc.adglide.AdGlide;
+import com.partharoypc.adglide.util.AdFormat;
 import com.partharoypc.adglide.util.AdGlideCallback;
 import com.partharoypc.adglidedemo.R;
 
@@ -22,7 +23,7 @@ public class ActivityRewarded extends AppCompatActivity {
 
         setupToolbar();
         initViews();
-        AdGlide.preloadRewarded(this);
+        AdGlide.preload(this, AdFormat.REWARDED);
 
     }
 
@@ -44,7 +45,7 @@ public class ActivityRewarded extends AppCompatActivity {
         btnShow.setOnClickListener(v -> showRewardedAd());
         btnLoad.setOnClickListener(v -> {
             appendLog("Manually Loading Rewarded Ad...");
-            AdGlide.preloadRewarded(this);
+            AdGlide.preload(this, AdFormat.REWARDED);
         });
     }
 

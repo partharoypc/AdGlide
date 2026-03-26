@@ -139,7 +139,7 @@ public class AdLoader {
     private void executeNetwork(String network, NetworkExecutor executor, AdGlideCallback finalCallback) {
         if (network == null || network.isEmpty() || sessionBlacklist.contains(network)) {
             AdGlideLog.d(TAG, "Skipping " + network + " for " + format + " (session blacklisted or empty)");
-            executeNext(executor, finalCallback);
+            new Handler(Looper.getMainLooper()).post(() -> executeNext(executor, finalCallback));
             return;
         }
 
@@ -193,7 +193,7 @@ public class AdLoader {
                     sessionBlacklist.add(network);
                 }
 
-                executeNext(executor, finalCallback);
+                new Handler(Looper.getMainLooper()).post(() -> executeNext(executor, finalCallback));
             }
         });
     }

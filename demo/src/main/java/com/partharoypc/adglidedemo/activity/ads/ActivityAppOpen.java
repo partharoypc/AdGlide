@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.partharoypc.adglide.AdGlide;
+import com.partharoypc.adglide.util.AdFormat;
 import com.partharoypc.adglide.util.AdGlideCallback;
 import com.partharoypc.adglidedemo.R;
 
@@ -25,7 +26,7 @@ public class ActivityAppOpen extends AppCompatActivity {
         initViews();
         
         appendLog("Preloading App Open pool...");
-        AdGlide.preloadAppOpen(this);
+        AdGlide.preload(this, AdFormat.APP_OPEN);
     }
 
     private void setupToolbar() {
@@ -46,7 +47,7 @@ public class ActivityAppOpen extends AppCompatActivity {
         btnShow.setOnClickListener(v -> showAppOpenAd());
         btnLoad.setOnClickListener(v -> {
             appendLog("Manually Loading/Replenishing App Open Pool...");
-            AdGlide.preloadAppOpen(this);
+            AdGlide.preload(this, AdFormat.APP_OPEN);
         });
     }
 

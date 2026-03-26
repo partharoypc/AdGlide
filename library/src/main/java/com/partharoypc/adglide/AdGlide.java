@@ -294,29 +294,43 @@ public class AdGlide {
         return isAdsEnabled() && config.isRewardedInterstitialEnabled();
     }
 
-    // --- Preloading Logic ---
+    // --- Centralized Preloading Logic ---
 
-    public static void preloadInterstitial(Activity activity) {
-        if (config != null && config.getAdStatus()) {
-            com.partharoypc.adglide.util.AdPoolManager.fillInterstitialPool(activity);
-        }
+    /**
+     * Preloads an ad of any format. For native ads, the default style is used.
+     * Use {@link #preload(Activity, com.partharoypc.adglide.util.AdFormat, String)} for custom native styles.
+     */
+    public static void preload(Activity activity, com.partharoypc.adglide.util.AdFormat format) {
+        preload(activity, format, null);
     }
 
-    public static void preloadRewarded(Activity activity) {
-        if (config != null && config.getAdStatus()) {
-            com.partharoypc.adglide.util.AdPoolManager.fillRewardedPool(activity);
-        }
-    }
+    /**
+     * Preloads an ad of any format into the pool for instant delivery.
+     */
+    public static void preload(Activity activity, com.partharoypc.adglide.util.AdFormat format, @Nullable String nativeStyle) {
+        if (config == null || !config.getAdStatus()) return;
 
-    public static void preloadRewardedInterstitial(Activity activity) {
-        if (config != null && config.getAdStatus()) {
-            com.partharoypc.adglide.util.AdPoolManager.fillRewardedInterstitialPool(activity);
-        }
-    }
-
-    public static void preloadNative(Activity activity, String style) {
-        if (config != null && config.getAdStatus()) {
-            com.partharoypc.adglide.util.AdPoolManager.fillNativePool(activity, style);
+        switch (format) {
+            case INTERSTITIAL:
+                com.partharoypc.adglide.util.AdPoolManager.fillInterstitialPool(activity);
+                break;
+            case REWARDED:
+                com.partharoypc.adglide.util.AdPoolManager.fillRewardedPool(activity);
+                break;
+            case REWARDED_INTERSTITIAL:
+                com.partharoypc.adglide.util.AdPoolManager.fillRewardedInterstitialPool(activity);
+                break;
+            case NATIVE:
+                if (nativeStyle != null) {
+                    com.partharoypc.adglide.util.AdPoolManager.fillNativePool(activity, nativeStyle);
+                }
+                break;
+            case APP_OPEN:
+                com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
+                break;
+            case BANNER:
+                // Banners are not typically pooled in the current architecture
+                break;
         }
     }
 
@@ -341,9 +355,9 @@ public class AdGlide {
 
         if (com.partharoypc.adglide.util.AdPoolManager.hasInterstitial()) {
             InterstitialAd.Builder pooledAd = com.partharoypc.adglide.util.AdPoolManager.getInterstitial();
-            pooledAd.show(activity, new InternalCallback("INTERSTITIAL", activity, callback, true));
+            pooledAd.show(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.INTERSTITIAL, activity, callback));
         } else {
-            new InterstitialAd.Builder(activity).loadAndShow(activity, new InternalCallback("INTERSTITIAL", activity, callback, true));
+            new InterstitialAd.Builder(activity).loadAndShow(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.INTERSTITIAL, activity, callback));
         }
     }
 
@@ -357,16 +371,14 @@ public class AdGlide {
     }
 
     private static class InternalCallback implements AdGlideCallback {
-        private final String format;
+        private final com.partharoypc.adglide.util.AdFormat format;
         private final Activity activity;
         private final AdGlideCallback externalCallback;
-        private final boolean isInterstitial;
 
-        InternalCallback(String format, Activity activity, AdGlideCallback externalCallback, boolean isInterstitial) {
+        InternalCallback(com.partharoypc.adglide.util.AdFormat format, Activity activity, AdGlideCallback externalCallback) {
             this.format = format;
             this.activity = activity;
             this.externalCallback = externalCallback;
-            this.isInterstitial = isInterstitial;
         }
 
         @Override
@@ -393,17 +405,8 @@ public class AdGlide {
         }
 
         private void autoPreload() {
-            if (config == null) return;
-            switch (format) {
-                case "INTERSTITIAL":
-                    if (config.isAutoLoadInterstitial()) preloadInterstitial(activity);
-                    break;
-                case "REWARDED":
-                    if (config.isAutoLoadRewarded()) preloadRewarded(activity);
-                    break;
-                case "REWARDED_INTERSTITIAL":
-                    if (config.isAutoLoadRewarded()) preloadRewardedInterstitial(activity);
-                    break;
+            if (config != null && config.isAutoLoadEnabled()) {
+                preload(activity, format);
             }
         }
 
@@ -437,9 +440,9 @@ public class AdGlide {
 
         if (com.partharoypc.adglide.util.AdPoolManager.hasRewarded()) {
             RewardedAd.Builder pooledAd = com.partharoypc.adglide.util.AdPoolManager.getRewarded();
-            pooledAd.showRewardedAd(activity, new InternalCallback("REWARDED", activity, callback, false));
+            pooledAd.showRewardedAd(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED, activity, callback));
         } else {
-            new RewardedAd.Builder(activity).loadAndShow(activity, new InternalCallback("REWARDED", activity, callback, false));
+            new RewardedAd.Builder(activity).loadAndShow(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED, activity, callback));
         }
     }
 
@@ -466,10 +469,10 @@ public class AdGlide {
         if (com.partharoypc.adglide.util.AdPoolManager.hasRewardedInterstitial()) {
             com.partharoypc.adglide.format.RewardedInterstitialAd.Builder pooledAd = 
                 com.partharoypc.adglide.util.AdPoolManager.getRewardedInterstitial();
-            pooledAd.showRewardedInterstitialAd(activity, new InternalCallback("REWARDED_INTERSTITIAL", activity, callback, false));
+            pooledAd.showRewardedInterstitialAd(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED_INTERSTITIAL, activity, callback));
         } else {
             new com.partharoypc.adglide.format.RewardedInterstitialAd.Builder(activity)
-                .loadAndShow(activity, new InternalCallback("REWARDED_INTERSTITIAL", activity, callback, false));
+                .loadAndShow(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED_INTERSTITIAL, activity, callback));
         }
     }
 
@@ -507,7 +510,7 @@ public class AdGlide {
             pooledAd.attachToContainer(container, new AdGlideCallback() {
                 @Override
                 public void onAdShowed() {
-                    preloadNative(activity, nativeStyle);
+                    preload(activity, com.partharoypc.adglide.util.AdFormat.NATIVE, nativeStyle);
                 }
             });
         } else {
@@ -517,17 +520,19 @@ public class AdGlide {
             builder.load(new AdGlideCallback() {
                 @Override
                 public void onAdShowed() {
-                    preloadNative(activity, nativeStyle);
+                    preload(activity, com.partharoypc.adglide.util.AdFormat.NATIVE, nativeStyle);
                 }
             });
         }
     }
 
 
+    /**
+     * @deprecated Use {@link #preload(Activity, com.partharoypc.adglide.util.AdFormat)} with {@link com.partharoypc.adglide.util.AdFormat#APP_OPEN}
+     */
+    @Deprecated
     public static void preloadAppOpen(Activity activity) {
-        if (config != null && config.getAdStatus() && config.isAppOpenEnabled()) {
-            com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
-        }
+        preload(activity, com.partharoypc.adglide.util.AdFormat.APP_OPEN);
     }
 
     private static int foregroundActivityCount = 0;
@@ -544,11 +549,16 @@ public class AdGlide {
                 foregroundActivityCount++;
                 if (foregroundActivityCount == 1 && !isChangingConfig) {
                     if (isAdsEnabled()) {
-                        if (config.isInterstitialEnabled() && config.isAutoLoadInterstitial()) preloadInterstitial(activity);
-                        if (config.isRewardedEnabled() && config.isAutoLoadRewarded()) preloadRewarded(activity);
+                        if (config.isAutoLoadEnabled()) {
+                            if (config.isInterstitialEnabled()) preload(activity, com.partharoypc.adglide.util.AdFormat.INTERSTITIAL);
+                            if (config.isRewardedEnabled()) preload(activity, com.partharoypc.adglide.util.AdFormat.REWARDED);
+                            if (config.isRewardedInterstitialEnabled()) preload(activity, com.partharoypc.adglide.util.AdFormat.REWARDED_INTERSTITIAL);
+                            if (config.isAppOpenEnabled()) preload(activity, com.partharoypc.adglide.util.AdFormat.APP_OPEN);
+                        }
+                        
                         if (config.isAppOpenEnabled()) {
-                            preloadAppOpen(activity);
-                            if (!config.getOpenAdExcludedActivities().contains(activity.getClass().getName())) {
+                            List<String> excluded = config.getOpenAdExcludedActivities();
+                            if (excluded == null || !excluded.contains(activity.getClass().getName())) {
                                 showAppOpenAd(activity, null);
                             }
                         }
