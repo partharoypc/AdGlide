@@ -85,6 +85,9 @@ public class AdGlide {
             }
         }
         PerformanceLogger.log("Core", "AdGlide initialized (v" + BuildConfig.VERSION_NAME + " - Premium)");
+        
+        // Pre-cache House Ad assets for offline support
+        preloadHouseAds(application);
     }
 
     /**
@@ -129,6 +132,43 @@ public class AdGlide {
                 registerAppOpenLifecycle(currentApplication);
                 isAppOpenRegistered = true;
             }
+        }
+
+        // Re-cache House Ad assets if config changed
+        preloadHouseAds(currentApplication);
+    }
+
+    private static void preloadHouseAds(android.content.Context context) {
+        if (config == null || !config.isHouseAdEnabled() || context == null) return;
+
+        AdGlideLog.d(TAG, "Proactively pre-fetching House Ad assets for offline support...");
+        
+        java.util.Set<String> assetUrls = new java.util.HashSet<>();
+        if (config.getHouseAdBannerImage() != null && !config.getHouseAdBannerImage().isEmpty()) {
+            assetUrls.add(config.getHouseAdBannerImage());
+        }
+        if (config.getHouseAdInterstitialImage() != null && !config.getHouseAdInterstitialImage().isEmpty()) {
+            assetUrls.add(config.getHouseAdInterstitialImage());
+        }
+        if (config.getHouseAdNativeImage() != null && !config.getHouseAdNativeImage().isEmpty()) {
+            assetUrls.add(config.getHouseAdNativeImage());
+        }
+        if (config.getHouseAdNativeIcon() != null && !config.getHouseAdNativeIcon().isEmpty()) {
+            assetUrls.add(config.getHouseAdNativeIcon());
+        }
+
+        for (String url : assetUrls) {
+            com.partharoypc.adglide.util.ImageDownloader.downloadImage(context, url, new com.partharoypc.adglide.util.ImageDownloader.ImageLoaderCallback() {
+                @Override
+                public void onImageLoaded(android.graphics.Bitmap bitmap) {
+                    // Cached successfully
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    // Silently fail pre-fetch (will retry during ad load if needed)
+                }
+            });
         }
     }
 
