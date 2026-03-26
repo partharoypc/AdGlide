@@ -118,38 +118,6 @@ public class MyApplication extends Application {
         // Initialize globally
         android.app.Application application = (android.app.Application) context.getApplicationContext();
         AdGlide.initialize(application, config);
-
-//        AdGlide.setGlobalAdListener(new AdGlide.GlobalAdListener() {
-//            @Override
-//            public void onAdLoaded(String format, String network) {
-//                AdGlideLog.d("DemoTracker", "✅ AD LOADED: [" + format + "] from [" + network + "]");
-//            }
-//
-//            @Override
-//            public void onAdFailedToLoad(String format, String network, String error) {
-//                AdGlideLog.e("DemoTracker", "❌ AD FAILED: [" + format + "] from [" + network + "] error: " + error);
-//            }
-//
-//            @Override
-//            public void onAdShowed(String format, String network) {
-//                AdGlideLog.d("DemoTracker", "👁️ AD SHOWED: [" + format + "] from [" + network + "]");
-//            }
-//
-//            @Override
-//            public void onAdClicked(String format, String network) {
-//                AdGlideLog.d("DemoTracker", "💰 AD CLICKED: [" + format + "] from [" + network + "]");
-//            }
-//
-//            @Override
-//            public void onAdDismissed(String format, String network) {
-//                AdGlideLog.d("DemoTracker", "👋 AD DISMISSED: [" + format + "] from [" + network + "]");
-//            }
-//
-//            @Override
-//            public void onAdCompleted(String format, String network) {
-//                AdGlideLog.d("DemoTracker", "🏆 AD COMPLETED: [" + format + "] from [" + network + "]");
-//            }
-//        });
     }
 
 

@@ -13,6 +13,7 @@ import static com.partharoypc.adglide.util.Constant.NONE;
 import static com.partharoypc.adglide.util.Constant.STARTAPP;
 import static com.partharoypc.adglide.util.Constant.UNITY;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
+import static com.partharoypc.adglide.util.Constant.HOUSE_AD;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -91,6 +92,7 @@ public class ActivitySettings extends AppCompatActivity {
         primaryNetworks.add(new AdapterNetwork.NetworkItem("ironSource", IRONSOURCE));
         primaryNetworks.add(new AdapterNetwork.NetworkItem("Start.io", STARTAPP));
         primaryNetworks.add(new AdapterNetwork.NetworkItem("Wortise", WORTISE));
+        primaryNetworks.add(new AdapterNetwork.NetworkItem("House Ad", HOUSE_AD));
 
         backupNetworks = new ArrayList<>();
         backupNetworks.add(new AdapterNetwork.NetworkItem("None", NONE));

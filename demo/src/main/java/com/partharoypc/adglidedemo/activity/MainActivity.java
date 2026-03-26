@@ -33,6 +33,7 @@ import static com.partharoypc.adglide.util.Constant.IRONSOURCE;
 import static com.partharoypc.adglide.util.Constant.UNITY;
 import static com.partharoypc.adglide.util.Constant.WORTISE;
 import static com.partharoypc.adglide.util.Constant.STARTAPP;
+import static com.partharoypc.adglide.util.Constant.HOUSE_AD;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -161,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
         if (chipId == R.id.chip_unity)       return UNITY;
         if (chipId == R.id.chip_wortise)     return WORTISE;
         if (chipId == R.id.chip_startapp)    return STARTAPP;
+        if (chipId == R.id.chip_house_ad)    return HOUSE_AD;
         return null;
     }
 
@@ -172,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
         if (UNITY.equals(network))       return R.id.chip_unity;
         if (WORTISE.equals(network))     return R.id.chip_wortise;
         if (STARTAPP.equals(network))    return R.id.chip_startapp;
+        if (HOUSE_AD.equals(network))    return R.id.chip_house_ad;
         return View.NO_ID;
     }
 
@@ -186,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
             case "unity":        return "Unity Ads";
             case "wortise":      return "Wortise";
             case "startapp":     return "StartApp";
+            case "house_ad":     return "House Ad";
             default:             return network;
         }
     }

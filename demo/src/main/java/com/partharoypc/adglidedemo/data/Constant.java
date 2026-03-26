@@ -69,17 +69,17 @@ public class Constant {
     // House Ad Config
     public static boolean HOUSE_AD_ENABLE = true;
     public static final String HOUSE_AD_BANNER_IMAGE = "https://raw.githubusercontent.com/partharoypc/AdGlide/main/assets/house_ad/banner.png";
-    public static final String HOUSE_AD_BANNER_URL = "https://play.google.com/store/apps/details?id=com.datamatrixlab.savebox";
+    public static final String HOUSE_AD_BANNER_URL = "https://github.com/partharoypc/AdGlide";
     public static final String HOUSE_AD_INTERSTITIAL_IMAGE = "https://raw.githubusercontent.com/partharoypc/AdGlide/main/assets/house_ad/interstitial.png";
-    public static final String HOUSE_AD_INTERSTITIAL_URL = "https://play.google.com/store/apps/details?id=com.datamatrixlab.savebox";
+    public static final String HOUSE_AD_INTERSTITIAL_URL = "https://github.com/partharoypc/AdGlide";
 
     // House Native Ads
-    public static final String HOUSE_AD_NATIVE_TITLE = "SaveBox: Video & Status Saver";
-    public static final String HOUSE_AD_NATIVE_DESC = "All-in-one downloader & private gallery vault for your mobile device.";
-    public static final String HOUSE_AD_NATIVE_CTA = "Install Now";
+    public static final String HOUSE_AD_NATIVE_TITLE = "AdGlide - Premium Ad Mediation Library";
+    public static final String HOUSE_AD_NATIVE_DESC = "AdGlide is a premium ad mediation library for Android that helps you monetize your app with multiple ad networks.";
+    public static final String HOUSE_AD_NATIVE_CTA = "View on GitHub";
     public static final String HOUSE_AD_NATIVE_IMAGE = "https://raw.githubusercontent.com/partharoypc/AdGlide/main/assets/house_ad/native.png";
     public static final String HOUSE_AD_NATIVE_ICON = "https://raw.githubusercontent.com/partharoypc/AdGlide/main/assets/house_ad/icon.png";
-    public static final String HOUSE_AD_NATIVE_URL = "https://play.google.com/store/apps/details?id=com.datamatrixlab.savebox";
+    public static final String HOUSE_AD_NATIVE_URL = "https://github.com/partharoypc/AdGlide";
 
 
 }
