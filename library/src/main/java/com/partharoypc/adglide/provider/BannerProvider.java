@@ -12,15 +12,7 @@ public interface BannerProvider {
         boolean isDarkTheme();
 
 
-        boolean isCollapsible();
-
         boolean isMrec();
-
-        boolean isAdaptive();
-
-        default String getCollapsiblePosition() {
-            return "bottom";
-        }
     }
 
 

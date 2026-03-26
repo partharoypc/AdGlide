@@ -6,11 +6,6 @@ import com.partharoypc.adglide.util.AdGlideLog;
 import com.facebook.ads.AdSettings;
 import com.facebook.ads.AudienceNetworkAds;
 import com.partharoypc.adglide.BuildConfig;
-
-/**
- * Helper class for initializing the Facebook Audience Network SDK.
- * Handles SDK initialization with debug mode configuration.
- */
 public class AudienceNetworkInitializeHelper implements AudienceNetworkAds.InitListener {
 
     /**

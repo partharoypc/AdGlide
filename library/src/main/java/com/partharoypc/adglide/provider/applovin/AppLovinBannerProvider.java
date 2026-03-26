@@ -23,7 +23,6 @@ public class AppLovinBannerProvider implements BannerProvider {
             maxAdView = new MaxAdView(adUnitId, com.applovin.mediation.MaxAdFormat.MREC, activity);
         } else {
             maxAdView = new MaxAdView(adUnitId, activity);
-            maxAdView.setExtraParameter("adaptive_banner", "true");
         }
         maxAdView.setListener(new MaxAdViewAdListener() {
             @Override
@@ -72,7 +71,7 @@ public class AppLovinBannerProvider implements BannerProvider {
             width = AppLovinSdkUtils.dpToPx(activity, 300);
             maxAdView.setLayoutParams(new FrameLayout.LayoutParams(width, heightPx));
         } else {
-            int bannerHeight = com.partharoypc.adglide.util.Tools.isTablet(activity) ? 90 : 50;
+            int bannerHeight = 50;
             heightPx = AppLovinSdkUtils.dpToPx(activity, bannerHeight);
             maxAdView.setLayoutParams(new FrameLayout.LayoutParams(width, heightPx));
         }

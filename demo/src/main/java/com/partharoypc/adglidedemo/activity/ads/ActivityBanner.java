@@ -49,14 +49,9 @@ public class ActivityBanner extends AppCompatActivity {
     private void loadBanner() {
         destroyBanner();
 
-        SwitchMaterial switchCollapsible = findViewById(R.id.switch_collapsible);
-        SwitchMaterial switchAdaptive = findViewById(R.id.switch_adaptive);
-
         // Professional Premium API:
         new com.partharoypc.adglide.format.BannerAd.Builder(this)
                 .container(bannerContainer)
-                .collapsible(switchCollapsible.isChecked())
-                .adaptive(switchAdaptive.isChecked())
                 .autoRefresh(30) // Demonstrate 30s auto-refresh
                 .load(new AdGlideCallback() {
                     @Override

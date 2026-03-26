@@ -71,22 +71,7 @@
                             android:layout_marginTop="4dp"
                             android:layout_marginBottom="20dp"/>
 
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/switch_collapsible"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="8dp"
-                            android:text="Collapsible Banner (5× eCPM boost)"
-                            android:textSize="14sp"/>
 
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/switch_adaptive"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:checked="true"
-                            android:text="Adaptive Banner (screen-optimised height)"
-                            android:textSize="14sp"
-                            android:layout_marginBottom="20dp"/>
 
                         <!-- Action buttons row -->
                         <LinearLayout

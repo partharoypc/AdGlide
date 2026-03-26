@@ -40,8 +40,7 @@ public class HouseAdBannerProvider implements BannerProvider {
                         bannerView.setBackgroundColor(Color.TRANSPARENT);
 
                         // Assuming standard 320x50 banner format
-                        int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 320,
-                                activity.getResources().getDisplayMetrics());
+                        int width = ViewGroup.LayoutParams.MATCH_PARENT;
                         int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50,
                                 activity.getResources().getDisplayMetrics());
                         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(width, height);

@@ -30,12 +30,6 @@ public class AdMobBannerProvider implements BannerProvider {
         adView.setAdSize(getAdSize(activity, config));
 
         AdRequest.Builder builder = new AdRequest.Builder();
-        if (config.isCollapsible() && !config.isMrec()) {
-            Bundle extras = new Bundle();
-            extras.putString("collapsible", config.getCollapsiblePosition());
-            builder.addNetworkExtrasBundle(AdMobAdapter.class, extras);
-
-        }
 
         adView.setAdListener(new AdListener() {
             @Override
@@ -79,10 +73,6 @@ public class AdMobBannerProvider implements BannerProvider {
         if (config.isMrec()) {
             return AdSize.MEDIUM_RECTANGLE;
         }
-        if (!config.isAdaptive()) {
-            return AdSize.BANNER;
-        }
-        return AdSize.getLargeAnchoredAdaptiveBannerAdSize(activity,
-                Tools.getAdaptiveBannerSize(activity));
+        return AdSize.BANNER;
     }
 }

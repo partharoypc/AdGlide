@@ -39,12 +39,9 @@ public class BannerAd {
         private View currentAdView;
         private ViewGroup customContainer;
         private boolean darkTheme = false;
-        private boolean collapsibleBanner = false;
-        private String collapsiblePosition = "bottom";
-        private boolean adaptiveBanner = true;
 
         
-        private int autoRefreshSeconds = 0; // 0 means no auto-refresh
+        private int autoRefreshSeconds = 0;
         private android.os.Handler refreshHandler;
         private Runnable refreshRunnable;
 
@@ -60,23 +57,8 @@ public class BannerAd {
         }
 
         @Override
-        public boolean isCollapsible() {
-            return collapsibleBanner;
-        }
-
-        @Override
         public boolean isMrec() {
             return false;
-        }
-
-        @Override
-        public boolean isAdaptive() {
-            return adaptiveBanner;
-        }
-
-        @Override
-        public String getCollapsiblePosition() {
-            return collapsiblePosition;
         }
 
 
@@ -106,26 +88,6 @@ public class BannerAd {
 
 
         @NonNull
-        public Builder collapsible(boolean collapsibleBanner) {
-            this.collapsibleBanner = collapsibleBanner;
-            return this;
-        }
-
-        @NonNull
-        public Builder collapsible(boolean collapsibleBanner, String position) {
-            this.collapsibleBanner = collapsibleBanner;
-            this.collapsiblePosition = position;
-            return this;
-        }
-
-
-        @NonNull
-        public Builder adaptive(boolean adaptiveBanner) {
-            this.adaptiveBanner = adaptiveBanner;
-            return this;
-        }
-
-        @NonNull
         public Builder container(ViewGroup container) {
             this.customContainer = container;
             return this;
@@ -151,7 +113,6 @@ public class BannerAd {
 
         private void loadAdFromNetwork(String networkToLoad, com.partharoypc.adglide.util.AdLoader.LoadResultCallback resultCallback, AdGlideCallback callback) {
             try {
-                // Do not destroy current banner immediately to avoid flicker during background refresh
                 String adUnitId = getAdUnitIdForNetwork(networkToLoad);
                 AdGlideLog.d(TAG, "Loading [" + networkToLoad.toUpperCase(java.util.Locale.ROOT) + "] Banner Ad with ID: "
                         + adUnitId);
@@ -180,7 +141,6 @@ public class BannerAd {
                             if (callback != null)
                                 callback.onAdLoaded();
                             
-                            // Destroy old banner ONLY after new one is loaded
                             if (currentProvider != null && currentProvider != provider) {
                                 currentProvider.destroy();
                             }
@@ -203,7 +163,6 @@ public class BannerAd {
                             AdGlideLog.e(TAG, "Banner failed to load for " + networkToLoad + ": " + error);
                             
                             resultCallback.onFailure(error);
-                            // Even if it fails, we should retry auto-refresh if enabled
                             scheduleAutoRefresh();
                         }
                     });
@@ -279,34 +238,17 @@ public class BannerAd {
 
         private ViewGroup getContainerForNetwork(String network) {
             int containerId = -1;
-            switch (network) {
-                case ADMOB:
-                case META_BIDDING_ADMOB:
-                case HOUSE_AD:
-                    containerId = R.id.ad_mob_banner_view_container;
-                    break;
-                case META:
-                    containerId = R.id.meta_banner_view_container;
-                    break;
-                case UNITY:
-                    containerId = R.id.unity_banner_view_container;
-                    break;
-                case IRONSOURCE:
-                case META_BIDDING_IRONSOURCE:
-                    containerId = R.id.iron_source_banner_view_container;
-                    break;
-                case STARTAPP:
-                    containerId = R.id.start_app_banner_view_container;
-                    break;
-                case WORTISE:
-                    containerId = R.id.wortise_banner_view_container;
-                    break;
-                case APPLOVIN:
-                case APPLOVIN_MAX:
-                case META_BIDDING_APPLOVIN_MAX:
-                    containerId = R.id.app_lovin_banner_view_container;
-                    break;
-            }
+            containerId = switch (network) {
+                case ADMOB, META_BIDDING_ADMOB, HOUSE_AD -> R.id.ad_mob_banner_view_container;
+                case META -> R.id.meta_banner_view_container;
+                case UNITY -> R.id.unity_banner_view_container;
+                case IRONSOURCE, META_BIDDING_IRONSOURCE -> R.id.iron_source_banner_view_container;
+                case STARTAPP -> R.id.start_app_banner_view_container;
+                case WORTISE -> R.id.wortise_banner_view_container;
+                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX ->
+                        R.id.app_lovin_banner_view_container;
+                default -> containerId;
+            };
             return containerId != -1 && activityRef.get() != null ? activityRef.get().findViewById(containerId) : null;
         }
 
