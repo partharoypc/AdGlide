@@ -21,8 +21,7 @@ public class ActivitySplash extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        // Centralized AdGlide & Constants Initialization
-        MyApplication.initializeAdGlide(this);
+        // Centralized AdGlide & Constants Initialization (Handled in MyApplication)
 
         // UI References
         android.view.View logo = findViewById(R.id.logo_container);

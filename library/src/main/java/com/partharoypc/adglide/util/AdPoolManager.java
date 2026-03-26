@@ -19,10 +19,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.lang.ref.WeakReference;
 
-/**
- * Manages pools of pre-loaded Zero-Wait Ads for instant delivery.
- * Refactored to use a more robust, generic architecture.
- */
 public class AdPoolManager {
     private static final String TAG = "AdGlide.Pool";
     private static final int MAX_POOL_SIZE = 2;
@@ -36,7 +32,7 @@ public class AdPoolManager {
         pools.put(AdFormat.REWARDED, new PoolSet<RewardedAd.Builder>());
         pools.put(AdFormat.REWARDED_INTERSTITIAL, new PoolSet<RewardedInterstitialAd.Builder>());
         pools.put(AdFormat.APP_OPEN, new PoolSet<AppOpenAd.Builder>());
-        
+
         for (AdFormat format : AdFormat.values()) {
             loadingState.put(format, new AtomicBoolean(false));
         }
@@ -47,19 +43,23 @@ public class AdPoolManager {
         final Queue<T> backup = new ConcurrentLinkedQueue<>();
 
         void offer(T item, boolean isPrimary) {
-            if (isPrimary) primary.offer(item);
-            else backup.offer(item);
+            if (isPrimary)
+                primary.offer(item);
+            else
+                backup.offer(item);
         }
 
         T poll() {
             T item = primary.poll();
-            if (item != null) return item;
+            if (item != null)
+                return item;
             return backup.poll();
         }
 
         boolean hasAvailable(AdCheck<T> check) {
             T pHead = primary.peek();
-            if (pHead != null && check.isAvailable(pHead)) return true;
+            if (pHead != null && check.isAvailable(pHead))
+                return true;
             T bHead = backup.peek();
             return bHead != null && check.isAvailable(bHead);
         }
@@ -87,7 +87,8 @@ public class AdPoolManager {
                         (builder, callback) -> builder.load(callback));
                 break;
             case REWARDED_INTERSTITIAL:
-                fillGenericPool(activity, AdFormat.REWARDED_INTERSTITIAL, () -> new RewardedInterstitialAd.Builder(activity),
+                fillGenericPool(activity, AdFormat.REWARDED_INTERSTITIAL,
+                        () -> new RewardedInterstitialAd.Builder(activity),
                         (builder, callback) -> builder.loadRewardedInterstitialAd(callback));
                 break;
             case APP_OPEN:
@@ -174,20 +175,30 @@ public class AdPoolManager {
     }
 
     // --- GENERIC FILLERS ---
-    private interface AdBuilderProvider<T> { T create(); }
-    private interface AdLoadAction<T> { void load(T ad, AdGlideCallback callback); }
+    private interface AdBuilderProvider<T> {
+        T create();
+    }
+
+    private interface AdLoadAction<T> {
+        void load(T ad, AdGlideCallback callback);
+    }
 
     @SuppressWarnings("unchecked")
-    private static <T> void fillGenericPool(Activity activity, AdFormat format, AdBuilderProvider<T> provider, AdLoadAction<T> loader) {
-        if (!isFormatEnabled(format) || activity == null || activity.isFinishing()) return;
+    private static <T> void fillGenericPool(Activity activity, AdFormat format, AdBuilderProvider<T> provider,
+            AdLoadAction<T> loader) {
+        if (!isFormatEnabled(format) || activity == null || activity.isFinishing())
+            return;
 
         PoolSet<T> poolSet = (PoolSet<T>) pools.get(format);
-        int limit = (format == AdFormat.REWARDED || format == AdFormat.REWARDED_INTERSTITIAL || format == AdFormat.APP_OPEN) ? 1 : MAX_POOL_SIZE;
+        int limit = (format == AdFormat.REWARDED || format == AdFormat.REWARDED_INTERSTITIAL
+                || format == AdFormat.APP_OPEN) ? 1 : MAX_POOL_SIZE;
 
         AtomicBoolean loading = loadingState.get(format);
-        if (poolSet.size() >= limit || (loading != null && loading.get())) return;
+        if (poolSet.size() >= limit || (loading != null && loading.get()))
+            return;
 
-        if (loading != null && !loading.compareAndSet(false, true)) return;
+        if (loading != null && !loading.compareAndSet(false, true))
+            return;
 
         final WeakReference<Activity> activityRef = new WeakReference<>(activity);
         T builder = provider.create();
@@ -195,29 +206,24 @@ public class AdPoolManager {
         loader.load(builder, new AdGlideCallback() {
             @Override
             public void onAdLoaded(String network) {
-                if (loading != null) loading.set(false);
+                if (loading != null)
+                    loading.set(false);
                 String primary = AdGlide.getConfig() != null ? AdGlide.getConfig().getPrimaryNetwork() : "";
                 poolSet.offer(builder, network.equals(primary));
-
-                // Decouple refill call to prevent StackOverflow on immediate callbacks
-                new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
-                    Activity currentActivity = activityRef.get();
-                    if (currentActivity != null && !currentActivity.isFinishing()) {
-                        fillGenericPool(currentActivity, format, provider, loader);
-                    }
-                });
             }
 
             @Override
             public void onAdFailedToLoad(String error) {
-                if (loading != null) loading.set(false);
+                if (loading != null)
+                    loading.set(false);
             }
         });
     }
 
     public static void fillNativePool(Activity activity, String style) {
-        if (!AdGlide.isNativeEnabled() || activity == null || activity.isFinishing() || style == null) return;
-        
+        if (!AdGlide.isNativeEnabled() || activity == null || activity.isFinishing() || style == null)
+            return;
+
         PoolSet<NativeAd.Builder> poolSet = nativePools.get(style.toLowerCase(Locale.ROOT));
         if (poolSet == null) {
             synchronized (nativePools) {
@@ -230,7 +236,8 @@ public class AdPoolManager {
         }
         final PoolSet<NativeAd.Builder> finalPoolSet = poolSet;
 
-        if (poolSet.size() >= MAX_POOL_SIZE) return;
+        if (poolSet.size() >= MAX_POOL_SIZE)
+            return;
 
         final WeakReference<Activity> activityRef = new WeakReference<>(activity);
         NativeAd.Builder builder = new NativeAd.Builder(activity).style(style);
@@ -247,6 +254,7 @@ public class AdPoolManager {
                     }
                 });
             }
+
             @Override
             public void onAdFailedToLoad(String error) {
             }

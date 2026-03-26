@@ -405,9 +405,8 @@ public class AdGlide {
         }
 
         private void autoPreload() {
-            if (config != null && config.isAutoLoadEnabled()) {
-                preload(activity, format);
-            }
+            // Always preload the next ad after one is used, as per "Preload after Show" logic
+            preload(activity, format);
         }
 
         private void resetCounter() {
@@ -549,18 +548,16 @@ public class AdGlide {
                 foregroundActivityCount++;
                 if (foregroundActivityCount == 1 && !isChangingConfig) {
                     if (isAdsEnabled()) {
-                        if (config.isAutoLoadEnabled()) {
-                            if (config.isInterstitialEnabled()) preload(activity, com.partharoypc.adglide.util.AdFormat.INTERSTITIAL);
-                            if (config.isRewardedEnabled()) preload(activity, com.partharoypc.adglide.util.AdFormat.REWARDED);
-                            if (config.isRewardedInterstitialEnabled()) preload(activity, com.partharoypc.adglide.util.AdFormat.REWARDED_INTERSTITIAL);
-                            if (config.isAppOpenEnabled()) preload(activity, com.partharoypc.adglide.util.AdFormat.APP_OPEN);
-                        }
-                        
-                        if (config.isAppOpenEnabled()) {
-                            List<String> excluded = config.getOpenAdExcludedActivities();
-                            if (excluded == null || !excluded.contains(activity.getClass().getName())) {
-                                showAppOpenAd(activity, null);
-                            }
+                        if (config.isInterstitialEnabled()) preload(activity, com.partharoypc.adglide.util.AdFormat.INTERSTITIAL);
+                        if (config.isRewardedEnabled()) preload(activity, com.partharoypc.adglide.util.AdFormat.REWARDED);
+                        if (config.isRewardedInterstitialEnabled()) preload(activity, com.partharoypc.adglide.util.AdFormat.REWARDED_INTERSTITIAL);
+                        if (config.isAppOpenEnabled()) preload(activity, com.partharoypc.adglide.util.AdFormat.APP_OPEN);
+                    }
+
+                    if (config.isAppOpenEnabled()) {
+                        List<String> excluded = config.getOpenAdExcludedActivities();
+                        if (excluded == null || !excluded.contains(activity.getClass().getName())) {
+                            showAppOpenAd(activity, null);
                         }
                     }
                 }
