@@ -102,6 +102,22 @@ public class AdPoolManager {
         }
     }
 
+    public static void fillInterstitialPool(Activity activity) {
+        fillPool(activity, AdFormat.INTERSTITIAL, null);
+    }
+
+    public static void fillRewardedPool(Activity activity) {
+        fillPool(activity, AdFormat.REWARDED, null);
+    }
+
+    public static void fillRewardedInterstitialPool(Activity activity) {
+        fillPool(activity, AdFormat.REWARDED_INTERSTITIAL, null);
+    }
+
+    public static void fillAppOpenPool(Activity activity) {
+        fillPool(activity, AdFormat.APP_OPEN, null);
+    }
+
     public static InterstitialAd.Builder getInterstitial() {
         PoolSet<InterstitialAd.Builder> pool = getPool(AdFormat.INTERSTITIAL);
         return pool != null ? pool.poll() : null;
@@ -199,7 +215,7 @@ public class AdPoolManager {
         });
     }
 
-    private static void fillNativePool(Activity activity, String style) {
+    public static void fillNativePool(Activity activity, String style) {
         if (!AdGlide.isNativeEnabled() || activity == null || activity.isFinishing() || style == null) return;
         
         PoolSet<NativeAd.Builder> poolSet = nativePools.get(style.toLowerCase(Locale.ROOT));

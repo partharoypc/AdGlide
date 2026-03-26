@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
 import android.view.ViewGroup;
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -329,7 +330,6 @@ public class AdGlide {
                 com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
                 break;
             case BANNER:
-                // Banners are not typically pooled in the current architecture
                 break;
         }
     }
@@ -412,9 +412,9 @@ public class AdGlide {
 
         private void resetCounter() {
             switch (format) {
-                case "INTERSTITIAL": interstitialClickCounter = 1; break;
-                case "REWARDED": rewardedClickCounter = 1; break;
-                case "REWARDED_INTERSTITIAL": rewardedInterstitialClickCounter = 1; break;
+                case INTERSTITIAL: interstitialClickCounter = 1; break;
+                case REWARDED: rewardedClickCounter = 1; break;
+                case REWARDED_INTERSTITIAL: rewardedInterstitialClickCounter = 1; break;
             }
         }
     }
