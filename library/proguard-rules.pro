@@ -49,7 +49,8 @@
 # -----------------------------------------------------------------------------------------------------
 # 5. SDK Preservation
 # -----------------------------------------------------------------------------------------------------
-# Preserve the BuildConfig and entry points to ensure total stability.
+# Preserve internal entry points to ensure total stability.
 -keep class com.partharoypc.adglide.AdGlide { *; }
--keep class com.partharoypc.adglide.BuildConfig { *; }
 -keep class com.partharoypc.adglide.AdGlideConfig { *; }
+-keep class com.partharoypc.adglide.BuildConfig { *; }
+-keep class com.partharoypc.adglide.util.AdGlideLog { *; }

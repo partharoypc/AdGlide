@@ -17,7 +17,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorPrimary"
             app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:titleTextColor="@color/white"/>
+            app:titleTextColor="@color/white" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -47,18 +47,18 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="App Open Ad"
+                    android:textColor="?attr/colorOnSurface"
                     android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="?attr/colorOnSurface"/>
+                    android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Ads that appear when users open or return to the app."
-                    android:textSize="13sp"
-                    android:textColor="?android:attr/textColorSecondary"
                     android:layout_marginTop="4dp"
-                    android:layout_marginBottom="20dp"/>
+                    android:layout_marginBottom="20dp"
+                    android:text="Ads that appear when users open or return to the app."
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="13sp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_load"
@@ -68,7 +68,7 @@
                     android:layout_marginBottom="10dp"
                     android:text="⬇   Preload Pool"
                     android:textSize="15sp"
-                    app:cornerRadius="12dp"/>
+                    app:cornerRadius="12dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_show"
@@ -77,7 +77,7 @@
                     android:layout_height="52dp"
                     android:text="▶   Show App Open"
                     android:textSize="15sp"
-                    app:cornerRadius="12dp"/>
+                    app:cornerRadius="12dp" />
 
             </LinearLayout>
 
@@ -87,18 +87,18 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_marginBottom="8dp"
             android:gravity="center_vertical"
-            android:layout_marginBottom="8dp">
+            android:orientation="horizontal">
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="📋  Event Log"
+                android:textColor="?attr/colorOnSurface"
                 android:textSize="14sp"
-                android:textStyle="bold"
-                android:textColor="?attr/colorOnSurface"/>
+                android:textStyle="bold" />
 
         </LinearLayout>
 
@@ -114,19 +114,19 @@
             <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="16dp"
-                android:fadeScrollbars="true">
+                android:fadeScrollbars="true"
+                android:padding="16dp">
 
                 <TextView
                     android:id="@+id/log_text_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="monospace"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textSize="12sp"
-                    android:lineSpacingMultiplier="1.5"
                     android:hint="Waiting for events..."
-                    android:textColorHint="?android:attr/textColorSecondary"/>
+                    android:lineSpacingMultiplier="1.5"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textColorHint="?android:attr/textColorSecondary"
+                    android:textSize="12sp" />
 
             </ScrollView>
 

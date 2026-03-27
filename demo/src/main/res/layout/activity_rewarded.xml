@@ -17,7 +17,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorPrimary"
             app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:titleTextColor="@color/white"/>
+            app:titleTextColor="@color/white" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -47,18 +47,18 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="🎁  Rewarded Ad"
+                    android:textColor="?attr/colorOnSurface"
                     android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="?attr/colorOnSurface"/>
+                    android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="User earns a reward for watching a full video ad"
-                    android:textSize="13sp"
-                    android:textColor="?android:attr/textColorSecondary"
                     android:layout_marginTop="4dp"
-                    android:layout_marginBottom="20dp"/>
+                    android:layout_marginBottom="20dp"
+                    android:text="User earns a reward for watching a full video ad"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="13sp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_load"
@@ -68,7 +68,7 @@
                     android:layout_marginBottom="10dp"
                     android:text="⬇   Preload Ad"
                     android:textSize="15sp"
-                    app:cornerRadius="12dp"/>
+                    app:cornerRadius="12dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_show"
@@ -77,8 +77,8 @@
                     android:layout_height="52dp"
                     android:text="▶   Show Rewarded Ad"
                     android:textSize="15sp"
-                    app:cornerRadius="12dp"
-                    app:backgroundTint="@color/colorSuccess"/>
+                    app:backgroundTint="@color/colorSuccess"
+                    app:cornerRadius="12dp" />
 
             </LinearLayout>
 
@@ -87,11 +87,11 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:text="📋  Event Log"
-            android:textSize="14sp"
-            android:textStyle="bold"
             android:textColor="?attr/colorOnSurface"
-            android:layout_marginBottom="8dp"/>
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
@@ -111,11 +111,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="monospace"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textSize="12sp"
-                    android:lineSpacingMultiplier="1.5"
                     android:hint="Waiting for events..."
-                    android:textColorHint="?android:attr/textColorSecondary"/>
+                    android:lineSpacingMultiplier="1.5"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textColorHint="?android:attr/textColorSecondary"
+                    android:textSize="12sp" />
 
             </ScrollView>
 
