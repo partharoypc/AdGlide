@@ -22,7 +22,7 @@
 - **💎 100% Lint-Free Quality** — Industrial-grade codebase with zero warnings (Locale/I18n fixed) for maximum stability and performance.
 - **🛡️ Refined Zero-Config ProGuard** — Embedded `consumer-rules.pro` now features even tighter, more secure scopes for all 8+ mediation networks.
 - **⚡ "Zero-Wait" Pre-loading** — Optimized pooling engine with immediate background refills for instant ad delivery.
-- **🔄 Dynamic Versioning** — SDK logs and performance metrics now automatically sync with your Gradle versioning.
+- **🔄 Dynamic Versioning** — SDK logs and performance metrics now automatically sync with the latest build versioning.
 - **🏠 Expanded House Ads** — Native House Ads now support full click-tracking and optimized video templates.
 
 ---
@@ -142,10 +142,10 @@ public class MyApplication extends Application {
         AdGlideConfig config = new AdGlideConfig.Builder()
             // ─── Global Settings ─────────────────────────────────────────
             .enableAds(true)                         // Master on/off switch
-            .testMode(true)                          // 🛡️ NEW: Centralized one-flag diagnostics
-            // .debug(true)                          // (Optional) TestMode already enables this
-            // .enableDebugHUD(true)                 // (Optional) TestMode already enables this
-
+            .testMode(true)                          // 🛡️ Centralized one-flag diagnostics
+            .autoLoad(true)                          // 🔄 NEW: Master switch for background pre-fetching
+            .adResponseTimeout(3500)                 // ⏱️ NEW: Max wait (ms) for network response
+            
             // ─── Waterfall Strategy (Type-Safe Enum) ─────────────────────
             .primaryNetwork(AdGlideNetwork.ADMOB)
             .backupNetworks(AdGlideNetwork.META, AdGlideNetwork.UNITY, AdGlideNetwork.IRONSOURCE)
@@ -156,12 +156,10 @@ public class MyApplication extends Application {
             .rewardedEnabled(true)
             .nativeEnabled(true)
             .appOpenEnabled(true)
-            .rewardedInterstitialEnabled(false)
+            .rewardedInterstitialEnabled(true)      // 🆕 NEW: Rewarded Interstitial support
 
-            // ─── Smart Loading ───────────────────────────────────────────
-            .autoLoadInterstitial(true)              // Prefetch after each show
-            .autoLoadRewarded(true)                  // Prefetch after each show
-            .appOpenCooldown(15)                     // ⏱️ NEW: Wait 15 mins between app-resume ads
+            // ─── Smart Loading & Intervals ──────────────────────────────
+            .appOpenCooldown(15)                     // ⏱️ Wait 15 mins between app-resume ads
             .interstitialInterval(2)                 // Show every N clicks (0 = always)
             .rewardedInterval(1)                     // Show every N clicks (0 = always)
 
@@ -172,7 +170,15 @@ public class MyApplication extends Application {
             // ─── App Open Exclusions ─────────────────────────────────────
             .excludeOpenAdFrom(SplashActivity.class, PaymentActivity.class)
 
-            // ─── AdMob ───────────────────────────────────────────────────
+            // ─── Network App IDs (Required for each network used) ────────
+            .adMobAppId("ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX")
+            .startAppId("YOUR_STARTAPP_ID")
+            .unityGameId("YOUR_UNITY_GAME_ID")
+            .appLovinSdkKey("YOUR_APPLOVIN_SDK_KEY")
+            .ironSourceAppKey("YOUR_IRONSOURCE_APP_KEY")
+            .wortiseAppId("YOUR_WORTISE_APP_ID")
+
+            // ─── AdMob Unit IDs ─────────────────────────────────────────
             .adMobBannerId("ca-app-pub-XXXXXXXX~XXXXXXXX")
             .adMobInterstitialId("ca-app-pub-XXXXXXXX~XXXXXXXX")
             .adMobRewardedId("ca-app-pub-XXXXXXXX~XXXXXXXX")
@@ -180,11 +186,19 @@ public class MyApplication extends Application {
             .adMobNativeId("ca-app-pub-XXXXXXXX~XXXXXXXX")
             .adMobAppOpenId("ca-app-pub-XXXXXXXX~XXXXXXXX")
 
-            // ─── Bidding & Mediation (New in v2.7.0) ─────────────────────
-            .unityRewardedIntId("unity_rewarded_int")
+            // ─── Meta (Facebook) Unit IDs ───────────────────────────────
+            .metaBannerId("YOUR_META_BANNER_ID")
+            .metaInterstitialId("YOUR_META_INTERSTITIAL_ID")
+            .metaRewardedId("YOUR_META_REWARDED_ID")
+            .metaNativeId("YOUR_META_NATIVE_ID")
+            .metaAppOpenId("YOUR_META_APP_OPEN_ID")
+
+            // ─── Other Network Unit IDs ─────────────────────────────────
+            .unityRewardedIntId("unity_reward_int")
             .ironSourceRewardedIntId("iron_rewarded_int")
             .ironSourceAppOpenId("iron_app_open")
             .startAppAppOpenId("startapp_app_open")
+            .wortiseAppOpenId("wortise_app_open")
 
             // ─── House Ads (Offline Failover) ───────────────────────────
             .houseAdEnabled(true)
@@ -276,8 +290,8 @@ AdGlide.showInterstitial(activity, () -> {
     startActivity(new Intent(this, NextActivity.class));
 });
 
-// Manual preload trigger (when autoLoadInterstitial is false)
-AdGlide.preloadInterstitial(activity);
+// Manual preload trigger (when autoLoad is false)
+AdGlide.preload(activity, AdFormat.INTERSTITIAL);
 
 // Builder API
 new InterstitialAd.Builder(activity)
@@ -306,7 +320,7 @@ AdGlide.showRewarded(activity, new AdGlideCallback() {
 });
 
 // Manual preload
-AdGlide.preloadRewarded(activity);
+AdGlide.preload(activity, AdFormat.REWARDED);
 ```
 
 ---
@@ -324,7 +338,7 @@ AdGlide.showRewardedInterstitial(activity, new AdGlideCallback() {
 });
 
 // Manual preload
-AdGlide.preloadRewardedInterstitial(activity);
+AdGlide.preload(activity, AdFormat.REWARDED_INTERSTITIAL);
 ```
 
 ---
@@ -379,9 +393,31 @@ AdGlide contains a built-in **Sequential Request Queue**. If your users click mu
 Monitor your SDK performance in real-time by registering a global listener.
 
 ```java
-AdGlide.setListener((format, network, status, duration) -> {
-    Log.d("AdGlideStats", format + " loaded from " + network + " in " + duration + "ms");
+AdGlide.setGlobalAdListener(new AdGlide.GlobalAdListener() {
+    @Override
+    public void onAdLoaded(String format, String network) {
+        Log.d("AdGlideStats", format + " loaded from " + network);
+    }
+
+    @Override
+    public void onAdFailedToLoad(String format, String network, String error) {
+        Log.e("AdGlideStats", format + " failed from " + network + ": " + error);
+    }
+
+    // Other events: onAdShowed, onAdClicked, onAdDismissed, onAdCompleted
 });
+```
+
+### 🔐 3.9 SDK Lifecycle & State
+
+```java
+// Check if the SDK is ready
+if (AdGlide.isInitialized()) {
+    // Do something
+}
+
+// Completely shut down the SDK and clear caches
+AdGlide.destroy();
 ```
 
 ---
@@ -512,43 +548,50 @@ You **do not** need to write any manual ProGuard rules for AdGlide or its suppor
 | :--- | :--- | :---: | :--- |
 | `enableAds(bool)` | `boolean` | `false` | Master ad on/off toggle |
 | `testMode(bool)` | `boolean` | `false` | Use test ads during development |
-| `debug(bool)` | `boolean` | `true` | Enable verbose logcat output |
+| `autoLoad(bool)` | `boolean` | `true` | Master switch for background pre-fetching |
 | `primaryNetwork(network)` | `AdGlideNetwork` | — | Primary network (Enum preferred) |
 | `backupNetworks(n...)` | `AdGlideNetwork...`| — | Fallback networks (Enum preferred) |
+| `adMobAppId(id)` | `String` | — | Google AdMob App ID |
+| `startAppId(id)` | `String` | — | StartApp App ID |
+| `unityGameId(id)` | `String` | — | Unity Game ID |
+| `appLovinSdkKey(key)` | `String` | — | AppLovin SDK Key |
+| `ironSourceAppKey(key)`| `String` | — | IronSource App Key |
+| `wortiseAppId(id)` | `String` | — | Wortise App ID |
+| `adMobBannerId(id)` | `String` | — | AdMob Banner Unit ID |
+| `...UnitId(id)` | `String` | — | Corresponding unit ID for each network |
 | `bannerEnabled(bool)` | `boolean` | `false` | Toggle banner ads |
 | `interstitialEnabled(bool)` | `boolean` | `false` | Toggle interstitial ads |
 | `rewardedEnabled(bool)` | `boolean` | `false` | Toggle rewarded ads |
 | `nativeEnabled(bool)` | `boolean` | `false` | Toggle native ads |
 | `appOpenEnabled(bool)` | `boolean` | `false` | Toggle app open ads |
 | `rewardedInterstitialEnabled(bool)` | `boolean` | `false` | Toggle rewarded interstitial |
-| `autoLoadInterstitial(bool)` | `boolean` | `false` | Auto-prefetch after show |
-| `autoLoadRewarded(bool)` | `boolean` | `false` | Auto-prefetch after show |
 | `interstitialInterval(int)` | `int` | `0` | Show every N calls (0 = always) |
 | `rewardedInterval(int)` | `int` | `0` | Show every N calls (0 = always) |
+| `appOpenCooldown(int)` | `int` | `30` | Cooldown (mins) between app-resume ads |
+| `adResponseTimeout(ms)`| `int` | `3500` | Max wait for network response |
 | `houseAdEnabled(bool)` | `boolean` | `false` | Enable house ads fallback |
 | `excludeOpenAdFrom(Class...)` | `Class<?>...` | — | Blacklist activities from App Open |
 | `enableGDPR(bool)` | `boolean` | `false` | Show UMP consent form |
 | `debugGDPR(bool)` | `boolean` | `false` | Force GDPR dialog in debug |
 | `enableDebugHUD(bool)` | `boolean` | `false` | Enable integrated Debug HUD |
-| `adResponseTimeout(ms)` | `int` | `3500` | Max wait for network response |
 
 ### Configuration Constants (`com.partharoypc.adglide.util.Constant`)
 
 Use these constants when defining your networks in the `AdGlideConfig.Builder` if you prefer string keys:
 
-| Value | Network |
-| :--- | :--- |
-| `Constant.ADMOB` | Google AdMob |
-| `Constant.META` | Meta Audience Network |
-| `Constant.APPLOVIN_MAX` | AppLovin MAX |
-| `Constant.WORTISE` | Wortise |
-| `Constant.IRONSOURCE` | IronSource / LevelPlay |
-| `Constant.UNITY` | Unity Ads |
-| `Constant.STARTAPP` | StartApp |
-| `Constant.HOUSE_AD` | House Ad (internal) |
-| `Constant.META_BIDDING_ADMOB` | Meta bidding via AdMob |
-| `Constant.META_BIDDING_APPLOVIN_MAX` | Meta bidding via AppLovin |
-| `Constant.META_BIDDING_IRONSOURCE` | Meta bidding via IronSource |
+| Value | Network | Constant Variable |
+| :--- | :--- | :--- |
+| `"admob"` | Google AdMob | `Constant.ADMOB` |
+| `"meta"` | Meta Audience Network | `Constant.META` |
+| `"app_lovin_max"` | AppLovin MAX | `Constant.APPLOVIN_MAX` |
+| `"wortise"` | Wortise | `Constant.WORTISE` |
+| `"ironsource"` | IronSource / LevelPlay | `Constant.IRONSOURCE` |
+| `"unity"` | Unity Ads | `Constant.UNITY` |
+| `"startapp"` | StartApp | `Constant.STARTAPP` |
+| `"house_ad"` | House Ad (internal) | `Constant.HOUSE_AD` |
+| `"meta_bidding_admob"` | Meta bidding via AdMob | `Constant.META_BIDDING_ADMOB` |
+| `"meta_bidding_applovin_max"` | Meta bidding via AppLovin | `Constant.META_BIDDING_APPLOVIN_MAX` |
+| `"meta_bidding_ironsource"` | Meta bidding via IronSource | `Constant.META_BIDDING_IRONSOURCE` |
 
 ---
 
@@ -559,12 +602,14 @@ Use these constants when defining your networks in the `AdGlideConfig.Builder` i
 ## 👨‍💻 Developed By
 
 **Partha Roy**  
-*Senior Android Engineer & Architecture Specialist*
+*Software Engineer & Mobile App Developer*
+
+Portfolio: <https://partharoypc.github.io/>
 
 [![GitHub](https://img.shields.io/badge/GitHub-partharoypc-181717?style=for-the-badge&logo=github)](https://github.com/partharoypc)
 [![License](https://img.shields.io/badge/License-Apache_2.0-yellow.svg?style=for-the-badge)](LICENSE)
 
-*Built for Scale • Optimized for Speed • Perfected for Developers*
+*Built for Scale • Optimized for Speed • Perfected for Developers •*
 
 **© 2026 [AdGlide SDK](https://github.com/partharoypc/AdGlide) — All rights reserved.**
 
