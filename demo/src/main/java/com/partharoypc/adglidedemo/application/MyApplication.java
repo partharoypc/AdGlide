@@ -2,6 +2,7 @@ package com.partharoypc.adglidedemo.application;
 
 import android.app.Application;
 import android.content.Context;
+import androidx.annotation.NonNull;
 import androidx.multidex.MultiDex;
 import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.AdGlideConfig;
@@ -19,8 +20,9 @@ public class MyApplication extends Application {
         initializeAdGlide(this);
     }
 
-    public static void initializeAdGlide(android.content.Context context) {
+    public static void initializeAdGlide(@NonNull android.content.Context context) {
         SharedPref sharedPref = new SharedPref(context);
+        AdGlideLog.d("DemoApp", "🛠️ Initializing AdGlide SDK with full configuration...");
 
         AdGlideConfig config = new AdGlideConfig.Builder()
                 .enableAds(sharedPref.getAdStatus())

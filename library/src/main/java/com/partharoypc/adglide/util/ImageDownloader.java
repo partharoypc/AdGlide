@@ -6,6 +6,8 @@ import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Base64;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import com.partharoypc.adglide.util.AdGlideLog;
 
 import java.io.File;
@@ -29,12 +31,22 @@ public class ImageDownloader {
         void onError(Exception e);
     }
 
-    public static void downloadImage(Context context, String urlString, ImageLoaderCallback callback) {
+    /**
+     * Downloads an image from a URL and caches it locally.
+     * 
+     * @param context The context used for file access (converted to application context internally for safety).
+     * @param urlString The remote URL of the image to download.
+     * @param callback The listener for load success or failure events.
+     */
+    public static void downloadImage(@NonNull Context context, @Nullable String urlString, @Nullable ImageLoaderCallback callback) {
         if (urlString == null || urlString.isEmpty()) {
-            mainHandler.post(() -> callback.onError(new IllegalArgumentException("URL is null or empty")));
+            if (callback != null) {
+                mainHandler.post(() -> callback.onError(new IllegalArgumentException("URL is null or empty")));
+            }
             return;
         }
 
+        final Context appContext = context.getApplicationContext();
         executor.execute(() -> {
             try {
                 // Determine persistent cache file name using standard hex MD5
@@ -45,34 +57,36 @@ public class ImageDownloader {
                     sb.append(String.format("%02x", b));
                 }
                 String hash = sb.toString();
-                File cacheFile = new File(context.getFilesDir(), "adglide_house_" + hash + ".png");
+                File cacheFile = new File(appContext.getFilesDir(), "adglide_house_" + hash + ".png");
 
                 // Check offline cache first
                 if (cacheFile.exists()) {
                     try (FileInputStream fis = new FileInputStream(cacheFile)) {
                         Bitmap offlineBitmap = BitmapFactory.decodeStream(fis);
                         if (offlineBitmap != null) {
-                            AdGlideLog.d(TAG, "Loaded House Ad from offline disk cache");
-                            mainHandler.post(() -> callback.onImageLoaded(offlineBitmap));
+                            AdGlideLog.d(TAG, "Loaded House Ad from offline disk cache: " + urlString);
+                            if (callback != null) {
+                                mainHandler.post(() -> callback.onImageLoaded(offlineBitmap));
+                            }
                             return;
                         }
                     } catch (Exception e) {
-                        AdGlideLog.e(TAG, "Error reading cache: " + e.getMessage());
+                        AdGlideLog.e(TAG, "Error reading cache for: " + urlString + " - " + e.getMessage());
                         cacheFile.delete(); // Delete corrupt cache file
                     }
                 }
 
                 // If no offline cache, download it
                 AdGlideLog.d(TAG, "Downloading image from: " + urlString);
-                URL url = new URL(urlString);
+                URL url = java.net.URI.create(urlString).toURL();
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 
                 // Add common headers to avoid being blocked by CDNs/Servers
                 connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 10; Mobile) AdGlideSDK/1.0");
                 connection.setInstanceFollowRedirects(true);
                 connection.setDoInput(true);
-                connection.setConnectTimeout(10000);
-                connection.setReadTimeout(10000);
+                connection.setConnectTimeout(15000);
+                connection.setReadTimeout(15000);
                 
                 int responseCode = connection.getResponseCode();
                 if (responseCode != HttpURLConnection.HTTP_OK) {
@@ -90,7 +104,9 @@ public class ImageDownloader {
                         }
                         
                         AdGlideLog.d(TAG, "Successfully downloaded and cached image: " + urlString);
-                        mainHandler.post(() -> callback.onImageLoaded(bitmap));
+                        if (callback != null) {
+                            mainHandler.post(() -> callback.onImageLoaded(bitmap));
+                        }
                     } else {
                         throw new Exception("Failed to decode image from " + urlString);
                     }
@@ -99,9 +115,10 @@ public class ImageDownloader {
                 }
             } catch (Exception e) {
                 AdGlideLog.e(TAG, "Error downloading image: " + e.getMessage());
-                mainHandler.post(() -> callback.onError(e));
+                if (callback != null) {
+                    mainHandler.post(() -> callback.onError(e));
+                }
             }
         });
     }
-
 }

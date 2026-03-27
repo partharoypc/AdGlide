@@ -6,7 +6,7 @@
 
 ### *The Premium Mediation Wrapper for High-Performance Android Apps*
 
-[![Version](https://img.shields.io/badge/Version-1.9.0-blue.svg)](https://github.com/partharoypc/AdGlide)
+[![Version](https://img.shields.io/badge/Version-2.0.0-blue.svg)](https://github.com/partharoypc/AdGlide)
 [![Android](https://img.shields.io/badge/Android-23%2B-green.svg)](https://developer.android.com)
 [![Compile SDK](https://img.shields.io/badge/Compile_SDK-36-green.svg)](https://developer.android.com)
 [![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://openjdk.org/projects/jdk/17/)
@@ -16,7 +16,7 @@
 
 ---
 
-## ✨ What's New in v1.9.0 (Super Perfect Edition)
+## ✨ What's New in v2.0.0 (The Major Leap Forward)
 
 - **📱 "Super Perfect" App Open Ads** — New rotation-proof lifecycle management. Ads only trigger on true app-resume, never during screen rotations.
 - **💎 100% Lint-Free Quality** — Industrial-grade codebase with zero warnings (Locale/I18n fixed) for maximum stability and performance.
@@ -89,7 +89,7 @@ Open your **app-level `build.gradle`** and add the AdGlide core plus only the ne
 ```gradle
 dependencies {
     // 🚀 AdGlide Core (Required)
-    implementation 'com.github.partharoypc:adglide:1.9.0'
+    implementation 'com.github.partharoypc:adglide:2.0.0'
 
     // ─── Choose Your Networks ───────────────────────────────────────
     implementation 'com.google.android.gms:play-services-ads:25.0.0'       // AdMob ✅

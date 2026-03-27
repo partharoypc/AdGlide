@@ -5,6 +5,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -23,7 +25,7 @@ public class ActivityNative extends AppCompatActivity {
     private LinearLayout nativeAdContainer;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedPref = new SharedPref(this);
         setContentView(R.layout.activity_native);
@@ -55,6 +57,7 @@ public class ActivityNative extends AppCompatActivity {
 
     private void loadNativeAd() {
         destroyNative();
+        AdGlideLog.d("ActivityNative", "⏳ Loading Native Ad with style: " + Constant.NATIVE_STYLE);
 
         com.partharoypc.adglide.AdGlideNativeStyle style;
         switch (Constant.NATIVE_STYLE) {
@@ -73,21 +76,8 @@ public class ActivityNative extends AppCompatActivity {
                 break;
         }
 
-        // Flagship Premium Builder API:
-        new com.partharoypc.adglide.format.NativeAd.Builder(this)
-                .container(nativeAdContainer)
-                .style(style)
-                .load(new AdGlideCallback() {
-                    @Override
-                    public void onAdLoaded() {
-                        AdGlideLog.d("ActivityNative", "💎 Native Ad Loaded Successfully");
-                    }
-
-                    @Override
-                    public void onAdFailedToLoad(String error) {
-                        AdGlideLog.e("ActivityNative", "🛑 Native Ad Failed: " + error);
-                    }
-                });
+        // Using the robust AdGlide API for demo
+        AdGlide.showNative(this, nativeAdContainer, style.name().toLowerCase(java.util.Locale.ROOT));
     }
 
     private void destroyNative() {

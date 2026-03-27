@@ -14,6 +14,7 @@ import android.widget.RelativeLayout;
 import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.AdGlideConfig;
 import com.partharoypc.adglide.provider.BannerProvider;
+import com.partharoypc.adglide.util.AdGlideLog;
 import com.partharoypc.adglide.util.ImageDownloader;
 
 public class HouseAdBannerProvider implements BannerProvider {
@@ -34,6 +35,11 @@ public class HouseAdBannerProvider implements BannerProvider {
                 new ImageDownloader.ImageLoaderCallback() {
                     @Override
                     public void onImageLoaded(Bitmap bitmap) {
+                        if (activity.isFinishing() || activity.isDestroyed()) {
+                            AdGlideLog.w("HouseAd", "Activity destroyed before House Ad banner could be shown.");
+                            return;
+                        }
+
                         bannerView = new ImageView(activity);
                         bannerView.setImageBitmap(bitmap);
                         bannerView.setScaleType(ImageView.ScaleType.FIT_XY);
@@ -48,13 +54,14 @@ public class HouseAdBannerProvider implements BannerProvider {
                         bannerView.setLayoutParams(params);
 
                         bannerView.setOnClickListener(v -> {
-                            if (config.getHouseAdBannerClickUrl() != null
-                                    && !config.getHouseAdBannerClickUrl().isEmpty()) {
+                            String clickUrl = config.getHouseAdBannerClickUrl();
+                            if (clickUrl != null && !clickUrl.isEmpty()) {
                                 try {
-                                    Intent intent = new Intent(Intent.ACTION_VIEW,
-                                            Uri.parse(config.getHouseAdBannerClickUrl()));
+                                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl));
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                     activity.startActivity(intent);
-                                } catch (Exception ignored) {
+                                } catch (Exception e) {
+                                    AdGlideLog.e("HouseAd", "Failed to open House Ad click URL: " + e.getMessage());
                                 }
                             }
                         });
@@ -67,7 +74,7 @@ public class HouseAdBannerProvider implements BannerProvider {
                     @Override
                     public void onError(Exception e) {
                         if (listener != null)
-                            listener.onAdFailedToLoad(e.getMessage());
+                            listener.onAdFailedToLoad(e != null ? e.getMessage() : "Unknown error downloading House Ad image");
                     }
                 });
     }

@@ -3,6 +3,8 @@ package com.partharoypc.adglidedemo.activity.ads;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import com.partharoypc.adglide.AdGlide;
@@ -13,7 +15,7 @@ import com.partharoypc.adglidedemo.R;
 public class ActivityRewardedInterstitial extends AppCompatActivity {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rewarded_interstitial);
 
@@ -36,15 +38,21 @@ public class ActivityRewardedInterstitial extends AppCompatActivity {
         Button btnLoad = findViewById(R.id.btn_load);
 
         btnLoad.setOnClickListener(v -> {
-            Toast.makeText(this, "Loading Rewarded Interstitial...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "⏳ Loading Rewarded Interstitial...", Toast.LENGTH_SHORT).show();
             AdGlide.preload(this, AdFormat.REWARDED_INTERSTITIAL);
         });
 
         btnShow.setOnClickListener(v -> {
+            Toast.makeText(this, "💎 Showing Rewarded Interstitial...", Toast.LENGTH_SHORT).show();
             AdGlide.showRewardedInterstitial(this, new AdGlideCallback() {
                 @Override
-                public void onAdFailedToLoad(String error) {
-                    Toast.makeText(ActivityRewardedInterstitial.this, "🛑 Not Ready: " + error,
+                public void onAdShowed() {
+                    Toast.makeText(ActivityRewardedInterstitial.this, "✅ Ad Showed", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onAdFailedToLoad(@Nullable String error) {
+                    Toast.makeText(ActivityRewardedInterstitial.this, "🛑 Not Ready: " + (error != null ? error : "Unknown Error"),
                             Toast.LENGTH_SHORT).show();
                 }
 

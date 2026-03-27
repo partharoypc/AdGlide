@@ -21,7 +21,7 @@ import java.lang.ref.WeakReference;
 
 public class AdPoolManager {
     private static final String TAG = "AdGlide.Pool";
-    private static final int MAX_POOL_SIZE = 2;
+    private static final int MAX_POOL_SIZE = 1;
 
     private static final Map<AdFormat, PoolSet<?>> pools = new EnumMap<>(AdFormat.class);
     private static final Map<String, PoolSet<NativeAd.Builder>> nativePools = new ConcurrentHashMap<>();

@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -18,14 +20,14 @@ public class ActivityInterstitial extends AppCompatActivity {
     private TextView logTextView;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_interstitial);
 
         setupToolbar();
         initViews();
+        appendLog("🚀 Preloading Interstitial Ad...");
         AdGlide.preload(this, AdFormat.INTERSTITIAL);
-
     }
 
     private void setupToolbar() {
@@ -45,7 +47,7 @@ public class ActivityInterstitial extends AppCompatActivity {
 
         btnShow.setOnClickListener(v -> showInterstitialAd());
         btnLoad.setOnClickListener(v -> {
-            appendLog("Manually Loading Interstitial Ad...");
+            appendLog("⏳ Manually Loading Interstitial Ad...");
             AdGlide.preload(this, AdFormat.INTERSTITIAL);
         });
     }
@@ -54,8 +56,13 @@ public class ActivityInterstitial extends AppCompatActivity {
         appendLog("💎 Triggering Interstitial Ad Show...");
         AdGlide.showInterstitial(this, new AdGlideCallback() {
             @Override
-            public void onAdFailedToLoad(String error) {
-                appendLog("🛑 Ad Failed: " + error);
+            public void onAdShowed() {
+                appendLog("✅ Interstitial Ad Showed Successfully");
+            }
+
+            @Override
+            public void onAdFailedToLoad(@Nullable String error) {
+                appendLog("🛑 Ad Failed: " + (error != null ? error : "Unknown Error"));
             }
 
             @Override
@@ -66,7 +73,7 @@ public class ActivityInterstitial extends AppCompatActivity {
         });
     }
 
-    private void appendLog(String text) {
+    private void appendLog(@NonNull String text) {
         logTextView.append(text + "\n");
     }
 

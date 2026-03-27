@@ -6,6 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -47,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean chipPanelOpen = false;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedPref = new SharedPref(this);
         applyAppTheme();
@@ -60,7 +62,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Banner ad at the bottom of the dashboard
         ViewGroup bannerContainer = findViewById(R.id.banner_container);
-        AdGlide.showBanner(this, bannerContainer);
+        if (bannerContainer != null) {
+            AdGlide.showBanner(this, bannerContainer);
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────

@@ -51,17 +51,13 @@ public class AdGlide {
     /**
      * Starts the SDK initialization process with a global configuration.
      * 
-     * @param application The exact Application instance.
-     * @param glideConfig The global configuration for AdGlide.
+     * @param application The exact Application instance. Must not be null.
+     * @param glideConfig The global configuration for AdGlide. Must not be null.
      */
-    public static void initialize(@Nullable Application application, @Nullable AdGlideConfig glideConfig) {
+    public static void initialize(@NonNull Application application, @NonNull AdGlideConfig glideConfig) {
         if (isInitialized) {
             AdGlideLog.w(TAG, "AdGlide is already initialized. Updating config instead.");
             updateConfig(glideConfig);
-            return;
-        }
-        if (application == null || glideConfig == null) {
-            AdGlideLog.e(TAG, "Cannot initialize AdGlide with null application or config.");
             return;
         }
         
@@ -85,7 +81,7 @@ public class AdGlide {
                 isAppOpenRegistered = true;
             }
         }
-        PerformanceLogger.log("Core", "AdGlide initialized (v" + BuildConfig.VERSION_NAME + " - Premium)");
+        PerformanceLogger.log("Core", "AdGlide initialized (v" + (config.isDebug() ? "DEBUG" : "RELEASE") + ")");
         
         // Pre-cache House Ad assets for offline support
         preloadHouseAds(application);
@@ -116,11 +112,14 @@ public class AdGlide {
 
     /**
      * Updates the global configuration dynamically at runtime.
-     * Re-initializes any necessary networks.
+     * 
+     * @param newConfig The new configuration to apply.
      */
-    public static void updateConfig(AdGlideConfig newConfig) {
-        if (!isInitialized || currentApplication == null)
+    public static void updateConfig(@NonNull AdGlideConfig newConfig) {
+        if (!isInitialized || currentApplication == null) {
+            AdGlideLog.e(TAG, "Cannot update config: AdGlide is not initialized.");
             return;
+        }
         config = newConfig;
 
         new AdNetwork.Initialize(currentApplication)
@@ -334,11 +333,17 @@ public class AdGlide {
         }
     }
 
-    public static void showInterstitial(Activity activity, AdGlideCallback callback) {
+    /**
+     * Shows an interstitial ad with an optional callback.
+     * 
+     * @param activity The host activity for the ad. Must not be null.
+     * @param callback The listener for ad events. May be null.
+     */
+    public static void showInterstitial(@NonNull Activity activity, @Nullable AdGlideCallback callback) {
         if (!isPreCheckOk(TAG, "Interstitial", callback)) return;
 
         if (!isInterstitialEnabled()) {
-            AdGlideLog.d(TAG, "Interstitial Ad is disabled.");
+            AdGlideLog.d(TAG, "Interstitial Ad is disabled via configuration.");
             if (callback != null) callback.onAdDismissed();
             return;
         }
@@ -355,15 +360,19 @@ public class AdGlide {
 
         if (com.partharoypc.adglide.util.AdPoolManager.hasInterstitial()) {
             InterstitialAd.Builder pooledAd = com.partharoypc.adglide.util.AdPoolManager.getInterstitial();
-            pooledAd.show(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.INTERSTITIAL, activity, callback));
+            if (pooledAd != null) {
+                pooledAd.show(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.INTERSTITIAL, activity, callback));
+            } else {
+                new InterstitialAd.Builder(activity).loadAndShow(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.INTERSTITIAL, activity, callback));
+            }
         } else {
             new InterstitialAd.Builder(activity).loadAndShow(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.INTERSTITIAL, activity, callback));
         }
     }
 
-    private static boolean isPreCheckOk(String tag, String format, AdGlideCallback callback) {
+    private static boolean isPreCheckOk(@NonNull String tag, @NonNull String format, @Nullable AdGlideCallback callback) {
         if (!isInitialized || config == null) {
-            AdGlideLog.e(tag, "AdGlide is not initialized. Call AdGlide.initialize() first.");
+            AdGlideLog.e(tag, "AdGlide is not initialized. Call AdGlide.initialize() first before requesting: " + format);
             if (callback != null) callback.onAdDismissed();
             return false;
         }
@@ -420,18 +429,21 @@ public class AdGlide {
 
     /**
      * Shows a pre-cached rewarded ad, or loads one on the fly if not cached.
+     * 
+     * @param activity The host activity. Must not be null.
+     * @param callback Ad event listener. May be null.
      */
-    public static void showRewarded(Activity activity, AdGlideCallback callback) {
+    public static void showRewarded(@NonNull Activity activity, @Nullable AdGlideCallback callback) {
         if (!isPreCheckOk(TAG, "Rewarded", callback)) return;
 
         if (!isRewardedEnabled()) {
-            AdGlideLog.d(TAG, "Rewarded Ad is disabled.");
+            AdGlideLog.d(TAG, "Rewarded Ad is disabled via configuration.");
             if (callback != null) callback.onAdDismissed();
             return;
         }
 
         if (rewardedClickCounter < config.getRewardedInterval()) {
-            AdGlideLog.d(TAG, "Rewarded Ad interval not met. Current counter: " + rewardedClickCounter);
+            AdGlideLog.d(TAG, "Rewarded Ad interval not met (" + rewardedClickCounter + "/" + config.getRewardedInterval() + ")");
             rewardedClickCounter++;
             if (callback != null) callback.onAdDismissed();
             return;
@@ -439,7 +451,11 @@ public class AdGlide {
 
         if (com.partharoypc.adglide.util.AdPoolManager.hasRewarded()) {
             RewardedAd.Builder pooledAd = com.partharoypc.adglide.util.AdPoolManager.getRewarded();
-            pooledAd.showRewardedAd(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED, activity, callback));
+            if (pooledAd != null) {
+                pooledAd.showRewardedAd(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED, activity, callback));
+            } else {
+                new RewardedAd.Builder(activity).loadAndShow(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED, activity, callback));
+            }
         } else {
             new RewardedAd.Builder(activity).loadAndShow(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED, activity, callback));
         }
@@ -448,18 +464,21 @@ public class AdGlide {
     /**
      * Shows a pre-cached rewarded interstitial ad, or loads one on the fly if not
      * cached.
+     * 
+     * @param activity The host activity. Must not be null.
+     * @param callback Ad event listener. May be null.
      */
-    public static void showRewardedInterstitial(Activity activity, AdGlideCallback callback) {
+    public static void showRewardedInterstitial(@NonNull Activity activity, @Nullable AdGlideCallback callback) {
         if (!isPreCheckOk(TAG, "RewardedInterstitial", callback)) return;
 
         if (!isRewardedInterstitialEnabled()) {
-            AdGlideLog.d(TAG, "Rewarded Interstitial Ad is disabled.");
+            AdGlideLog.d(TAG, "Rewarded Interstitial Ad is disabled via configuration.");
             if (callback != null) callback.onAdDismissed();
             return;
         }
 
         if (rewardedInterstitialClickCounter < config.getRewardedInterval()) {
-            AdGlideLog.d(TAG, "Rewarded Interstitial Ad interval not met. Current counter: " + rewardedInterstitialClickCounter);
+            AdGlideLog.d(TAG, "Rewarded Interstitial Ad interval not met (" + rewardedInterstitialClickCounter + "/" + config.getRewardedInterval() + ")");
             rewardedInterstitialClickCounter++;
             if (callback != null) callback.onAdDismissed();
             return;
@@ -468,7 +487,12 @@ public class AdGlide {
         if (com.partharoypc.adglide.util.AdPoolManager.hasRewardedInterstitial()) {
             com.partharoypc.adglide.format.RewardedInterstitialAd.Builder pooledAd = 
                 com.partharoypc.adglide.util.AdPoolManager.getRewardedInterstitial();
-            pooledAd.showRewardedInterstitialAd(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED_INTERSTITIAL, activity, callback));
+            if (pooledAd != null) {
+                pooledAd.showRewardedInterstitialAd(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED_INTERSTITIAL, activity, callback));
+            } else {
+                new com.partharoypc.adglide.format.RewardedInterstitialAd.Builder(activity)
+                    .loadAndShow(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED_INTERSTITIAL, activity, callback));
+            }
         } else {
             new com.partharoypc.adglide.format.RewardedInterstitialAd.Builder(activity)
                 .loadAndShow(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED_INTERSTITIAL, activity, callback));
@@ -477,13 +501,25 @@ public class AdGlide {
 
     /**
      * Shows a banner ad in the activity's default banner container.
+     * 
+     * @param activity The host activity. Must not be null.
      */
-    public static void showBanner(Activity activity) {
+    public static void showBanner(@NonNull Activity activity) {
         showBanner(activity, null);
     }
 
-    public static void showBanner(Activity activity, ViewGroup container) {
-        if (config == null || !isBannerEnabled()) return;
+    /**
+     * Shows a banner ad in the specified container.
+     * 
+     * @param activity The host activity. Must not be null.
+     * @param container The ViewGroup to host the banner. May be null (provider may use default).
+     */
+    public static void showBanner(@NonNull Activity activity, @Nullable ViewGroup container) {
+        if (!isPreCheckOk(TAG, "Banner", null)) return;
+        if (!isBannerEnabled()) {
+             AdGlideLog.d(TAG, "Banner Ad is disabled via configuration.");
+             return;
+        }
         
         BannerAd.Builder existing = cachedBannerBuilder != null ? cachedBannerBuilder.get() : null;
         if (existing != null) {
@@ -497,32 +533,57 @@ public class AdGlide {
         builder.load();
     }
 
-    public static void showNative(Activity activity, String nativeStyle) {
+    /**
+     * Shows a native ad in the activity's default container with a specific style.
+     * 
+     * @param activity The host activity. Must not be null.
+     * @param nativeStyle The style identifier for the native ad. Must not be null.
+     */
+    public static void showNative(@NonNull Activity activity, @NonNull String nativeStyle) {
         showNative(activity, null, nativeStyle);
     }
 
-    public static void showNative(Activity activity, ViewGroup container, String nativeStyle) {
-        if (config == null || !isNativeEnabled()) return;
+    /**
+     * Shows a native ad in the specified container with a specific style.
+     * 
+     * @param activity The host activity. Must not be null.
+     * @param container The ViewGroup to host the native ad. May be null.
+     * @param nativeStyle The style identifier. Must not be null.
+     */
+    public static void showNative(@NonNull Activity activity, @Nullable ViewGroup container, @NonNull String nativeStyle) {
+        if (!isPreCheckOk(TAG, "Native", null)) return;
+        if (!isNativeEnabled()) {
+            AdGlideLog.d(TAG, "Native Ad is disabled via configuration.");
+            return;
+        }
 
         if (com.partharoypc.adglide.util.AdPoolManager.hasNative(nativeStyle)) {
             com.partharoypc.adglide.format.NativeAd.Builder pooledAd = com.partharoypc.adglide.util.AdPoolManager.getNative(nativeStyle);
-            pooledAd.attachToContainer(container, new AdGlideCallback() {
-                @Override
-                public void onAdShowed() {
-                    preload(activity, com.partharoypc.adglide.util.AdFormat.NATIVE, nativeStyle);
-                }
-            });
+            if (pooledAd != null) {
+                pooledAd.attachToContainer(container, new AdGlideCallback() {
+                    @Override
+                    public void onAdShowed() {
+                        preload(activity, com.partharoypc.adglide.util.AdFormat.NATIVE, nativeStyle);
+                    }
+                });
+            } else {
+                loadNativeOnFly(activity, container, nativeStyle);
+            }
         } else {
-            PerformanceLogger.log("NATIVE", "Showing Native Ad Style: " + nativeStyle);
-            NativeAd.Builder builder = new NativeAd.Builder(activity).style(nativeStyle);
-            if (container != null) builder.container(container);
-            builder.load(new AdGlideCallback() {
-                @Override
-                public void onAdShowed() {
-                    preload(activity, com.partharoypc.adglide.util.AdFormat.NATIVE, nativeStyle);
-                }
-            });
+            loadNativeOnFly(activity, container, nativeStyle);
         }
+    }
+
+    private static void loadNativeOnFly(Activity activity, ViewGroup container, String nativeStyle) {
+        PerformanceLogger.log("NATIVE", "Showing Native Ad Style: " + nativeStyle);
+        NativeAd.Builder builder = new NativeAd.Builder(activity).style(nativeStyle);
+        if (container != null) builder.container(container);
+        builder.load(new AdGlideCallback() {
+            @Override
+            public void onAdShowed() {
+                preload(activity, com.partharoypc.adglide.util.AdFormat.NATIVE, nativeStyle);
+            }
+        });
     }
 
 
@@ -585,24 +646,50 @@ public class AdGlide {
         application.registerActivityLifecycleCallbacks(lifecycleCallbacks);
     }
 
-    public static void showAppOpenAd(Activity activity) {
+    /**
+     * Shows an app open ad with default settings.
+     * 
+     * @param activity The host activity. Must not be null.
+     */
+    public static void showAppOpenAd(@NonNull Activity activity) {
         showAppOpenAd(activity, false, null);
     }
 
-    public static void showAppOpenAd(Activity activity, AdGlideCallback callback) {
+    /**
+     * Shows an app open ad with a callback.
+     * 
+     * @param activity The host activity. Must not be null.
+     * @param callback Ad event listener. May be null.
+     */
+    public static void showAppOpenAd(@NonNull Activity activity, @Nullable AdGlideCallback callback) {
         showAppOpenAd(activity, true, callback); // Default to ignore cooldown when manually requested
     }
 
-    public static void showAppOpenAd(Activity activity, boolean ignoreCooldown, AdGlideCallback callback) {
+    /**
+     * Shows an app open ad with cooldown control and a callback.
+     * 
+     * @param activity The host activity. Must not be null.
+     * @param ignoreCooldown Whether to ignore the configured cooldown interval.
+     * @param callback Ad event listener. May be null.
+     */
+    public static void showAppOpenAd(@NonNull Activity activity, boolean ignoreCooldown, @Nullable AdGlideCallback callback) {
+        if (!isPreCheckOk(TAG, "AppOpen", callback)) return;
+        if (!isAppOpenEnabled()) {
+            AdGlideLog.d(TAG, "App Open Ad is disabled via configuration.");
+            if (callback != null) callback.onAdDismissed();
+            return;
+        }
+
         if (com.partharoypc.adglide.util.AdPoolManager.hasAppOpen()) {
             AppOpenAd.Builder pooledAd = com.partharoypc.adglide.util.AdPoolManager.getAppOpen();
-            pooledAd.showAppOpenAd(ignoreCooldown, new AdGlideCallback() {
-                @Override
-                public void onAdShowed() {
-                    com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
-                    if (callback != null)
-                        callback.onAdShowed();
-                }
+            if (pooledAd != null) {
+                pooledAd.showAppOpenAd(ignoreCooldown, new AdGlideCallback() {
+                    @Override
+                    public void onAdShowed() {
+                        com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
+                        if (callback != null)
+                            callback.onAdShowed();
+                    }
 
                 @Override
                 public void onAdDismissed() {
@@ -631,7 +718,10 @@ public class AdGlide {
         } else {
             loadAndShowAppOpenOnFly(activity, ignoreCooldown, callback);
         }
+    } else {
+        loadAndShowAppOpenOnFly(activity, ignoreCooldown, callback);
     }
+}
 
     private static void loadAndShowAppOpenOnFly(Activity activity, boolean ignoreCooldown, AdGlideCallback callback) {
         new AppOpenAd.Builder(activity).loadAndShow(activity, ignoreCooldown, new AdGlideCallback() {

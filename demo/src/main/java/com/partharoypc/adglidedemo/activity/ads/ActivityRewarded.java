@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -17,14 +19,14 @@ public class ActivityRewarded extends AppCompatActivity {
     private TextView logTextView;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rewarded);
 
         setupToolbar();
         initViews();
+        appendLog("🚀 Preloading Rewarded Ad...");
         AdGlide.preload(this, AdFormat.REWARDED);
-
     }
 
     private void setupToolbar() {
@@ -44,7 +46,7 @@ public class ActivityRewarded extends AppCompatActivity {
 
         btnShow.setOnClickListener(v -> showRewardedAd());
         btnLoad.setOnClickListener(v -> {
-            appendLog("Manually Loading Rewarded Ad...");
+            appendLog("⏳ Manually Loading Rewarded Ad...");
             AdGlide.preload(this, AdFormat.REWARDED);
         });
     }
@@ -53,29 +55,29 @@ public class ActivityRewarded extends AppCompatActivity {
         appendLog("💎 Triggering Rewarded Ad Show...");
         AdGlide.showRewarded(this, new AdGlideCallback() {
             @Override
-            public void onAdFailedToLoad(String error) {
-                appendLog("🛑 Ad Failed: " + error);
+            public void onAdFailedToLoad(@Nullable String error) {
+                appendLog("🛑 Ad Failed: " + (error != null ? error : "Unknown Error"));
             }
 
             @Override
             public void onAdShowed() {
-                appendLog("👁️ Rewarded Ad Showed");
+                appendLog("👁️ Rewarded Ad Showed Successfully");
             }
 
             @Override
             public void onAdDismissed() {
-                appendLog("👋 Ad Dismissed");
+                appendLog("👋 Ad Dismissed by User");
             }
 
             @Override
             public void onAdCompleted() {
-                appendLog("🏆 User Earned Reward!");
+                appendLog("🏆 User Earned Reward! (onAdCompleted)");
                 Toast.makeText(getApplicationContext(), "Reward Earned!", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void appendLog(String text) {
+    private void appendLog(@NonNull String text) {
         logTextView.append(text + "\n");
     }
 

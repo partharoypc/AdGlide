@@ -10,5 +10,7 @@ public class StartAppInitializer implements NetworkInitializer {
     public void initialize(Context context, InitializerConfig config) {
         StartAppSDK.init(context, config.getAppId());
         StartAppSDK.setTestAdsEnabled(config.isDebug() || config.isTestMode());
+        StartAppSDK.enableReturnAds(false);
+        StartAppAd.disableSplashAd();
     }
 }

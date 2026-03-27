@@ -5,6 +5,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import com.google.android.material.switchmaterial.SwitchMaterial;
@@ -18,7 +20,7 @@ public class ActivityBanner extends AppCompatActivity {
     private LinearLayout bannerContainer;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_banner);
 
@@ -48,6 +50,7 @@ public class ActivityBanner extends AppCompatActivity {
 
     private void loadBanner() {
         destroyBanner();
+        AdGlideLog.d("ActivityBanner", "⏳ Loading Banner Ad...");
 
         // Professional Premium API:
         new com.partharoypc.adglide.format.BannerAd.Builder(this)
@@ -56,12 +59,12 @@ public class ActivityBanner extends AppCompatActivity {
                 .load(new AdGlideCallback() {
                     @Override
                     public void onAdLoaded() {
-                        AdGlideLog.d("ActivityBanner", "💎 Banner Ad Loaded");
+                        AdGlideLog.d("ActivityBanner", "💎 Banner Ad Loaded Successfully");
                     }
 
                     @Override
-                    public void onAdFailedToLoad(String error) {
-                        AdGlideLog.e("ActivityBanner", "🛑 Banner Ad Failed: " + error);
+                    public void onAdFailedToLoad(@Nullable String error) {
+                        AdGlideLog.e("ActivityBanner", "🛑 Banner Ad Failed: " + (error != null ? error : "Unknown Error"));
                     }
                 });
     }

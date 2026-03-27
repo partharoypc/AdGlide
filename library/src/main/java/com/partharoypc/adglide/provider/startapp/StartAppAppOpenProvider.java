@@ -20,7 +20,7 @@ public class StartAppAppOpenProvider implements AppOpenProvider {
         this.activeListener = listener;
         isReady = false;
         startAppAd = new StartAppAd(activity);
-        startAppAd.loadAd(StartAppAd.AdMode.AUTOMATIC, new AdEventListener() {
+        startAppAd.loadAd(StartAppAd.AdMode.FULLPAGE, new AdEventListener() {
             @Override
             public void onReceiveAd(Ad ad) {
                 isReady = true;

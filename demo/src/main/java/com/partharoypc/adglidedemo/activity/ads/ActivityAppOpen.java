@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -18,14 +20,14 @@ public class ActivityAppOpen extends AppCompatActivity {
     private TextView logTextView;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_open);
 
         setupToolbar();
         initViews();
         
-        appendLog("Preloading App Open pool...");
+        appendLog("🚀 Preloading App Open pool...");
         AdGlide.preload(this, AdFormat.APP_OPEN);
     }
 
@@ -46,22 +48,22 @@ public class ActivityAppOpen extends AppCompatActivity {
 
         btnShow.setOnClickListener(v -> showAppOpenAd());
         btnLoad.setOnClickListener(v -> {
-            appendLog("Manually Loading/Replenishing App Open Pool...");
+            appendLog("⏳ Manually Loading/Replenishing App Open Pool...");
             AdGlide.preload(this, AdFormat.APP_OPEN);
         });
     }
 
     private void showAppOpenAd() {
-        appendLog("💎 Triggering App Open Ad Show (from pool if ready)...");
+        appendLog("💎 Triggering App Open Ad Show...");
         AdGlide.showAppOpenAd(this, new AdGlideCallback() {
             @Override
-            public void onAdFailedToLoad(String error) {
-                appendLog("🛑 Ad Failed: " + error);
+            public void onAdFailedToLoad(@Nullable String error) {
+                appendLog("🛑 Ad Failed: " + (error != null ? error : "Unknown Error"));
             }
 
             @Override
             public void onAdShowed() {
-                appendLog("👁️ App Open Ad Showed successfully");
+                appendLog("👁️ App Open Ad Showed Successfully");
             }
 
             @Override
@@ -72,7 +74,7 @@ public class ActivityAppOpen extends AppCompatActivity {
         });
     }
 
-    private void appendLog(String text) {
+    private void appendLog(@NonNull String text) {
         logTextView.append("• " + text + "\n");
     }
 

@@ -1,5 +1,7 @@
 package com.partharoypc.adglide;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import com.partharoypc.adglide.util.AdGlideLog;
 
 import java.util.ArrayList;
@@ -197,13 +199,20 @@ public class AdGlideConfig {
         return adStatus;
     }
 
+    /**
+     * @return The primary ad network as a string. Never null.
+     */
+    @NonNull
     public String getPrimaryNetwork() {
-        return primaryNetwork;
+        return primaryNetwork != null ? primaryNetwork : "";
     }
 
-
+    /**
+     * @return The list of backup ad networks. Never null.
+     */
+    @NonNull
     public List<String> getBackupNetworks() {
-        return backupNetworks;
+        return backupNetworks != null ? backupNetworks : new java.util.ArrayList<>();
     }
 
     public boolean isTestMode() {
@@ -280,12 +289,20 @@ public class AdGlideConfig {
     }
 
     // Getters for App IDs
+    /**
+     * @return The AdMob App ID. Never null.
+     */
+    @NonNull
     public String getAdMobAppId() {
-        return adMobAppId;
+        return adMobAppId != null ? adMobAppId : "";
     }
 
+    /**
+     * @return The Startapp App ID. Never null.
+     */
+    @NonNull
     public String getStartAppId() {
-        return startappAppId;
+        return startappAppId != null ? startappAppId : "";
     }
 
     public String getUnityGameId() {
@@ -305,8 +322,12 @@ public class AdGlideConfig {
     }
 
     // Getters for Banner IDs
+    /**
+     * @return The AdMob Banner unit ID. Never null.
+     */
+    @NonNull
     public String getAdMobBannerId() {
-        return adMobBannerId;
+        return adMobBannerId != null ? adMobBannerId : "";
     }
 
     public String getMetaBannerId() {
@@ -330,8 +351,12 @@ public class AdGlideConfig {
     }
 
     // Getters for Interstitial IDs
+    /**
+     * @return The AdMob Interstitial unit ID. Never null.
+     */
+    @NonNull
     public String getAdMobInterstitialId() {
-        return adMobInterstitialId;
+        return adMobInterstitialId != null ? adMobInterstitialId : "";
     }
 
     public String getMetaInterstitialId() {
@@ -965,6 +990,11 @@ public class AdGlideConfig {
             return this;
         }
 
+        /**
+         * Finalizes the configuration and returns an AdGlideConfig instance.
+         * 
+         * @return A validated AdGlideConfig instance.
+         */
         public AdGlideConfig build() {
             AdGlideConfig config = new AdGlideConfig(this);
             validate(config);
@@ -979,15 +1009,30 @@ public class AdGlideConfig {
                 AdGlideLog.w("Config", "Primary network is not set. Ads may not load correctly.");
             }
             
-            if ("admob".equalsIgnoreCase(primary) && (config.getAdMobAppId() == null || config.getAdMobAppId().isEmpty())) {
-                AdGlideLog.e("Config", "AdMob is primary but App ID is missing!");
-                config.setValid(false);
-            }
+            checkNetwork(config, "admob", config.getAdMobAppId(), "App ID");
+            checkNetwork(config, "startapp", config.getStartAppId(), "App ID");
+            checkNetwork(config, "unity", config.getUnityGameId(), "Game ID");
+            checkNetwork(config, "applovin", config.getAppLovinSdkKey(), "SDK Key");
+            checkNetwork(config, "ironsource", config.getIronSourceAppKey(), "App Key");
+            checkNetwork(config, "wortise", config.getWortiseAppId(), "App ID");
             
             if (config.isValid()) {
                 AdGlideLog.i("Config", "SDK Configuration validated successfully.");
             } else {
-                AdGlideLog.e("Config", "SDK Configuration validation failed. Check your setup.");
+                AdGlideLog.e("Config", "SDK Configuration validation failed. Check your setup for missing keys/IDs.");
+            }
+        }
+
+        private void checkNetwork(AdGlideConfig config, String name, String value, String type) {
+            String primary = config.getPrimaryNetwork();
+            List<String> backups = config.getBackupNetworks();
+            
+            boolean isUsed = (primary != null && primary.toLowerCase(java.util.Locale.ROOT).contains(name)) || 
+                             (backups != null && backups.stream().anyMatch(n -> n.toLowerCase(java.util.Locale.ROOT).contains(name)));
+            
+            if (isUsed && (value == null || value.trim().isEmpty())) {
+                AdGlideLog.e("Config", name.toUpperCase(java.util.Locale.ROOT) + " is enabled but " + type + " is missing!");
+                config.setValid(false);
             }
         }
     }
