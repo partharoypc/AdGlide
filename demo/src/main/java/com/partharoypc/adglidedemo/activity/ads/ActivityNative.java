@@ -76,8 +76,22 @@ public class ActivityNative extends AppCompatActivity {
                 break;
         }
 
-        // Using the robust AdGlide API for demo
-        AdGlide.showNative(this, nativeAdContainer, style.name().toLowerCase(java.util.Locale.ROOT));
+        // Using the "Super Perfect" Native Builder for automatic Shimmer & Pool management
+        new com.partharoypc.adglide.format.NativeAd.Builder(this)
+                .style(style)
+                .container(nativeAdContainer)
+                .build()
+                .load(new AdGlideCallback() {
+                    @Override
+                    public void onAdLoaded(String network) {
+                        AdGlideLog.d("ActivityNative", "✅ Native Ad Loaded from " + network);
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(String error) {
+                        AdGlideLog.e("ActivityNative", "❌ Native Ad Failed: " + error);
+                    }
+                });
     }
 
     private void destroyNative() {

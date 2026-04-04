@@ -20,24 +20,34 @@ public class WortiseNativeProvider implements NativeProvider {
 
     @Override
     public void loadNativeAd(Activity activity, String adUnitId, NativeConfig config, NativeListener listener) {
+        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("wortise")) {
+            listener.onAdFailedToLoad("Wortise is currently healing from recent failures.");
+            return;
+        }
+        // Removed redundant notifyLoadStarted call
+
         googleNativeAd = new GoogleNativeAd(activity, adUnitId, new GoogleNativeAd.Listener() {
             @Override
             public void onNativeClicked(@NonNull GoogleNativeAd ad) {
+                listener.onAdClicked();
             }
 
             @Override
             public void onNativeFailedToLoad(@NonNull GoogleNativeAd ad, @NonNull AdError error) {
+                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("wortise", adUnitId);
                 listener.onAdFailedToLoad(error.getMessage());
             }
 
             @Override
             public void onNativeLoaded(@NonNull GoogleNativeAd ad, @NonNull NativeAd nativeAd) {
+                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("wortise", adUnitId);
                 View adView = inflateAndPopulateAdView(activity, nativeAd, config);
                 listener.onAdLoaded(adView);
             }
 
             @Override
             public void onNativeImpression(@NonNull GoogleNativeAd ad) {
+                listener.onAdShowed();
             }
 
             @Override

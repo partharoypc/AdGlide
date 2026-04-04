@@ -12,19 +12,28 @@ import com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo;
 import com.ironsource.mediationsdk.logger.IronSourceError;
 import com.ironsource.mediationsdk.ads.nativead.LevelPlayNativeAd;
 import com.ironsource.mediationsdk.ads.nativead.LevelPlayNativeAdListener;
+import com.unity3d.mediation.LevelPlayAdInfo;
+import com.unity3d.mediation.LevelPlayAdError;
 import com.partharoypc.adglide.R;
 import com.partharoypc.adglide.provider.NativeProvider;
+import androidx.annotation.NonNull;
 
 public class IronSourceNativeProvider implements NativeProvider {
     private LevelPlayNativeAd levelPlayNativeAd;
 
     @Override
     public void loadNativeAd(Activity activity, String adUnitId, NativeConfig config, NativeListener listener) {
+        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("ironsource")) {
+            listener.onAdFailedToLoad("IronSource is currently healing from recent failures.");
+            return;
+        }
+
         levelPlayNativeAd = new LevelPlayNativeAd.Builder()
                 .withPlacementName(adUnitId)
                 .withListener(new LevelPlayNativeAdListener() {
                     @Override
                     public void onAdLoaded(LevelPlayNativeAd ad, AdInfo adInfo) {
+                        com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("ironsource", adUnitId);
                         activity.runOnUiThread(() -> {
                             View adView = inflateAndPopulateAdView(activity, ad, config);
                             listener.onAdLoaded(adView);
@@ -32,16 +41,19 @@ public class IronSourceNativeProvider implements NativeProvider {
                     }
 
                     @Override
-                    public void onAdLoadFailed(LevelPlayNativeAd ad, IronSourceError ironSourceError) {
-                        listener.onAdFailedToLoad(ironSourceError.getErrorMessage());
+                    public void onAdLoadFailed(LevelPlayNativeAd ad, @NonNull IronSourceError error) {
+                        com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("ironsource", adUnitId);
+                        listener.onAdFailedToLoad(error.getErrorMessage());
                     }
 
                     @Override
                     public void onAdClicked(LevelPlayNativeAd ad, AdInfo adInfo) {
+                        listener.onAdClicked();
                     }
 
                     @Override
                     public void onAdImpression(LevelPlayNativeAd ad, AdInfo adInfo) {
+                        listener.onAdShowed();
                     }
                 })
                 .build();
@@ -55,11 +67,9 @@ public class IronSourceNativeProvider implements NativeProvider {
         FrameLayout container = new FrameLayout(activity);
         LayoutInflater.from(activity).inflate(layoutRes, container, true);
 
-        // Detach root view from temp container and return it directly
         View adView = container.getChildAt(0);
         container.removeAllViews();
 
-        // Populate assets
         TextView title = adView.findViewById(R.id.native_ad_title);
         TextView body = adView.findViewById(R.id.native_ad_body);
         Button cta = adView.findViewById(R.id.native_ad_call_to_action);

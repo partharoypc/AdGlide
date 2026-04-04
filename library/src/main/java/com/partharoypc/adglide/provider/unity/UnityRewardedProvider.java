@@ -15,10 +15,17 @@ public class UnityRewardedProvider implements RewardedProvider {
 
     @Override
     public void loadRewardedAd(Activity activity, String adUnitId, RewardedConfig config, RewardedListener listener) {
+        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("unity")) {
+            listener.onAdFailedToLoad("Unity is currently healing from recent failures.");
+            return;
+        }
+        // Removed redundant notifyLoadStarted call
+
         this.placementId = adUnitId;
         UnityAds.load(adUnitId, new IUnityAdsLoadListener() {
             @Override
             public void onUnityAdsAdLoaded(String placementId) {
+                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("unity", adUnitId);
                 AdGlideLog.d(TAG, "Rewarded Ad loaded: " + placementId);
                 isAvailable = true;
                 listener.onAdLoaded();
@@ -26,6 +33,7 @@ public class UnityRewardedProvider implements RewardedProvider {
 
             @Override
             public void onUnityAdsFailedToLoad(String placementId, UnityAds.UnityAdsLoadError error, String message) {
+                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("unity", adUnitId);
                 AdGlideLog.e(TAG, "Rewarded Ad failed to load: [" + error + "] " + message);
                 isAvailable = false;
                 listener.onAdFailedToLoad(message);
@@ -62,6 +70,7 @@ public class UnityRewardedProvider implements RewardedProvider {
 
                 @Override
                 public void onUnityAdsShowClick(String placementId) {
+                    listener.onAdClicked();
                 }
             });
         } else {

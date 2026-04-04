@@ -21,14 +21,14 @@ public class AdMobNativeProvider implements NativeProvider {
 
     @Override
     public void loadNativeAd(Activity activity, String adUnitId, NativeConfig config, NativeListener listener) {
-        if (!com.partharoypc.adglide.util.AdMobHelper.isRequestAllowed(adUnitId)) {
+        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isRequestAllowed("admob", adUnitId)) {
             listener.onAdFailedToLoad("AdMob rate limit hit");
             return;
         }
 
         AdLoader adLoader = new AdLoader.Builder(activity, adUnitId)
                 .forNativeAd(ad -> {
-                    com.partharoypc.adglide.util.AdMobHelper.resetCooldown(adUnitId);
+                    com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("admob", adUnitId);
                     if (this.nativeAd != null) {
                         this.nativeAd.destroy();
                     }
@@ -41,7 +41,7 @@ public class AdMobNativeProvider implements NativeProvider {
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError adError) {
                         if (adError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
-                            com.partharoypc.adglide.util.AdMobHelper.recordFailure(adUnitId);
+                            com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("admob", adUnitId);
                         }
                         listener.onAdFailedToLoad(adError.getMessage());
                     }

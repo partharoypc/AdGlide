@@ -20,7 +20,7 @@ public class AdMobBannerProvider implements BannerProvider {
 
     @Override
     public void loadBanner(Activity activity, String adUnitId, BannerConfig config, BannerListener listener) {
-        if (!com.partharoypc.adglide.util.AdMobHelper.isRequestAllowed(adUnitId)) {
+        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isRequestAllowed("admob", adUnitId)) {
             listener.onAdFailedToLoad("AdMob rate limit hit");
             return;
         }
@@ -34,14 +34,14 @@ public class AdMobBannerProvider implements BannerProvider {
         adView.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
-                com.partharoypc.adglide.util.AdMobHelper.resetCooldown(adUnitId);
+                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("admob", adUnitId);
                 listener.onAdLoaded(adView);
             }
 
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError adError) {
                 if (adError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
-                    com.partharoypc.adglide.util.AdMobHelper.recordFailure(adUnitId);
+                    com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("admob", adUnitId);
                 }
                 listener.onAdFailedToLoad(adError.getMessage());
             }

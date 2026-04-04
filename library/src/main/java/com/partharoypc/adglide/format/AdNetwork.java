@@ -20,6 +20,7 @@ public class AdNetwork {
     public static class Initialize implements NetworkInitializer.InitializerConfig {
 
         private static final String TAG = "AdGlide";
+        private static final java.util.Set<String> initializedNetworks = java.util.Collections.synchronizedSet(new java.util.HashSet<>());
         private final Context context;
         private AdGlideConfig config;
 
@@ -128,7 +129,12 @@ public class AdNetwork {
             try {
                 NetworkInitializer initializer = NetworkInitializerFactory.getInitializer(networkName);
                 if (initializer != null) {
+                    if (initializedNetworks.contains(networkName)) {
+                        AdGlideLog.d(TAG, "[" + networkName.toUpperCase(java.util.Locale.ROOT) + "] SDK already initialized. Skipping.");
+                        return;
+                    }
                     initializer.initialize(context, this);
+                    initializedNetworks.add(networkName);
                     AdGlideLog.d(TAG, "[" + networkName.toUpperCase(java.util.Locale.ROOT) + "] SDK initialized successfully.");
                 }
             } catch (Exception e) {

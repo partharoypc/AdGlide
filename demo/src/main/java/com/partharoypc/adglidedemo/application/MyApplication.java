@@ -97,9 +97,9 @@ public class MyApplication extends Application {
                 .appOpenCooldown(sharedPref.getAppOpenCooldownMinutes())
                 .adResponseTimeout(sharedPref.getAdResponseTimeoutMs())
 
-                // ── Privacy & Debug ───────────────────────────────────────
                 .excludeOpenAdFrom(ActivitySplash.class, ActivitySettings.class)
                 .enableGDPR(true)
+                .aggressivePreload(sharedPref.getAggressivePreload())
 
                 // ── House Ads Fallback ────────────────────────────────────
                 .houseAdEnabled(sharedPref.getIsHouseAdEnabled())

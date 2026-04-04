@@ -51,5 +51,6 @@
     <string name="rewarded_interval">🎁  Rewarded Ad Interval</string>
     <string name="ad_timeout">⏱  Ad Response Timeout (ms)</string>
     <string name="app_open_cooldown">❄️  App Open Cooldown (min)</string>
+    <string name="aggressive_preload">🚀  Aggressive Ad Preloading</string>
     
 </resources>

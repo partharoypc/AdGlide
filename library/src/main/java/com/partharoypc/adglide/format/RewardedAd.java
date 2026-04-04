@@ -17,6 +17,7 @@ import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.AdGlideConfig;
 import android.app.Activity;
 import com.partharoypc.adglide.util.AdGlideLog;
+import com.partharoypc.adglide.util.AdGlideCallback;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,8 +25,8 @@ import androidx.annotation.Nullable;
 import com.partharoypc.adglide.AdGlideNetwork;
 import com.partharoypc.adglide.provider.RewardedProvider;
 import com.partharoypc.adglide.provider.RewardedProviderFactory;
-import com.partharoypc.adglide.util.AdGlideCallback;
-import com.partharoypc.adglide.util.Tools;
+import com.partharoypc.adglide.util.AdFormat;
+import com.partharoypc.adglide.util.AdPoolManager;
 import com.partharoypc.adglide.util.WaterfallManager;
 
 import java.util.HashMap;
@@ -47,10 +48,18 @@ public class RewardedAd {
         private boolean showOnLoad = false;
         private AdGlideCallback callback;
 
+        public Activity getActivity() {
+            return activityRef != null ? activityRef.get() : null;
+        }
 
-        public Builder(@NonNull Activity activity) {
-            this.activityRef = new java.lang.ref.WeakReference<>(activity);
-            this.adLoader = new com.partharoypc.adglide.util.AdLoader(activity,
+
+        public Builder(@NonNull android.content.Context context) {
+            if (context instanceof Activity) {
+                this.activityRef = new java.lang.ref.WeakReference<>((Activity) context);
+            } else {
+                this.activityRef = null;
+            }
+            this.adLoader = new com.partharoypc.adglide.util.AdLoader(context,
                     com.partharoypc.adglide.util.AdFormat.REWARDED);
         }
 
@@ -112,11 +121,9 @@ public class RewardedAd {
         }
 
         private void loadAdFromNetwork(String network, com.partharoypc.adglide.util.AdLoader.LoadResultCallback resultCallback, AdGlideCallback callback) {
-            Activity activity = activityRef.get();
+            Activity activity = (activityRef != null) ? activityRef.get() : null;
             if (activity == null) {
-                AdGlideLog.e(TAG, "Activity is null. Cannot load Rewarded from network.");
-                resultCallback.onFailure("Activity is null");
-                return;
+                AdGlideLog.e(TAG, "Activity context is missing. Cannot load Rewarded from network. Falling back to Application context for loader, but match rate may be affected.");
             }
 
             destroy();
@@ -151,6 +158,13 @@ public class RewardedAd {
                 public void onAdLoaded() {
                     com.partharoypc.adglide.util.PerformanceLogger.log("Rewarded", "Loaded: " + network);
                     AdGlideLog.d(TAG, network + " Rewarded ad loaded");
+                    
+                    if (adLoader != null && adLoader.isTimedOut()) {
+                        AdGlideLog.d(TAG, "Rewarded ad loaded AFTER timeout. Caching as Late Fill.");
+                        AdPoolManager.cacheLateFill(AdFormat.REWARDED, network, RewardedAd.Builder.this);
+                        return;
+                    }
+                    
                     resultCallback.onSuccess();
                     if (showOnLoad) {
                         showOnLoad = false;

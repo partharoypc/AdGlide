@@ -191,4 +191,13 @@ public class SharedPref {
         editor.apply();
     }
 
+    public boolean getAggressivePreload() {
+        return sharedPreferences.getBoolean("aggressive_preload", true);
+    }
+
+    public void setAggressivePreload(boolean enable) {
+        editor.putBoolean("aggressive_preload", enable);
+        editor.apply();
+    }
+
 }

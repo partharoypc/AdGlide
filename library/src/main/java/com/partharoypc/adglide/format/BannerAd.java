@@ -45,9 +45,13 @@ public class BannerAd {
         private android.os.Handler refreshHandler;
         private Runnable refreshRunnable;
 
-        public Builder(Activity activity) {
-            this.activityRef = new java.lang.ref.WeakReference<>(activity);
-            this.adLoader = new com.partharoypc.adglide.util.AdLoader(activity,
+        public Builder(@NonNull android.content.Context context) {
+            if (context instanceof Activity) {
+                this.activityRef = new java.lang.ref.WeakReference<>((Activity) context);
+            } else {
+                this.activityRef = null;
+            }
+            this.adLoader = new com.partharoypc.adglide.util.AdLoader(context,
                     com.partharoypc.adglide.util.AdFormat.BANNER);
         }
 
@@ -123,11 +127,9 @@ public class BannerAd {
                     return;
                 }
 
-                Activity activity = activityRef.get();
+                Activity activity = (activityRef != null) ? activityRef.get() : null;
                 if (activity == null) {
-                    AdGlideLog.e(TAG, "Activity is null. Cannot load Banner from network.");
-                    resultCallback.onFailure("Activity is null");
-                    return;
+                    AdGlideLog.e(TAG, "Activity context is missing. Cannot load Banner from network. Falling back to Application context for loader, but match rate may be affected.");
                 }
 
                 BannerProvider provider = BannerProviderFactory.getProvider(networkToLoad);

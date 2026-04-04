@@ -23,6 +23,12 @@ public class StartAppNativeProvider implements NativeProvider {
     @Override
     @SuppressWarnings("deprecation")
     public void loadNativeAd(Activity activity, String adUnitId, NativeConfig config, NativeListener listener) {
+        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("startapp")) {
+            listener.onAdFailedToLoad("StartApp is currently healing from recent failures.");
+            return;
+        }
+        // Removed redundant notifyLoadStarted call
+
         startAppNativeAd = new StartAppNativeAd(activity);
         NativeAdPreferences nativePrefs = new NativeAdPreferences()
                 .setAdsNumber(1)
@@ -32,6 +38,7 @@ public class StartAppNativeProvider implements NativeProvider {
         AdEventListener adEventListener = new AdEventListener() {
             @Override
             public void onReceiveAd(@NonNull com.startapp.sdk.adsbase.Ad ad) {
+                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("startapp", "NATIVE");
                 ArrayList<NativeAdDetails> ads = startAppNativeAd.getNativeAds();
                 if (ads != null && !ads.isEmpty()) {
                     NativeAdDetails details = ads.get(0);
@@ -44,6 +51,7 @@ public class StartAppNativeProvider implements NativeProvider {
 
             @Override
             public void onFailedToReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
+                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("startapp", "NATIVE");
                 listener.onAdFailedToLoad("StartApp: Failed to receive ad");
             }
         };

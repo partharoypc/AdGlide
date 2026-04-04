@@ -7,8 +7,6 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -21,7 +19,6 @@ import com.partharoypc.adglide.AdGlideConfig;
 import com.partharoypc.adglide.R;
 import com.partharoypc.adglide.provider.RewardedProvider;
 import com.partharoypc.adglide.util.ImageDownloader;
-import androidx.core.content.ContextCompat;
 
 public class HouseAdRewardedProvider implements RewardedProvider {
 
@@ -30,9 +27,11 @@ public class HouseAdRewardedProvider implements RewardedProvider {
 
     @Override
     public void loadRewardedAd(Activity activity, String adUnitId, RewardedConfig unusedConfig, RewardedListener listener) {
+        // Removed redundant notifyLoadStarted call
         this.config = AdGlide.getConfig();
         if (config == null || !config.isHouseAdEnabled() || config.getHouseAdInterstitialImage() == null
                 || config.getHouseAdInterstitialImage().isEmpty()) {
+            com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("house", "HOUSE_REWARDED");
             if (listener != null)
                 listener.onAdFailedToLoad("House Ad rewarded not configured or disabled");
             return;
@@ -42,6 +41,7 @@ public class HouseAdRewardedProvider implements RewardedProvider {
                 new ImageDownloader.ImageLoaderCallback() {
                     @Override
                     public void onImageLoaded(Bitmap bitmap) {
+                        com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("house", "HOUSE_REWARDED");
                         cachedAdImage = bitmap;
                         if (listener != null)
                             listener.onAdLoaded();
@@ -49,6 +49,7 @@ public class HouseAdRewardedProvider implements RewardedProvider {
 
                     @Override
                     public void onError(Exception e) {
+                        com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("house", "HOUSE_REWARDED");
                         if (listener != null)
                             listener.onAdFailedToLoad(e.getMessage());
                     }
@@ -80,6 +81,7 @@ public class HouseAdRewardedProvider implements RewardedProvider {
         imageView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         imageView.setOnClickListener(v -> {
+            if (listener != null) listener.onAdClicked();
             if (config != null && config.getHouseAdInterstitialClickUrl() != null
                     && !config.getHouseAdInterstitialClickUrl().isEmpty()) {
                 try {

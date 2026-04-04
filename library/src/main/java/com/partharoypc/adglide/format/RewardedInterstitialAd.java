@@ -12,6 +12,7 @@ import android.app.Activity;
 
 import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.util.AdGlideLog;
+import com.partharoypc.adglide.util.AdGlideCallback;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,8 +20,8 @@ import androidx.annotation.Nullable;
 import com.partharoypc.adglide.AdGlideNetwork;
 import com.partharoypc.adglide.provider.RewardedProvider;
 import com.partharoypc.adglide.provider.RewardedProviderFactory;
-import com.partharoypc.adglide.util.AdGlideCallback;
-import com.partharoypc.adglide.util.Tools;
+import com.partharoypc.adglide.util.AdFormat;
+import com.partharoypc.adglide.util.AdPoolManager;
 import com.partharoypc.adglide.util.WaterfallManager;
 
 import java.util.HashMap;
@@ -41,10 +42,18 @@ public class RewardedInterstitialAd {
         private RewardedProvider currentProvider;
         private String currentNetwork;
 
+        public Activity getActivity() {
+            return activityRef != null ? activityRef.get() : null;
+        }
 
-        public Builder(Activity activity) {
-            this.activityRef = new java.lang.ref.WeakReference<>(activity);
-            this.adLoader = new com.partharoypc.adglide.util.AdLoader(activity,
+
+        public Builder(@NonNull android.content.Context context) {
+            if (context instanceof Activity) {
+                this.activityRef = new java.lang.ref.WeakReference<>((Activity) context);
+            } else {
+                this.activityRef = null;
+            }
+            this.adLoader = new com.partharoypc.adglide.util.AdLoader(context,
                     com.partharoypc.adglide.util.AdFormat.REWARDED_INTERSTITIAL);
         }
 
@@ -94,16 +103,22 @@ public class RewardedInterstitialAd {
                 }
             };
 
-            Activity activity = activityRef.get();
+            Activity activity = (activityRef != null) ? activityRef.get() : null;
             if (activity == null) {
-                resultCallback.onFailure("Activity is null");
-                return;
+                AdGlideLog.e(TAG, "Activity context is missing. Cannot load Rewarded Interstitial from network. Falling back to Application context for loader, but match rate may be affected.");
             }
 
             provider.loadRewardedAd(activity, adUnitId, config, new RewardedProvider.RewardedListener() {
                 @Override
                 public void onAdLoaded() {
                     AdGlideLog.d(TAG, network + " Rewarded interstitial loaded");
+                    
+                    if (adLoader != null && adLoader.isTimedOut()) {
+                        AdGlideLog.d(TAG, "Rewarded Interstitial loaded AFTER timeout. Caching as Late Fill.");
+                        AdPoolManager.cacheLateFill(AdFormat.REWARDED_INTERSTITIAL, network, RewardedInterstitialAd.Builder.this);
+                        return;
+                    }
+                    
                     resultCallback.onSuccess();
                     if (showOnLoad) {
                         showOnLoad = false;

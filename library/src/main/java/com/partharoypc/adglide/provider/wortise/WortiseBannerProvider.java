@@ -15,6 +15,12 @@ public class WortiseBannerProvider implements BannerProvider {
 
     @Override
     public void loadBanner(Activity activity, String adUnitId, BannerConfig config, BannerListener listener) {
+        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("wortise")) {
+            listener.onAdFailedToLoad("Wortise is currently healing from recent failures.");
+            return;
+        }
+        // Removed redundant notifyLoadStarted call
+
         bannerAd = new BannerAd(activity);
         AdSize size = config.isMrec() ? AdSize.HEIGHT_250 : AdSize.HEIGHT_50;
         bannerAd.setAdSize(size);
@@ -22,20 +28,24 @@ public class WortiseBannerProvider implements BannerProvider {
         bannerAd.setListener(new BannerAd.Listener() {
             @Override
             public void onBannerClicked(@NonNull BannerAd banner) {
+                listener.onAdClicked();
             }
 
             @Override
             public void onBannerFailedToLoad(@NonNull BannerAd banner, @NonNull AdError error) {
+                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("wortise", adUnitId);
                 listener.onAdFailedToLoad(error.getMessage());
             }
 
             @Override
             public void onBannerLoaded(@NonNull BannerAd banner) {
+                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("wortise", adUnitId);
                 listener.onAdLoaded(banner);
             }
 
             @Override
             public void onBannerImpression(@NonNull BannerAd banner) {
+                listener.onAdShowed();
             }
 
             @Override

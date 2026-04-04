@@ -16,6 +16,7 @@ import static com.partharoypc.adglide.util.Constant.WORTISE;
 import com.partharoypc.adglide.AdGlideConfig;
 import android.app.Activity;
 import com.partharoypc.adglide.util.AdGlideLog;
+import com.partharoypc.adglide.util.AdGlideCallback;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -29,8 +30,8 @@ import com.partharoypc.adglide.AdGlideNativeStyle;
 import com.partharoypc.adglide.R;
 import com.partharoypc.adglide.provider.NativeProvider;
 import com.partharoypc.adglide.provider.NativeProviderFactory;
-import com.partharoypc.adglide.util.AdGlideCallback;
-import com.partharoypc.adglide.util.Tools;
+import com.partharoypc.adglide.util.AdFormat;
+import com.partharoypc.adglide.util.AdPoolManager;
 import com.partharoypc.adglide.util.WaterfallManager;
 
 import java.util.HashMap;
@@ -55,15 +56,28 @@ public class NativeAd {
         private View preloadedAdView;
         private boolean isAdLoaded = false;
 
+        public String getNativeStyle() {
+            return nativeAdStyle;
+        }
+
         private final com.partharoypc.adglide.util.AdLoader adLoader;
 
-        public Builder(Activity activity) {
-            this.activityRef = new java.lang.ref.WeakReference<>(activity);
-            this.adLoader = new com.partharoypc.adglide.util.AdLoader(activity,
+        public Activity getActivity() {
+            return activityRef != null ? activityRef.get() : null;
+        }
+
+        public Builder(@NonNull android.content.Context context) {
+            if (context instanceof Activity) {
+                this.activityRef = new java.lang.ref.WeakReference<>((Activity) context);
+                this.nativeBackgroundLight = ContextCompat.getColor(context, android.R.color.transparent);
+                this.nativeBackgroundDark = ContextCompat.getColor(context, android.R.color.transparent);
+            } else {
+                this.activityRef = null;
+                this.nativeBackgroundLight = android.graphics.Color.TRANSPARENT;
+                this.nativeBackgroundDark = android.graphics.Color.TRANSPARENT;
+            }
+            this.adLoader = new com.partharoypc.adglide.util.AdLoader(context,
                     com.partharoypc.adglide.util.AdFormat.NATIVE);
-            // Default semantic colors: Transparent
-            this.nativeBackgroundLight = ContextCompat.getColor(activity, android.R.color.transparent);
-            this.nativeBackgroundDark = ContextCompat.getColor(activity, android.R.color.transparent);
         }
 
         @NonNull
@@ -137,9 +151,26 @@ public class NativeAd {
                 return;
             }
             if (adLoader == null) return;
+            showShimmer(callback);
             adLoader.startLoading((networkToLoad, resultCallback) -> {
                 loadAdFromNetwork(networkToLoad, resultCallback, callback);
             }, callback);
+        }
+
+        private void showShimmer(AdGlideCallback callback) {
+            Activity activity = (activityRef != null) ? activityRef.get() : null;
+            if (activity == null) return;
+            
+            ViewGroup container = customContainer != null ? customContainer : activity.findViewById(R.id.native_ad_view_container);
+            if (container != null) {
+                activity.runOnUiThread(() -> {
+                    container.removeAllViews();
+                    View shimmer = activity.getLayoutInflater().inflate(R.layout.adglide_shimmer_native, container, false);
+                    container.addView(shimmer);
+                    container.setVisibility(View.VISIBLE);
+                    com.partharoypc.adglide.helper.ShimmerHelper.startShimmer(shimmer);
+                });
+            }
         }
 
         private void loadAdFromNetwork(String network, com.partharoypc.adglide.util.AdLoader.LoadResultCallback resultCallback, AdGlideCallback callback) {
@@ -172,11 +203,9 @@ public class NativeAd {
                 }
             };
 
-            Activity activity = activityRef.get();
+            Activity activity = (activityRef != null) ? activityRef.get() : null;
             if (activity == null) {
-                AdGlideLog.e(TAG, "Activity is null. Cannot load Native from network.");
-                resultCallback.onFailure("Activity is null");
-                return;
+                AdGlideLog.e(TAG, "Activity context is missing during Native load. Falling back to application context where possible.");
             }
 
             provider.loadNativeAd(activity, adUnitId, config, new NativeProvider.NativeListener() {
@@ -184,6 +213,12 @@ public class NativeAd {
                 public void onAdLoaded(View adView) {
                     preloadedAdView = adView;
                     isAdLoaded = true;
+                    
+                    if (adLoader != null && adLoader.isTimedOut()) {
+                        AdGlideLog.d(TAG, "Native ad loaded AFTER timeout. Caching as Late Fill.");
+                        AdPoolManager.cacheLateFillNative(network, NativeAd.Builder.this);
+                        return;
+                    }
                     resultCallback.onSuccess();
                     if (callback != null)
                         callback.onAdLoaded();

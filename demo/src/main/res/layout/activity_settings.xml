@@ -308,7 +308,21 @@
                         android:layout_width="match_parent"
                         android:layout_height="56dp"
                         android:paddingHorizontal="20dp"
-                        android:text="@string/test_mode" />
+                        android:text="Test Mode"
+                        app:thumbTint="@color/colorPrimary" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:alpha="0.3"
+                        android:background="?attr/colorOutline" />
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switch_aggressive_preload"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:paddingHorizontal="20dp"
+                        android:text="@string/aggressive_preload" />
 
                     <View
                         android:layout_width="match_parent"

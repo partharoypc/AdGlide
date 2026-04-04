@@ -14,17 +14,25 @@ public class StartAppRewardedProvider implements RewardedProvider {
 
     @Override
     public void loadRewardedAd(Activity activity, String adUnitId, RewardedConfig config, RewardedListener listener) {
+        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("startapp")) {
+            listener.onAdFailedToLoad("StartApp is currently healing from recent failures.");
+            return;
+        }
+        // Removed redundant notifyLoadStarted call
+
         isReady = false;
         startAppAd = new StartAppAd(activity);
         startAppAd.loadAd(StartAppAd.AdMode.REWARDED_VIDEO, new AdEventListener() {
             @Override
             public void onReceiveAd(@NonNull Ad ad) {
+                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("startapp", "REWARDED");
                 isReady = true;
                 listener.onAdLoaded();
             }
 
             @Override
             public void onFailedToReceiveAd(Ad ad) {
+                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("startapp", "REWARDED");
                 isReady = false;
                 listener.onAdFailedToLoad("StartApp: Failed to receive ad");
             }

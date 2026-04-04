@@ -12,15 +12,12 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.AdGlideConfig;
 import com.partharoypc.adglide.provider.InterstitialProvider;
-import com.partharoypc.adglide.util.AdGlideCallback;
 import com.partharoypc.adglide.util.ImageDownloader;
-import androidx.core.content.ContextCompat;
 import com.partharoypc.adglide.R;
 
 public class HouseAdInterstitialProvider implements InterstitialProvider {
@@ -31,9 +28,11 @@ public class HouseAdInterstitialProvider implements InterstitialProvider {
     @Override
     public void loadInterstitial(Activity activity, String adUnitId, InterstitialConfig unusedConfig,
             InterstitialListener listener) {
+        // Removed redundant notifyLoadStarted call
         this.config = AdGlide.getConfig();
         if (config == null || !config.isHouseAdEnabled() || config.getHouseAdInterstitialImage() == null
                 || config.getHouseAdInterstitialImage().isEmpty()) {
+            com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("house", "HOUSE_INTERSTITIAL");
             if (listener != null)
                 listener.onAdFailedToLoad("House Ad interstitial not configured or disabled");
             return;
@@ -43,6 +42,7 @@ public class HouseAdInterstitialProvider implements InterstitialProvider {
                 new ImageDownloader.ImageLoaderCallback() {
                     @Override
                     public void onImageLoaded(Bitmap bitmap) {
+                        com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("house", "HOUSE_INTERSTITIAL");
                         cachedAdImage = bitmap;
                         if (listener != null)
                             listener.onAdLoaded();
@@ -50,6 +50,7 @@ public class HouseAdInterstitialProvider implements InterstitialProvider {
 
                     @Override
                     public void onError(Exception e) {
+                        com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("house", "HOUSE_INTERSTITIAL");
                         if (listener != null)
                             listener.onAdFailedToLoad(e.getMessage());
                     }
@@ -65,7 +66,7 @@ public class HouseAdInterstitialProvider implements InterstitialProvider {
 
         if (cachedAdImage == null) {
             if (listener != null)
-                listener.onAdFailedToLoad("House ad image not loaded");
+                listener.onAdShowFailed("House ad image not loaded");
             return;
         }
 
@@ -82,6 +83,7 @@ public class HouseAdInterstitialProvider implements InterstitialProvider {
         imageView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         imageView.setOnClickListener(v -> {
+            if (listener != null) listener.onAdClicked();
             if (config != null && config.getHouseAdInterstitialClickUrl() != null
                     && !config.getHouseAdInterstitialClickUrl().isEmpty()) {
                 try {

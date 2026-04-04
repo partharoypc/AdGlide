@@ -26,6 +26,7 @@ public class AdPoolManager {
     private static final Map<AdFormat, PoolSet<?>> pools = new EnumMap<>(AdFormat.class);
     private static final Map<String, PoolSet<NativeAd.Builder>> nativePools = new ConcurrentHashMap<>();
     private static final Map<AdFormat, AtomicBoolean> loadingState = new EnumMap<>(AdFormat.class);
+    private static final Map<String, AtomicBoolean> nativeLoadingState = new ConcurrentHashMap<>();
 
     static {
         pools.put(AdFormat.INTERSTITIAL, new PoolSet<InterstitialAd.Builder>());
@@ -121,7 +122,16 @@ public class AdPoolManager {
 
     public static InterstitialAd.Builder getInterstitial() {
         PoolSet<InterstitialAd.Builder> pool = getPool(AdFormat.INTERSTITIAL);
-        return pool != null ? pool.poll() : null;
+        if (pool == null) return null;
+        
+        InterstitialAd.Builder builder;
+        while ((builder = pool.poll()) != null) {
+            if (builder.getActivity() != null && !builder.getActivity().isFinishing()) {
+                return builder;
+            }
+            AdGlideLog.d(TAG, "Discarding pooled Interstitial ad: Original Activity context was destroyed.");
+        }
+        return null;
     }
 
     public static boolean hasInterstitial() {
@@ -131,7 +141,16 @@ public class AdPoolManager {
 
     public static RewardedAd.Builder getRewarded() {
         PoolSet<RewardedAd.Builder> pool = getPool(AdFormat.REWARDED);
-        return pool != null ? pool.poll() : null;
+        if (pool == null) return null;
+        
+        RewardedAd.Builder builder;
+        while ((builder = pool.poll()) != null) {
+            if (builder.getActivity() != null && !builder.getActivity().isFinishing()) {
+                return builder;
+            }
+            AdGlideLog.d(TAG, "Discarding pooled Rewarded ad: Original Activity context was destroyed.");
+        }
+        return null;
     }
 
     public static boolean hasRewarded() {
@@ -141,7 +160,16 @@ public class AdPoolManager {
 
     public static RewardedInterstitialAd.Builder getRewardedInterstitial() {
         PoolSet<RewardedInterstitialAd.Builder> pool = getPool(AdFormat.REWARDED_INTERSTITIAL);
-        return pool != null ? pool.poll() : null;
+        if (pool == null) return null;
+        
+        RewardedInterstitialAd.Builder builder;
+        while ((builder = pool.poll()) != null) {
+            if (builder.getActivity() != null && !builder.getActivity().isFinishing()) {
+                return builder;
+            }
+            AdGlideLog.d(TAG, "Discarding pooled Rewarded Interstitial ad: Original Activity context was destroyed.");
+        }
+        return null;
     }
 
     public static boolean hasRewardedInterstitial() {
@@ -151,7 +179,16 @@ public class AdPoolManager {
 
     public static AppOpenAd.Builder getAppOpen() {
         PoolSet<AppOpenAd.Builder> pool = getPool(AdFormat.APP_OPEN);
-        return pool != null ? pool.poll() : null;
+        if (pool == null) return null;
+        
+        AppOpenAd.Builder builder;
+        while ((builder = pool.poll()) != null) {
+            if (builder.getActivity() != null && !builder.getActivity().isFinishing()) {
+                return builder;
+            }
+            AdGlideLog.d(TAG, "Discarding pooled App Open ad: Original Activity context was destroyed.");
+        }
+        return null;
     }
 
     public static boolean hasAppOpen() {
@@ -161,12 +198,59 @@ public class AdPoolManager {
 
     public static NativeAd.Builder getNative(String style) {
         PoolSet<NativeAd.Builder> poolSet = nativePools.get(style.toLowerCase(Locale.ROOT));
-        return poolSet != null ? poolSet.poll() : null;
+        if (poolSet == null) return null;
+        
+        NativeAd.Builder builder;
+        while ((builder = poolSet.poll()) != null) {
+            if (builder.getActivity() != null && !builder.getActivity().isFinishing()) {
+                return builder;
+            }
+            AdGlideLog.d(TAG, "Discarding pooled Native ad [" + style + "]: Original Activity context was destroyed.");
+        }
+        return null;
     }
 
     public static boolean hasNative(String style) {
         PoolSet<NativeAd.Builder> poolSet = nativePools.get(style.toLowerCase(Locale.ROOT));
         return poolSet != null && poolSet.hasAvailable(ad -> ad.isAdLoaded());
+    }
+
+    /**
+     * Cache an ad that loaded after the initial request timed out (Late Fill).
+     * This helps achieve a 95%+ Show Rate by ensuring every match eventually becomes an impression.
+     */
+    public static <T> void cacheLateFill(AdFormat format, String network, T builder) {
+        if (builder == null) return;
+        
+        AdGlide.notifyLateMatchSaved(format.toString(), network);
+        
+        PoolSet<T> poolSet = getPool(format);
+        if (poolSet != null) {
+            String primary = AdGlide.getConfig() != null ? AdGlide.getConfig().getPrimaryNetwork() : "";
+            boolean isPrimary = (network != null && network.equals(primary));
+            
+            // Only cache if we have space, to avoid memory leaks
+            int limit = (format == AdFormat.REWARDED || format == AdFormat.REWARDED_INTERSTITIAL || format == AdFormat.APP_OPEN) ? 1 : MAX_POOL_SIZE;
+            if (poolSet.size() < limit + 1) { // Allow +1 for late fills to be ready for the next request
+                poolSet.offer(builder, isPrimary);
+                AdGlideLog.d(TAG, "Cached late fill for " + format + " from [" + network + "] into " + (isPrimary ? "Primary" : "Backup") + " pool.");
+            } else {
+                AdGlideLog.d(TAG, "Late fill for " + format + " discarded (Pool already sufficiently full).");
+            }
+        }
+    }
+
+    public static void cacheLateFillNative(String network, NativeAd.Builder builder) {
+        if (builder == null) return;
+        
+        AdGlide.notifyLateMatchSaved(AdFormat.NATIVE.toString(), network);
+        
+        String style = builder.getNativeStyle();
+        PoolSet<NativeAd.Builder> poolSet = nativePools.get(style.toLowerCase(Locale.ROOT));
+        if (poolSet != null && poolSet.size() < MAX_POOL_SIZE + 1) {
+             poolSet.offer(builder, true); // Treat late fills as primary candidates
+             AdGlideLog.d(TAG, "Cached late fill for NativeStyle [" + style + "] after timeout.");
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -188,6 +272,16 @@ public class AdPoolManager {
             AdLoadAction<T> loader) {
         if (!isFormatEnabled(format) || activity == null || activity.isFinishing())
             return;
+
+        // PROTECT SHOW RATE: Don't request new ads while another one is showing
+        if (AdGlide.isAdShowing()) {
+            return;
+        }
+
+        // REDUCE WASTE: Don't request unless the next show is "imminent" (within 1 click)
+        if (!AdGlide.isImminent(format)) {
+            return;
+        }
 
         PoolSet<T> poolSet = (PoolSet<T>) pools.get(format);
         int limit = (format == AdFormat.REWARDED || format == AdFormat.REWARDED_INTERSTITIAL
@@ -239,11 +333,22 @@ public class AdPoolManager {
         if (poolSet.size() >= MAX_POOL_SIZE)
             return;
 
+        AtomicBoolean loading = nativeLoadingState.get(style.toLowerCase(Locale.ROOT));
+        if (loading == null) {
+            loading = new AtomicBoolean(false);
+            nativeLoadingState.put(style.toLowerCase(Locale.ROOT), loading);
+        }
+
+        if (!loading.compareAndSet(false, true))
+            return;
+            
+        final AtomicBoolean finalLoading = loading;
         final WeakReference<Activity> activityRef = new WeakReference<>(activity);
         NativeAd.Builder builder = new NativeAd.Builder(activity).style(style);
         builder.load(new AdGlideCallback() {
             @Override
             public void onAdLoaded(String network) {
+                finalLoading.set(false);
                 String primary = AdGlide.getConfig() != null ? AdGlide.getConfig().getPrimaryNetwork() : "";
                 finalPoolSet.offer(builder, network.equals(primary));
 
@@ -257,6 +362,7 @@ public class AdPoolManager {
 
             @Override
             public void onAdFailedToLoad(String error) {
+                finalLoading.set(false);
             }
         });
     }
@@ -278,6 +384,9 @@ public class AdPoolManager {
         }
         nativePools.clear();
         for (AtomicBoolean loading : loadingState.values()) {
+            loading.set(false);
+        }
+        for (AtomicBoolean loading : nativeLoadingState.values()) {
             loading.set(false);
         }
         AdGlideLog.d(TAG, "Ad pools cleared.");

@@ -25,6 +25,7 @@ public class AdGlideConfig {
     private final boolean debugGDPR;
     private final boolean enableDebugHUD;
     private final int adResponseTimeoutMs;
+    private final boolean aggressivePreload;
     private boolean isValid = true;
 
     // Granular Ad Type Status
@@ -118,6 +119,7 @@ public class AdGlideConfig {
         this.debugGDPR = builder.debugGDPR;
         this.enableDebugHUD = builder.enableDebugHUD;
         this.adResponseTimeoutMs = builder.adResponseTimeoutMs;
+        this.aggressivePreload = builder.aggressivePreload;
 
         this.bannerStatus = builder.bannerStatus;
         this.interstitialStatus = builder.interstitialStatus;
@@ -194,6 +196,86 @@ public class AdGlideConfig {
         isValid = valid;
     }
 
+    public Builder toBuilder() {
+        Builder builder = new Builder()
+            .enableAds(this.adStatus)
+            .primaryNetwork(this.primaryNetwork)
+            .testMode(this.testMode)
+            .debug(this.debug)
+            .autoLoad(this.autoLoad)
+            .houseAdEnabled(this.enableHouseAd)
+            .interstitialInterval(this.interstitialInterval)
+            .rewardedInterval(this.rewardedInterval)
+            .appOpenCooldown(this.appOpenCooldownMinutes)
+            .bannerEnabled(this.bannerStatus)
+            .interstitialEnabled(this.interstitialStatus)
+            .nativeEnabled(this.nativeStatus)
+            .rewardedEnabled(this.rewardedStatus)
+            .appOpenEnabled(this.appOpenStatus)
+            .rewardedInterstitialEnabled(this.rewardedInterstitialStatus)
+            .enableGDPR(this.enableGDPR)
+            .debugGDPR(this.debugGDPR)
+            .enableDebugHUD(this.enableDebugHUD)
+            .adResponseTimeout(this.adResponseTimeoutMs)
+            .aggressivePreload(this.aggressivePreload)
+            .adMobAppId(this.adMobAppId)
+            .startAppId(this.startappAppId)
+            .unityGameId(this.unityGameId)
+            .appLovinSdkKey(this.appLovinSdkKey)
+            .ironSourceAppKey(this.ironSourceAppKey)
+            .wortiseAppId(this.wortiseAppId)
+            .adMobBannerId(this.adMobBannerId)
+            .metaBannerId(this.metaBannerId)
+            .unityBannerId(this.unityBannerId)
+            .appLovinBannerId(this.appLovinBannerId)
+            .ironSourceBannerId(this.ironSourceBannerId)
+            .wortiseBannerId(this.wortiseBannerId)
+            .adMobInterstitialId(this.adMobInterstitialId)
+            .metaInterstitialId(this.metaInterstitialId)
+            .unityInterstitialId(this.unityInterstitialId)
+            .appLovinInterstitialId(this.appLovinInterstitialId)
+            .ironSourceInterstitialId(this.ironSourceInterstitialId)
+            .wortiseInterstitialId(this.wortiseInterstitialId)
+            .adMobRewardedId(this.adMobRewardedId)
+            .metaRewardedId(this.metaRewardedId)
+            .unityRewardedId(this.unityRewardedId)
+            .appLovinRewardedId(this.appLovinRewardedId)
+            .ironSourceRewardedId(this.ironSourceRewardedId)
+            .wortiseRewardedId(this.wortiseRewardedId)
+            .adMobRewardedIntId(this.adMobRewardedIntId)
+            .appLovinRewardedIntId(this.appLovinRewardedIntId)
+            .unityRewardedIntId(this.unityRewardedIntId)
+            .ironSourceRewardedIntId(this.ironSourceRewardedIntId)
+            .wortiseRewardedIntId(this.wortiseRewardedIntId)
+            .adMobAppOpenId(this.adMobAppOpenId)
+            .metaAppOpenId(this.metaAppOpenId)
+            .appLovinAppOpenId(this.appLovinAppOpenId)
+            .startAppAppOpenId(this.startappAppOpenId)
+            .ironSourceAppOpenId(this.ironSourceAppOpenId)
+            .wortiseAppOpenId(this.wortiseAppOpenId)
+            .adMobNativeId(this.adMobNativeId)
+            .metaNativeId(this.metaNativeId)
+            .appLovinNativeId(this.appLovinNativeId)
+            .ironSourceNativeId(this.ironSourceNativeId)
+            .wortiseNativeId(this.wortiseNativeId)
+            .houseAdBannerImage(this.houseAdBannerImage)
+            .houseAdBannerClickUrl(this.houseAdBannerClickUrl)
+            .houseAdInterstitialImage(this.houseAdInterstitialImage)
+            .houseAdInterstitialClickUrl(this.houseAdInterstitialClickUrl)
+            .houseAdNativeTitle(this.houseAdNativeTitle)
+            .houseAdNativeDescription(this.houseAdNativeDescription)
+            .houseAdNativeImage(this.houseAdNativeImage)
+            .houseAdNativeIcon(this.houseAdNativeIcon)
+            .houseAdNativeCTA(this.houseAdNativeCTA)
+            .houseAdNativeClickUrl(this.houseAdNativeClickUrl);
+
+        if (this.backupNetworks != null) {
+            builder.backupNetworks(this.backupNetworks.toArray(new String[0]));
+        }
+        
+        return builder;
+    }
+
     // Getters for Global Settings
     public boolean getAdStatus() {
         return adStatus;
@@ -265,6 +347,10 @@ public class AdGlideConfig {
     
     public int getAdResponseTimeoutMs() {
         return adResponseTimeoutMs;
+    }
+
+    public boolean isAggressivePreloadEnabled() {
+        return aggressivePreload;
     }
 
     public boolean isBannerEnabled() {
@@ -532,7 +618,8 @@ public class AdGlideConfig {
         private boolean enableGDPR = false;
         private boolean debugGDPR = false;
         private boolean enableDebugHUD = false;
-        private int adResponseTimeoutMs = 3500; // Default 3.5 seconds
+        private int adResponseTimeoutMs = 8000; // Increased to 8 seconds for better match rate with AdMob/Meta
+        private boolean aggressivePreload = true;
         private int appOpenCooldownMinutes = 30;
 
         private String adMobAppId = "";
@@ -731,6 +818,11 @@ public class AdGlideConfig {
 
         public Builder adResponseTimeout(int timeoutMs) {
             this.adResponseTimeoutMs = timeoutMs;
+            return this;
+        }
+
+        public Builder aggressivePreload(boolean enable) {
+            this.aggressivePreload = enable;
             return this;
         }
 

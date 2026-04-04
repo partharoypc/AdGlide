@@ -15,10 +15,14 @@ import com.partharoypc.adglide.format.InterstitialAd;
 import com.partharoypc.adglide.format.RewardedAd;
 import com.partharoypc.adglide.format.BannerAd;
 import com.partharoypc.adglide.format.NativeAd;
+import com.partharoypc.adglide.util.AdFormat;
 import com.partharoypc.adglide.util.AdGlideCallback;
 import com.partharoypc.adglide.util.AdGlideLog;
 import com.partharoypc.adglide.util.ConsentManager;
 import com.partharoypc.adglide.util.PerformanceLogger;
+import androidx.lifecycle.ProcessLifecycleOwner;
+import androidx.lifecycle.DefaultLifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
 
 public class AdGlide {
     private static final String TAG = "AdGlide";
@@ -34,9 +38,16 @@ public class AdGlide {
     private static int interstitialClickCounter = 1;
     private static int rewardedClickCounter = 1;
     private static int rewardedInterstitialClickCounter = 1;
+
+    // Time-Gap Protection
+    private static long lastFullAdShowTime = 0;
+    private static final long GLOBAL_TIME_GAP_MS = 60000; // 60 seconds
+
     private static boolean isInitialized = false;
+    private static boolean isAdShowing = false;
     private static Application.ActivityLifecycleCallbacks lifecycleCallbacks;
     private static boolean isAppOpenRegistered = false;
+    private static java.lang.ref.WeakReference<Activity> currentActivityRef = new java.lang.ref.WeakReference<>(null);
 
     /**
      * Retrieves the global AdGlide configuration.
@@ -66,6 +77,15 @@ public class AdGlide {
             return;
         }
 
+        // Load stored House Ad metadata for offline resilience if current config allows
+        if (glideConfig.isHouseAdEnabled()) {
+            com.partharoypc.adglide.util.AdGlidePrefs prefs = new com.partharoypc.adglide.util.AdGlidePrefs(application);
+            // Merge stored metadata if current values are empty
+            if (glideConfig.getHouseAdBannerImage().isEmpty()) {
+                glideConfig = prefs.applyStoredHouseAd(glideConfig.toBuilder()).build();
+            }
+        }
+
         config = glideConfig;
         currentApplication = application;
         isInitialized = true;
@@ -77,7 +97,8 @@ public class AdGlide {
 
         if (config.getAdStatus()) {
             if (config.isAppOpenEnabled() && !isAppOpenRegistered) {
-                registerAppOpenLifecycle(application);
+                registerActivityLifecycle(application);
+                registerProcessLifecycle();
                 isAppOpenRegistered = true;
             }
         }
@@ -85,6 +106,16 @@ public class AdGlide {
         
         // Pre-cache House Ad assets for offline support
         preloadHouseAds(application);
+    }
+
+    /**
+     * Retrieves the global Application context.
+     * 
+     * @return The active Application context.
+     */
+    @Nullable
+    public static android.content.Context getContext() {
+        return currentApplication;
     }
 
     /**
@@ -129,7 +160,8 @@ public class AdGlide {
         // Ensure AppOpen is registered/unregistered if status changed
         if (config.getAdStatus() && config.isAppOpenEnabled()) {
             if (!isAppOpenRegistered) {
-                registerAppOpenLifecycle(currentApplication);
+                registerActivityLifecycle(currentApplication);
+                registerProcessLifecycle();
                 isAppOpenRegistered = true;
             }
         }
@@ -140,6 +172,9 @@ public class AdGlide {
 
     private static void preloadHouseAds(android.content.Context context) {
         if (config == null || !config.isHouseAdEnabled() || context == null) return;
+
+        // Save metadata for offline resilience
+        new com.partharoypc.adglide.util.AdGlidePrefs(context).saveHouseAdMetadata(config);
 
         AdGlideLog.d(TAG, "Proactively pre-fetching House Ad assets for offline support...");
         
@@ -203,14 +238,48 @@ public class AdGlide {
         return true; // Default to true if ConsentManager not yet initialized
     }
 
+    public static boolean isAdShowing() {
+        return isAdShowing;
+    }
+
+    public static void setAdShowing(boolean showing) {
+        isAdShowing = showing;
+        AdGlideLog.d(TAG, "Global Ad Showing State: " + showing);
+    }
+
     public static boolean isInitialized() {
         return isInitialized;
+    }
+
+    /**
+     * Checks if a format show is "imminent" (within 1 interaction of the interval).
+     * This is used by the AdPoolManager to optimize the match rate and reduce waste.
+     */
+    public static boolean isImminent(com.partharoypc.adglide.util.AdFormat format) {
+        if (config == null) return false;
+        
+        switch (format) {
+            case INTERSTITIAL:
+                return (config.getInterstitialInterval() - interstitialClickCounter) <= 1;
+            case REWARDED:
+                return (config.getRewardedInterval() - rewardedClickCounter) <= 1;
+            case REWARDED_INTERSTITIAL:
+                return (config.getRewardedInterval() - rewardedInterstitialClickCounter) <= 1;
+            case APP_OPEN:
+            case NATIVE:
+            case BANNER:
+                return true; // These formats are always "imminent" or handled differently
+            default:
+                return false;
+        }
     }
 
     /**
      * Interface for global ad event tracking across the entire application.
      */
     public interface GlobalAdListener {
+        void onAdRequested(String format, String network);
+
         void onAdLoaded(String format, String network);
 
         void onAdFailedToLoad(String format, String network, String error);
@@ -222,6 +291,10 @@ public class AdGlide {
         void onAdDismissed(String format, String network);
 
         void onAdCompleted(String format, String network);
+
+        void onLateMatchSaved(String format, String network);
+
+        void onHealerSkip(String format, String network);
     }
 
     /**
@@ -229,6 +302,11 @@ public class AdGlide {
      */
     public static void setGlobalAdListener(GlobalAdListener listener) {
         globalAdListener = listener;
+    }
+
+    public static void notifyAdRequested(String format, String network) {
+        if (globalAdListener != null)
+            globalAdListener.onAdRequested(format, network);
     }
 
     public static void notifyAdLoaded(String format, String network) {
@@ -242,6 +320,8 @@ public class AdGlide {
     }
 
     public static void notifyAdShowed(String format, String network) {
+        setAdShowing(true);
+        lastFullAdShowTime = System.currentTimeMillis();
         if (globalAdListener != null)
             globalAdListener.onAdShowed(format, network);
     }
@@ -252,6 +332,7 @@ public class AdGlide {
     }
 
     public static void notifyAdDismissed(String format, String network) {
+        setAdShowing(false);
         if (globalAdListener != null)
             globalAdListener.onAdDismissed(format, network);
     }
@@ -259,6 +340,16 @@ public class AdGlide {
     public static void notifyAdCompleted(String format, String network) {
         if (globalAdListener != null)
             globalAdListener.onAdCompleted(format, network);
+    }
+
+    public static void notifyLateMatchSaved(String format, String network) {
+        if (globalAdListener != null)
+            globalAdListener.onLateMatchSaved(format, network);
+    }
+
+    public static void notifyHealerSkip(String format, String network) {
+        if (globalAdListener != null)
+            globalAdListener.onHealerSkip(format, network);
     }
 
     // --- Developer Friendly State Helpers ---
@@ -376,15 +467,30 @@ public class AdGlide {
             if (callback != null) callback.onAdDismissed();
             return false;
         }
+        if (isAdShowing()) {
+            AdGlideLog.d(tag, "A full-screen ad is already showing. Ignoring request for [" + format + "] to ensure 'only once' policy.");
+            if (callback != null) callback.onAdDismissed();
+            return false;
+        }
+
+        // TIME-GAP PROTECTION (UX Improvement)
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastFullAdShowTime < GLOBAL_TIME_GAP_MS) {
+            long remaining = (GLOBAL_TIME_GAP_MS - (currentTime - lastFullAdShowTime)) / 1000;
+            AdGlideLog.d(tag, "Time-Gap protection active. Skipping [" + format + "] (Backoff: " + remaining + "s)");
+            if (callback != null) callback.onAdDismissed();
+            return false;
+        }
+
         return true;
     }
 
     private static class InternalCallback implements AdGlideCallback {
-        private final com.partharoypc.adglide.util.AdFormat format;
+        private final AdFormat format;
         private final Activity activity;
         private final AdGlideCallback externalCallback;
 
-        InternalCallback(com.partharoypc.adglide.util.AdFormat format, Activity activity, AdGlideCallback externalCallback) {
+        InternalCallback(AdFormat format, Activity activity, AdGlideCallback externalCallback) {
             this.format = format;
             this.activity = activity;
             this.externalCallback = externalCallback;
@@ -595,53 +701,50 @@ public class AdGlide {
         preload(activity, com.partharoypc.adglide.util.AdFormat.APP_OPEN);
     }
 
-    private static int foregroundActivityCount = 0;
-    private static boolean isChangingConfig = false;
-
-    private static void registerAppOpenLifecycle(Application application) {
-        lifecycleCallbacks = new Application.ActivityLifecycleCallbacks() {
-            @Override
-            public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
-            }
-
-            @Override
-            public void onActivityStarted(@NonNull Activity activity) {
-                foregroundActivityCount++;
-                if (foregroundActivityCount == 1 && !isChangingConfig) {
-                    if (isAdsEnabled()) {
-                        if (config.isInterstitialEnabled()) preload(activity, com.partharoypc.adglide.util.AdFormat.INTERSTITIAL);
-                        if (config.isRewardedEnabled()) preload(activity, com.partharoypc.adglide.util.AdFormat.REWARDED);
-                        if (config.isRewardedInterstitialEnabled()) preload(activity, com.partharoypc.adglide.util.AdFormat.REWARDED_INTERSTITIAL);
-                        if (config.isAppOpenEnabled()) preload(activity, com.partharoypc.adglide.util.AdFormat.APP_OPEN);
+    private static void registerProcessLifecycle() {
+        new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+            ProcessLifecycleOwner.get().getLifecycle().addObserver(new DefaultLifecycleObserver() {
+                @Override
+                public void onStart(@NonNull LifecycleOwner owner) {
+                    AdGlideLog.d(TAG, "App moved to foreground. Checking for App Open ads...");
+                    if (isAdsEnabled() && config.isAggressivePreloadEnabled()) {
+                        // Background preloading to ensure next ad is ready
+                        com.partharoypc.adglide.util.AdPoolManager.fillInterstitialPool(null);
+                        com.partharoypc.adglide.util.AdPoolManager.fillRewardedPool(null);
                     }
 
-                    if (config.isAppOpenEnabled()) {
-                        List<String> excluded = config.getOpenAdExcludedActivities();
-                        if (excluded == null || !excluded.contains(activity.getClass().getName())) {
-                            showAppOpenAd(activity, null);
+                    if (isAdsEnabled() && config.isAppOpenEnabled()) {
+                        Activity activity = currentActivityRef != null ? currentActivityRef.get() : null;
+                        if (activity != null && !activity.isFinishing()) {
+                            showAppOpenAd(activity, false, null);
+                        } else {
+                            AdGlideLog.w(TAG, "Cannot show App Open ad: No active Activity context.");
                         }
                     }
                 }
-                isChangingConfig = false;
+            });
+        });
+    }
+
+    private static void registerActivityLifecycle(Application application) {
+        if (lifecycleCallbacks != null) return;
+        
+        lifecycleCallbacks = new Application.ActivityLifecycleCallbacks() {
+            @Override public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {}
+            @Override public void onActivityStarted(@NonNull Activity activity) {
+                currentActivityRef = new java.lang.ref.WeakReference<>(activity);
             }
-
-            @Override
-            public void onActivityResumed(@NonNull Activity activity) {}
-
-            @Override
-            public void onActivityPaused(@NonNull Activity activity) {}
-
-            @Override
-            public void onActivityStopped(@NonNull Activity activity) {
-                isChangingConfig = activity.isChangingConfigurations();
-                foregroundActivityCount--;
+            @Override public void onActivityResumed(@NonNull Activity activity) {
+                currentActivityRef = new java.lang.ref.WeakReference<>(activity);
             }
-
-            @Override
-            public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {}
-
-            @Override
-            public void onActivityDestroyed(@NonNull Activity activity) {}
+            @Override public void onActivityPaused(@NonNull Activity activity) {}
+            @Override public void onActivityStopped(@NonNull Activity activity) {}
+            @Override public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {}
+            @Override public void onActivityDestroyed(@NonNull Activity activity) {
+                if (currentActivityRef != null && currentActivityRef.get() == activity) {
+                    currentActivityRef.clear();
+                }
+            }
         };
         application.registerActivityLifecycleCallbacks(lifecycleCallbacks);
     }
@@ -691,79 +794,45 @@ public class AdGlide {
                             callback.onAdShowed();
                     }
 
-                @Override
-                public void onAdDismissed() {
-                    com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
-                    if (callback != null)
-                        callback.onAdDismissed();
-                }
+                    @Override
+                    public void onAdDismissed() {
+                        com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
+                        if (callback != null)
+                            callback.onAdDismissed();
+                    }
 
-                @Override
-                public void onAdFailedToLoad(String error) {
-                    loadAndShowAppOpenOnFly(activity, ignoreCooldown, callback);
-                }
-
-                @Override
-                public void onAdLoaded() {
-                    if (callback != null)
-                        callback.onAdLoaded();
-                }
-
-                @Override
-                public void onAdCompleted() {
-                    if (callback != null)
-                        callback.onAdCompleted();
-                }
-            });
+                    @Override
+                    public void onAdFailedToLoad(String error) {
+                        loadAndShowAppOpenOnFly(activity, ignoreCooldown, callback);
+                    }
+                });
+            } else {
+                loadAndShowAppOpenOnFly(activity, ignoreCooldown, callback);
+            }
         } else {
             loadAndShowAppOpenOnFly(activity, ignoreCooldown, callback);
         }
-    } else {
-        loadAndShowAppOpenOnFly(activity, ignoreCooldown, callback);
     }
-}
 
     private static void loadAndShowAppOpenOnFly(Activity activity, boolean ignoreCooldown, AdGlideCallback callback) {
+        PerformanceLogger.log("APP_OPEN", "Loading App Open Ad on the fly");
         new AppOpenAd.Builder(activity).loadAndShow(activity, ignoreCooldown, new AdGlideCallback() {
             @Override
             public void onAdShowed() {
                 com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
-                if (callback != null)
-                    callback.onAdShowed();
+                if (callback != null) callback.onAdShowed();
             }
 
             @Override
             public void onAdDismissed() {
                 com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
-                if (callback != null)
-                    callback.onAdDismissed();
+                if (callback != null) callback.onAdDismissed();
             }
 
             @Override
             public void onAdFailedToLoad(String error) {
-                com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
-                if (callback != null)
-                    callback.onAdFailedToLoad(error);
-            }
-
-            @Override
-            public void onAdLoaded() {
-                if (callback != null)
-                    callback.onAdLoaded();
-            }
-
-            @Override
-            public void onAdCompleted() {
-                if (callback != null)
-                    callback.onAdCompleted();
+                if (callback != null) callback.onAdFailedToLoad(error);
             }
         });
-    }
-
-    public static void showDebugHUD(Activity activity) {
-        if (config != null && config.isEnableDebugHUD()) {
-            activity.startActivity(
-                    new android.content.Intent(activity, com.partharoypc.adglide.util.DebugActivity.class));
-        }
     }
 }

@@ -18,37 +18,52 @@ public class AppLovinNativeProvider implements NativeProvider {
 
     @Override
     public void loadNativeAd(Activity activity, String adUnitId, NativeConfig config, NativeListener listener) {
+        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("applovin")) {
+            listener.onAdFailedToLoad("AppLovin is currently healing from recent failures.");
+            return;
+        }
+
         nativeAdLoader = new MaxNativeAdLoader(adUnitId);
         nativeAdLoader.setNativeAdListener(new MaxNativeAdListener() {
             @Override
             public void onNativeAdLoaded(MaxNativeAdView nativeAdView, MaxAd ad) {
+                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("applovin", adUnitId);
                 AdGlideLog.d(TAG, "Native Ad loaded");
                 if (maxNativeAd != null) {
                     nativeAdLoader.destroy(maxNativeAd);
                 }
                 maxNativeAd = ad;
 
-                int layoutRes = getLayoutForStyle(config.getStyle());
-                com.applovin.mediation.nativeAds.MaxNativeAdViewBinder binder = new com.applovin.mediation.nativeAds.MaxNativeAdViewBinder.Builder(
-                        layoutRes)
-                        .setTitleTextViewId(com.partharoypc.adglide.R.id.title_text_view)
-                        .setBodyTextViewId(com.partharoypc.adglide.R.id.body_text_view)
-                        .setIconImageViewId(com.partharoypc.adglide.R.id.icon_image_view)
-                        .setMediaContentViewGroupId(com.partharoypc.adglide.R.id.media_view_container)
-                        .setOptionsContentViewGroupId(com.partharoypc.adglide.R.id.ad_options_view)
-                        .setCallToActionButtonId(com.partharoypc.adglide.R.id.cta_button)
-                        .build();
-                MaxNativeAdView customView = new MaxNativeAdView(binder, activity);
-                nativeAdLoader.render(customView, ad);
-
-
-                listener.onAdLoaded(customView);
+                if (nativeAdView != null) {
+                    listener.onAdLoaded(nativeAdView);
+                } else {
+                    // Fallback to manual rendering if view is null
+                    int layoutRes = getLayoutForStyle(config.getStyle());
+                    com.applovin.mediation.nativeAds.MaxNativeAdViewBinder binder = new com.applovin.mediation.nativeAds.MaxNativeAdViewBinder.Builder(layoutRes)
+                            .setTitleTextViewId(com.partharoypc.adglide.R.id.title_text_view)
+                            .setBodyTextViewId(com.partharoypc.adglide.R.id.body_text_view)
+                            .setIconImageViewId(com.partharoypc.adglide.R.id.icon_image_view)
+                            .setMediaContentViewGroupId(com.partharoypc.adglide.R.id.media_view_container)
+                            .setOptionsContentViewGroupId(com.partharoypc.adglide.R.id.ad_options_view)
+                            .setCallToActionButtonId(com.partharoypc.adglide.R.id.cta_button)
+                            .build();
+                    MaxNativeAdView customView = new MaxNativeAdView(binder, activity);
+                    nativeAdLoader.render(customView, ad);
+                    listener.onAdLoaded(customView);
+                }
+                listener.onAdShowed();
             }
 
             @Override
             public void onNativeAdLoadFailed(String adUnitId, MaxError error) {
+                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("applovin", adUnitId);
                 AdGlideLog.e(TAG, "Native Ad failed to load: [" + error.getCode() + "] " + error.getMessage());
                 listener.onAdFailedToLoad(error.getMessage());
+            }
+
+            @Override
+            public void onNativeAdClicked(MaxAd ad) {
+                listener.onAdClicked();
             }
         });
         AdGlideLog.d(TAG, "Loading Native Ad: " + adUnitId);
@@ -56,7 +71,6 @@ public class AppLovinNativeProvider implements NativeProvider {
     }
 
     private int getLayoutForStyle(String style) {
-        // These are not directly used by AppLovin render but kept for reference
         switch (style) {
             case "small":
                 return com.partharoypc.adglide.R.layout.adglide_app_lovin_radio_template_view;

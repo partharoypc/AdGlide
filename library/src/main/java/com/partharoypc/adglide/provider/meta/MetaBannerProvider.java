@@ -15,6 +15,12 @@ public class MetaBannerProvider implements BannerProvider {
 
     @Override
     public void loadBanner(Activity activity, String adUnitId, BannerConfig config, BannerListener listener) {
+        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed(com.partharoypc.adglide.util.Constant.AD_NETWORK_META)) {
+            listener.onAdFailedToLoad("Meta is currently healing from recent failures.");
+            return;
+        }
+        // Removed redundant notifyLoadStarted call
+
         AdSize adSize;
         if (config.isMrec()) {
             adSize = AdSize.RECTANGLE_HEIGHT_250;
@@ -26,11 +32,13 @@ public class MetaBannerProvider implements BannerProvider {
         AdListener adListener = new AdListener() {
             @Override
             public void onError(Ad ad, AdError adError) {
+                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure(com.partharoypc.adglide.util.Constant.AD_NETWORK_META, adUnitId);
                 listener.onAdFailedToLoad("[" + adError.getErrorCode() + "] " + adError.getErrorMessage());
             }
 
             @Override
             public void onAdLoaded(Ad ad) {
+                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess(com.partharoypc.adglide.util.Constant.AD_NETWORK_META, adUnitId);
                 listener.onAdLoaded(adView);
             }
 

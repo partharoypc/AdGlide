@@ -175,7 +175,8 @@ public class AppOpenAd {
                         @Override
                         public void onAdShowed() {
                             long now = System.currentTimeMillis();
-                            if (adGlidePrefs != null) adGlidePrefs.setAppOpenLastShown(now);
+                            if (adGlidePrefs == null) adGlidePrefs = new AdGlidePrefs(activity);
+                            adGlidePrefs.setAppOpenLastShown(now);
                             AdGlide.notifyAdShowed("APP_OPEN", network);
                             if (callback != null)
                                 callback.onAdShowed();
@@ -209,9 +210,17 @@ public class AppOpenAd {
         private boolean ignoreCooldown = false;
         private AdGlideCallback callback;
 
-        public Builder(Activity activity) {
-            this.activityRef = new java.lang.ref.WeakReference<>(activity);
-            this.adLoader = new com.partharoypc.adglide.util.AdLoader(activity,
+        public Activity getActivity() {
+            return activityRef != null ? activityRef.get() : null;
+        }
+
+        public Builder(@NonNull android.content.Context context) {
+            if (context instanceof Activity) {
+                this.activityRef = new java.lang.ref.WeakReference<>((Activity) context);
+            } else {
+                this.activityRef = null;
+            }
+            this.adLoader = new com.partharoypc.adglide.util.AdLoader(context,
                     com.partharoypc.adglide.util.AdFormat.APP_OPEN);
         }
 
@@ -264,11 +273,9 @@ public class AppOpenAd {
                     return;
                 }
 
-                Activity activity = activityRef.get();
+                Activity activity = (activityRef != null) ? activityRef.get() : null;
                 if (activity == null) {
-                    AdGlideLog.e(TAG, "Activity is null. Cannot load App Open from network.");
-                    resultCallback.onFailure("Activity is null");
-                    return;
+                    AdGlideLog.e(TAG, "Activity context is missing. Cannot load App Open from network. Falling back to Application context for loader, but match rate may be affected.");
                 }
                 AppOpenProvider provider = getProvider(network);
                 if (provider != null) {
@@ -278,6 +285,13 @@ public class AppOpenAd {
                         public void onAdLoaded() {
                             com.partharoypc.adglide.util.PerformanceLogger.log("AppOpen", "Loaded: " + network);
                             AdGlideLog.d(TAG, "AppOpen ad loaded from [" + network.toUpperCase(java.util.Locale.ROOT) + "]. Showing now.");
+                            
+                            if (adLoader != null && adLoader.isTimedOut()) {
+                                AdGlideLog.d(TAG, "App Open LOADED after timeout. Caching as Late Fill.");
+                                com.partharoypc.adglide.util.AdPoolManager.cacheLateFill(com.partharoypc.adglide.util.AdFormat.APP_OPEN, network, Builder.this);
+                                return;
+                            }
+                            
                             resultCallback.onSuccess();
                             if (callback != null) callback.onAdLoaded();
                             
@@ -323,6 +337,7 @@ public class AppOpenAd {
                             com.partharoypc.adglide.util.PerformanceLogger.log("AppOpen", "Showed: " + network);
                             AdGlideLog.d(TAG, "AppOpen ad showed from [" + network.toUpperCase(java.util.Locale.ROOT) + "]");
                             long now = System.currentTimeMillis();
+                            if (adGlidePrefs == null && activityRef.get() != null) adGlidePrefs = new AdGlidePrefs(activityRef.get());
                             if (adGlidePrefs != null) adGlidePrefs.setAppOpenLastShown(now);
                             AdGlide.notifyAdShowed("APP_OPEN", network);
                             if (callback != null) callback.onAdShowed();
@@ -406,6 +421,7 @@ public class AppOpenAd {
 
                         @Override
                         public void onAdShowed() {
+                            if (adGlidePrefs == null && activity != null) adGlidePrefs = new AdGlidePrefs(activity);
                             if (adGlidePrefs != null) adGlidePrefs.setAppOpenLastShown(System.currentTimeMillis());
 
                             if (callback != null)

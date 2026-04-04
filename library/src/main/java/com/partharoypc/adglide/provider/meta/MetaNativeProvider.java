@@ -23,6 +23,12 @@ public class MetaNativeProvider implements NativeProvider {
 
     @Override
     public void loadNativeAd(Activity activity, String adUnitId, NativeConfig config, NativeListener listener) {
+        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed(com.partharoypc.adglide.util.Constant.AD_NETWORK_META)) {
+            listener.onAdFailedToLoad("Meta is currently healing from recent failures.");
+            return;
+        }
+        // Removed redundant notifyLoadStarted call
+
         nativeAd = new NativeAd(activity, adUnitId);
         NativeAdListener nativeAdListener = new NativeAdListener() {
             @Override
@@ -31,6 +37,7 @@ public class MetaNativeProvider implements NativeProvider {
 
             @Override
             public void onError(Ad ad, AdError adError) {
+                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure(com.partharoypc.adglide.util.Constant.AD_NETWORK_META, adUnitId);
                 AdGlideLog.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META,
                         "Native Error: [" + adError.getErrorCode() + "] " + adError.getErrorMessage());
                 listener.onAdFailedToLoad("[" + adError.getErrorCode() + "] " + adError.getErrorMessage());
@@ -41,6 +48,7 @@ public class MetaNativeProvider implements NativeProvider {
                 if (nativeAd != ad)
                     return;
 
+                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess(com.partharoypc.adglide.util.Constant.AD_NETWORK_META, adUnitId);
                 View adView = inflateAndPopulateAdView(activity, (NativeAd) ad, config);
                 listener.onAdLoaded(adView);
             }

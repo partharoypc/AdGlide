@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import com.partharoypc.adglide.provider.AppOpenProvider;
 import com.wortise.ads.AdError;
 import com.wortise.ads.appopen.AppOpenAd;
+import java.lang.ref.WeakReference;
 import java.util.Date;
 
 public class WortiseAppOpenProvider implements AppOpenProvider, AppOpenAd.Listener {
@@ -14,10 +15,22 @@ public class WortiseAppOpenProvider implements AppOpenProvider, AppOpenAd.Listen
     private boolean isShowingAd = false;
     private long loadTime = 0;
     private AppOpenListener listener;
+    private WeakReference<Activity> activityRef;
+    private String adUnitId;
 
     @Override
     public void loadAppOpenAd(Activity activity, String adUnitId, AppOpenListener listener) {
+        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("wortise")) {
+            if (listener != null) listener.onAdFailedToLoad("Wortise is currently healing from recent failures.");
+            return;
+        }
+        // Removed redundant notifyLoadStarted call
+
+        this.activityRef = new WeakReference<>(activity);
+        this.adUnitId = adUnitId;
+
         if (isAdAvailable()) {
+            com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("wortise", adUnitId);
             listener.onAdLoaded();
             return;
         }
@@ -34,6 +47,7 @@ public class WortiseAppOpenProvider implements AppOpenProvider, AppOpenAd.Listen
     @Override
     public void showAppOpenAd(Activity activity, AppOpenListener listener) {
         this.listener = listener;
+        this.activityRef = new WeakReference<>(activity);
         if (isAdAvailable()) {
             appOpenAd.showAd();
         } else {
@@ -66,6 +80,10 @@ public class WortiseAppOpenProvider implements AppOpenProvider, AppOpenAd.Listen
 
     @Override
     public void onAppOpenLoaded(@NonNull AppOpenAd ad) {
+        Activity activity = activityRef != null ? activityRef.get() : null;
+        if (activity != null) {
+            com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("wortise", adUnitId);
+        }
         loadTime = (new Date()).getTime();
         isLoadingAd = false;
         if (listener != null)
@@ -74,6 +92,10 @@ public class WortiseAppOpenProvider implements AppOpenProvider, AppOpenAd.Listen
 
     @Override
     public void onAppOpenFailedToLoad(@NonNull AppOpenAd ad, @NonNull AdError error) {
+        Activity activity = activityRef != null ? activityRef.get() : null;
+        if (activity != null) {
+            com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("wortise", adUnitId);
+        }
         isLoadingAd = false;
         if (listener != null)
             listener.onAdFailedToLoad(error.getMessage());
@@ -81,6 +103,7 @@ public class WortiseAppOpenProvider implements AppOpenProvider, AppOpenAd.Listen
 
     @Override
     public void onAppOpenClicked(@NonNull AppOpenAd ad) {
+        if (listener != null) listener.onAdClicked();
     }
 
     @Override
@@ -88,10 +111,7 @@ public class WortiseAppOpenProvider implements AppOpenProvider, AppOpenAd.Listen
         isShowingAd = false;
         if (listener != null)
             listener.onAdDismissed();
-        // Clear listener so the stale show-listener
-        // is not called when the next ad loads.
         listener = null;
-        // Removed redundant internal auto-load to prevent double loading
     }
 
     @Override
@@ -103,6 +123,7 @@ public class WortiseAppOpenProvider implements AppOpenProvider, AppOpenAd.Listen
 
     @Override
     public void onAppOpenImpression(@NonNull AppOpenAd ad) {
+        if (listener != null) listener.onAdShowed();
     }
 
     @Override

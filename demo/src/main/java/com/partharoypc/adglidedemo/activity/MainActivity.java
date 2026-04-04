@@ -65,6 +65,88 @@ public class MainActivity extends AppCompatActivity {
         if (bannerContainer != null) {
             AdGlide.showBanner(this, bannerContainer);
         }
+
+        setupPerformanceMonitor();
+    }
+
+    private void setupPerformanceMonitor() {
+        TextView tvShowRate = findViewById(R.id.tv_show_rate_value);
+        TextView tvLateFill = findViewById(R.id.tv_late_fill_value);
+        TextView tvMatchRate = findViewById(R.id.tv_match_rate_value);
+        TextView tvSessionStats = findViewById(R.id.tv_session_stats);
+        TextView tvHealerSkips = findViewById(R.id.tv_healer_skips);
+        TextView tvHealthStatus = findViewById(R.id.tv_health_status);
+
+        AdGlide.setGlobalAdListener(new AdGlide.GlobalAdListener() {
+            @Override
+            public void onAdRequested(String format, String network) {
+                com.partharoypc.adglidedemo.util.PerformanceMonitor.recordRequest();
+                updateDashboard();
+            }
+
+            @Override
+            public void onAdLoaded(String format, String network) {
+                com.partharoypc.adglidedemo.util.PerformanceMonitor.recordMatch();
+                updateDashboard();
+            }
+
+            @Override
+            public void onAdFailedToLoad(String format, String network, String error) {}
+
+            @Override
+            public void onAdShowed(String format, String network) {
+                com.partharoypc.adglidedemo.util.PerformanceMonitor.recordImpression();
+                updateDashboard();
+            }
+
+            @Override
+            public void onAdClicked(String format, String network) {}
+
+            @Override
+            public void onAdDismissed(String format, String network) {}
+
+            @Override
+            public void onAdCompleted(String format, String network) {}
+
+            @Override
+            public void onLateMatchSaved(String format, String network) {
+                com.partharoypc.adglidedemo.util.PerformanceMonitor.recordLateMatchSaved();
+                updateDashboard();
+                showToast("♻️ Zero-Waste: Late match saved for " + format);
+            }
+
+            @Override
+            public void onHealerSkip(String format, String network) {
+                com.partharoypc.adglidedemo.util.PerformanceMonitor.recordHealerSkip();
+                updateDashboard();
+                showToast("⚔️ Healer: Skipped unhealthy [" + network + "] for Zero-Waste");
+            }
+
+            private void updateDashboard() {
+                runOnUiThread(() -> {
+                    tvShowRate.setText(String.format(java.util.Locale.ROOT, "%.0f%%", com.partharoypc.adglidedemo.util.PerformanceMonitor.getShowRate()));
+                    tvLateFill.setText(String.valueOf(com.partharoypc.adglidedemo.util.PerformanceMonitor.getLateMatchesSaved()));
+                    tvMatchRate.setText(String.format(java.util.Locale.ROOT, "%.0f%%", com.partharoypc.adglidedemo.util.PerformanceMonitor.getMatchRate()));
+                    tvHealerSkips.setText(String.valueOf(com.partharoypc.adglidedemo.util.PerformanceMonitor.getHealerSkips()));
+                    
+                    // Health status logic
+                    if (com.partharoypc.adglidedemo.util.PerformanceMonitor.getHealerSkips() > 5) {
+                        tvHealthStatus.setText("HEALING");
+                        tvHealthStatus.setTextColor(android.graphics.Color.YELLOW);
+                    } else if (com.partharoypc.adglidedemo.util.PerformanceMonitor.getHealerSkips() > 0) {
+                        tvHealthStatus.setText("PROTECTED");
+                        tvHealthStatus.setTextColor(android.graphics.Color.CYAN);
+                    } else {
+                        tvHealthStatus.setText("EXCELLENT");
+                        tvHealthStatus.setTextColor(android.graphics.Color.GREEN);
+                    }
+
+                    tvSessionStats.setText(String.format(java.util.Locale.ROOT, "Session: %d Requests | %d Impressions", 
+                        com.partharoypc.adglidedemo.util.PerformanceMonitor.getTotalRequests(), 
+                        com.partharoypc.adglidedemo.util.PerformanceMonitor.getTotalImpressions()));
+                });
+            }
+        });
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -235,7 +317,7 @@ public class MainActivity extends AppCompatActivity {
             if (item.getActivityClass() != null) {
                 startActivity(new Intent(this, item.getActivityClass()));
             } else if (item.getTitle().contains("Debugger")) {
-                AdGlide.showDebugHUD(this);
+                android.widget.Toast.makeText(this, "Debug HUD is deprecated", android.widget.Toast.LENGTH_SHORT).show();
             }
         });
         recyclerView.setAdapter(adapter);

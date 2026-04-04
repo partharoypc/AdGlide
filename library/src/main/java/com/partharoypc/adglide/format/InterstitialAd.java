@@ -17,6 +17,7 @@ import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.AdGlideConfig;
 import android.app.Activity;
 import com.partharoypc.adglide.util.AdGlideLog;
+import com.partharoypc.adglide.util.AdGlideCallback;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,8 +25,8 @@ import androidx.annotation.Nullable;
 import com.partharoypc.adglide.AdGlideNetwork;
 import com.partharoypc.adglide.provider.InterstitialProvider;
 import com.partharoypc.adglide.provider.InterstitialProviderFactory;
-import com.partharoypc.adglide.util.AdGlideCallback;
-import com.partharoypc.adglide.util.Tools;
+import com.partharoypc.adglide.util.AdFormat;
+import com.partharoypc.adglide.util.AdPoolManager;
 import com.partharoypc.adglide.util.WaterfallManager;
 
 public class InterstitialAd {
@@ -40,10 +41,18 @@ public class InterstitialAd {
         private boolean showOnLoad = false;
         private AdGlideCallback callback;
 
+        public Activity getActivity() {
+            return activityRef != null ? activityRef.get() : null;
+        }
 
-        public Builder(@NonNull Activity activity) {
-            this.activityRef = new java.lang.ref.WeakReference<>(activity);
-            this.adLoader = new com.partharoypc.adglide.util.AdLoader(activity,
+
+        public Builder(@NonNull android.content.Context context) {
+            if (context instanceof Activity) {
+                this.activityRef = new java.lang.ref.WeakReference<>((Activity) context);
+            } else {
+                this.activityRef = null;
+            }
+            this.adLoader = new com.partharoypc.adglide.util.AdLoader(context,
                     com.partharoypc.adglide.util.AdFormat.INTERSTITIAL);
         }
 
@@ -143,11 +152,9 @@ public class InterstitialAd {
                     return;
                 }
 
-                Activity activity = activityRef.get();
+                Activity activity = (activityRef != null) ? activityRef.get() : null;
                 if (activity == null) {
-                    AdGlideLog.e(TAG, "Activity is null. Cannot load Interstitial from network.");
-                    resultCallback.onFailure("Activity is null");
-                    return;
+                    AdGlideLog.e(TAG, "Activity context is missing. Cannot load Interstitial. Falling back to Application context for loader, but match rate may be affected.");
                 }
 
                 InterstitialProvider provider = InterstitialProviderFactory.getProvider(networkToLoad);
@@ -162,6 +169,13 @@ public class InterstitialAd {
                                     com.partharoypc.adglide.util.PerformanceLogger.log("Interstitial",
                                             "Loaded: " + networkToLoad);
                                     AdGlideLog.d(TAG, networkToLoad + " Interstitial Ad loaded");
+                                    
+                                    if (adLoader != null && adLoader.isTimedOut()) {
+                                        AdGlideLog.d(TAG, "Interstitial loaded AFTER timeout. Caching as Late Fill.");
+                                        AdPoolManager.cacheLateFill(AdFormat.INTERSTITIAL, networkToLoad, Builder.this);
+                                        return;
+                                    }
+                                    
                                     resultCallback.onSuccess();
                                     if (showOnLoad) {
                                         showOnLoad = false;

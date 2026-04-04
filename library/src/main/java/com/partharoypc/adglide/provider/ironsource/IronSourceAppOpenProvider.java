@@ -16,16 +16,24 @@ public class IronSourceAppOpenProvider implements AppOpenProvider {
 
     @Override
     public void loadAppOpenAd(Activity activity, String adUnitId, AppOpenListener listener) {
+        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("ironsource")) {
+            if (listener != null) listener.onAdFailedToLoad("IronSource is currently healing from recent failures.");
+            return;
+        }
+        // Removed redundant notifyLoadStarted call
+
         this.activeListener = listener;
         interstitialAd = new LevelPlayInterstitialAd(adUnitId);
         interstitialAd.setListener(new LevelPlayInterstitialAdListener() {
             @Override
             public void onAdLoaded(@NonNull LevelPlayAdInfo adInfo) {
+                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("ironsource", adUnitId);
                 if (activeListener != null) activeListener.onAdLoaded();
             }
 
             @Override
             public void onAdLoadFailed(@NonNull LevelPlayAdError error) {
+                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("ironsource", adUnitId);
                 if (activeListener != null) activeListener.onAdFailedToLoad(error.getErrorMessage());
             }
 
