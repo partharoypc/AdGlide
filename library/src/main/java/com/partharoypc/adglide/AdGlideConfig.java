@@ -25,7 +25,6 @@ public class AdGlideConfig {
     private final boolean debugGDPR;
     private final boolean enableDebugHUD;
     private final int adResponseTimeoutMs;
-    private final boolean aggressivePreload;
     private boolean isValid = true;
 
     // Granular Ad Type Status
@@ -119,7 +118,6 @@ public class AdGlideConfig {
         this.debugGDPR = builder.debugGDPR;
         this.enableDebugHUD = builder.enableDebugHUD;
         this.adResponseTimeoutMs = builder.adResponseTimeoutMs;
-        this.aggressivePreload = builder.aggressivePreload;
 
         this.bannerStatus = builder.bannerStatus;
         this.interstitialStatus = builder.interstitialStatus;
@@ -217,7 +215,6 @@ public class AdGlideConfig {
             .debugGDPR(this.debugGDPR)
             .enableDebugHUD(this.enableDebugHUD)
             .adResponseTimeout(this.adResponseTimeoutMs)
-            .aggressivePreload(this.aggressivePreload)
             .adMobAppId(this.adMobAppId)
             .startAppId(this.startappAppId)
             .unityGameId(this.unityGameId)
@@ -349,9 +346,6 @@ public class AdGlideConfig {
         return adResponseTimeoutMs;
     }
 
-    public boolean isAggressivePreloadEnabled() {
-        return aggressivePreload;
-    }
 
     public boolean isBannerEnabled() {
         return bannerStatus;
@@ -686,7 +680,6 @@ public class AdGlideConfig {
         private boolean debugGDPR = false;
         private boolean enableDebugHUD = false;
         private int adResponseTimeoutMs = 8000; // Increased to 8 seconds for better match rate with AdMob/Meta
-        private boolean aggressivePreload = true;
         private int appOpenCooldownMinutes = 30;
 
         private String adMobAppId = "";
@@ -888,10 +881,6 @@ public class AdGlideConfig {
             return this;
         }
 
-        public Builder aggressivePreload(boolean enable) {
-            this.aggressivePreload = enable;
-            return this;
-        }
 
         public Builder adMobAppId(String id) {
             this.adMobAppId = id;

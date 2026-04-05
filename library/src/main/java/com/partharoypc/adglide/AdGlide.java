@@ -701,7 +701,7 @@ public class AdGlide {
                 @Override
                 public void onStart(@NonNull LifecycleOwner owner) {
                     AdGlideLog.d(TAG, "App moved to foreground. Checking for App Open ads...");
-                    if (isAdsEnabled() && config.isAggressivePreloadEnabled()) {
+                    if (isAdsEnabled() && config.isAutoLoadEnabled()) {
                         // Background preloading to ensure next ad is ready
                         com.partharoypc.adglide.util.AdPoolManager.fillInterstitialPool(null);
                         com.partharoypc.adglide.util.AdPoolManager.fillRewardedPool(null);
