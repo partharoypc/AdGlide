@@ -6,7 +6,7 @@
 
 ### *The Premium Mediation Wrapper for High-Performance Android Apps*
 
-[![Version](https://img.shields.io/badge/Version-2.0.0-blue.svg)](https://github.com/partharoypc/AdGlide)
+[![Version](https://img.shields.io/badge/Version-2.1.0-blue.svg)](https://github.com/partharoypc/AdGlide)
 [![Android](https://img.shields.io/badge/Android-23%2B-green.svg)](https://developer.android.com)
 [![Compile SDK](https://img.shields.io/badge/Compile_SDK-36-green.svg)](https://developer.android.com)
 [![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://openjdk.org/projects/jdk/17/)
@@ -16,14 +16,15 @@
 
 ---
 
-## ✨ What's New in v2.0.0 (The Major Leap Forward)
+## ✨ What's New in v2.1.0 (The Performance Update)
 
-- **📱 "Super Perfect" App Open Ads** — New rotation-proof lifecycle management. Ads only trigger on true app-resume, never during screen rotations.
-- **💎 100% Lint-Free Quality** — Industrial-grade codebase with zero warnings (Locale/I18n fixed) for maximum stability and performance.
-- **🛡️ Refined Zero-Config ProGuard** — Embedded `consumer-rules.pro` now features even tighter, more secure scopes for all 8+ mediation networks.
-- **⚡ "Zero-Wait" Pre-loading** — Optimized pooling engine with immediate background refills for instant ad delivery.
-- **🔄 Dynamic Versioning** — SDK logs and performance metrics now automatically sync with the latest build versioning.
-- **🏠 Expanded House Ads** — Native House Ads now support full click-tracking and optimized video templates.
+- **📊 Real-time Performance Dashboard** — NEW: Integrated Debug HUD now features live Match Rate and Show Rate tracking for all formats.
+- **⚡ "Zero-Waste" Caching** — Optimized pooling engine with proactive background refills and matching logic for near-100% show rates.
+- **🛡️ Industrial-Grade UX Protection** — Built-in 15s global time-gap between full-screen ads to prevent accidental overlaps and improve retention.
+- **📱 Smart App-Open Throttling** — Ads now only trigger on meaningful app resumes (backgrounded >30s), avoiding frustration during rapid task-switching.
+- **🏠 Offline Resilience** — House Ads now proactively pre-fetch assets and store metadata locally for 100% offline ad availability.
+- **🔄 Meta Bidding Expansion** — Full type-safe support for Meta Bidding via AdMob, AppLovin (MAX), and IronSource (LevelPlay) orchestration.
+- **💎 100% Lint-Free Quality** — Refined codebase with zero warnings for maximum stability in production environments.
 
 ---
 
@@ -89,7 +90,7 @@ Open your **app-level `build.gradle`** and add the AdGlide core plus only the ne
 ```gradle
 dependencies {
     // 🚀 AdGlide Core (Required)
-    implementation 'com.github.partharoypc:adglide:2.0.0'
+    implementation 'com.github.partharoypc:adglide:2.1.0'
 
     // ─── Choose Your Networks ───────────────────────────────────────
     implementation 'com.google.android.gms:play-services-ads:25.0.0'       // AdMob ✅
@@ -142,13 +143,13 @@ public class MyApplication extends Application {
         AdGlideConfig config = new AdGlideConfig.Builder()
             // ─── Global Settings ─────────────────────────────────────────
             .enableAds(true)                         // Master on/off switch
-            .testMode(true)                          // 🛡️ Centralized one-flag diagnostics
-            .autoLoad(true)                          // 🔄 NEW: Master switch for background pre-fetching
-            .adResponseTimeout(3500)                 // ⏱️ NEW: Max wait (ms) for network response
+            .testMode(true)                          // 🛡️ Centralized diagnostics (Auto-enables Debug HUD)
+            .autoLoad(true)                          // 🔄 Master switch for background pre-fetching
+            .adResponseTimeout(8000)                 // ⏱️ Max wait (ms) for network response (Improved for Bidding)
             
             // ─── Waterfall Strategy (Type-Safe Enum) ─────────────────────
             .primaryNetwork(AdGlideNetwork.ADMOB)
-            .backupNetworks(AdGlideNetwork.META, AdGlideNetwork.UNITY, AdGlideNetwork.IRONSOURCE)
+            .backupNetworks(AdGlideNetwork.META, AdGlideNetwork.APPLOVIN_MAX, AdGlideNetwork.IRONSOURCE)
 
             // ─── Format Toggles ──────────────────────────────────────────
             .bannerEnabled(true)
@@ -156,10 +157,10 @@ public class MyApplication extends Application {
             .rewardedEnabled(true)
             .nativeEnabled(true)
             .appOpenEnabled(true)
-            .rewardedInterstitialEnabled(true)      // 🆕 NEW: Rewarded Interstitial support
+            .rewardedInterstitialEnabled(true)
 
             // ─── Smart Loading & Intervals ──────────────────────────────
-            .appOpenCooldown(15)                     // ⏱️ Wait 15 mins between app-resume ads
+            .appOpenCooldown(30)                     // ⏱️ NEW: Wait 30 mins between app-resume ads
             .interstitialInterval(2)                 // Show every N clicks (0 = always)
             .rewardedInterval(1)                     // Show every N clicks (0 = always)
 
@@ -445,9 +446,9 @@ House Ads keep your inventory monetized even when all ad networks fail to fill. 
 
 ---
 
-### 🛠️ 4.2 Live Debug HUD
+### 🛠️ 4.2 Real-time Performance Dashboard (Debug HUD)
 
-The Debug HUD shows you exactly which network filled, failed, or was rate-limited on your device in real time.
+The integrated Debug HUD now includes a **Performance Dashboard** that shows you exactly which network filled, failed, or was rate-limited in real time. It calculates your **Match Rate** and **Show Rate** on the fly.
 
 ```java
 // Trigger via a secret gesture or developer menu
@@ -455,7 +456,13 @@ AdGlide.showDebugHUD(activity);
 ```
 
 > [!TIP]
-> Enable in config with `.enableDebugHUD(true)`. The HUD shows a **Waterfall Status** panel, a full **Performance Log**, and a **Clear Logs** button.
+> Enable in config with `.enableDebugHUD(true)`. The HUD features:
+>
+> - **Waterfall Status**: Visualizes the refill queue for all formats.
+> - **Real-time Metrics**: Live calculation of Match Rate and Show Rate.
+> - **Zero-Waste Logs**: Tracks background refills and "late matches" saved for future sessions.
+> - **Clear Logs**: Instantly reset metrics for a fresh test run.
+
 
 ---
 
@@ -533,11 +540,12 @@ You **do not** need to write any manual ProGuard rules for AdGlide or its suppor
 | Practice | Recommendation |
 | :--- | :--- |
 | **App Open Ads** | Always enable — highest eCPM format. Exclude only truly blocking screens. |
-| **Auto-Loading** | Use `.autoLoadInterstitial(true)` for zero-wait ad-ready state. |
-| **Waterfall** | Set at least 1 backup network for higher fill rates. |
+| **Auto-Loading** | Use `.autoLoad(true)` for zero-wait ad-ready state across all formats. |
+| **Waterfall** | Set at least 2 backup networks for near-100% fill rates in global markets. |
+| **UX Protection** | Our built-in **15s Global Time-Gap** prevents showing back-to-back full ads. |
 | **Intervals** | Start with `interstitialInterval(2)` — show every 2nd click to balance UX & revenue. |
-| **House Ads** | Always configure a fallback — never waste an impression. |
-| **Test Mode** | Always develop with `.testMode(true)` — **never** use real ads during testing. |
+| **House Ads** | Configure fallbacks — AdGlide v2.1.0 keeps assets cached for offline use. |
+| **Test Mode** | Always develop with `.testMode(true)` — it auto-configures all debug features. |
 | **Collapsible Banners** | Use on home/dashboard screens for up to 5× standard CPM. |
 
 ---
@@ -547,7 +555,7 @@ You **do not** need to write any manual ProGuard rules for AdGlide or its suppor
 | Method | Type | Default | Description |
 | :--- | :--- | :---: | :--- |
 | `enableAds(bool)` | `boolean` | `false` | Master ad on/off toggle |
-| `testMode(bool)` | `boolean` | `false` | Use test ads during development |
+| `testMode(bool)` | `boolean` | `false` | Use test ads + auto-enable Debug HUD |
 | `autoLoad(bool)` | `boolean` | `true` | Master switch for background pre-fetching |
 | `primaryNetwork(network)` | `AdGlideNetwork` | — | Primary network (Enum preferred) |
 | `backupNetworks(n...)` | `AdGlideNetwork...`| — | Fallback networks (Enum preferred) |
@@ -568,7 +576,7 @@ You **do not** need to write any manual ProGuard rules for AdGlide or its suppor
 | `interstitialInterval(int)` | `int` | `0` | Show every N calls (0 = always) |
 | `rewardedInterval(int)` | `int` | `0` | Show every N calls (0 = always) |
 | `appOpenCooldown(int)` | `int` | `30` | Cooldown (mins) between app-resume ads |
-| `adResponseTimeout(ms)`| `int` | `3500` | Max wait for network response |
+| `adResponseTimeout(ms)`| `int` | `8000` | Max wait for network response |
 | `houseAdEnabled(bool)` | `boolean` | `false` | Enable house ads fallback |
 | `excludeOpenAdFrom(Class...)` | `Class<?>...` | — | Blacklist activities from App Open |
 | `enableGDPR(bool)` | `boolean` | `false` | Show UMP consent form |
