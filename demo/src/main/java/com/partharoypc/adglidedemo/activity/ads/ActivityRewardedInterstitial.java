@@ -43,32 +43,31 @@ public class ActivityRewardedInterstitial extends AppCompatActivity {
         });
 
         btnShow.setOnClickListener(v -> {
-            Toast.makeText(this, "💎 Triggering Rewarded Interstitial (Builder API)...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "💎 Triggering Rewarded Interstitial (Platinum Static API)...", Toast.LENGTH_SHORT).show();
             
-            // Professional one-liner handling full lifecycle automatically
-            new com.partharoypc.adglide.format.RewardedInterstitialAd.Builder(this)
-                    .loadAndShow(this, new AdGlideCallback() {
-                        @Override
-                        public void onAdShowed() {
-                            Toast.makeText(ActivityRewardedInterstitial.this, "✅ Ad Showed (Zero-Latency if pooled)", Toast.LENGTH_SHORT).show();
-                        }
+            // High-level helper: Automatically handles Intervals, Time-Gaps, and Global locks.
+            AdGlide.showRewardedInterstitial(this, new AdGlideCallback() {
+                @Override
+                public void onAdShowed() {
+                    Toast.makeText(ActivityRewardedInterstitial.this, "✅ Ad Showed (Zero-Latency if pooled)", Toast.LENGTH_SHORT).show();
+                }
 
-                        @Override
-                        public void onAdFailedToLoad(@Nullable String error) {
-                            Toast.makeText(ActivityRewardedInterstitial.this, "🛑 Ad Failed: " + (error != null ? error : "No Fill"),
-                                    Toast.LENGTH_SHORT).show();
-                        }
+                @Override
+                public void onAdFailedToLoad(@Nullable String error) {
+                    Toast.makeText(ActivityRewardedInterstitial.this, "🛑 Ad Failed or Skipped: " + (error != null ? error : "Interval/Time-Gap Not Met"),
+                            Toast.LENGTH_SHORT).show();
+                }
 
-                        @Override
-                        public void onAdDismissed() {
-                            Toast.makeText(ActivityRewardedInterstitial.this, "👋 Ad Closed", Toast.LENGTH_SHORT).show();
-                        }
+                @Override
+                public void onAdDismissed() {
+                    Toast.makeText(ActivityRewardedInterstitial.this, "👋 Ad Closed", Toast.LENGTH_SHORT).show();
+                }
 
-                        @Override
-                        public void onAdCompleted() {
-                            Toast.makeText(ActivityRewardedInterstitial.this, "🏆 Reward Granted!", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                @Override
+                public void onAdCompleted() {
+                    Toast.makeText(ActivityRewardedInterstitial.this, "🏆 Reward Granted!", Toast.LENGTH_SHORT).show();
+                }
+            });
         });
     }
 }

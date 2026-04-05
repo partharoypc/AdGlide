@@ -180,17 +180,20 @@ public class InterstitialAd {
                                 public void onAdFailedToLoad(String error) {}
                                 @Override
                                 public void onAdDismissed() {
+                                    AdGlide.setAdShowing(false);
                                     if (callback != null) callback.onAdDismissed();
                                     // Removed redundant auto-load call to prevent double loading
                                 }
                                 @Override
                                 public void onAdShowFailed(String error) {
+                                    AdGlide.setAdShowing(false);
                                     AdGlideLog.e(TAG, "Interstitial Ad failed to show: " + error);
                                     if (callback != null) callback.onAdDismissed();
                                     // Removed redundant auto-load call to prevent double loading
                                 }
                                 @Override
                                 public void onAdShowed() {
+                                    AdGlide.setAdShowing(true);
                                     AdGlide.notifyAdShowed("INTERSTITIAL", currentNetwork);
                                     if (callback != null) callback.onAdShowed();
                                 }

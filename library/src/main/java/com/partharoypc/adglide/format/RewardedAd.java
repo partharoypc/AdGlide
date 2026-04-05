@@ -161,9 +161,18 @@ public class RewardedAd {
 
                                 @Override
                                 public void onAdDismissed() {
+                                    AdGlide.setAdShowing(false);
+                                    AdGlide.notifyAdDismissed("REWARDED", currentNetwork);
                                     if (callback != null)
                                         callback.onAdDismissed();
-                                    // Removed redundant auto-load call to prevent double loading
+                                }
+
+                                @Override
+                                public void onAdShowFailed(String error) {
+                                    AdGlide.setAdShowing(false);
+                                    AdGlideLog.e(TAG, "Rewarded Ad failed to show: " + error);
+                                    if (callback != null)
+                                        callback.onAdDismissed();
                                 }
 
                                 @Override
@@ -179,7 +188,9 @@ public class RewardedAd {
 
                                 @Override
                                 public void onAdShowed() {
+                                    AdGlide.setAdShowing(true);
                                     AdGlide.notifyAdShowed("REWARDED", currentNetwork);
+                                    if (callback != null) callback.onAdShowed();
                                 }
 
                                 @Override

@@ -189,7 +189,8 @@ public class AdLoader {
         
         handler.postDelayed(timeoutRunnable, timeoutMs);
 
-        executor.loadNetwork(network, new LoadResultCallback() {
+        try {
+            executor.loadNetwork(network, new LoadResultCallback() {
             @Override
             public void onSuccess() {
                 if (!isFinished.compareAndSet(false, true)) return;
@@ -209,12 +210,12 @@ public class AdLoader {
                     return; // DO NOT call finalCallback. The builder will cache the Late Fill and AdPool handles it.
                 }
 
+                inFlightRequests.put(format, false);
                 if (finalCallback != null) finalCallback.onAdLoaded(network);
                 AdGlide.notifyAdLoaded(format != null ? format.name() : "UNKNOWN", network);
                 if (context != null) {
                     com.partharoypc.adglide.util.NetworkHealer.getInstance(context).recordSuccess(network, formatName);
                 }
-                inFlightRequests.put(format, false);
             }
 
             @Override
@@ -241,15 +242,14 @@ public class AdLoader {
                     com.partharoypc.adglide.util.NetworkHealer.getInstance(context).recordFailure(network, formatName, isTechnical);
                 }
 
-                // If error indicates a configuration issue, blacklist for session to avoid timeouts
-                if (error != null && (error.toLowerCase(java.util.Locale.ROOT).contains("invalid") || error.toLowerCase(java.util.Locale.ROOT).contains("not found"))) {
-                    sessionBlacklist.add(network);
-                }
-
                 // Execute Next only if we're not timed out and successfully finished the current network
                 new Handler(Looper.getMainLooper()).post(() -> executeNext(executor, finalCallback));
             }
         });
+        } catch (Exception e) {
+            AdGlideLog.e(TAG, "Exception during loadNetwork for " + network + ": " + e.getMessage());
+            executeNext(executor, finalCallback);
+        }
     }
 
     private boolean isTechnicalError(String error) {

@@ -54,27 +54,25 @@ public class ActivityAppOpen extends AppCompatActivity {
     }
 
     private void showAppOpenAd() {
-        appendLog("💎 Triggering App Open Ad (Builder API)...");
+        appendLog("💎 Triggering App Open Ad (Platinum Static API)...");
         
-        // Professional one-liner: Handles Cooldown, Loading, and Showing automatically.
-        new com.partharoypc.adglide.format.AppOpenAd.Builder(this)
-                .loadAndShow(this, new AdGlideCallback() {
-                    @Override
-                    public void onAdFailedToLoad(@Nullable String error) {
-                        appendLog("🛑 Ad Failed: " + (error != null ? error : "No Fill"));
-                    }
+        // High-level helper: Automatically handles Cooldown and Global locks.
+        AdGlide.showAppOpenAd(this, new AdGlideCallback() {
+            @Override
+            public void onAdFailedToLoad(@Nullable String error) {
+                appendLog("🛑 Ad Failed or Skipped: " + (error != null ? error : "Cooldown Not Elapsed"));
+            }
 
-                    @Override
-                    public void onAdShowed() {
-                        appendLog("👁️ App Open Ad Showed Successfully");
-                    }
+            @Override
+            public void onAdShowed() {
+                appendLog("👁️ App Open Ad Showed Successfully");
+            }
 
-                    @Override
-                    public void onAdDismissed() {
-                        appendLog("👋 App Open Ad Dismissed — Pool replenishing...");
-                        Log.d(TAG, "onAdDismissed");
-                    }
-                });
+            @Override
+            public void onAdDismissed() {
+                appendLog("👋 App Open Ad Dismissed — Pool replenishing...");
+            }
+        });
     }
 
     private void appendLog(@NonNull String text) {

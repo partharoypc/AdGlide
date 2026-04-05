@@ -47,7 +47,7 @@ public class AdGlide {
 
     // Time-Gap Protection
     private static final AtomicLong lastFullAdShowTime = new AtomicLong(0);
-    private static final long GLOBAL_TIME_GAP_MS = 60000; // 60 seconds
+    private static final long GLOBAL_TIME_GAP_MS = 15000; // 15 seconds
 
     private static final AtomicBoolean isInitialized = new AtomicBoolean(false);
     private static final AtomicBoolean isAdShowing = new AtomicBoolean(false);
@@ -104,6 +104,8 @@ public class AdGlide {
             if (config.isAppOpenEnabled() && !isAppOpenRegistered.getAndSet(true)) {
                 registerActivityLifecycle(application);
                 registerProcessLifecycle();
+                // Proactively fill App Open pool for the first foreground transition
+                com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(null);
             }
         }
         PerformanceLogger.log("Core", "AdGlide initialized (v" + (config.isDebug() ? "DEBUG" : "RELEASE") + ")");
@@ -323,8 +325,10 @@ public class AdGlide {
     }
 
     public static void notifyAdShowed(String format, String network) {
-        setAdShowing(true);
-        lastFullAdShowTime.set(System.currentTimeMillis());
+        if (isFullScreenFormat(format)) {
+            setAdShowing(true);
+            lastFullAdShowTime.set(System.currentTimeMillis());
+        }
         if (globalAdListener != null)
             globalAdListener.onAdShowed(format, network);
     }
@@ -335,9 +339,17 @@ public class AdGlide {
     }
 
     public static void notifyAdDismissed(String format, String network) {
-        setAdShowing(false);
+        if (isFullScreenFormat(format)) {
+            setAdShowing(false);
+        }
         if (globalAdListener != null)
             globalAdListener.onAdDismissed(format, network);
+    }
+
+    private static boolean isFullScreenFormat(String format) {
+        if (format == null) return false;
+        String f = format.toUpperCase(java.util.Locale.ROOT);
+        return f.equals("INTERSTITIAL") || f.equals("REWARDED") || f.equals("REWARDED_INTERSTITIAL") || f.equals("APP_OPEN");
     }
 
     public static void notifyAdCompleted(String format, String network) {
@@ -451,9 +463,6 @@ public class AdGlide {
 
         PerformanceLogger.log("INTERSTITIAL", "Triggering Interstitial Ad");
 
-        // Strict "Only Once" show policy
-        isAdShowing.set(true);
-
         // The unified Builder now manages both 'Loaded' (pooled) and 'LoadAndShow' logic
         InternalCallback internalCallback = new InternalCallback(com.partharoypc.adglide.util.AdFormat.INTERSTITIAL, activity, callback);
         
@@ -526,6 +535,12 @@ public class AdGlide {
             if (externalCallback != null) externalCallback.onAdFailedToLoad(error);
         }
 
+        @Override
+        public void onAdShowFailed(String error) {
+            isAdShowing.set(false); // Reset if show attempt fails at runtime
+            if (externalCallback != null) externalCallback.onAdDismissed();
+        }
+
         private void autoPreload() {
             // Always preload the next ad after one is used, as per "Preload after Show" logic
             preload(activity, format);
@@ -561,8 +576,7 @@ public class AdGlide {
             return;
         }
 
-        // Strict "Only Once" show policy
-        isAdShowing.set(true);
+        AdGlideLog.d(TAG, "Rewarded Ad interval met. Proceeding...");
 
         InternalCallback internalCallback = new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED, activity, callback);
 
@@ -596,8 +610,7 @@ public class AdGlide {
             return;
         }
 
-        // Strict "Only Once" show policy
-        isAdShowing.set(true);
+        AdGlideLog.d(TAG, "Rewarded Interstitial Ad interval met. Proceeding...");
 
         InternalCallback internalCallback = new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED_INTERSTITIAL, activity, callback);
 
@@ -721,10 +734,11 @@ public class AdGlide {
                         com.partharoypc.adglide.util.AdPoolManager.fillRewardedPool(null);
                     }
 
-                    // SMART BACKOFF: Only show if the app was in the background for >30 seconds
+                    // SMART BACKOFF: Only show if the app was in the background for >30 seconds (5s in Debug)
+                    long backoffTime = (config != null && config.isDebug()) ? 5000 : 30000;
                     long backgroundTime = System.currentTimeMillis() - lastBackgroundTime;
-                    if (lastBackgroundTime > 0 && backgroundTime < 30000) {
-                        AdGlideLog.d(TAG, "SKIPPING App Open Ad: User returned within " + (backgroundTime / 1000) + "s. (Backoff Threshold: 30s)");
+                    if (lastBackgroundTime > 0 && backgroundTime < backoffTime) {
+                        AdGlideLog.d(TAG, "SKIPPING App Open Ad: User returned within " + (backgroundTime / 1000) + "s. (Backoff Threshold: " + (backoffTime / 1000) + "s)");
                         return;
                     }
 

@@ -5,6 +5,7 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
+import com.partharoypc.adglide.AdGlide;
 import com.partharoypc.adglide.util.AdFormat;
 import com.partharoypc.adglide.util.AdGlideCallback;
 import com.partharoypc.adglide.util.AdGlideLog;
@@ -100,6 +101,7 @@ public abstract class BaseAdBuilder<T extends BaseAdBuilder<T>> {
         // Lifecycle Guard: Prevent crashes if the activity is already finishing or destroyed
         if (displayActivity.isFinishing() || (android.os.Build.VERSION.SDK_INT >= 17 && displayActivity.isDestroyed())) {
             AdGlideLog.e(TAG, "Cannot show Ad: Activity is finishing or already destroyed.");
+            AdGlide.setAdShowing(false); // <--- NUCLEAR FAIL-SAFE
             if (callback != null) callback.onAdDismissed();
             return;
         }

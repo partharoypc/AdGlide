@@ -145,6 +145,16 @@ public class RewardedInterstitialAd {
 
                             @Override
                             public void onAdDismissed() {
+                                AdGlide.setAdShowing(false);
+                                AdGlide.notifyAdDismissed("REWARDED_INTERSTITIAL", currentNetwork);
+                                if (callback != null)
+                                    callback.onAdDismissed();
+                            }
+
+                            @Override
+                            public void onAdShowFailed(String error) {
+                                AdGlide.setAdShowing(false);
+                                AdGlideLog.e(TAG, "Rewarded Interstitial Ad failed to show: " + error);
                                 if (callback != null)
                                     callback.onAdDismissed();
                             }
@@ -158,7 +168,9 @@ public class RewardedInterstitialAd {
 
                             @Override
                             public void onAdShowed() {
+                                AdGlide.setAdShowing(true);
                                 AdGlide.notifyAdShowed("REWARDED_INTERSTITIAL", currentNetwork);
+                                if (callback != null) callback.onAdShowed();
                             }
 
                             @Override

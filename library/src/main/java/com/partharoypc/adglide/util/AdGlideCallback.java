@@ -1,17 +1,13 @@
 package com.partharoypc.adglide.util;
 
-/**
- * Unified callback for all ad events in the AdGlide SDK.
- * Provides default empty implementations to allow developers to override only
- * needed methods.
- */
 public interface AdGlideCallback {
     /** Called when an ad is successfully loaded. */
     default void onAdLoaded() {
     }
 
     /**
-     * Called when an ad is successfully loaded, providing the name of the winning network.
+     * Called when an ad is successfully loaded, providing the name of the winning
+     * network.
      */
     default void onAdLoaded(String network) {
         onAdLoaded();
@@ -27,6 +23,15 @@ public interface AdGlideCallback {
 
     /** Called when an ad is displayed to the user. */
     default void onAdShowed() {
+    }
+
+    /**
+     * Called when an ad fails to show at runtime.
+     * 
+     * @param error Descriptive error message.
+     */
+    default void onAdShowFailed(String error) {
+        onAdDismissed(); // Fallback to ensure state recovery for simple integrations
     }
 
     /** Called when an ad is dismissed by the user. */

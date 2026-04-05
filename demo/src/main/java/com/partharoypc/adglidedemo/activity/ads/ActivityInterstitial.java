@@ -53,26 +53,25 @@ public class ActivityInterstitial extends AppCompatActivity {
     }
 
     private void showInterstitialAd() {
-        appendLog("💎 Triggering Interstitial Ad (Builder API)...");
+        appendLog("💎 Triggering Interstitial Ad (Platinum Static API)...");
         
-        // Professional one-liner: Handles Cooldown, Interval, Load, and Show automatically.
-        new com.partharoypc.adglide.format.InterstitialAd.Builder(this)
-                .loadAndShow(this, new AdGlideCallback() {
-                    @Override
-                    public void onAdShowed() {
-                        appendLog("✅ Interstitial Showed (Zero-Latency if pooled)");
-                    }
+        // High-level helper: Automatically handles Intervals, Time-Gaps, and Concurrency Locks.
+        AdGlide.showInterstitial(this, new AdGlideCallback() {
+            @Override
+            public void onAdShowed() {
+                appendLog("✅ Interstitial Showed (Zero-Latency if pooled)");
+            }
 
-                    @Override
-                    public void onAdFailedToLoad(@Nullable String error) {
-                        appendLog("🛑 Ad Failed: " + (error != null ? error : "No Fill"));
-                    }
+            @Override
+            public void onAdFailedToLoad(@Nullable String error) {
+                appendLog("🛑 Ad Failed or Skipped: " + (error != null ? error : "Interval/Time-Gap Not Met"));
+            }
 
-                    @Override
-                    public void onAdDismissed() {
-                        appendLog("👋 Ad Dismissed — Next one is auto-preloading...");
-                    }
-                });
+            @Override
+            public void onAdDismissed() {
+                appendLog("👋 Ad Dismissed — Next one is auto-preloading...");
+            }
+        });
     }
 
     private void appendLog(@NonNull String text) {

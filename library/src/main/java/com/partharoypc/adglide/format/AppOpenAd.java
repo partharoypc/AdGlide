@@ -163,6 +163,7 @@ public class AppOpenAd {
 
                         @Override
                         public void onAdFailedToLoad(String error) {
+                            AdGlide.setAdShowing(false);
                             if (callback != null) callback.onAdFailedToLoad(error);
                             resultCallback.onFailure(error);
                         }
@@ -317,7 +318,7 @@ public class AppOpenAd {
                             long now = System.currentTimeMillis();
                             if (adGlidePrefs == null && activityRef.get() != null) adGlidePrefs = new AdGlidePrefs(activityRef.get());
                             if (adGlidePrefs != null) adGlidePrefs.setAppOpenLastShown(now);
-                            AdGlide.notifyAdShowed("APP_OPEN", network);
+                            AdGlide.notifyAdShowed("APP_OPEN", network); // Synchronized notification
                             if (callback != null) callback.onAdShowed();
                         }
 
@@ -380,6 +381,7 @@ public class AppOpenAd {
                         @Override
                         public void onAdDismissed() {
                             AdGlide.setAdShowing(false);
+                            AdGlide.notifyAdDismissed("APP_OPEN", currentNetwork != null ? currentNetwork : "UNKNOWN");
                             if (callback != null)
                                 callback.onAdDismissed();
                         }
@@ -395,7 +397,7 @@ public class AppOpenAd {
                         public void onAdShowed() {
                             if (adGlidePrefs == null && activity != null) adGlidePrefs = new AdGlidePrefs(activity);
                             if (adGlidePrefs != null) adGlidePrefs.setAppOpenLastShown(System.currentTimeMillis());
-
+                            AdGlide.notifyAdShowed("APP_OPEN", currentNetwork != null ? currentNetwork : "UNKNOWN");
                             if (callback != null)
                                 callback.onAdShowed();
                         }
