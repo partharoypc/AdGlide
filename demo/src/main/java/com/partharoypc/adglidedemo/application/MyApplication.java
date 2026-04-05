@@ -90,7 +90,6 @@ public class MyApplication extends Application {
                 .rewardedInterstitialEnabled(sharedPref.getIsRewardedInterstitialEnabled())
                 .appOpenEnabled(sharedPref.getIsAppOpenAdEnabled())
 
-                // ── Smart Loading & Intervals ─────────────────────────────
                 .autoLoad(true)
                 .interstitialInterval(sharedPref.getInterstitialInterval())
                 .rewardedInterval(sharedPref.getRewardedInterval())
@@ -99,7 +98,6 @@ public class MyApplication extends Application {
 
                 .excludeOpenAdFrom(ActivitySplash.class, ActivitySettings.class)
                 .enableGDPR(true)
-                .aggressivePreload(sharedPref.getAggressivePreload())
 
                 // ── House Ads Fallback ────────────────────────────────────
                 .houseAdEnabled(sharedPref.getIsHouseAdEnabled())

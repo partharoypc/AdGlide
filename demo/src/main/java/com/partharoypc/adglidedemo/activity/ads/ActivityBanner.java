@@ -55,6 +55,7 @@ public class ActivityBanner extends AppCompatActivity {
         // Professional Premium API:
         new com.partharoypc.adglide.format.BannerAd.Builder(this)
                 .container(bannerContainer)
+                .adaptive(true) // Professional Adaptive Sizing
                 .autoRefresh(30) // Demonstrate 30s auto-refresh
                 .load(new AdGlideCallback() {
                     @Override

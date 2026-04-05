@@ -132,7 +132,7 @@ public class AppOpenAd {
             }
 
             // Strict "Only Once" show policy
-            if (AdGlide.isAdShowing().get()) {
+            if (AdGlide.isAdShowing()) {
                 AdGlideLog.d(TAG, "App Open Ad skipped — Another ad is already showing.");
                 if (callback != null) callback.onAdDismissed();
                 return;
@@ -154,7 +154,7 @@ public class AppOpenAd {
             adLoader.startLoading((network, resultCallback) -> {
                 AppOpenProvider provider = getProvider(network);
                 if (provider != null) {
-                    AdGlide.isAdShowing().set(true);
+                    AdGlide.setAdShowing(true);
                     provider.showAppOpenAd(activity, new AppOpenProvider.AppOpenListener() {
                         @Override
                         public void onAdLoaded() {
@@ -169,14 +169,14 @@ public class AppOpenAd {
 
                         @Override
                         public void onAdDismissed() {
-                            AdGlide.isAdShowing().set(false);
+                            AdGlide.setAdShowing(false);
                             AdGlide.notifyAdDismissed("APP_OPEN", network);
                             if (callback != null) callback.onAdDismissed();
                         }
 
                         @Override
                         public void onAdShowFailed(String error) {
-                            AdGlide.isAdShowing().set(false);
+                            AdGlide.setAdShowing(false);
                             if (callback != null) callback.onAdDismissed();
                             resultCallback.onFailure(error);
                         }
@@ -352,7 +352,7 @@ public class AppOpenAd {
                 }
 
                 // Strict "Only Once" show policy
-                if (AdGlide.isAdShowing().get()) {
+                if (AdGlide.isAdShowing()) {
                     AdGlideLog.d(TAG, "App Open Ad skipped — Another ad is already showing.");
                     if (callback != null) callback.onAdDismissed();
                     return;
@@ -366,7 +366,7 @@ public class AppOpenAd {
 
                 // Try to show from currently loaded network if available
                 if (currentProvider != null && currentProvider.isAdAvailable()) {
-                    AdGlide.isAdShowing().set(true);
+                    AdGlide.setAdShowing(true);
                     currentProvider.showAppOpenAd(safeActivity, new AppOpenProvider.AppOpenListener() {
 
                         @Override
@@ -379,14 +379,14 @@ public class AppOpenAd {
 
                         @Override
                         public void onAdDismissed() {
-                            AdGlide.isAdShowing().set(false);
+                            AdGlide.setAdShowing(false);
                             if (callback != null)
                                 callback.onAdDismissed();
                         }
 
                         @Override
                         public void onAdShowFailed(String error) {
-                            AdGlide.isAdShowing().set(false);
+                            AdGlide.setAdShowing(false);
                             if (callback != null)
                                 callback.onAdDismissed();
                         }

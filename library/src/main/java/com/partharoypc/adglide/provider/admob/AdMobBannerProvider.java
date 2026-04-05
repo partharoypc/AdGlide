@@ -73,7 +73,9 @@ public class AdMobBannerProvider implements BannerProvider {
             int adWidth = (int) (adWidthPixels / density);
 
             // Get adaptive ad size and return for setting on the ad view.
-            return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(activity, adWidth);
+            @SuppressWarnings("deprecation")
+            AdSize adaptiveSize = AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(activity, adWidth);
+            return adaptiveSize;
         }
         return AdSize.BANNER;
     }

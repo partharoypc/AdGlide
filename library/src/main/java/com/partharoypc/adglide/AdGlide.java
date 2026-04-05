@@ -11,6 +11,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.partharoypc.adglide.format.AdNetwork;
+import com.partharoypc.adglide.format.BannerAd;
+import com.partharoypc.adglide.format.InterstitialAd;
+import com.partharoypc.adglide.format.RewardedAd;
+import com.partharoypc.adglide.format.AppOpenAd;
+import com.partharoypc.adglide.format.NativeAd;
+import com.partharoypc.adglide.format.RewardedInterstitialAd;
 import com.partharoypc.adglide.util.AdFormat;
 import com.partharoypc.adglide.util.AdGlideCallback;
 import com.partharoypc.adglide.util.AdGlideLog;
@@ -144,7 +150,7 @@ public class AdGlide {
      * @param newConfig The new configuration to apply.
      */
     public static void updateConfig(@NonNull AdGlideConfig newConfig) {
-        if (!isInitialized || currentApplication == null) {
+        if (!isInitialized.get() || currentApplication == null) {
             AdGlideLog.e(TAG, "Cannot update config: AdGlide is not initialized.");
             return;
         }
@@ -156,10 +162,10 @@ public class AdGlide {
 
         // Ensure AppOpen is registered/unregistered if status changed
         if (config.getAdStatus() && config.isAppOpenEnabled()) {
-            if (!isAppOpenRegistered) {
+            if (!isAppOpenRegistered.get()) {
                 registerActivityLifecycle(currentApplication);
                 registerProcessLifecycle();
-                isAppOpenRegistered = true;
+                isAppOpenRegistered.set(true);
             }
         }
 
@@ -236,16 +242,16 @@ public class AdGlide {
     }
 
     public static boolean isAdShowing() {
-        return isAdShowing;
+        return isAdShowing.get();
     }
 
     public static void setAdShowing(boolean showing) {
-        isAdShowing = showing;
+        isAdShowing.set(showing);
         AdGlideLog.d(TAG, "Global Ad Showing State: " + showing);
     }
 
     public static boolean isInitialized() {
-        return isInitialized;
+        return isInitialized.get();
     }
 
     /**
@@ -257,11 +263,11 @@ public class AdGlide {
         
         switch (format) {
             case INTERSTITIAL:
-                return (config.getInterstitialInterval() - interstitialClickCounter) <= 1;
+                return (config.getInterstitialInterval() - interstitialClickCounter.get()) <= 1;
             case REWARDED:
-                return (config.getRewardedInterval() - rewardedClickCounter) <= 1;
+                return (config.getRewardedInterval() - rewardedClickCounter.get()) <= 1;
             case REWARDED_INTERSTITIAL:
-                return (config.getRewardedInterval() - rewardedInterstitialClickCounter) <= 1;
+                return (config.getRewardedInterval() - rewardedInterstitialClickCounter.get()) <= 1;
             case APP_OPEN:
             case NATIVE:
             case BANNER:
@@ -318,7 +324,7 @@ public class AdGlide {
 
     public static void notifyAdShowed(String format, String network) {
         setAdShowing(true);
-        lastFullAdShowTime = System.currentTimeMillis();
+        lastFullAdShowTime.set(System.currentTimeMillis());
         if (globalAdListener != null)
             globalAdListener.onAdShowed(format, network);
     }
@@ -723,8 +729,9 @@ public class AdGlide {
                     }
 
                     if (isAdsEnabled() && config.isAppOpenEnabled()) {
-                        Activity activity = currentActivityRef != null ? currentActivityRef.get() : null;
-                        if (activity != null && !activity.isFinishing()) {
+                        java.lang.ref.WeakReference<Activity> ref = currentActivityRef.get();
+                        Activity activity = ref != null ? ref.get() : null;
+                        if (activity != null && !activity.isFinishing() && (android.os.Build.VERSION.SDK_INT < 17 || !activity.isDestroyed())) {
                             showAppOpenAd(activity, false, null);
                         } else {
                             AdGlideLog.w(TAG, "Cannot show App Open ad: No active Activity context.");
@@ -747,17 +754,18 @@ public class AdGlide {
         lifecycleCallbacks = new Application.ActivityLifecycleCallbacks() {
             @Override public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {}
             @Override public void onActivityStarted(@NonNull Activity activity) {
-                currentActivityRef = new java.lang.ref.WeakReference<>(activity);
+                currentActivityRef.set(new java.lang.ref.WeakReference<>(activity));
             }
             @Override public void onActivityResumed(@NonNull Activity activity) {
-                currentActivityRef = new java.lang.ref.WeakReference<>(activity);
+                currentActivityRef.set(new java.lang.ref.WeakReference<>(activity));
             }
             @Override public void onActivityPaused(@NonNull Activity activity) {}
             @Override public void onActivityStopped(@NonNull Activity activity) {}
             @Override public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {}
             @Override public void onActivityDestroyed(@NonNull Activity activity) {
-                if (currentActivityRef != null && currentActivityRef.get() == activity) {
-                    currentActivityRef.clear();
+                java.lang.ref.WeakReference<Activity> ref = currentActivityRef.get();
+                if (ref != null && ref.get() == activity) {
+                    ref.clear();
                 }
             }
         };
@@ -852,7 +860,7 @@ public class AdGlide {
      * Dangerous: Use only for debugging or when user specifically requests ad state reset.
      */
     public static void reset(@NonNull Context context) {
-        if (isInitialized) {
+        if (isInitialized.get()) {
             com.partharoypc.adglide.util.AdPoolManager.clearPools();
             com.partharoypc.adglide.util.NetworkHealer.getInstance(context).reset();
             AdGlideLog.i(TAG, "Full SDK State Reset Triggered.");

@@ -228,13 +228,6 @@ public class ActivitySettings extends AppCompatActivity {
             initAds();
         });
  
-        // Aggressive Preload Switch
-        SwitchMaterial switchAggressivePreload = findViewById(R.id.switch_aggressive_preload);
-        switchAggressivePreload.setChecked(sharedPref.getAggressivePreload());
-        switchAggressivePreload.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            sharedPref.setAggressivePreload(isChecked);
-            initAds();
-        });
 
 
         // Rewarded Interval
