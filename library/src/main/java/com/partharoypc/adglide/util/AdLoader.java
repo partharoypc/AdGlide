@@ -237,7 +237,8 @@ public class AdLoader {
                 AdGlide.notifyAdFailedToLoad(format != null ? format.name() : "UNKNOWN", network, error);
                 
                 if (context != null) {
-                    com.partharoypc.adglide.util.NetworkHealer.getInstance(context).recordFailure(network, formatName);
+                    boolean isTechnical = isTechnicalError(error);
+                    com.partharoypc.adglide.util.NetworkHealer.getInstance(context).recordFailure(network, formatName, isTechnical);
                 }
 
                 // If error indicates a configuration issue, blacklist for session to avoid timeouts
@@ -249,6 +250,22 @@ public class AdLoader {
                 new Handler(Looper.getMainLooper()).post(() -> executeNext(executor, finalCallback));
             }
         });
+    }
+
+    private boolean isTechnicalError(String error) {
+        if (error == null || error.isEmpty()) return true;
+        String lower = error.toLowerCase(java.util.Locale.ROOT);
+        
+        // NO_FILL errors (Not technical, just lack of inventory)
+        if (lower.contains("no fill") || 
+            lower.contains("no ad config") || 
+            lower.contains("matched but no ad") || 
+            lower.contains("inventory not available") || 
+            lower.contains("error: 3")) { // AdMob NO_FILL code
+            return false;
+        }
+        
+        return true; // Default to technical for safety (timeout, network, internal)
     }
 
     private void executeNext(NetworkExecutor executor, AdGlideCallback finalCallback) {

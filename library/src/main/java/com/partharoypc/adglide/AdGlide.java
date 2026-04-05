@@ -440,10 +440,9 @@ public class AdGlide {
             return;
         }
 
-        if (interstitialClickCounter < config.getInterstitialInterval()) {
+        if (++interstitialClickCounter < config.getInterstitialInterval()) {
             PerformanceLogger.log("INTERSTITIAL", "Ad skipped — Interval not met ("
-                    + interstitialClickCounter + "/" + config.getInterstitialInterval() + ")");
-            interstitialClickCounter++;
+                    + (interstitialClickCounter) + "/" + config.getInterstitialInterval() + ")");
             if (callback != null) callback.onAdDismissed();
             return;
         }
@@ -526,9 +525,9 @@ public class AdGlide {
 
         private void resetCounter() {
             switch (format) {
-                case INTERSTITIAL: interstitialClickCounter = 1; break;
-                case REWARDED: rewardedClickCounter = 1; break;
-                case REWARDED_INTERSTITIAL: rewardedInterstitialClickCounter = 1; break;
+                case INTERSTITIAL: interstitialClickCounter = 0; break;
+                case REWARDED: rewardedClickCounter = 0; break;
+                case REWARDED_INTERSTITIAL: rewardedInterstitialClickCounter = 0; break;
             }
         }
     }
@@ -548,9 +547,8 @@ public class AdGlide {
             return;
         }
 
-        if (rewardedClickCounter < config.getRewardedInterval()) {
+        if (++rewardedClickCounter < config.getRewardedInterval()) {
             AdGlideLog.d(TAG, "Rewarded Ad interval not met (" + rewardedClickCounter + "/" + config.getRewardedInterval() + ")");
-            rewardedClickCounter++;
             if (callback != null) callback.onAdDismissed();
             return;
         }
@@ -581,9 +579,8 @@ public class AdGlide {
             return;
         }
 
-        if (rewardedInterstitialClickCounter < config.getRewardedInterval()) {
+        if (++rewardedInterstitialClickCounter < config.getRewardedInterval()) {
             AdGlideLog.d(TAG, "Rewarded Interstitial Ad interval not met (" + rewardedInterstitialClickCounter + "/" + config.getRewardedInterval() + ")");
-            rewardedInterstitialClickCounter++;
             if (callback != null) callback.onAdDismissed();
             return;
         }
@@ -695,16 +692,26 @@ public class AdGlide {
         preload(activity, com.partharoypc.adglide.util.AdFormat.APP_OPEN);
     }
 
+    private static long lastBackgroundTime = 0;
+
     private static void registerProcessLifecycle() {
         new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
             ProcessLifecycleOwner.get().getLifecycle().addObserver(new DefaultLifecycleObserver() {
                 @Override
                 public void onStart(@NonNull LifecycleOwner owner) {
                     AdGlideLog.d(TAG, "App moved to foreground. Checking for App Open ads...");
+                    
                     if (isAdsEnabled() && config.isAutoLoadEnabled()) {
                         // Background preloading to ensure next ad is ready
                         com.partharoypc.adglide.util.AdPoolManager.fillInterstitialPool(null);
                         com.partharoypc.adglide.util.AdPoolManager.fillRewardedPool(null);
+                    }
+
+                    // SMART BACKOFF: Only show if the app was in the background for >30 seconds
+                    long backgroundTime = System.currentTimeMillis() - lastBackgroundTime;
+                    if (lastBackgroundTime > 0 && backgroundTime < 30000) {
+                        AdGlideLog.d(TAG, "SKIPPING App Open Ad: User returned within " + (backgroundTime / 1000) + "s. (Backoff Threshold: 30s)");
+                        return;
                     }
 
                     if (isAdsEnabled() && config.isAppOpenEnabled()) {
@@ -715,6 +722,12 @@ public class AdGlide {
                             AdGlideLog.w(TAG, "Cannot show App Open ad: No active Activity context.");
                         }
                     }
+                }
+
+                @Override
+                public void onStop(@NonNull LifecycleOwner owner) {
+                    lastBackgroundTime = System.currentTimeMillis();
+                    AdGlideLog.d(TAG, "App moved to background. Recording lastBackgroundTime.");
                 }
             });
         });

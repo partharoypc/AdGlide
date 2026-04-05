@@ -223,13 +223,34 @@ public class BannerAd {
         }
 
         private void scheduleAutoRefresh() {
-            if (autoRefreshSeconds <= 0) return;
+            if (autoRefreshSeconds <= 0 || isPaused) return;
+            
+            Activity activity = getActivity();
+            float multiplier = com.partharoypc.adglide.util.BatteryUtils.getRefreshMultiplier(activity);
+            
+            if (multiplier < 0) {
+                AdGlideLog.d(TAG, "Banner Auto-Refresh DISABLED (Power Save Mode active)");
+                stopAutoRefresh();
+                return;
+            }
+
+            long delayMs = (long) (autoRefreshSeconds * 1000L * multiplier);
+            
+            // TRAFFIC SMOOTHING: Add a random jitter (+/- 3s) to prevent synchronized request spikes 
+            // from 1M+ concurrent users, which can overwhelm ad servers and drop match rates.
+            long jitter = (long) ((Math.random() * 6000) - 3000); 
+            delayMs = Math.max(5000, delayMs + jitter); // Ensure at least 5s delay
+
+            if (multiplier > 1.0f) {
+                AdGlideLog.d(TAG, "Banner Auto-Refresh SLOWED DOWN (Low Battery detected). Delay: " + (delayMs / 1000) + "s (incl. jitter)");
+            }
+
             if (refreshHandler == null) {
                 refreshHandler = new android.os.Handler(android.os.Looper.getMainLooper());
                 refreshRunnable = () -> doLoad(null);
             }
             refreshHandler.removeCallbacks(refreshRunnable);
-            refreshHandler.postDelayed(refreshRunnable, autoRefreshSeconds * 1000L);
+            refreshHandler.postDelayed(refreshRunnable, delayMs);
         }
 
         private void stopAutoRefresh() {

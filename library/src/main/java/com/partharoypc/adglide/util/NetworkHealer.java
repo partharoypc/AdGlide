@@ -78,8 +78,18 @@ public class NetworkHealer {
     }
 
     public synchronized void recordFailure(String network, String format) {
+        recordFailure(network, format, true); // Default to technical error for backward compatibility
+    }
+
+    public synchronized void recordFailure(String network, String format, boolean isTechnicalError) {
         if (format == null || format.isEmpty() || network.equals(Constant.HOUSE_AD))
             return;
+
+        if (!isTechnicalError) {
+            AdGlideLog.d(TAG, "Non-technical failure (No-Fill) for [" + network.toUpperCase(java.util.Locale.ROOT) + "] "
+                    + format + ". Skipping protective cooldown stay on high-CPM network.");
+            return;
+        }
 
         String key = network + ":" + format;
         Integer currentFailCount = failCounterMap.get(key);
@@ -91,7 +101,7 @@ public class NetworkHealer {
 
         prefs.setHealer(key, count, now);
 
-        AdGlideLog.d(TAG, "Recorded failure #" + count + " for [" + network.toUpperCase(java.util.Locale.ROOT) + "] "
+        AdGlideLog.d(TAG, "Recorded technical failure #" + count + " for [" + network.toUpperCase(java.util.Locale.ROOT) + "] "
                 + format + " Format. Protective cooldown active.");
     }
 
