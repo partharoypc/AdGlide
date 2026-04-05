@@ -13,6 +13,7 @@ public interface BannerProvider {
 
 
         boolean isMrec();
+        boolean isAdaptive();
     }
 
 

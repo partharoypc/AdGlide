@@ -11,6 +11,8 @@ import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.DefaultLifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
 
 import com.partharoypc.adglide.AdGlideConfig;
 import com.partharoypc.adglide.AdGlideNetwork;
@@ -31,20 +33,30 @@ public class BannerAd {
 
     private static final String TAG = "AdGlide";
 
-    public static class Builder extends BaseAdBuilder<Builder> implements BannerProvider.BannerConfig {
+    public static class Builder extends BaseAdBuilder<Builder> implements BannerProvider.BannerConfig, DefaultLifecycleObserver {
 
         private BannerProvider currentProvider;
         private View currentAdView;
         private ViewGroup customContainer;
         private boolean darkTheme = false;
+        private boolean isAdaptive = true;
 
         
         private int autoRefreshSeconds = 0;
         private android.os.Handler refreshHandler;
         private Runnable refreshRunnable;
+        private boolean isPaused = false;
 
         public Builder(@NonNull android.content.Context context) {
             super(context, com.partharoypc.adglide.util.AdFormat.BANNER);
+            if (context instanceof LifecycleOwner) {
+                ((LifecycleOwner) context).getLifecycle().addObserver(this);
+            } else {
+                Activity activity = getActivity();
+                if (activity instanceof LifecycleOwner) {
+                    ((LifecycleOwner) activity).getLifecycle().addObserver(this);
+                }
+            }
         }
 
         @Override
@@ -55,6 +67,34 @@ public class BannerAd {
         @Override
         public boolean isMrec() {
             return false;
+        }
+
+        @Override
+        public boolean isAdaptive() {
+            return isAdaptive;
+        }
+
+        @Override
+        public void onStart(@NonNull LifecycleOwner owner) {
+            if (isPaused) {
+                isPaused = false;
+                AdGlideLog.d(TAG, "Banner Auto-Refresh resumed (Activity started)");
+                scheduleAutoRefresh();
+            }
+        }
+
+        @Override
+        public void onStop(@NonNull LifecycleOwner owner) {
+            isPaused = true;
+            AdGlideLog.d(TAG, "Banner Auto-Refresh paused (Activity stopped/background)");
+            stopAutoRefresh();
+        }
+
+        @Override
+        public void onDestroy(@NonNull LifecycleOwner owner) {
+            AdGlideLog.d(TAG, "Banner Builder lifecycle destroyed. Cleaning up.");
+            destroyAndDetachBanner();
+            owner.getLifecycle().removeObserver(this);
         }
 
 
@@ -93,6 +133,12 @@ public class BannerAd {
         @NonNull
         public Builder darkTheme(boolean darkTheme) {
             this.darkTheme = darkTheme;
+            return this;
+        }
+
+        @NonNull
+        public Builder adaptive(boolean isAdaptive) {
+            this.isAdaptive = isAdaptive;
             return this;
         }
 

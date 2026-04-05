@@ -66,6 +66,15 @@ public class AdMobBannerProvider implements BannerProvider {
         if (config.isMrec()) {
             return AdSize.MEDIUM_RECTANGLE;
         }
+        if (config.isAdaptive()) {
+            // Determine the screen width (less padding) to use for the ad width.
+            int adWidthPixels = activity.getResources().getDisplayMetrics().widthPixels;
+            float density = activity.getResources().getDisplayMetrics().density;
+            int adWidth = (int) (adWidthPixels / density);
+
+            // Get adaptive ad size and return for setting on the ad view.
+            return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(activity, adWidth);
+        }
         return AdSize.BANNER;
     }
 }
