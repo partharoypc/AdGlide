@@ -15,10 +15,6 @@ public class WortiseBannerProvider implements BannerProvider {
 
     @Override
     public void loadBanner(Activity activity, String adUnitId, BannerConfig config, BannerListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("wortise")) {
-            listener.onAdFailedToLoad("Wortise is currently healing from recent failures.");
-            return;
-        }
         // Removed redundant notifyLoadStarted call
 
         bannerAd = new BannerAd(activity);
@@ -33,13 +29,11 @@ public class WortiseBannerProvider implements BannerProvider {
 
             @Override
             public void onBannerFailedToLoad(@NonNull BannerAd banner, @NonNull AdError error) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("wortise", adUnitId);
                 listener.onAdFailedToLoad(error.getMessage());
             }
 
             @Override
             public void onBannerLoaded(@NonNull BannerAd banner) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("wortise", adUnitId);
                 listener.onAdLoaded(banner);
             }
 

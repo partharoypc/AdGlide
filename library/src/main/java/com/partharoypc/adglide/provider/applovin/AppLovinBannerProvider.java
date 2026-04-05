@@ -19,10 +19,6 @@ public class AppLovinBannerProvider implements BannerProvider {
     @Override
     @SuppressWarnings("deprecation")
     public void loadBanner(Activity activity, String adUnitId, BannerConfig config, BannerListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("applovin")) {
-            listener.onAdFailedToLoad("AppLovin is currently healing from recent failures.");
-            return;
-        }
         // Removed redundant notifyLoadStarted call
 
         if (config.isMrec()) {
@@ -33,14 +29,12 @@ public class AppLovinBannerProvider implements BannerProvider {
         maxAdView.setListener(new MaxAdViewAdListener() {
             @Override
             public void onAdLoaded(MaxAd ad) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("applovin", adUnitId);
                 AdGlideLog.d(TAG, "Banner Ad loaded");
                 listener.onAdLoaded(maxAdView);
             }
 
             @Override
             public void onAdLoadFailed(String adUnitId, MaxError error) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("applovin", adUnitId);
                 AdGlideLog.e(TAG, "Banner Ad failed to load: [" + error.getCode() + "] " + error.getMessage());
                 listener.onAdFailedToLoad(error.getMessage());
             }

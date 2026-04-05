@@ -16,17 +16,11 @@ public class AdMobInterstitialProvider implements InterstitialProvider {
     @Override
     public void loadInterstitial(Activity activity, String adUnitId, InterstitialConfig config,
             InterstitialListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isRequestAllowed("admob", adUnitId)) {
-            listener.onAdFailedToLoad("AdMob rate limit hit");
-            return;
-        }
-
         AdRequest adRequest = new AdRequest.Builder().build();
         InterstitialAd.load(activity, adUnitId, adRequest, new InterstitialAdLoadCallback() {
             @Override
             public void onAdLoaded(@NonNull InterstitialAd ad) {
                 com.partharoypc.adglide.util.PerformanceLogger.log("AdMob", "Interstitial loaded: " + adUnitId);
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("admob", adUnitId);
                 interstitialAd = ad;
                 listener.onAdLoaded();
             }
@@ -35,7 +29,6 @@ public class AdMobInterstitialProvider implements InterstitialProvider {
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                 com.partharoypc.adglide.util.PerformanceLogger.error("AdMob", "Interstitial failed: " + loadAdError.getMessage());
                 if (loadAdError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
-                    com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("admob", adUnitId);
                 }
                 interstitialAd = null;
                 listener.onAdFailedToLoad(loadAdError.getMessage());

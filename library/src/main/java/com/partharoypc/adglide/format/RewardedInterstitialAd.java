@@ -33,49 +33,16 @@ import java.util.Map;
  */
 public class RewardedInterstitialAd {
 
-    public static class Builder {
+    public static class Builder extends BaseAdBuilder<Builder> {
         private static final String TAG = "AdGlide";
-        private final com.partharoypc.adglide.util.AdLoader adLoader;
-        private final java.lang.ref.WeakReference<Activity> activityRef;
-        private boolean showOnLoad = false;
-        private AdGlideCallback callback;
         private RewardedProvider currentProvider;
-        private String currentNetwork;
-
-        public Activity getActivity() {
-            return activityRef != null ? activityRef.get() : null;
-        }
-
 
         public Builder(@NonNull android.content.Context context) {
-            if (context instanceof Activity) {
-                this.activityRef = new java.lang.ref.WeakReference<>((Activity) context);
-            } else {
-                this.activityRef = null;
-            }
-            this.adLoader = new com.partharoypc.adglide.util.AdLoader(context,
-                    com.partharoypc.adglide.util.AdFormat.REWARDED_INTERSTITIAL);
+            super(context, com.partharoypc.adglide.util.AdFormat.REWARDED_INTERSTITIAL);
         }
 
-        @NonNull
-        public Builder build(AdGlideCallback callback) {
-            loadRewardedInterstitialAd(callback);
-            return this;
-        }
-
-        /**
-         * Used internally by AdGlide to request an ad on the fly and show it
-         * immediately.
-         */
-        @NonNull
-        public Builder loadAndShow(Activity displayActivity, AdGlideCallback callback) {
-            this.showOnLoad = true;
-            this.callback = callback;
-            loadRewardedInterstitialAd(callback);
-            return this;
-        }
-
-        public void loadRewardedInterstitialAd(AdGlideCallback callback) {
+        @Override
+        protected void doLoad(AdGlideCallback callback) {
             if (adLoader == null) return;
             adLoader.startLoading((networkToLoad, resultCallback) -> {
                 loadAdFromNetwork(networkToLoad, resultCallback, callback);
@@ -116,13 +83,12 @@ public class RewardedInterstitialAd {
                     if (adLoader != null && adLoader.isTimedOut()) {
                         AdGlideLog.d(TAG, "Rewarded Interstitial loaded AFTER timeout. Caching as Late Fill.");
                         AdPoolManager.cacheLateFill(AdFormat.REWARDED_INTERSTITIAL, network, RewardedInterstitialAd.Builder.this);
-                        return;
                     }
                     
                     resultCallback.onSuccess();
                     if (showOnLoad) {
                         showOnLoad = false;
-                        showRewardedInterstitialAd(activity, callback);
+                        doShow(activity, callback);
                     }
                 }
 
@@ -161,17 +127,11 @@ public class RewardedInterstitialAd {
             });
         }
 
-        public void showRewardedInterstitialAd(AdGlideCallback callback) {
-            Activity activity = activityRef.get();
-            if (activity != null) {
-                showRewardedInterstitialAd(activity, callback);
-            }
-        }
 
-        public void showRewardedInterstitialAd(Activity displayActivity, AdGlideCallback callback) {
+        @Override
+        protected void doShow(Activity displayActivity, AdGlideCallback callback) {
             if (currentProvider != null && currentProvider.isAdAvailable()) {
-                Activity defaultActivity = activityRef.get();
-                currentProvider.showRewardedAd(displayActivity != null ? displayActivity : defaultActivity,
+                currentProvider.showRewardedAd(displayActivity,
                         new RewardedProvider.RewardedListener() {
                             @Override
                             public void onAdLoaded() {
@@ -216,16 +176,7 @@ public class RewardedInterstitialAd {
 
         private static String getAdUnitIdForNetwork(String network) {
             com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-            if (config == null)
-                return "0";
-            return switch (network) {
-                case ADMOB, META_BIDDING_ADMOB -> config.getAdMobRewardedIntId();
-                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> config.getAppLovinRewardedIntId();
-                case com.partharoypc.adglide.util.Constant.UNITY -> config.getUnityRewardedIntId();
-                case com.partharoypc.adglide.util.Constant.IRONSOURCE, com.partharoypc.adglide.util.Constant.META_BIDDING_IRONSOURCE -> config.getIronSourceRewardedIntId();
-                case WORTISE -> config.getWortiseRewardedIntId();
-                default -> "0";
-            };
+            return config != null ? config.resolveAdUnitId(com.partharoypc.adglide.util.AdFormat.REWARDED_INTERSTITIAL, network) : "0";
         }
 
         public boolean isAdAvailable() {

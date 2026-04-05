@@ -80,7 +80,6 @@ public class ActivityNative extends AppCompatActivity {
         new com.partharoypc.adglide.format.NativeAd.Builder(this)
                 .style(style)
                 .container(nativeAdContainer)
-                .build()
                 .load(new AdGlideCallback() {
                     @Override
                     public void onAdLoaded(String network) {

@@ -43,10 +43,11 @@ public class ShimmerHelper {
     }
 
     /**
-     * Stops all animations on the view and its children.
+     * Stops all animations on the view and its children recursively.
      */
     public static void stopShimmer(View view) {
         if (view == null) return;
+        
         view.clearAnimation();
         if (view instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) view;

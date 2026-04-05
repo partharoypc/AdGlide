@@ -14,10 +14,6 @@ public class UnityBannerProvider implements BannerProvider {
 
     @Override
     public void loadBanner(Activity activity, String adUnitId, BannerConfig config, BannerListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("unity")) {
-            listener.onAdFailedToLoad("Unity is currently healing from recent failures.");
-            return;
-        }
         // Removed redundant notifyLoadStarted call
 
         bannerView = new BannerView((android.content.Context) activity, adUnitId,
@@ -27,7 +23,6 @@ public class UnityBannerProvider implements BannerProvider {
         bannerView.setListener(new BannerView.IListener() {
             @Override
             public void onBannerLoaded(BannerView bannerAdView) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("unity", adUnitId);
                 AdGlideLog.d(com.partharoypc.adglide.util.Constant.AD_NETWORK_UNITY, "Banner Ad loaded: " + adUnitId);
                 listener.onAdLoaded(bannerAdView);
                 listener.onAdShowed();
@@ -40,7 +35,6 @@ public class UnityBannerProvider implements BannerProvider {
 
             @Override
             public void onBannerFailedToLoad(BannerView bannerAdView, BannerErrorInfo errorInfo) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("unity", adUnitId);
                 AdGlideLog.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_UNITY,
                         "Banner Ad failed to load: [" + errorInfo.errorCode + "] " + errorInfo.errorMessage);
                 listener.onAdFailedToLoad(errorInfo.errorMessage);

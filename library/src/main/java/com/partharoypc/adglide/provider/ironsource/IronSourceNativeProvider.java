@@ -23,17 +23,11 @@ public class IronSourceNativeProvider implements NativeProvider {
 
     @Override
     public void loadNativeAd(Activity activity, String adUnitId, NativeConfig config, NativeListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("ironsource")) {
-            listener.onAdFailedToLoad("IronSource is currently healing from recent failures.");
-            return;
-        }
-
         levelPlayNativeAd = new LevelPlayNativeAd.Builder()
                 .withPlacementName(adUnitId)
                 .withListener(new LevelPlayNativeAdListener() {
                     @Override
                     public void onAdLoaded(LevelPlayNativeAd ad, AdInfo adInfo) {
-                        com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("ironsource", adUnitId);
                         activity.runOnUiThread(() -> {
                             View adView = inflateAndPopulateAdView(activity, ad, config);
                             listener.onAdLoaded(adView);
@@ -42,7 +36,6 @@ public class IronSourceNativeProvider implements NativeProvider {
 
                     @Override
                     public void onAdLoadFailed(LevelPlayNativeAd ad, @NonNull IronSourceError error) {
-                        com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("ironsource", adUnitId);
                         listener.onAdFailedToLoad(error.getErrorMessage());
                     }
 
@@ -70,10 +63,10 @@ public class IronSourceNativeProvider implements NativeProvider {
         View adView = container.getChildAt(0);
         container.removeAllViews();
 
-        TextView title = adView.findViewById(R.id.native_ad_title);
-        TextView body = adView.findViewById(R.id.native_ad_body);
-        Button cta = adView.findViewById(R.id.native_ad_call_to_action);
-        ImageView icon = adView.findViewById(R.id.native_ad_icon);
+        TextView title = adView.findViewById(R.id.adglide_native_headline);
+        TextView body = adView.findViewById(R.id.adglide_native_body);
+        Button cta = adView.findViewById(R.id.adglide_native_cta);
+        ImageView icon = adView.findViewById(R.id.adglide_native_icon);
 
         if (title != null && ad.getTitle() != null)
             title.setText(ad.getTitle());

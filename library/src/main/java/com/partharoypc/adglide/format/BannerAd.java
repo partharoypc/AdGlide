@@ -31,10 +31,8 @@ public class BannerAd {
 
     private static final String TAG = "AdGlide";
 
-    public static class Builder implements BannerProvider.BannerConfig {
+    public static class Builder extends BaseAdBuilder<Builder> implements BannerProvider.BannerConfig {
 
-        private final com.partharoypc.adglide.util.AdLoader adLoader;
-        private final java.lang.ref.WeakReference<Activity> activityRef;
         private BannerProvider currentProvider;
         private View currentAdView;
         private ViewGroup customContainer;
@@ -46,13 +44,7 @@ public class BannerAd {
         private Runnable refreshRunnable;
 
         public Builder(@NonNull android.content.Context context) {
-            if (context instanceof Activity) {
-                this.activityRef = new java.lang.ref.WeakReference<>((Activity) context);
-            } else {
-                this.activityRef = null;
-            }
-            this.adLoader = new com.partharoypc.adglide.util.AdLoader(context,
-                    com.partharoypc.adglide.util.AdFormat.BANNER);
+            super(context, com.partharoypc.adglide.util.AdFormat.BANNER);
         }
 
         @Override
@@ -66,21 +58,35 @@ public class BannerAd {
         }
 
 
-        @NonNull
-        public Builder build() {
-            return this;
+        @Override
+        protected void doLoad(AdGlideCallback callback) {
+            this.callback = callback;
+            Activity activity = getActivity();
+            if (activity == null || activity.isFinishing()) {
+                stopAutoRefresh();
+                return;
+            }
+            if (adLoader == null) return;
+            showShimmer(callback);
+            adLoader.startLoading((networkToLoad, resultCallback) -> {
+                loadAdFromNetwork(networkToLoad, resultCallback, callback);
+            }, new AdGlideCallback() {
+                @Override
+                public void onAdLoaded() {
+                    // Shimmer removal is handled inside displayAdView which gets triggered on success
+                }
+
+                @Override
+                public void onAdFailedToLoad(String error) {
+                    hideShimmer(currentNetwork);
+                    if (callback != null) callback.onAdFailedToLoad(error);
+                }
+            });
         }
 
-        @NonNull
-        public Builder load() {
-            loadBannerAd(null);
-            return this;
-        }
-
-        @NonNull
-        public Builder load(AdGlideCallback callback) {
-            loadBannerAd(callback);
-            return this;
+        @Override
+        protected void doShow(Activity activity, AdGlideCallback callback) {
+            displayAdView(currentNetwork, currentAdView, callback);
         }
 
 
@@ -103,20 +109,11 @@ public class BannerAd {
             return this;
         }
 
-        public void loadBannerAd(AdGlideCallback callback) {
-            Activity activity = activityRef != null ? activityRef.get() : null;
-            if (activity == null || activity.isFinishing()) {
-                stopAutoRefresh();
-                return;
-            }
-            if (adLoader == null) return;
-            adLoader.startLoading((networkToLoad, resultCallback) -> {
-                loadAdFromNetwork(networkToLoad, resultCallback, callback);
-            }, callback);
-        }
+
 
         private void loadAdFromNetwork(String networkToLoad, com.partharoypc.adglide.util.AdLoader.LoadResultCallback resultCallback, AdGlideCallback callback) {
             try {
+                this.currentNetwork = networkToLoad;
                 String adUnitId = getAdUnitIdForNetwork(networkToLoad);
                 AdGlideLog.d(TAG, "Loading [" + networkToLoad.toUpperCase(java.util.Locale.ROOT) + "] Banner Ad with ID: "
                         + adUnitId);
@@ -127,7 +124,7 @@ public class BannerAd {
                     return;
                 }
 
-                Activity activity = (activityRef != null) ? activityRef.get() : null;
+                Activity activity = getActivity();
                 if (activity == null) {
                     AdGlideLog.e(TAG, "Activity context is missing. Cannot load Banner from network. Falling back to Application context for loader, but match rate may be affected.");
                 }
@@ -183,7 +180,7 @@ public class BannerAd {
             if (autoRefreshSeconds <= 0) return;
             if (refreshHandler == null) {
                 refreshHandler = new android.os.Handler(android.os.Looper.getMainLooper());
-                refreshRunnable = () -> loadBannerAd(null);
+                refreshRunnable = () -> doLoad(null);
             }
             refreshHandler.removeCallbacks(refreshRunnable);
             refreshHandler.postDelayed(refreshRunnable, autoRefreshSeconds * 1000L);
@@ -196,32 +193,23 @@ public class BannerAd {
         }
 
         private static String getAdUnitIdForNetwork(String network) {
-            AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-            if (config == null)
-                return "";
-            return switch (network) {
-                case ADMOB, META_BIDDING_ADMOB -> config.getAdMobBannerId();
-                case META -> config.getMetaBannerId();
-                case UNITY -> config.getUnityBannerId();
-                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> config.getAppLovinBannerId();
-                case IRONSOURCE, META_BIDDING_IRONSOURCE -> config.getIronSourceBannerId();
-                case STARTAPP -> !config.getStartAppId().isEmpty() ? config.getStartAppId() : "startapp_id";
-                case WORTISE -> config.getWortiseBannerId();
-                case HOUSE_AD -> "house_ad";
-                default -> "";
-            };
+            com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+            return config != null ? config.resolveAdUnitId(com.partharoypc.adglide.util.AdFormat.BANNER, network) : "0";
         }
 
         private void displayAdView(String network, View adView, AdGlideCallback callback) {
-            Activity activity = activityRef != null ? activityRef.get() : null;
-            if (activity == null) {
-                AdGlideLog.e(TAG, "Activity reference is null, cannot display banner.");
+            Activity activity = getActivity();
+            if (activity == null || activity.isFinishing()) {
+                AdGlideLog.e(TAG, "Activity is null or finishing, cannot display banner.");
                 return;
             }
             activity.runOnUiThread(() -> {
                 try {
                     ViewGroup container = customContainer != null ? customContainer : getContainerForNetwork(network);
                     if (container != null) {
+                        // Cleanup: Stop animations before swapping
+                        com.partharoypc.adglide.helper.ShimmerHelper.stopShimmer(container);
+
                         container.removeAllViews();
                         container.addView(adView);
                         container.setVisibility(View.VISIBLE);
@@ -234,6 +222,39 @@ public class BannerAd {
                     }
                 } catch (Exception e) {
                     AdGlideLog.e(TAG, "Error displaying ad view: " + e.getMessage());
+                }
+            });
+        }
+
+        private void showShimmer(AdGlideCallback callback) {
+            Activity activity = getActivity();
+            if (activity == null || activity.isFinishing()) return;
+            
+            // For banners, we use the primary network to find the default container if custom is null
+            String primary = currentNetwork != null ? currentNetwork : (AdGlide.getConfig() != null ? AdGlide.getConfig().getPrimaryNetwork() : com.partharoypc.adglide.util.Constant.ADMOB);
+            ViewGroup container = customContainer != null ? customContainer : getContainerForNetwork(primary);
+            
+            if (container != null) {
+                activity.runOnUiThread(() -> {
+                    if (activity.isFinishing()) return;
+                    container.removeAllViews();
+                    View shimmer = activity.getLayoutInflater().inflate(R.layout.adglide_shimmer_banner, container, false);
+                    container.addView(shimmer);
+                    container.setVisibility(View.VISIBLE);
+                    com.partharoypc.adglide.helper.ShimmerHelper.startShimmer(shimmer);
+                });
+            }
+        }
+
+        private void hideShimmer(String network) {
+            Activity activity = getActivity();
+            if (activity == null) return;
+            activity.runOnUiThread(() -> {
+                ViewGroup container = customContainer != null ? customContainer : getContainerForNetwork(network);
+                if (container != null) {
+                    com.partharoypc.adglide.helper.ShimmerHelper.stopShimmer(container);
+                    container.removeAllViews();
+                    container.setVisibility(View.GONE);
                 }
             });
         }
@@ -251,7 +272,8 @@ public class BannerAd {
                         R.id.app_lovin_banner_view_container;
                 default -> containerId;
             };
-            return containerId != -1 && activityRef.get() != null ? activityRef.get().findViewById(containerId) : null;
+            Activity activity = getActivity();
+            return containerId != -1 && activity != null ? activity.findViewById(containerId) : null;
         }
 
         public void destroyAndDetachBanner() {

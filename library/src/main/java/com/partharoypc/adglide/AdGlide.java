@@ -2,6 +2,7 @@ package com.partharoypc.adglide;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import java.util.List;
@@ -137,7 +138,7 @@ public class AdGlide {
         globalAdListener = null;
         cachedBannerBuilder = null;
         
-        com.partharoypc.adglide.util.AdPoolManager.clear();
+        com.partharoypc.adglide.util.AdPoolManager.clearPools();
         AdGlideLog.d(TAG, "AdGlide SDK destroyed.");
     }
 
@@ -447,17 +448,16 @@ public class AdGlide {
             return;
         }
 
-        PerformanceLogger.log("INTERSTITIAL", "Showing Interstitial Ad");
+        PerformanceLogger.log("INTERSTITIAL", "Triggering Interstitial Ad");
 
-        if (com.partharoypc.adglide.util.AdPoolManager.hasInterstitial()) {
-            InterstitialAd.Builder pooledAd = com.partharoypc.adglide.util.AdPoolManager.getInterstitial();
-            if (pooledAd != null) {
-                pooledAd.show(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.INTERSTITIAL, activity, callback));
-            } else {
-                new InterstitialAd.Builder(activity).loadAndShow(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.INTERSTITIAL, activity, callback));
-            }
+        // The unified Builder now manages both 'Loaded' (pooled) and 'LoadAndShow' logic
+        InternalCallback internalCallback = new InternalCallback(com.partharoypc.adglide.util.AdFormat.INTERSTITIAL, activity, callback);
+        
+        InterstitialAd.Builder pooledAd = com.partharoypc.adglide.util.AdPoolManager.getInterstitial();
+        if (pooledAd != null) {
+            pooledAd.show(activity, internalCallback);
         } else {
-            new InterstitialAd.Builder(activity).loadAndShow(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.INTERSTITIAL, activity, callback));
+            new InterstitialAd.Builder(activity).loadAndShow(activity, internalCallback);
         }
     }
 
@@ -555,15 +555,13 @@ public class AdGlide {
             return;
         }
 
-        if (com.partharoypc.adglide.util.AdPoolManager.hasRewarded()) {
-            RewardedAd.Builder pooledAd = com.partharoypc.adglide.util.AdPoolManager.getRewarded();
-            if (pooledAd != null) {
-                pooledAd.showRewardedAd(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED, activity, callback));
-            } else {
-                new RewardedAd.Builder(activity).loadAndShow(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED, activity, callback));
-            }
+        InternalCallback internalCallback = new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED, activity, callback);
+
+        RewardedAd.Builder pooledAd = com.partharoypc.adglide.util.AdPoolManager.getRewarded();
+        if (pooledAd != null) {
+            pooledAd.show(activity, internalCallback);
         } else {
-            new RewardedAd.Builder(activity).loadAndShow(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED, activity, callback));
+            new RewardedAd.Builder(activity).loadAndShow(activity, internalCallback);
         }
     }
 
@@ -590,18 +588,14 @@ public class AdGlide {
             return;
         }
 
-        if (com.partharoypc.adglide.util.AdPoolManager.hasRewardedInterstitial()) {
-            com.partharoypc.adglide.format.RewardedInterstitialAd.Builder pooledAd = 
-                com.partharoypc.adglide.util.AdPoolManager.getRewardedInterstitial();
-            if (pooledAd != null) {
-                pooledAd.showRewardedInterstitialAd(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED_INTERSTITIAL, activity, callback));
-            } else {
-                new com.partharoypc.adglide.format.RewardedInterstitialAd.Builder(activity)
-                    .loadAndShow(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED_INTERSTITIAL, activity, callback));
-            }
+        InternalCallback internalCallback = new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED_INTERSTITIAL, activity, callback);
+
+        com.partharoypc.adglide.format.RewardedInterstitialAd.Builder pooledAd = com.partharoypc.adglide.util.AdPoolManager.getRewardedInterstitial();
+        if (pooledAd != null) {
+            pooledAd.show(activity, internalCallback);
         } else {
             new com.partharoypc.adglide.format.RewardedInterstitialAd.Builder(activity)
-                .loadAndShow(activity, new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED_INTERSTITIAL, activity, callback));
+                .loadAndShow(activity, internalCallback);
         }
     }
 
@@ -783,32 +777,28 @@ public class AdGlide {
             return;
         }
 
-        if (com.partharoypc.adglide.util.AdPoolManager.hasAppOpen()) {
-            AppOpenAd.Builder pooledAd = com.partharoypc.adglide.util.AdPoolManager.getAppOpen();
-            if (pooledAd != null) {
-                pooledAd.showAppOpenAd(ignoreCooldown, new AdGlideCallback() {
-                    @Override
-                    public void onAdShowed() {
-                        com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
-                        if (callback != null)
-                            callback.onAdShowed();
-                    }
+        AppOpenAd.Builder pooledAd = com.partharoypc.adglide.util.AdPoolManager.getAppOpen();
+        if (pooledAd != null) {
+            pooledAd.showAppOpenAd(activity, ignoreCooldown, new AdGlideCallback() {
+                @Override
+                public void onAdShowed() {
+                    com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
+                    if (callback != null)
+                        callback.onAdShowed();
+                }
 
-                    @Override
-                    public void onAdDismissed() {
-                        com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
-                        if (callback != null)
-                            callback.onAdDismissed();
-                    }
+                @Override
+                public void onAdDismissed() {
+                    com.partharoypc.adglide.util.AdPoolManager.fillAppOpenPool(activity);
+                    if (callback != null)
+                        callback.onAdDismissed();
+                }
 
-                    @Override
-                    public void onAdFailedToLoad(String error) {
-                        loadAndShowAppOpenOnFly(activity, ignoreCooldown, callback);
-                    }
-                });
-            } else {
-                loadAndShowAppOpenOnFly(activity, ignoreCooldown, callback);
-            }
+                @Override
+                public void onAdFailedToLoad(String error) {
+                    loadAndShowAppOpenOnFly(activity, ignoreCooldown, callback);
+                }
+            });
         } else {
             loadAndShowAppOpenOnFly(activity, ignoreCooldown, callback);
         }
@@ -834,5 +824,17 @@ public class AdGlide {
                 if (callback != null) callback.onAdFailedToLoad(error);
             }
         });
+    }
+
+    /**
+     * Resets the entire SDK state, including all cached pools and NetworkHealer history.
+     * Dangerous: Use only for debugging or when user specifically requests ad state reset.
+     */
+    public static void reset(@NonNull Context context) {
+        if (isInitialized) {
+            com.partharoypc.adglide.util.AdPoolManager.clearPools();
+            com.partharoypc.adglide.util.NetworkHealer.getInstance(context).reset();
+            AdGlideLog.i(TAG, "Full SDK State Reset Triggered.");
+        }
     }
 }

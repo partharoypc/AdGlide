@@ -14,24 +14,18 @@ public class IronSourceRewardedProvider implements RewardedProvider {
 
     @Override
     public void loadRewardedAd(Activity activity, String adUnitId, RewardedConfig config, RewardedListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("ironsource")) {
-            listener.onAdFailedToLoad("IronSource is currently healing from recent failures.");
-            return;
-        }
         // Removed redundant notifyLoadStarted call
 
         rewardedAd = new LevelPlayRewardedAd(adUnitId);
         rewardedAd.setListener(new LevelPlayRewardedAdListener() {
             @Override
             public void onAdLoaded(@NonNull LevelPlayAdInfo adInfo) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("ironsource", adUnitId);
                 com.partharoypc.adglide.util.PerformanceLogger.log("IronSource", "Rewarded available: " + adUnitId);
                 listener.onAdLoaded();
             }
 
             @Override
             public void onAdLoadFailed(@NonNull LevelPlayAdError error) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("ironsource", adUnitId);
                 com.partharoypc.adglide.util.PerformanceLogger.error("IronSource", "Rewarded unavailable");
                 listener.onAdFailedToLoad(error.getErrorMessage());
             }

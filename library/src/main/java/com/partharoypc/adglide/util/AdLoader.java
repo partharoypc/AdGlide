@@ -15,6 +15,8 @@ import com.partharoypc.adglide.util.WaterfallManager;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Centralized loader for all ad formats.
@@ -23,7 +25,7 @@ import java.util.List;
 public class AdLoader {
     private static final String TAG = "AdGlide";
     private static final java.util.Set<String> sessionBlacklist = java.util.Collections.synchronizedSet(new java.util.HashSet<>());
-    private static final java.util.Map<AdFormat, Boolean> inFlightRequests = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<AdFormat, Boolean> inFlightRequests = new ConcurrentHashMap<>();
 
     /**
      * Interface to be implemented by individual Ad Formats to execute the actual provider load.
@@ -46,8 +48,8 @@ public class AdLoader {
     private final String primaryNetwork;
     private final long timeoutMs;
     private long startTime;
-    private boolean isTimedOut = false;
-    private boolean isFinished = false;
+    private final AtomicBoolean isTimedOut = new AtomicBoolean(false);
+    private final AtomicBoolean isFinished = new AtomicBoolean(false);
 
     public AdLoader(@NonNull android.content.Context context, AdFormat format) {
         if (context instanceof Activity) {
@@ -98,11 +100,11 @@ public class AdLoader {
     }
 
     public boolean isTimedOut() {
-        return isTimedOut;
+        return isTimedOut.get();
     }
 
     public boolean isFinished() {
-        return isFinished;
+        return isFinished.get();
     }
 
     /**
@@ -164,9 +166,10 @@ public class AdLoader {
         }
 
         android.content.Context context = AdGlide.getContext();
-        if (context != null && !com.partharoypc.adglide.util.NetworkHealer.getInstance(context).isNetworkHealed(network)) {
+        String formatName = format != null ? format.name() : "UNKNOWN";
+        if (context != null && !com.partharoypc.adglide.util.NetworkHealer.getInstance(context).isRequestAllowed(network, formatName)) {
             AdGlideLog.d(TAG, "ZERO-WASTE: Skipping " + network + " for " + format + " (Network currently unhealthy/healing)");
-            AdGlide.notifyHealerSkip(format != null ? format.name() : "UNKNOWN", network);
+            AdGlide.notifyHealerSkip(formatName, network);
             new Handler(Looper.getMainLooper()).post(() -> executeNext(executor, finalCallback));
             return;
         }
@@ -175,9 +178,11 @@ public class AdLoader {
         Handler handler = new Handler(Looper.getMainLooper());
         
         Runnable timeoutRunnable = () -> {
-            if (!isFinished) {
-                isTimedOut = true;
+            if (!isFinished.get() && isTimedOut.compareAndSet(false, true)) {
                 AdGlideLog.d(TAG, "Timeout (" + timeoutMs + "ms) reached for [" + network + "]. Attempting fallback to maximize match rate.");
+                if (context != null) {
+                    com.partharoypc.adglide.util.NetworkHealer.getInstance(context).recordFailure(network, formatName);
+                }
                 executeNext(executor, finalCallback);
             }
         };
@@ -187,7 +192,8 @@ public class AdLoader {
         executor.loadNetwork(network, new LoadResultCallback() {
             @Override
             public void onSuccess() {
-                if (isFinished) return;
+                if (!isFinished.compareAndSet(false, true)) return;
+                
                 handler.removeCallbacksAndMessages(null);
                 responded[0] = true;
                 handler.removeCallbacks(timeoutRunnable);
@@ -195,40 +201,51 @@ public class AdLoader {
                 long duration = System.currentTimeMillis() - startTime;
                 PerformanceLogger.log(format != null ? format.name() : "UNKNOWN", "Loaded in " + duration + "ms from [" + network + "]");
 
-                if (isTimedOut && !isFinished) {
-                    AdGlideLog.d(TAG, "LATE MATCH: [" + network.toUpperCase(java.util.Locale.ROOT) + "] " + format + " filled after timeout. Saving to bucket for Zero-Waste delivery.");
-                    // The loader logic allows providing the builder itself for caching
-                    // This is handled by the higher-level format builder which implement cacheLateFill
+                if (isTimedOut.get()) {
+                    AdGlideLog.d(TAG, "LATE MATCH: [" + network.toUpperCase(java.util.Locale.ROOT) + "] " + format + " filled after timeout. Healing network cooldown.");
+                    if (context != null) {
+                        com.partharoypc.adglide.util.NetworkHealer.getInstance(context).recordSuccess(network, formatName);
+                    }
+                    return; // DO NOT call finalCallback. The builder will cache the Late Fill and AdPool handles it.
                 }
 
-                isFinished = true;
                 if (finalCallback != null) finalCallback.onAdLoaded(network);
                 AdGlide.notifyAdLoaded(format != null ? format.name() : "UNKNOWN", network);
+                if (context != null) {
+                    com.partharoypc.adglide.util.NetworkHealer.getInstance(context).recordSuccess(network, formatName);
+                }
                 inFlightRequests.put(format, false);
-
-
             }
 
             @Override
             public void onFailure(String error) {
-                if (isFinished) return;
-                handler.removeCallbacksAndMessages(null);
+                if (!isFinished.compareAndSet(false, true)) return;
+                
+                handler.removeCallbacksAndMessages(null); // Prevent timeout
                 responded[0] = true;
                 handler.removeCallbacks(timeoutRunnable);
-                AdGlideLog.d(TAG, format + " load failed on [" + network.toUpperCase(java.util.Locale.ROOT) + "]: " + error);
                 
+                if (isTimedOut.get()) {
+                    AdGlideLog.d(TAG, "Late failure for [" + network + "] ignored. Already moved to fallback.");
+                    return; // DO NOT execute next again
+                }
+
+                AdGlideLog.d(TAG, format + " load failed on [" + network.toUpperCase(java.util.Locale.ROOT) + "]: " + error);
                 PerformanceLogger.error(format != null ? format.name() : "UNKNOWN", "Failed to load from [" + network + "]: " + error);
                 
                 // Internal notification for global listener
                 AdGlide.notifyAdFailedToLoad(format != null ? format.name() : "UNKNOWN", network, error);
+                
+                if (context != null) {
+                    com.partharoypc.adglide.util.NetworkHealer.getInstance(context).recordFailure(network, formatName);
+                }
 
-
-
-                // If error indicates a configuration issue, blacklist for session to avoid 3.5s timeouts
+                // If error indicates a configuration issue, blacklist for session to avoid timeouts
                 if (error != null && (error.toLowerCase(java.util.Locale.ROOT).contains("invalid") || error.toLowerCase(java.util.Locale.ROOT).contains("not found"))) {
                     sessionBlacklist.add(network);
                 }
 
+                // Execute Next only if we're not timed out and successfully finished the current network
                 new Handler(Looper.getMainLooper()).post(() -> executeNext(executor, finalCallback));
             }
         });

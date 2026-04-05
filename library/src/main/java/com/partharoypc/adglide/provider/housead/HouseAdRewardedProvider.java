@@ -31,7 +31,6 @@ public class HouseAdRewardedProvider implements RewardedProvider {
         this.config = AdGlide.getConfig();
         if (config == null || !config.isHouseAdEnabled() || config.getHouseAdInterstitialImage() == null
                 || config.getHouseAdInterstitialImage().isEmpty()) {
-            com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("house", "HOUSE_REWARDED");
             if (listener != null)
                 listener.onAdFailedToLoad("House Ad rewarded not configured or disabled");
             return;
@@ -41,7 +40,6 @@ public class HouseAdRewardedProvider implements RewardedProvider {
                 new ImageDownloader.ImageLoaderCallback() {
                     @Override
                     public void onImageLoaded(Bitmap bitmap) {
-                        com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("house", "HOUSE_REWARDED");
                         cachedAdImage = bitmap;
                         if (listener != null)
                             listener.onAdLoaded();
@@ -49,7 +47,6 @@ public class HouseAdRewardedProvider implements RewardedProvider {
 
                     @Override
                     public void onError(Exception e) {
-                        com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("house", "HOUSE_REWARDED");
                         if (listener != null)
                             listener.onAdFailedToLoad(e.getMessage());
                     }

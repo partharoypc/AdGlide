@@ -15,16 +15,10 @@ public class AppLovinInterstitialProvider implements InterstitialProvider {
     @Override
     public void loadInterstitial(Activity activity, String adUnitId, InterstitialConfig config,
             InterstitialListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isRequestAllowed("applovin", adUnitId)) {
-            listener.onAdFailedToLoad("AppLovin rate limit hit");
-            return;
-        }
-
         maxInterstitialAd = new MaxInterstitialAd(adUnitId);
         maxInterstitialAd.setListener(new MaxAdListener() {
             @Override
             public void onAdLoaded(MaxAd ad) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("applovin", adUnitId);
                 AdGlideLog.d(TAG, "Interstitial Ad loaded");
                 com.partharoypc.adglide.util.PerformanceLogger.log(TAG, "Interstitial loaded: " + adUnitId);
                 listener.onAdLoaded();
@@ -32,7 +26,6 @@ public class AppLovinInterstitialProvider implements InterstitialProvider {
 
             @Override
             public void onAdLoadFailed(String adUnitId, MaxError error) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("applovin", adUnitId);
                 AdGlideLog.e(TAG, "Interstitial Ad failed to load: [" + error.getCode() + "] " + error.getMessage());
                 listener.onAdFailedToLoad(error.getMessage());
             }

@@ -16,10 +16,6 @@ public class StartAppInterstitialProvider implements InterstitialProvider {
     @Override
     public void loadInterstitial(Activity activity, String adUnitId, InterstitialConfig config,
             InterstitialListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("startapp")) {
-            listener.onAdFailedToLoad("StartApp is currently healing from recent failures.");
-            return;
-        }
         // Removed redundant notifyLoadStarted call
 
         isReady = false;
@@ -27,14 +23,12 @@ public class StartAppInterstitialProvider implements InterstitialProvider {
         startAppAd.loadAd(new AdEventListener() {
             @Override
             public void onReceiveAd(Ad ad) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("startapp", "INTERSTITIAL");
                 isReady = true;
                 listener.onAdLoaded();
             }
 
             @Override
             public void onFailedToReceiveAd(Ad ad) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("startapp", "INTERSTITIAL");
                 isReady = false;
                 AdGlideLog.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_STARTAPP,
                         "Interstitial failed to load: " + ad.getErrorMessage());

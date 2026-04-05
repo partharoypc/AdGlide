@@ -54,24 +54,27 @@ public class ActivityAppOpen extends AppCompatActivity {
     }
 
     private void showAppOpenAd() {
-        appendLog("💎 Triggering App Open Ad Show...");
-        AdGlide.showAppOpenAd(this, new AdGlideCallback() {
-            @Override
-            public void onAdFailedToLoad(@Nullable String error) {
-                appendLog("🛑 Ad Failed: " + (error != null ? error : "Unknown Error"));
-            }
+        appendLog("💎 Triggering App Open Ad (Builder API)...");
+        
+        // Professional one-liner: Handles Cooldown, Loading, and Showing automatically.
+        new com.partharoypc.adglide.format.AppOpenAd.Builder(this)
+                .loadAndShow(this, new AdGlideCallback() {
+                    @Override
+                    public void onAdFailedToLoad(@Nullable String error) {
+                        appendLog("🛑 Ad Failed: " + (error != null ? error : "No Fill"));
+                    }
 
-            @Override
-            public void onAdShowed() {
-                appendLog("👁️ App Open Ad Showed Successfully");
-            }
+                    @Override
+                    public void onAdShowed() {
+                        appendLog("👁️ App Open Ad Showed Successfully");
+                    }
 
-            @Override
-            public void onAdDismissed() {
-                appendLog("👋 App Open Ad Dismissed");
-                Log.d(TAG, "onAdDismissed");
-            }
-        });
+                    @Override
+                    public void onAdDismissed() {
+                        appendLog("👋 App Open Ad Dismissed — Pool replenishing...");
+                        Log.d(TAG, "onAdDismissed");
+                    }
+                });
     }
 
     private void appendLog(@NonNull String text) {

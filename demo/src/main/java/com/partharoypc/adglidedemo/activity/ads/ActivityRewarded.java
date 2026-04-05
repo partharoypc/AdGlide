@@ -52,29 +52,32 @@ public class ActivityRewarded extends AppCompatActivity {
     }
 
     private void showRewardedAd() {
-        appendLog("💎 Triggering Rewarded Ad Show...");
-        AdGlide.showRewarded(this, new AdGlideCallback() {
-            @Override
-            public void onAdFailedToLoad(@Nullable String error) {
-                appendLog("🛑 Ad Failed: " + (error != null ? error : "Unknown Error"));
-            }
+        appendLog("💎 Triggering Rewarded Ad (Builder API)...");
+        
+        // Professional one-liner: Handles Cooldown, Interval, Loading, and Showing automatically.
+        new com.partharoypc.adglide.format.RewardedAd.Builder(this)
+                .loadAndShow(this, new AdGlideCallback() {
+                    @Override
+                    public void onAdFailedToLoad(@Nullable String error) {
+                        appendLog("🛑 Ad Failed: " + (error != null ? error : "No Fill"));
+                    }
 
-            @Override
-            public void onAdShowed() {
-                appendLog("👁️ Rewarded Ad Showed Successfully");
-            }
+                    @Override
+                    public void onAdShowed() {
+                        appendLog("👁️ Rewarded Ad Showed Successfully");
+                    }
 
-            @Override
-            public void onAdDismissed() {
-                appendLog("👋 Ad Dismissed by User");
-            }
+                    @Override
+                    public void onAdDismissed() {
+                        appendLog("👋 Ad Dismissed by User");
+                    }
 
-            @Override
-            public void onAdCompleted() {
-                appendLog("🏆 User Earned Reward! (onAdCompleted)");
-                Toast.makeText(getApplicationContext(), "Reward Earned!", Toast.LENGTH_SHORT).show();
-            }
-        });
+                    @Override
+                    public void onAdCompleted() {
+                        appendLog("🏆 User Earned Reward! (onAdCompleted)");
+                        Toast.makeText(getApplicationContext(), "Reward Earned!", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void appendLog(@NonNull String text) {

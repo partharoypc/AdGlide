@@ -598,6 +598,73 @@ public class AdGlideConfig {
         return houseAdNativeClickUrl;
     }
 
+    public String resolveAdUnitId(com.partharoypc.adglide.util.AdFormat format, String network) {
+        if (network == null) return "0";
+        return switch (format) {
+            case INTERSTITIAL -> switch (network) {
+                case com.partharoypc.adglide.util.Constant.ADMOB, com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB -> getAdMobInterstitialId();
+                case com.partharoypc.adglide.util.Constant.META -> getMetaInterstitialId();
+                case com.partharoypc.adglide.util.Constant.UNITY -> getUnityInterstitialId();
+                case com.partharoypc.adglide.util.Constant.APPLOVIN, com.partharoypc.adglide.util.Constant.APPLOVIN_MAX, com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX -> getAppLovinInterstitialId();
+                case com.partharoypc.adglide.util.Constant.IRONSOURCE, com.partharoypc.adglide.util.Constant.META_BIDDING_IRONSOURCE -> getIronSourceInterstitialId();
+                case com.partharoypc.adglide.util.Constant.STARTAPP -> !getStartAppId().isEmpty() ? getStartAppId() : "startapp_id";
+                case com.partharoypc.adglide.util.Constant.WORTISE -> getWortiseInterstitialId();
+                case com.partharoypc.adglide.util.Constant.HOUSE_AD -> "house_ad";
+                default -> "0";
+            };
+            case BANNER -> switch (network) {
+                case com.partharoypc.adglide.util.Constant.ADMOB, com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB -> getAdMobBannerId();
+                case com.partharoypc.adglide.util.Constant.META -> getMetaBannerId();
+                case com.partharoypc.adglide.util.Constant.UNITY -> getUnityBannerId();
+                case com.partharoypc.adglide.util.Constant.APPLOVIN, com.partharoypc.adglide.util.Constant.APPLOVIN_MAX, com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX -> getAppLovinBannerId();
+                case com.partharoypc.adglide.util.Constant.IRONSOURCE, com.partharoypc.adglide.util.Constant.META_BIDDING_IRONSOURCE -> getIronSourceBannerId();
+                case com.partharoypc.adglide.util.Constant.STARTAPP -> !getStartAppId().isEmpty() ? getStartAppId() : "startapp_id";
+                case com.partharoypc.adglide.util.Constant.WORTISE -> getWortiseBannerId();
+                case com.partharoypc.adglide.util.Constant.HOUSE_AD -> "house_ad";
+                default -> "0";
+            };
+            case REWARDED -> switch (network) {
+                case com.partharoypc.adglide.util.Constant.ADMOB, com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB -> getAdMobRewardedId();
+                case com.partharoypc.adglide.util.Constant.META -> getMetaRewardedId();
+                case com.partharoypc.adglide.util.Constant.UNITY -> getUnityRewardedId();
+                case com.partharoypc.adglide.util.Constant.APPLOVIN, com.partharoypc.adglide.util.Constant.APPLOVIN_MAX, com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX -> getAppLovinRewardedId();
+                case com.partharoypc.adglide.util.Constant.IRONSOURCE, com.partharoypc.adglide.util.Constant.META_BIDDING_IRONSOURCE -> getIronSourceRewardedId();
+                case com.partharoypc.adglide.util.Constant.STARTAPP -> !getStartAppId().isEmpty() ? getStartAppId() : "startapp_id";
+                case com.partharoypc.adglide.util.Constant.WORTISE -> getWortiseRewardedId();
+                case com.partharoypc.adglide.util.Constant.HOUSE_AD -> "house_ad";
+                default -> "0";
+            };
+            case REWARDED_INTERSTITIAL -> switch (network) {
+                case com.partharoypc.adglide.util.Constant.ADMOB, com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB -> getAdMobRewardedIntId();
+                case com.partharoypc.adglide.util.Constant.APPLOVIN, com.partharoypc.adglide.util.Constant.APPLOVIN_MAX, com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX -> getAppLovinRewardedIntId();
+                case com.partharoypc.adglide.util.Constant.UNITY -> getUnityRewardedIntId();
+                case com.partharoypc.adglide.util.Constant.IRONSOURCE, com.partharoypc.adglide.util.Constant.META_BIDDING_IRONSOURCE -> getIronSourceRewardedIntId();
+                case com.partharoypc.adglide.util.Constant.WORTISE -> getWortiseRewardedIntId();
+                default -> "0";
+            };
+            case NATIVE -> switch (network) {
+                case com.partharoypc.adglide.util.Constant.ADMOB, com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB -> getAdMobNativeId();
+                case com.partharoypc.adglide.util.Constant.META -> getMetaNativeId();
+                case com.partharoypc.adglide.util.Constant.APPLOVIN, com.partharoypc.adglide.util.Constant.APPLOVIN_MAX, com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX -> getAppLovinNativeId();
+                case com.partharoypc.adglide.util.Constant.WORTISE -> getWortiseNativeId();
+                case com.partharoypc.adglide.util.Constant.STARTAPP -> !getStartAppId().isEmpty() ? getStartAppId() : "startapp_id";
+                case com.partharoypc.adglide.util.Constant.IRONSOURCE, com.partharoypc.adglide.util.Constant.META_BIDDING_IRONSOURCE -> getIronSourceNativeId();
+                case com.partharoypc.adglide.util.Constant.HOUSE_AD -> "house_ad";
+                default -> "0";
+            };
+            case APP_OPEN -> switch (network) {
+                case com.partharoypc.adglide.util.Constant.ADMOB, com.partharoypc.adglide.util.Constant.META_BIDDING_ADMOB -> getAdMobAppOpenId();
+                case com.partharoypc.adglide.util.Constant.META -> getMetaAppOpenId();
+                case com.partharoypc.adglide.util.Constant.APPLOVIN, com.partharoypc.adglide.util.Constant.APPLOVIN_MAX, com.partharoypc.adglide.util.Constant.META_BIDDING_APPLOVIN_MAX -> getAppLovinAppOpenId();
+                case com.partharoypc.adglide.util.Constant.STARTAPP -> !getStartAppId().isEmpty() ? getStartAppId() : "startapp_id";
+                case com.partharoypc.adglide.util.Constant.IRONSOURCE, com.partharoypc.adglide.util.Constant.META_BIDDING_IRONSOURCE -> getIronSourceAppOpenId();
+                case com.partharoypc.adglide.util.Constant.WORTISE -> getWortiseAppOpenId();
+                default -> "0";
+            };
+            default -> "0";
+        };
+    }
+
     public static class Builder {
         private boolean adStatus = false;
         private String primaryNetwork = "";
@@ -1119,9 +1186,16 @@ public class AdGlideConfig {
             String primary = config.getPrimaryNetwork();
             List<String> backups = config.getBackupNetworks();
             
-            boolean isUsed = (primary != null && primary.toLowerCase(java.util.Locale.ROOT).contains(name)) || 
-                             (backups != null && backups.stream().anyMatch(n -> n.toLowerCase(java.util.Locale.ROOT).contains(name)));
-            
+            boolean isUsed = (primary != null && primary.toLowerCase(java.util.Locale.ROOT).contains(name));
+            if (!isUsed && backups != null) {
+                for (String n : backups) {
+                    if (n.toLowerCase(java.util.Locale.ROOT).contains(name)) {
+                        isUsed = true;
+                        break;
+                    }
+                }
+            }
+
             if (isUsed && (value == null || value.trim().isEmpty())) {
                 AdGlideLog.e("Config", name.toUpperCase(java.util.Locale.ROOT) + " is enabled but " + type + " is missing!");
                 config.setValid(false);

@@ -28,17 +28,11 @@ public class AdMobAppOpenProvider implements AppOpenProvider {
             return;
         }
 
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isRequestAllowed("admob", adUnitId)) {
-            listener.onAdFailedToLoad("AdMob rate limit hit");
-            return;
-        }
-
         isLoadingAd = true;
         AdRequest request = new AdRequest.Builder().build();
         AppOpenAd.load(activity, adUnitId, request, new AppOpenAd.AppOpenAdLoadCallback() {
             @Override
             public void onAdLoaded(@NonNull AppOpenAd ad) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("admob", adUnitId);
                 appOpenAd = ad;
                 mAdUnitId = adUnitId;
                 isLoadingAd = false;
@@ -49,7 +43,6 @@ public class AdMobAppOpenProvider implements AppOpenProvider {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                 if (loadAdError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
-                    com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("admob", adUnitId);
                 }
                 isLoadingAd = false;
                 listener.onAdFailedToLoad(loadAdError.getMessage());

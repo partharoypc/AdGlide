@@ -11,23 +11,17 @@ public class StartAppBannerProvider implements BannerProvider {
 
     @Override
     public void loadBanner(Activity activity, String adUnitId, BannerConfig config, BannerListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("startapp")) {
-            listener.onAdFailedToLoad("StartApp is currently healing from recent failures.");
-            return;
-        }
         // Removed redundant notifyLoadStarted call
 
         if (config.isMrec()) {
             banner = new com.startapp.sdk.ads.banner.Mrec(activity, new com.startapp.sdk.ads.banner.BannerListener() {
                 @Override
                 public void onReceiveAd(View view) {
-                    com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("startapp", "BANNER_MREC");
                     listener.onAdLoaded(view);
                 }
 
                 @Override
                 public void onFailedToReceiveAd(View view) {
-                    com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("startapp", "BANNER_MREC");
                     AdGlideLog.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_STARTAPP,
                             "MREC failed to load");
                     listener.onAdFailedToLoad("StartApp failed to receive ad");
@@ -45,13 +39,11 @@ public class StartAppBannerProvider implements BannerProvider {
             banner = new Banner(activity, new com.startapp.sdk.ads.banner.BannerListener() {
                 @Override
                 public void onReceiveAd(View view) {
-                    com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("startapp", "BANNER");
                     listener.onAdLoaded(view);
                 }
 
                 @Override
                 public void onFailedToReceiveAd(View view) {
-                    com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("startapp", "BANNER");
                     AdGlideLog.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_STARTAPP,
                             "Banner failed to load");
                     listener.onAdFailedToLoad("StartApp failed to receive ad");

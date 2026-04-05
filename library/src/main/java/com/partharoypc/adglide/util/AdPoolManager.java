@@ -90,7 +90,7 @@ public class AdPoolManager {
             case REWARDED_INTERSTITIAL:
                 fillGenericPool(activity, AdFormat.REWARDED_INTERSTITIAL,
                         () -> new RewardedInterstitialAd.Builder(activity),
-                        (builder, callback) -> builder.loadRewardedInterstitialAd(callback));
+                        (builder, callback) -> builder.load(callback));
                 break;
             case APP_OPEN:
                 fillGenericPool(activity, AdFormat.APP_OPEN, () -> new AppOpenAd.Builder(activity),
@@ -377,7 +377,7 @@ public class AdPoolManager {
         };
     }
 
-    public static void clear() {
+    public static void clearPools() {
         for (PoolSet<?> pool : pools.values()) {
             pool.primary.clear();
             pool.backup.clear();

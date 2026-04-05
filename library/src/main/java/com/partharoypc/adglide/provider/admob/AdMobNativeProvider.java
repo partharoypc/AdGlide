@@ -21,14 +21,8 @@ public class AdMobNativeProvider implements NativeProvider {
 
     @Override
     public void loadNativeAd(Activity activity, String adUnitId, NativeConfig config, NativeListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isRequestAllowed("admob", adUnitId)) {
-            listener.onAdFailedToLoad("AdMob rate limit hit");
-            return;
-        }
-
         AdLoader adLoader = new AdLoader.Builder(activity, adUnitId)
                 .forNativeAd(ad -> {
-                    com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("admob", adUnitId);
                     if (this.nativeAd != null) {
                         this.nativeAd.destroy();
                     }
@@ -41,7 +35,6 @@ public class AdMobNativeProvider implements NativeProvider {
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError adError) {
                         if (adError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
-                            com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("admob", adUnitId);
                         }
                         listener.onAdFailedToLoad(adError.getMessage());
                     }
@@ -74,7 +67,7 @@ public class AdMobNativeProvider implements NativeProvider {
         android.widget.FrameLayout container = new android.widget.FrameLayout(activity);
         inflater.inflate(layoutRes, container, true);
 
-        NativeAdView nativeAdView = container.findViewById(R.id.native_ad_view);
+        NativeAdView nativeAdView = container.findViewById(R.id.adglide_native_view);
 
         if (nativeAdView == null) {
             if (container.getChildCount() > 0) {
@@ -106,11 +99,11 @@ public class AdMobNativeProvider implements NativeProvider {
     }
 
     private void populateNativeAdView(NativeAd nativeAd, NativeAdView nativeAdView) {
-        nativeAdView.setMediaView(nativeAdView.findViewById(R.id.media_view));
-        nativeAdView.setHeadlineView(nativeAdView.findViewById(R.id.primary));
-        nativeAdView.setBodyView(nativeAdView.findViewById(R.id.body));
-        nativeAdView.setCallToActionView(nativeAdView.findViewById(R.id.cta));
-        nativeAdView.setIconView(nativeAdView.findViewById(R.id.icon));
+        nativeAdView.setMediaView(nativeAdView.findViewById(R.id.adglide_native_media));
+        nativeAdView.setHeadlineView(nativeAdView.findViewById(R.id.adglide_native_headline));
+        nativeAdView.setBodyView(nativeAdView.findViewById(R.id.adglide_native_body));
+        nativeAdView.setCallToActionView(nativeAdView.findViewById(R.id.adglide_native_cta));
+        nativeAdView.setIconView(nativeAdView.findViewById(R.id.adglide_native_icon));
 
         if (nativeAdView.getHeadlineView() != null)
             ((TextView) nativeAdView.getHeadlineView()).setText(nativeAd.getHeadline());

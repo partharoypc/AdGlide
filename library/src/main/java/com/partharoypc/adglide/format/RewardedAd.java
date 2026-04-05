@@ -40,80 +40,15 @@ public class RewardedAd {
 
     private static final String TAG = "AdGlide";
 
-    public static class Builder {
-        private final com.partharoypc.adglide.util.AdLoader adLoader;
-        private final java.lang.ref.WeakReference<Activity> activityRef;
+    public static class Builder extends BaseAdBuilder<Builder> {
         private RewardedProvider currentProvider;
-        private String currentNetwork;
-        private boolean showOnLoad = false;
-        private AdGlideCallback callback;
-
-        public Activity getActivity() {
-            return activityRef != null ? activityRef.get() : null;
-        }
-
 
         public Builder(@NonNull android.content.Context context) {
-            if (context instanceof Activity) {
-                this.activityRef = new java.lang.ref.WeakReference<>((Activity) context);
-            } else {
-                this.activityRef = null;
-            }
-            this.adLoader = new com.partharoypc.adglide.util.AdLoader(context,
-                    com.partharoypc.adglide.util.AdFormat.REWARDED);
+            super(context, com.partharoypc.adglide.util.AdFormat.REWARDED);
         }
 
-        @NonNull
-        public Builder build() {
-            return this;
-        }
-
-        @NonNull
-        public Builder build(AdGlideCallback callback) {
-            loadRewardedAd(callback);
-            return this;
-        }
-
-
-        @NonNull
-        public Builder show(AdGlideCallback callback) {
-            Activity activity = activityRef.get();
-            showRewardedAd(activity, callback);
-            return this;
-        }
-
-        @NonNull
-        public Builder show(@NonNull Activity displayActivity, AdGlideCallback callback) {
-            showRewardedAd(displayActivity, callback);
-            return this;
-        }
-
-        @NonNull
-        public Builder load() {
-            loadRewardedAd(null);
-            return this;
-        }
-
-        @NonNull
-        public Builder load(AdGlideCallback callback) {
-            loadRewardedAd(callback);
-            return this;
-        }
-
-
-        /**
-         * Used internally by AdGlide to request an ad on the fly and show it
-         * immediately.
-         */
-        @NonNull
-        public Builder loadAndShow(Activity displayActivity, AdGlideCallback callback) {
-            this.showOnLoad = true;
-            this.callback = callback;
-            loadRewardedAd(callback);
-            return this;
-        }
-
-        public void loadRewardedAd(AdGlideCallback callback) {
+        @Override
+        protected void doLoad(AdGlideCallback callback) {
             if (adLoader == null) return;
             adLoader.startLoading((networkToLoad, resultCallback) -> {
                 loadAdFromNetwork(networkToLoad, resultCallback, callback);
@@ -162,13 +97,12 @@ public class RewardedAd {
                     if (adLoader != null && adLoader.isTimedOut()) {
                         AdGlideLog.d(TAG, "Rewarded ad loaded AFTER timeout. Caching as Late Fill.");
                         AdPoolManager.cacheLateFill(AdFormat.REWARDED, network, RewardedAd.Builder.this);
-                        return;
                     }
                     
                     resultCallback.onSuccess();
                     if (showOnLoad) {
                         showOnLoad = false;
-                        showRewardedAd(activity, callback);
+                        doShow(activity, callback);
                     }
                 }
 
@@ -208,21 +142,12 @@ public class RewardedAd {
             });
         }
 
-        public void showRewardedAd(AdGlideCallback callback) {
-            Activity activity = activityRef != null ? activityRef.get() : null;
-            if (activity != null) {
-                showRewardedAd(activity, callback);
-            } else {
-                AdGlideLog.e(TAG, "Cannot show Rewarded Ad: Activity reference is null.");
-                if (callback != null) callback.onAdDismissed();
-            }
-        }
 
-        public void showRewardedAd(Activity displayActivity, AdGlideCallback callback) {
+        @Override
+        protected void doShow(Activity displayActivity, AdGlideCallback callback) {
             try {
                 if (currentProvider != null && currentProvider.isAdAvailable()) {
-                    Activity activity = activityRef != null ? activityRef.get() : null;
-                    currentProvider.showRewardedAd(displayActivity != null ? displayActivity : activity,
+                    currentProvider.showRewardedAd(displayActivity,
                             new RewardedProvider.RewardedListener() {
                                 @Override
                                 public void onAdLoaded() {
@@ -276,20 +201,8 @@ public class RewardedAd {
         }
 
         private static String getAdUnitIdForNetwork(String network) {
-            AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-            if (config == null)
-                return "0";
-            return switch (network) {
-                case ADMOB, META_BIDDING_ADMOB -> config.getAdMobRewardedId();
-                case META -> config.getMetaRewardedId();
-                case UNITY -> config.getUnityRewardedId();
-                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> config.getAppLovinRewardedId();
-                case IRONSOURCE, META_BIDDING_IRONSOURCE -> config.getIronSourceRewardedId();
-                case STARTAPP -> !config.getStartAppId().isEmpty() ? config.getStartAppId() : "startapp_id";
-                case WORTISE -> config.getWortiseRewardedId();
-                case com.partharoypc.adglide.util.Constant.HOUSE_AD -> "house_ad";
-                default -> "0";
-            };
+            com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+            return config != null ? config.resolveAdUnitId(com.partharoypc.adglide.util.AdFormat.REWARDED, network) : "0";
         }
 
         public void destroy() {

@@ -33,7 +33,6 @@ public class HouseAdAppOpenProvider implements AppOpenProvider {
         this.config = AdGlide.getConfig();
         if (config == null || !config.isHouseAdEnabled() || config.getHouseAdInterstitialImage() == null
                 || config.getHouseAdInterstitialImage().isEmpty()) {
-            com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("house", "HOUSE_APPOPEN");
             if (listener != null)
                 listener.onAdFailedToLoad("House Ad AppOpen not configured or disabled");
             return;
@@ -43,7 +42,6 @@ public class HouseAdAppOpenProvider implements AppOpenProvider {
                 new ImageDownloader.ImageLoaderCallback() {
                     @Override
                     public void onImageLoaded(Bitmap bitmap) {
-                        com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("house", "HOUSE_APPOPEN");
                         cachedAdImage = bitmap;
                         if (listener != null)
                             listener.onAdLoaded();
@@ -51,7 +49,6 @@ public class HouseAdAppOpenProvider implements AppOpenProvider {
 
                     @Override
                     public void onError(Exception e) {
-                        com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("house", "HOUSE_APPOPEN");
                         if (listener != null)
                             listener.onAdFailedToLoad(e.getMessage());
                     }

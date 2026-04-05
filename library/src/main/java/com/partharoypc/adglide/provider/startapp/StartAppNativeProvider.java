@@ -23,10 +23,6 @@ public class StartAppNativeProvider implements NativeProvider {
     @Override
     @SuppressWarnings("deprecation")
     public void loadNativeAd(Activity activity, String adUnitId, NativeConfig config, NativeListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("startapp")) {
-            listener.onAdFailedToLoad("StartApp is currently healing from recent failures.");
-            return;
-        }
         // Removed redundant notifyLoadStarted call
 
         startAppNativeAd = new StartAppNativeAd(activity);
@@ -38,7 +34,6 @@ public class StartAppNativeProvider implements NativeProvider {
         AdEventListener adEventListener = new AdEventListener() {
             @Override
             public void onReceiveAd(@NonNull com.startapp.sdk.adsbase.Ad ad) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("startapp", "NATIVE");
                 ArrayList<NativeAdDetails> ads = startAppNativeAd.getNativeAds();
                 if (ads != null && !ads.isEmpty()) {
                     NativeAdDetails details = ads.get(0);
@@ -51,7 +46,6 @@ public class StartAppNativeProvider implements NativeProvider {
 
             @Override
             public void onFailedToReceiveAd(com.startapp.sdk.adsbase.Ad ad) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("startapp", "NATIVE");
                 listener.onAdFailedToLoad("StartApp: Failed to receive ad");
             }
         };
@@ -63,11 +57,11 @@ public class StartAppNativeProvider implements NativeProvider {
         int layoutRes = getLayoutForStyle(config.getStyle());
         View root = inflater.inflate(layoutRes, null);
 
-        ImageView image = root.findViewById(R.id.start_app_native_image);
-        ImageView icon = root.findViewById(R.id.start_app_native_icon);
-        TextView title = root.findViewById(R.id.start_app_native_title);
-        TextView description = root.findViewById(R.id.start_app_native_description);
-        Button button = root.findViewById(R.id.start_app_native_button);
+        ImageView image = root.findViewById(R.id.adglide_native_media);
+        ImageView icon = root.findViewById(R.id.adglide_native_icon);
+        TextView title = root.findViewById(R.id.adglide_native_headline);
+        TextView description = root.findViewById(R.id.adglide_native_body);
+        Button button = root.findViewById(R.id.adglide_native_cta);
 
         if (title != null)
             title.setText(details.getTitle());

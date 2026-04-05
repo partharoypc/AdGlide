@@ -2,6 +2,7 @@ package com.partharoypc.adglide.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import java.util.Map;
 
 /**
  * Internal preference helper for the AdGlide library.
@@ -89,5 +90,16 @@ public class AdGlidePrefs {
             .remove("healer_fail_time_" + key)
             .remove("healer_fail_count_" + key)
             .apply();
+    }
+
+    public void clearAllHealer() {
+        SharedPreferences.Editor editor = prefs.edit();
+        Map<String, ?> allEntries = prefs.getAll();
+        for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
+            if (entry.getKey().startsWith("healer_fail_")) {
+                editor.remove(entry.getKey());
+            }
+        }
+        editor.apply();
     }
 }

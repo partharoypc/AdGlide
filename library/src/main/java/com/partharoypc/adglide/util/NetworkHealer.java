@@ -35,24 +35,17 @@ public class NetworkHealer {
     }
 
     /**
-     * Checks if a network is "healed" and ready for a new request.
-     * Combined check for all units of a network.
+     * Checks if a request is allowed for a specific format to protect the overall Match Rate.
      */
-    public boolean isNetworkHealed(String network) {
-        return isRequestAllowed(network, "GLOBAL");
-    }
-
-    /**
-     * Checks if a request is allowed for a specific placement to protect the overall Match Rate.
-     */
-    public boolean isRequestAllowed(String network, String adUnitId) {
+    public boolean isRequestAllowed(String network, String format) {
         if (network == null || network.equals(Constant.HOUSE_AD)) return true; // House ads never skip
         
-        String key = network + ":" + adUnitId;
+        String key = network + ":" + format;
         
         // Check memory first
         Long lastFailTime = lastFailTimeMap.get(key);
-        int failCount = failCounterMap.getOrDefault(key, 0);
+        Integer currentFailCount = failCounterMap.get(key);
+        int failCount = currentFailCount != null ? currentFailCount : 0;
 
         // Fallback to Prefs if memory is empty (after app restart)
         if (lastFailTime == null) {
@@ -69,7 +62,7 @@ public class NetworkHealer {
             
             // Safety: Reset if the data is older than 2 hours
             if (currentTime - lastFailTime > MAX_HEALING_AGE_MS) {
-                recordSuccess(network, adUnitId);
+                recordSuccess(network, format);
                 return true;
             }
 
@@ -78,26 +71,27 @@ public class NetworkHealer {
             
             if (elapsedTime < cooldownDuration) {
                 long remainingSeconds = (cooldownDuration - elapsedTime) / 1000;
-                AdGlideLog.d(TAG, "ZERO-WASTE: Protection triggered for [" + network.toUpperCase() + "]. Cooling down for " + remainingSeconds + "s");
+                AdGlideLog.d(TAG, "ZERO-WASTE: Protection triggered for [" + network.toUpperCase(java.util.Locale.ROOT) + "] " + format + " Format. Cooling down for " + remainingSeconds + "s");
                 return false;
             }
         }
         return true;
     }
 
-    public void recordSuccess(String network, String adUnitId) {
-        if (adUnitId == null) return;
-        String key = network + ":" + adUnitId;
+    public void recordSuccess(String network, String format) {
+        if (format == null) return;
+        String key = network + ":" + format;
         failCounterMap.remove(key);
         lastFailTimeMap.remove(key);
         prefs.clearHealer(key);
     }
 
-    public void recordFailure(String network, String adUnitId) {
-        if (adUnitId == null || adUnitId.isEmpty() || network.equals(Constant.HOUSE_AD)) return;
+    public void recordFailure(String network, String format) {
+        if (format == null || format.isEmpty() || network.equals(Constant.HOUSE_AD)) return;
             
-        String key = network + ":" + adUnitId;
-        int count = failCounterMap.getOrDefault(key, 0) + 1;
+        String key = network + ":" + format;
+        Integer currentFailCount = failCounterMap.get(key);
+        int count = (currentFailCount != null ? currentFailCount : 0) + 1;
         long now = System.currentTimeMillis();
         
         failCounterMap.put(key, count);
@@ -106,6 +100,16 @@ public class NetworkHealer {
         // Persist to SharedPreferences
         prefs.setHealer(key, count, now);
         
-        AdGlideLog.d(TAG, "Recorded failure #" + count + " for [" + network.toUpperCase() + "]. Protective cooldown active.");
+        AdGlideLog.d(TAG, "Recorded failure #" + count + " for [" + network.toUpperCase(java.util.Locale.ROOT) + "] " + format + " Format. Protective cooldown active.");
+    }
+
+    /**
+     * Resets all healer state. Useful for testing or when user wants to force-clear cooldowns.
+     */
+    public void reset() {
+        lastFailTimeMap.clear();
+        failCounterMap.clear();
+        prefs.clearAllHealer();
+        AdGlideLog.i(TAG, "NetworkHealer state reset.");
     }
 }

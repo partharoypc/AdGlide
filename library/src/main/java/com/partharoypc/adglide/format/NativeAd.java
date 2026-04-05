@@ -43,9 +43,8 @@ import java.util.Map;
  */
 public class NativeAd {
 
-    public static class Builder {
+    public static class Builder extends BaseAdBuilder<Builder> {
         private static final String TAG = "AdGlide.Native";
-        private final java.lang.ref.WeakReference<Activity> activityRef;
         private ViewGroup nativeAdViewContainer;
         private ViewGroup customContainer;
         private NativeProvider currentProvider;
@@ -60,46 +59,51 @@ public class NativeAd {
             return nativeAdStyle;
         }
 
-        private final com.partharoypc.adglide.util.AdLoader adLoader;
 
-        public Activity getActivity() {
-            return activityRef != null ? activityRef.get() : null;
-        }
 
         public Builder(@NonNull android.content.Context context) {
-            if (context instanceof Activity) {
-                this.activityRef = new java.lang.ref.WeakReference<>((Activity) context);
-                this.nativeBackgroundLight = ContextCompat.getColor(context, android.R.color.transparent);
-                this.nativeBackgroundDark = ContextCompat.getColor(context, android.R.color.transparent);
-            } else {
-                this.activityRef = null;
-                this.nativeBackgroundLight = android.graphics.Color.TRANSPARENT;
-                this.nativeBackgroundDark = android.graphics.Color.TRANSPARENT;
+            super(context, com.partharoypc.adglide.util.AdFormat.NATIVE);
+            this.nativeBackgroundLight = ContextCompat.getColor(context, android.R.color.transparent);
+            this.nativeBackgroundDark = ContextCompat.getColor(context, android.R.color.transparent);
+        }
+
+        @Override
+        protected void doLoad(AdGlideCallback callback) {
+            this.callback = callback;
+            Activity activity = getActivity();
+            if (activity == null) {
+                AdGlideLog.e(TAG, "Cannot load Native Ad: Activity reference is null.");
+                if (callback != null) callback.onAdFailedToLoad("Activity is null");
+                return;
             }
-            this.adLoader = new com.partharoypc.adglide.util.AdLoader(context,
-                    com.partharoypc.adglide.util.AdFormat.NATIVE);
+            if (adLoader == null) return;
+            showShimmer(callback);
+            adLoader.startLoading((networkToLoad, resultCallback) -> {
+                loadAdFromNetwork(networkToLoad, resultCallback, callback);
+            }, new AdGlideCallback() {
+                @Override
+                public void onAdLoaded() {
+                    // Shimmer removal is handled inside displayAdView which gets triggered on success
+                }
+
+                @Override
+                public void onAdFailedToLoad(String error) {
+                    hideShimmer();
+                    if (callback != null) callback.onAdFailedToLoad(error);
+                }
+            });
         }
 
-        @NonNull
-        public Builder build() {
-            return this;
-        }
-
-        @NonNull
-        public Builder load() {
-            loadNativeAd(null);
-            return this;
+        @Override
+        protected void doShow(Activity activity, AdGlideCallback callback) {
+            displayAdView(activity, callback);
         }
 
         public boolean isAdLoaded() {
             return isAdLoaded && preloadedAdView != null;
         }
 
-        @NonNull
-        public Builder load(AdGlideCallback callback) {
-            loadNativeAd(callback);
-            return this;
-        }
+
 
         @NonNull
         public Builder padding(int left, int top, int right, int bottom) {
@@ -143,34 +147,64 @@ public class NativeAd {
             return this;
         }
 
-        public void loadNativeAd(AdGlideCallback callback) {
-            Activity activity = activityRef != null ? activityRef.get() : null;
-            if (activity == null) {
-                AdGlideLog.e(TAG, "Cannot load Native Ad: Activity reference is null.");
-                if (callback != null) callback.onAdFailedToLoad("Activity is null");
-                return;
-            }
-            if (adLoader == null) return;
-            showShimmer(callback);
-            adLoader.startLoading((networkToLoad, resultCallback) -> {
-                loadAdFromNetwork(networkToLoad, resultCallback, callback);
-            }, callback);
-        }
+
 
         private void showShimmer(AdGlideCallback callback) {
-            Activity activity = (activityRef != null) ? activityRef.get() : null;
-            if (activity == null) return;
+            Activity activity = getActivity();
+            if (activity == null || activity.isFinishing()) return;
             
             ViewGroup container = customContainer != null ? customContainer : activity.findViewById(R.id.native_ad_view_container);
             if (container != null) {
                 activity.runOnUiThread(() -> {
+                    if (activity.isFinishing()) return;
                     container.removeAllViews();
-                    View shimmer = activity.getLayoutInflater().inflate(R.layout.adglide_shimmer_native, container, false);
+                    
+                    int shimmerLayout = getShimmerLayoutForStyle(nativeAdStyle);
+                    View shimmer = activity.getLayoutInflater().inflate(shimmerLayout, container, false);
+                    
                     container.addView(shimmer);
                     container.setVisibility(View.VISIBLE);
                     com.partharoypc.adglide.helper.ShimmerHelper.startShimmer(shimmer);
                 });
             }
+        }
+
+        private int getShimmerLayoutForStyle(String style) {
+            if (style == null) return R.layout.adglide_shimmer_native_medium;
+            
+            switch (style.toLowerCase(java.util.Locale.ROOT)) {
+                case "small":
+                case "radio":
+                    return R.layout.adglide_shimmer_native_small;
+                case "banner":
+                case "news":
+                    return R.layout.adglide_shimmer_native_news;
+                case "video":
+                case "large":
+                    return R.layout.adglide_shimmer_native_video;
+                case "medium":
+                default:
+                    return R.layout.adglide_shimmer_native_medium;
+            }
+        }
+
+        private void hideShimmer() {
+            Activity activity = getActivity();
+            if (activity == null) return;
+            activity.runOnUiThread(() -> {
+                ViewGroup container = customContainer != null ? customContainer : activity.findViewById(R.id.native_ad_view_container);
+                if (container != null) {
+                    // Recursive stop all animations
+                    com.partharoypc.adglide.helper.ShimmerHelper.stopShimmer(container);
+                    
+                    // Legacy Cleanup: Hide ProgressBars from old templates
+                    View legacyProgress = container.findViewById(R.id.progress_bar_ad);
+                    if (legacyProgress != null) legacyProgress.setVisibility(View.GONE);
+                    
+                    container.removeAllViews();
+                    container.setVisibility(View.GONE);
+                }
+            });
         }
 
         private void loadAdFromNetwork(String network, com.partharoypc.adglide.util.AdLoader.LoadResultCallback resultCallback, AdGlideCallback callback) {
@@ -203,7 +237,7 @@ public class NativeAd {
                 }
             };
 
-            Activity activity = (activityRef != null) ? activityRef.get() : null;
+            Activity activity = getActivity();
             if (activity == null) {
                 AdGlideLog.e(TAG, "Activity context is missing during Native load. Falling back to application context where possible.");
             }
@@ -217,15 +251,15 @@ public class NativeAd {
                     if (adLoader != null && adLoader.isTimedOut()) {
                         AdGlideLog.d(TAG, "Native ad loaded AFTER timeout. Caching as Late Fill.");
                         AdPoolManager.cacheLateFillNative(network, NativeAd.Builder.this);
-                        return;
                     }
                     resultCallback.onSuccess();
                     if (callback != null)
                         callback.onAdLoaded();
                     
                     // Only display immediately if a container was already provided
-                    if (customContainer != null || activityRef.get() != null && activityRef.get().findViewById(R.id.native_ad_view_container) != null) {
-                        displayAdView(adView, callback);
+                    if (customContainer != null || (getActivity() != null && getActivity().findViewById(R.id.native_ad_view_container) != null)) {
+                        Activity activity = getActivity();
+                        if (activity != null) displayAdView(activity, callback);
                     }
                 }
 
@@ -238,42 +272,51 @@ public class NativeAd {
         }
 
         private static String getAdUnitIdForNetwork(String network) {
-            AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-            if (config == null)
-                return "0";
-            return switch (network) {
-                case ADMOB, META_BIDDING_ADMOB -> config.getAdMobNativeId();
-                case META -> config.getMetaNativeId();
-                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> config.getAppLovinNativeId();
-                case WORTISE -> config.getWortiseNativeId();
-                case STARTAPP -> !config.getStartAppId().isEmpty() ? config.getStartAppId() : "startapp_id";
-                case IRONSOURCE, META_BIDDING_IRONSOURCE -> config.getIronSourceNativeId();
-                case UNITY -> null; // Unity does not support Native Ads
-                case com.partharoypc.adglide.util.Constant.HOUSE_AD -> "house_ad";
-                default -> "0";
-            };
+            com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+            return config != null ? config.resolveAdUnitId(com.partharoypc.adglide.util.AdFormat.NATIVE, network) : "0";
         }
 
-        private void displayAdView(View adView, AdGlideCallback callback) {
-            Activity activity = activityRef != null ? activityRef.get() : null;
-            if (activity == null) {
-                AdGlideLog.e(TAG, "Activity reference is null, cannot display native ad.");
+        private void displayAdView(Activity activity, AdGlideCallback callback) {
+            if (activity == null || activity.isFinishing()) {
+                AdGlideLog.e(TAG, "Activity is null or finishing, cannot display native ad.");
                 return;
             }
 
-            if (customContainer != null) {
-                nativeAdViewContainer = customContainer;
-            } else {
-                nativeAdViewContainer = (ViewGroup) activity.findViewById(R.id.native_ad_view_container);
-            }
+            activity.runOnUiThread(() -> {
+                if (activity.isFinishing()) return;
 
-            if (nativeAdViewContainer != null && adView != null) {
-                nativeAdViewContainer.removeAllViews();
-                nativeAdViewContainer.addView(adView);
-                animateIn(nativeAdViewContainer);
-                if (callback != null)
-                    callback.onAdShowed();
-            }
+                if (customContainer != null) {
+                    nativeAdViewContainer = customContainer;
+                } else {
+                    nativeAdViewContainer = (ViewGroup) activity.findViewById(R.id.native_ad_view_container);
+                }
+
+                if (nativeAdViewContainer != null && preloadedAdView != null) {
+                    // Recursive stop all animations
+                    com.partharoypc.adglide.helper.ShimmerHelper.stopShimmer(nativeAdViewContainer);
+                    
+                    // Legacy Cleanup: Hide ProgressBars from old templates
+                    View legacyProgress = nativeAdViewContainer.findViewById(R.id.progress_bar_ad);
+                    if (legacyProgress != null) legacyProgress.setVisibility(View.GONE);
+
+                    // SAFE VIEW ATTACHMENT: Detach from previous parent if exists
+                    if (preloadedAdView.getParent() != null) {
+                        ((ViewGroup) preloadedAdView.getParent()).removeView(preloadedAdView);
+                    }
+                    
+                    nativeAdViewContainer.removeAllViews();
+                    nativeAdViewContainer.addView(preloadedAdView);
+                    nativeAdViewContainer.setVisibility(View.VISIBLE);
+                    animateIn(nativeAdViewContainer);
+                    if (callback != null)
+                        callback.onAdShowed();
+                } else {
+                    AdGlideLog.w(TAG, "Native ad container or preloaded view is null. Native ad display failed.");
+                    if (nativeAdViewContainer != null) {
+                        hideShimmer();
+                    }
+                }
+            });
         }
 
         /**
@@ -283,7 +326,8 @@ public class NativeAd {
         public void attachToContainer(ViewGroup container, AdGlideCallback callback) {
             this.customContainer = container;
             if (isAdLoaded()) {
-                displayAdView(preloadedAdView, callback);
+                Activity activity = getActivity();
+                if (activity != null) displayAdView(activity, callback);
             } else {
                 load(callback);
             }
@@ -299,7 +343,7 @@ public class NativeAd {
 
         public void setNativeAdPadding(int left, int top, int right, int bottom) {
             if (nativeAdViewContainer == null) {
-                Activity activity = activityRef.get();
+                Activity activity = getActivity();
                 if (activity != null) {
                     nativeAdViewContainer = activity.findViewById(R.id.native_ad_view_container);
                 }
@@ -313,7 +357,7 @@ public class NativeAd {
 
         public void setNativeAdMargin(int left, int top, int right, int bottom) {
             if (nativeAdViewContainer == null) {
-                Activity activity = activityRef.get();
+                Activity activity = getActivity();
                 if (activity != null) {
                     nativeAdViewContainer = activity.findViewById(R.id.native_ad_view_container);
                 }
@@ -330,7 +374,7 @@ public class NativeAd {
 
         public void setNativeAdBackgroundResource(int drawableBackground) {
             if (nativeAdViewContainer == null) {
-                Activity activity = activityRef.get();
+                Activity activity = getActivity();
                 if (activity != null) {
                     nativeAdViewContainer = activity.findViewById(R.id.native_ad_view_container);
                 }

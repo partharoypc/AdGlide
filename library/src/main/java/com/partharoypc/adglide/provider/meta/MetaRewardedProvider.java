@@ -15,11 +15,6 @@ public class MetaRewardedProvider implements RewardedProvider {
 
     @Override
     public void loadRewardedAd(Activity activity, String adUnitId, RewardedConfig config, RewardedListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isRequestAllowed(com.partharoypc.adglide.util.Constant.AD_NETWORK_META, adUnitId)) {
-            listener.onAdFailedToLoad("Meta is currently healing from recent failures.");
-            return;
-        }
-
         rewardedVideoAd = new RewardedVideoAd(activity, adUnitId);
         rewardedVideoAd.loadAd(rewardedVideoAd.buildLoadAdConfig()
                 .withAdListener(new RewardedVideoAdListener() {
@@ -36,7 +31,6 @@ public class MetaRewardedProvider implements RewardedProvider {
 
                     @Override
                     public void onError(Ad ad, AdError adError) {
-                        com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure(com.partharoypc.adglide.util.Constant.AD_NETWORK_META, adUnitId);
                         isAvailable = false;
                         AdGlideLog.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META,
                                 "Rewarded Error: [" + adError.getErrorCode() + "] " + adError.getErrorMessage());
@@ -49,7 +43,6 @@ public class MetaRewardedProvider implements RewardedProvider {
                     @Override
                     public void onAdLoaded(Ad ad) {
                         isAvailable = true;
-                        com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess(com.partharoypc.adglide.util.Constant.AD_NETWORK_META, adUnitId);
                         com.partharoypc.adglide.util.PerformanceLogger.log("Meta", "Rewarded loaded: " + adUnitId);
                         listener.onAdLoaded();
                     }

@@ -31,29 +31,11 @@ import com.partharoypc.adglide.util.WaterfallManager;
 
 public class InterstitialAd {
 
-    public static class Builder implements InterstitialProvider.InterstitialConfig {
-
-        private static final String TAG = "AdGlide";
-        private final com.partharoypc.adglide.util.AdLoader adLoader;
-        private final java.lang.ref.WeakReference<Activity> activityRef;
+    public static class Builder extends BaseAdBuilder<Builder> implements InterstitialProvider.InterstitialConfig {
         private InterstitialProvider currentProvider;
-        private String currentNetwork;
-        private boolean showOnLoad = false;
-        private AdGlideCallback callback;
-
-        public Activity getActivity() {
-            return activityRef != null ? activityRef.get() : null;
-        }
-
 
         public Builder(@NonNull android.content.Context context) {
-            if (context instanceof Activity) {
-                this.activityRef = new java.lang.ref.WeakReference<>((Activity) context);
-            } else {
-                this.activityRef = null;
-            }
-            this.adLoader = new com.partharoypc.adglide.util.AdLoader(context,
-                    com.partharoypc.adglide.util.AdFormat.INTERSTITIAL);
+            super(context, com.partharoypc.adglide.util.AdFormat.INTERSTITIAL);
         }
 
         @Override
@@ -68,71 +50,8 @@ public class InterstitialAd {
             return config != null && config.isTestMode();
         }
 
-        @NonNull
-        public Builder build() {
-            return this;
-        }
-
-        @NonNull
-        public Builder build(AdGlideCallback callback) {
-            return this;
-        }
-
-        @NonNull
-        public Builder load() {
-            loadInterstitialAd(null);
-            return this;
-        }
-
-        @NonNull
-        public Builder load(AdGlideCallback callback) {
-            loadInterstitialAd(callback);
-            return this;
-        }
-
-        /**
-         * Used internally by AdGlide to request an ad on the fly and show it
-         * immediately.
-         */
-        @NonNull
-        public Builder loadAndShow(Activity displayActivity, AdGlideCallback callback) {
-            this.showOnLoad = true;
-            this.callback = callback;
-            loadInterstitialAd(callback);
-            return this;
-        }
-
-        public void show() {
-            Activity activity = activityRef != null ? activityRef.get() : null;
-            if (activity != null) {
-                showInterstitialAd(activity, null);
-            } else {
-                AdGlideLog.e(TAG, "Cannot show Interstitial Ad: Activity reference is null.");
-            }
-        }
-
-        public void show(@NonNull Activity displayActivity) {
-            showInterstitialAd(displayActivity, null);
-        }
-
-        public void show(AdGlideCallback callback) {
-            Activity activity = activityRef != null ? activityRef.get() : null;
-            if (activity != null) {
-                showInterstitialAd(activity, callback);
-            } else {
-                AdGlideLog.e(TAG, "Cannot show Interstitial Ad: Activity reference is null.");
-                if (callback != null) callback.onAdDismissed();
-            }
-        }
-
-        public void show(@NonNull Activity displayActivity, AdGlideCallback callback) {
-            showInterstitialAd(displayActivity, callback);
-        }
-
-
-        // --- Core Internal Logic ---
-
-        private void loadInterstitialAd(AdGlideCallback callback) {
+        @Override
+        protected void doLoad(AdGlideCallback callback) {
             if (adLoader == null) return;
             adLoader.startLoading((networkToLoad, resultCallback) -> {
                 loadAdFromNetwork(networkToLoad, resultCallback, callback);
@@ -173,13 +92,12 @@ public class InterstitialAd {
                                     if (adLoader != null && adLoader.isTimedOut()) {
                                         AdGlideLog.d(TAG, "Interstitial loaded AFTER timeout. Caching as Late Fill.");
                                         AdPoolManager.cacheLateFill(AdFormat.INTERSTITIAL, networkToLoad, Builder.this);
-                                        return;
                                     }
                                     
                                     resultCallback.onSuccess();
                                     if (showOnLoad) {
                                         showOnLoad = false;
-                                        showInterstitialAd(activity, callback);
+                                        doShow(activity, callback);
                                     }
                                 }
 
@@ -238,23 +156,12 @@ public class InterstitialAd {
         }
 
         private static String getAdUnitIdForNetwork(String network) {
-            AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
-            if (config == null)
-                return "";
-            return switch (network) {
-                case ADMOB, META_BIDDING_ADMOB -> config.getAdMobInterstitialId();
-                case META -> config.getMetaInterstitialId();
-                case UNITY -> config.getUnityInterstitialId();
-                case APPLOVIN, APPLOVIN_MAX, META_BIDDING_APPLOVIN_MAX -> config.getAppLovinInterstitialId();
-                case IRONSOURCE, META_BIDDING_IRONSOURCE -> config.getIronSourceInterstitialId();
-                case STARTAPP -> !config.getStartAppId().isEmpty() ? config.getStartAppId() : "startapp";
-                case WORTISE -> config.getWortiseInterstitialId();
-                case HOUSE_AD -> "house_ad";
-                default -> "";
-            };
+            com.partharoypc.adglide.AdGlideConfig config = com.partharoypc.adglide.AdGlide.getConfig();
+            return config != null ? config.resolveAdUnitId(com.partharoypc.adglide.util.AdFormat.INTERSTITIAL, network) : "0";
         }
 
-        public void showInterstitialAd(Activity displayActivity, AdGlideCallback callback) {
+        @Override
+        protected void doShow(Activity displayActivity, AdGlideCallback callback) {
             try {
                 if (!com.partharoypc.adglide.AdGlide.isInterstitialEnabled()) {
                     AdGlideLog.d(TAG, "Interstitial Ad is disabled globally or locally. Calling dismissed listener.");
@@ -265,8 +172,7 @@ public class InterstitialAd {
                 }
 
                 if (currentProvider != null && currentProvider.isAdLoaded()) {
-                    Activity activity = activityRef.get();
-                    currentProvider.showInterstitial(displayActivity != null ? displayActivity : activity,
+                    currentProvider.showInterstitial(displayActivity,
                             new InterstitialProvider.InterstitialListener() {
                                 @Override
                                 public void onAdLoaded() {}

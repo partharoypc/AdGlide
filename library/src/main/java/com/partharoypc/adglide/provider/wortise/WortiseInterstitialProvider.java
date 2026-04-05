@@ -14,10 +14,6 @@ public class WortiseInterstitialProvider implements InterstitialProvider {
     @Override
     public void loadInterstitial(Activity activity, String adUnitId, InterstitialConfig config,
             InterstitialListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("wortise")) {
-            listener.onAdFailedToLoad("Wortise is currently healing from recent failures.");
-            return;
-        }
         // Removed redundant notifyLoadStarted call
 
         interstitialAd = new InterstitialAd(activity, adUnitId);
@@ -35,14 +31,12 @@ public class WortiseInterstitialProvider implements InterstitialProvider {
 
             @Override
             public void onInterstitialFailedToLoad(@NonNull InterstitialAd ad, @NonNull AdError error) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("wortise", adUnitId);
                 interstitialAd = null;
                 listener.onAdFailedToLoad(error.getMessage());
             }
 
             @Override
             public void onInterstitialLoaded(@NonNull InterstitialAd ad) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("wortise", adUnitId);
                 com.partharoypc.adglide.util.PerformanceLogger.log("Wortise", "Interstitial loaded: " + adUnitId);
                 listener.onAdLoaded();
             }

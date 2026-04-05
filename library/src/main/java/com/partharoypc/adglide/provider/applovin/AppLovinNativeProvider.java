@@ -18,16 +18,10 @@ public class AppLovinNativeProvider implements NativeProvider {
 
     @Override
     public void loadNativeAd(Activity activity, String adUnitId, NativeConfig config, NativeListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("applovin")) {
-            listener.onAdFailedToLoad("AppLovin is currently healing from recent failures.");
-            return;
-        }
-
         nativeAdLoader = new MaxNativeAdLoader(adUnitId);
         nativeAdLoader.setNativeAdListener(new MaxNativeAdListener() {
             @Override
             public void onNativeAdLoaded(MaxNativeAdView nativeAdView, MaxAd ad) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("applovin", adUnitId);
                 AdGlideLog.d(TAG, "Native Ad loaded");
                 if (maxNativeAd != null) {
                     nativeAdLoader.destroy(maxNativeAd);
@@ -40,12 +34,12 @@ public class AppLovinNativeProvider implements NativeProvider {
                     // Fallback to manual rendering if view is null
                     int layoutRes = getLayoutForStyle(config.getStyle());
                     com.applovin.mediation.nativeAds.MaxNativeAdViewBinder binder = new com.applovin.mediation.nativeAds.MaxNativeAdViewBinder.Builder(layoutRes)
-                            .setTitleTextViewId(com.partharoypc.adglide.R.id.title_text_view)
-                            .setBodyTextViewId(com.partharoypc.adglide.R.id.body_text_view)
-                            .setIconImageViewId(com.partharoypc.adglide.R.id.icon_image_view)
-                            .setMediaContentViewGroupId(com.partharoypc.adglide.R.id.media_view_container)
-                            .setOptionsContentViewGroupId(com.partharoypc.adglide.R.id.ad_options_view)
-                            .setCallToActionButtonId(com.partharoypc.adglide.R.id.cta_button)
+                            .setTitleTextViewId(com.partharoypc.adglide.R.id.adglide_native_headline)
+                            .setBodyTextViewId(com.partharoypc.adglide.R.id.adglide_native_body)
+                            .setIconImageViewId(com.partharoypc.adglide.R.id.adglide_native_icon)
+                            .setMediaContentViewGroupId(com.partharoypc.adglide.R.id.adglide_native_media)
+                            .setOptionsContentViewGroupId(com.partharoypc.adglide.R.id.adglide_ad_choices_container)
+                            .setCallToActionButtonId(com.partharoypc.adglide.R.id.adglide_native_cta)
                             .build();
                     MaxNativeAdView customView = new MaxNativeAdView(binder, activity);
                     nativeAdLoader.render(customView, ad);
@@ -56,7 +50,6 @@ public class AppLovinNativeProvider implements NativeProvider {
 
             @Override
             public void onNativeAdLoadFailed(String adUnitId, MaxError error) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("applovin", adUnitId);
                 AdGlideLog.e(TAG, "Native Ad failed to load: [" + error.getCode() + "] " + error.getMessage());
                 listener.onAdFailedToLoad(error.getMessage());
             }

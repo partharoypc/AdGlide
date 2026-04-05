@@ -17,17 +17,12 @@ public class UnityInterstitialProvider implements InterstitialProvider {
     @Override
     public void loadInterstitial(Activity activity, String adUnitId, InterstitialConfig config,
             InterstitialListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("unity")) {
-            listener.onAdFailedToLoad("Unity is currently healing from recent failures.");
-            return;
-        }
         // Removed redundant notifyLoadStarted call
 
         this.placementId = adUnitId;
         UnityAds.load(adUnitId, new IUnityAdsLoadListener() {
             @Override
             public void onUnityAdsAdLoaded(String placementId) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("unity", adUnitId);
                 AdGlideLog.d(TAG, "Interstitial Ad loaded: " + placementId);
                 isLoaded = true;
                 listener.onAdLoaded();
@@ -35,7 +30,6 @@ public class UnityInterstitialProvider implements InterstitialProvider {
 
             @Override
             public void onUnityAdsFailedToLoad(String placementId, UnityAds.UnityAdsLoadError error, String message) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("unity", adUnitId);
                 AdGlideLog.e(TAG, "Interstitial Ad failed to load: [" + error + "] " + message);
                 isLoaded = false;
                 listener.onAdFailedToLoad(message);

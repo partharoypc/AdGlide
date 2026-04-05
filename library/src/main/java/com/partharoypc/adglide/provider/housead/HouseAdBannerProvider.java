@@ -27,7 +27,6 @@ public class HouseAdBannerProvider implements BannerProvider {
         AdGlideConfig config = AdGlide.getConfig();
         if (config == null || !config.isHouseAdEnabled() || config.getHouseAdBannerImage() == null
                 || config.getHouseAdBannerImage().isEmpty()) {
-            com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("house", "HOUSE_BANNER");
             if (listener != null)
                 listener.onAdFailedToLoad("House Ad banner not configured or disabled");
             return;
@@ -70,7 +69,6 @@ public class HouseAdBannerProvider implements BannerProvider {
                         });
 
                         if (listener != null) {
-                            com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("house", "HOUSE_BANNER");
                             listener.onAdLoaded(bannerView);
                             listener.onAdShowed();
                         }
@@ -78,7 +76,6 @@ public class HouseAdBannerProvider implements BannerProvider {
 
                     @Override
                     public void onError(Exception e) {
-                        com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("house", "HOUSE_BANNER");
                         if (listener != null)
                             listener.onAdFailedToLoad(e != null ? e.getMessage() : "Unknown error downloading House Ad image");
                     }

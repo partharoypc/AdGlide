@@ -15,10 +15,6 @@ public class AppLovinRewardedProvider implements RewardedProvider {
 
     @Override
     public void loadRewardedAd(Activity activity, String adUnitId, RewardedConfig config, RewardedListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("applovin")) {
-            listener.onAdFailedToLoad("AppLovin is currently healing from recent failures.");
-            return;
-        }
         // Removed redundant notifyLoadStarted call
 
         rewardedAd = MaxRewardedAd.getInstance(adUnitId);
@@ -30,7 +26,6 @@ public class AppLovinRewardedProvider implements RewardedProvider {
 
             @Override
             public void onAdLoaded(MaxAd ad) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("applovin", adUnitId);
                 AdGlideLog.d(TAG, "Rewarded Ad loaded");
                 listener.onAdLoaded();
             }
@@ -52,7 +47,6 @@ public class AppLovinRewardedProvider implements RewardedProvider {
 
             @Override
             public void onAdLoadFailed(String adUnitId, MaxError error) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("applovin", adUnitId);
                 AdGlideLog.e(TAG, "Rewarded Ad failed to load: [" + error.getCode() + "] " + error.getMessage());
                 listener.onAdFailedToLoad(error.getMessage());
             }

@@ -20,17 +20,12 @@ public class WortiseAppOpenProvider implements AppOpenProvider, AppOpenAd.Listen
 
     @Override
     public void loadAppOpenAd(Activity activity, String adUnitId, AppOpenListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("wortise")) {
-            if (listener != null) listener.onAdFailedToLoad("Wortise is currently healing from recent failures.");
-            return;
-        }
         // Removed redundant notifyLoadStarted call
 
         this.activityRef = new WeakReference<>(activity);
         this.adUnitId = adUnitId;
 
         if (isAdAvailable()) {
-            com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("wortise", adUnitId);
             listener.onAdLoaded();
             return;
         }
@@ -82,7 +77,6 @@ public class WortiseAppOpenProvider implements AppOpenProvider, AppOpenAd.Listen
     public void onAppOpenLoaded(@NonNull AppOpenAd ad) {
         Activity activity = activityRef != null ? activityRef.get() : null;
         if (activity != null) {
-            com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("wortise", adUnitId);
         }
         loadTime = (new Date()).getTime();
         isLoadingAd = false;
@@ -94,7 +88,6 @@ public class WortiseAppOpenProvider implements AppOpenProvider, AppOpenAd.Listen
     public void onAppOpenFailedToLoad(@NonNull AppOpenAd ad, @NonNull AdError error) {
         Activity activity = activityRef != null ? activityRef.get() : null;
         if (activity != null) {
-            com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("wortise", adUnitId);
         }
         isLoadingAd = false;
         if (listener != null)

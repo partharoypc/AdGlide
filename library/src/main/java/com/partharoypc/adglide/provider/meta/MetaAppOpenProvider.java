@@ -19,10 +19,6 @@ public class MetaAppOpenProvider implements AppOpenProvider {
 
     @Override
     public void loadAppOpenAd(Activity activity, String adUnitId, AppOpenListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed(com.partharoypc.adglide.util.Constant.AD_NETWORK_META)) {
-            if (listener != null) listener.onAdFailedToLoad("Meta is currently healing from recent failures.");
-            return;
-        }
         // Removed redundant notifyLoadStarted call
 
         this.activeListener = listener;
@@ -48,7 +44,6 @@ public class MetaAppOpenProvider implements AppOpenProvider {
 
             @Override
             public void onError(Ad ad, AdError adError) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure(com.partharoypc.adglide.util.Constant.AD_NETWORK_META, adUnitId);
                 AdGlideLog.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META,
                         "Meta AppOpen failed: [" + adError.getErrorCode() + "] " + adError.getErrorMessage());
                 if (activeListener != null)
@@ -57,7 +52,6 @@ public class MetaAppOpenProvider implements AppOpenProvider {
 
             @Override
             public void onAdLoaded(Ad ad) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess(com.partharoypc.adglide.util.Constant.AD_NETWORK_META, adUnitId);
                 AdGlideLog.d(TAG, "Meta AppOpen loaded");
                 if (activeListener != null)
                     activeListener.onAdLoaded();

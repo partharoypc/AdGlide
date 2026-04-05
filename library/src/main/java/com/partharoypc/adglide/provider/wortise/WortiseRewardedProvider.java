@@ -13,24 +13,18 @@ public class WortiseRewardedProvider implements RewardedProvider {
 
     @Override
     public void loadRewardedAd(Activity activity, String adUnitId, RewardedConfig config, RewardedListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("wortise")) {
-            listener.onAdFailedToLoad("Wortise is currently healing from recent failures.");
-            return;
-        }
         // Removed redundant notifyLoadStarted call
 
         rewardedAd = new RewardedAd(activity, adUnitId);
         rewardedAd.setListener(new RewardedAd.Listener() {
             @Override
             public void onRewardedLoaded(@NonNull RewardedAd ad) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("wortise", adUnitId);
                 com.partharoypc.adglide.util.PerformanceLogger.log("Wortise", "Rewarded loaded: " + adUnitId);
                 listener.onAdLoaded();
             }
 
             @Override
             public void onRewardedFailedToLoad(@NonNull RewardedAd ad, @NonNull AdError error) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("wortise", adUnitId);
                 com.partharoypc.adglide.util.PerformanceLogger.error("Wortise", "Rewarded failed: " + error.getMessage());
                 listener.onAdFailedToLoad(error.toString());
             }

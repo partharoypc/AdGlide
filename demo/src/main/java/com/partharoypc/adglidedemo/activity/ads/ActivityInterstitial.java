@@ -53,24 +53,26 @@ public class ActivityInterstitial extends AppCompatActivity {
     }
 
     private void showInterstitialAd() {
-        appendLog("💎 Triggering Interstitial Ad Show...");
-        AdGlide.showInterstitial(this, new AdGlideCallback() {
-            @Override
-            public void onAdShowed() {
-                appendLog("✅ Interstitial Ad Showed Successfully");
-            }
+        appendLog("💎 Triggering Interstitial Ad (Builder API)...");
+        
+        // Professional one-liner: Handles Cooldown, Interval, Load, and Show automatically.
+        new com.partharoypc.adglide.format.InterstitialAd.Builder(this)
+                .loadAndShow(this, new AdGlideCallback() {
+                    @Override
+                    public void onAdShowed() {
+                        appendLog("✅ Interstitial Showed (Zero-Latency if pooled)");
+                    }
 
-            @Override
-            public void onAdFailedToLoad(@Nullable String error) {
-                appendLog("🛑 Ad Failed: " + (error != null ? error : "Unknown Error"));
-            }
+                    @Override
+                    public void onAdFailedToLoad(@Nullable String error) {
+                        appendLog("🛑 Ad Failed: " + (error != null ? error : "No Fill"));
+                    }
 
-            @Override
-            public void onAdDismissed() {
-                appendLog("👋 Interstitial Ad Dismissed");
-                Log.d(TAG, "onAdDismissed");
-            }
-        });
+                    @Override
+                    public void onAdDismissed() {
+                        appendLog("👋 Ad Dismissed — Next one is auto-preloading...");
+                    }
+                });
     }
 
     private void appendLog(@NonNull String text) {

@@ -16,18 +16,12 @@ public class AdMobRewardedProvider implements RewardedProvider {
 
     @Override
     public void loadRewardedAd(Activity activity, String adUnitId, RewardedConfig config, RewardedListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isRequestAllowed("admob", adUnitId)) {
-            listener.onAdFailedToLoad("AdMob rate limit hit");
-            return;
-        }
-
         com.google.android.gms.ads.AdRequest adRequest = new com.google.android.gms.ads.AdRequest.Builder().build();
 
         if (config.isInterstitial()) {
             RewardedInterstitialAd.load(activity, adUnitId, adRequest, new RewardedInterstitialAdLoadCallback() {
                 @Override
                 public void onAdLoaded(@NonNull RewardedInterstitialAd ad) {
-                    com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("admob", adUnitId);
                     rewardedInterstitialAd = ad;
                     setupInterstitialCallback(listener);
                     listener.onAdLoaded();
@@ -37,7 +31,6 @@ public class AdMobRewardedProvider implements RewardedProvider {
                 public void onAdFailedToLoad(@NonNull LoadAdError adError) {
                     com.partharoypc.adglide.util.PerformanceLogger.error("AdMob", "Rewarded Interstitial failed: " + adError.getMessage());
                     if (adError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
-                        com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("admob", adUnitId);
                     }
                     listener.onAdFailedToLoad(adError.getMessage());
                 }
@@ -46,7 +39,6 @@ public class AdMobRewardedProvider implements RewardedProvider {
             RewardedAd.load(activity, adUnitId, adRequest, new RewardedAdLoadCallback() {
                 @Override
                 public void onAdLoaded(@NonNull RewardedAd ad) {
-                    com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("admob", adUnitId);
                     rewardedAd = ad;
                     setupRewardedCallback(listener);
                     listener.onAdLoaded();
@@ -56,7 +48,6 @@ public class AdMobRewardedProvider implements RewardedProvider {
                 public void onAdFailedToLoad(@NonNull LoadAdError adError) {
                     com.partharoypc.adglide.util.PerformanceLogger.error("AdMob", "Rewarded failed: " + adError.getMessage());
                     if (adError.getCode() == com.google.android.gms.ads.AdRequest.ERROR_CODE_NO_FILL) {
-                        com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("admob", adUnitId);
                     }
                     listener.onAdFailedToLoad(adError.getMessage());
                 }

@@ -14,24 +14,18 @@ public class IronSourceInterstitialProvider implements InterstitialProvider {
     @Override
     public void loadInterstitial(Activity activity, String adUnitId, InterstitialConfig config,
             InterstitialListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("ironsource")) {
-            listener.onAdFailedToLoad("IronSource is currently healing from recent failures.");
-            return;
-        }
         // Removed redundant notifyLoadStarted call
 
         interstitialAd = new LevelPlayInterstitialAd(adUnitId);
         interstitialAd.setListener(new LevelPlayInterstitialAdListener() {
             @Override
             public void onAdLoaded(@NonNull LevelPlayAdInfo adInfo) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("ironsource", adUnitId);
                 com.partharoypc.adglide.util.PerformanceLogger.log("IronSource", "Interstitial loaded: " + adUnitId);
                 listener.onAdLoaded();
             }
 
             @Override
             public void onAdLoadFailed(@NonNull LevelPlayAdError error) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("ironsource", adUnitId);
                 com.partharoypc.adglide.util.PerformanceLogger.error("IronSource", "Interstitial failed: " + error.getErrorMessage());
                 listener.onAdFailedToLoad(error.getErrorMessage());
             }

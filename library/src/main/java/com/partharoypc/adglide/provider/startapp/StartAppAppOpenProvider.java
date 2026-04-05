@@ -17,10 +17,6 @@ public class StartAppAppOpenProvider implements AppOpenProvider {
 
     @Override
     public void loadAppOpenAd(Activity activity, String adUnitId, AppOpenListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("startapp")) {
-            if (listener != null) listener.onAdFailedToLoad("StartApp is currently healing from recent failures.");
-            return;
-        }
         // Removed redundant notifyLoadStarted call
 
         this.activeListener = listener;
@@ -29,7 +25,6 @@ public class StartAppAppOpenProvider implements AppOpenProvider {
         startAppAd.loadAd(StartAppAd.AdMode.FULLPAGE, new AdEventListener() {
             @Override
             public void onReceiveAd(Ad ad) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("startapp", "APP_OPEN");
                 isReady = true;
                 AdGlideLog.d(TAG, "StartApp AppOpen loaded");
                 if (activeListener != null) activeListener.onAdLoaded();
@@ -37,7 +32,6 @@ public class StartAppAppOpenProvider implements AppOpenProvider {
 
             @Override
             public void onFailedToReceiveAd(Ad ad) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("startapp", "APP_OPEN");
                 isReady = false;
                 AdGlideLog.e(TAG, "StartApp AppOpen failed to load: " + ad.getErrorMessage());
                 if (activeListener != null) activeListener.onAdFailedToLoad(ad.getErrorMessage());

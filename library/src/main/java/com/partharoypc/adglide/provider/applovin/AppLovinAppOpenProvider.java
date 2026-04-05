@@ -30,10 +30,6 @@ public class AppLovinAppOpenProvider implements AppOpenProvider, MaxAdListener {
         if (isLoadingAd) {
             return;
         }
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed("applovin")) {
-            listener.onAdFailedToLoad("AppLovin is currently healing from recent failures.");
-            return;
-        }
         
         this.activityRef = new java.lang.ref.WeakReference<>(activity);
         this.currentAdUnitId = adUnitId;
@@ -82,7 +78,6 @@ public class AppLovinAppOpenProvider implements AppOpenProvider, MaxAdListener {
     @Override
     public void onAdLoaded(MaxAd ad) {
         Activity activity = activityRef != null ? activityRef.get() : null;
-        com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("applovin", currentAdUnitId);
         loadTime = (new Date()).getTime();
         isLoadingAd = false;
         if (listener != null)
@@ -92,7 +87,6 @@ public class AppLovinAppOpenProvider implements AppOpenProvider, MaxAdListener {
     @Override
     public void onAdLoadFailed(String adUnitId, MaxError error) {
         Activity activity = activityRef != null ? activityRef.get() : null;
-        com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("applovin", adUnitId);
         AdGlideLog.e(TAG, "App Open Ad failed to load: [" + error.getCode() + "] " + error.getMessage());
         isLoadingAd = false;
         if (listener != null)

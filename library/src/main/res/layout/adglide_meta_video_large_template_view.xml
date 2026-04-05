@@ -74,7 +74,7 @@
                         app:cardElevation="0dp">
 
                         <com.facebook.ads.MediaView
-                            android:id="@+id/native_ad_media"
+                            android:id="@+id/adglide_native_media"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center" />
@@ -98,7 +98,7 @@
                     app:cardElevation="0dp">
 
                     <com.facebook.ads.MediaView
-                        android:id="@+id/native_ad_icon"
+                        android:id="@+id/adglide_native_icon"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent" />
 
@@ -111,14 +111,14 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/native_ad_title"
+                        android:id="@+id/adglide_native_headline"
                         style="@style/AdGlide.Headline"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="" />
 
                     <TextView
-                        android:id="@+id/native_ad_body"
+                        android:id="@+id/adglide_native_body"
                         style="@style/AdGlide.Body"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -139,7 +139,7 @@
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/native_ad_call_to_action"
+                android:id="@+id/adglide_native_cta"
                 style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/adglide_video_cta_button_height"

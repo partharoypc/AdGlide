@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/start_app_unit"
+    android:id="@+id/adglide_native_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clipChildren="false"
@@ -45,7 +45,7 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/ad_options_view"
+                    android:id="@+id/adglide_ad_choices_container"
                     android:layout_width="@dimen/adglide_ad_options_size"
                     android:layout_height="@dimen/adglide_ad_options_size"
                     android:layout_alignParentEnd="true"
@@ -72,7 +72,7 @@
                     app:cardElevation="0dp">
 
                     <ImageView
-                        android:id="@+id/start_app_native_icon"
+                        android:id="@+id/adglide_native_icon"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:contentDescription="@string/adglide_img_content_description"
@@ -87,7 +87,7 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/start_app_native_title"
+                        android:id="@+id/adglide_native_headline"
                         style="@style/AdGlide.Headline"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -97,7 +97,7 @@
                         android:text="" />
 
                     <TextView
-                        android:id="@+id/start_app_native_description"
+                        android:id="@+id/adglide_native_body"
                         style="@style/AdGlide.Body"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -106,7 +106,7 @@
                         android:text="" />
 
                     <RatingBar
-                        android:id="@+id/rating_bar"
+                        android:id="@+id/adglide_native_stars"
                         style="?android:attr/ratingBarStyleSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -133,7 +133,7 @@
                     app:layout_constraintTop_toTopOf="parent">
 
                     <ImageView
-                        android:id="@+id/start_app_native_image"
+                        android:id="@+id/adglide_native_media"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:contentDescription="@string/adglide_img_content_description"
@@ -144,7 +144,7 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/start_app_native_button"
+                android:id="@+id/adglide_native_cta"
                 style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/adglide_video_cta_button_height"

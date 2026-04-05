@@ -23,10 +23,6 @@ public class MetaNativeProvider implements NativeProvider {
 
     @Override
     public void loadNativeAd(Activity activity, String adUnitId, NativeConfig config, NativeListener listener) {
-        if (!com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).isNetworkHealed(com.partharoypc.adglide.util.Constant.AD_NETWORK_META)) {
-            listener.onAdFailedToLoad("Meta is currently healing from recent failures.");
-            return;
-        }
         // Removed redundant notifyLoadStarted call
 
         nativeAd = new NativeAd(activity, adUnitId);
@@ -37,7 +33,6 @@ public class MetaNativeProvider implements NativeProvider {
 
             @Override
             public void onError(Ad ad, AdError adError) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure(com.partharoypc.adglide.util.Constant.AD_NETWORK_META, adUnitId);
                 AdGlideLog.e(com.partharoypc.adglide.util.Constant.AD_NETWORK_META,
                         "Native Error: [" + adError.getErrorCode() + "] " + adError.getErrorMessage());
                 listener.onAdFailedToLoad("[" + adError.getErrorCode() + "] " + adError.getErrorMessage());
@@ -48,7 +43,6 @@ public class MetaNativeProvider implements NativeProvider {
                 if (nativeAd != ad)
                     return;
 
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess(com.partharoypc.adglide.util.Constant.AD_NETWORK_META, adUnitId);
                 View adView = inflateAndPopulateAdView(activity, (NativeAd) ad, config);
                 listener.onAdLoaded(adView);
             }
@@ -75,19 +69,19 @@ public class MetaNativeProvider implements NativeProvider {
         nativeAdLayout.addView(nativeAdView);
 
         // AdChoices
-        LinearLayout adChoicesContainer = nativeAdView.findViewById(R.id.ad_choices_container);
+        LinearLayout adChoicesContainer = nativeAdView.findViewById(R.id.adglide_ad_choices_container);
         if (adChoicesContainer != null) {
             AdOptionsView adOptionsView = new AdOptionsView(activity, ad, nativeAdLayout);
             adChoicesContainer.removeAllViews();
             adChoicesContainer.addView(adOptionsView, 0);
         }
 
-        TextView nativeAdTitle = nativeAdView.findViewById(R.id.native_ad_title);
-        com.facebook.ads.MediaView nativeAdMedia = nativeAdView.findViewById(R.id.native_ad_media);
-        com.facebook.ads.MediaView nativeAdIcon = nativeAdView.findViewById(R.id.native_ad_icon);
+        TextView nativeAdTitle = nativeAdView.findViewById(R.id.adglide_native_headline);
+        com.facebook.ads.MediaView nativeAdMedia = nativeAdView.findViewById(R.id.adglide_native_media);
+        com.facebook.ads.MediaView nativeAdIcon = nativeAdView.findViewById(R.id.adglide_native_icon);
         TextView nativeAdSocialContext = nativeAdView.findViewById(R.id.native_ad_social_context);
-        TextView nativeAdBody = nativeAdView.findViewById(R.id.native_ad_body);
-        Button nativeAdCallToAction = nativeAdView.findViewById(R.id.native_ad_call_to_action);
+        TextView nativeAdBody = nativeAdView.findViewById(R.id.adglide_native_body);
+        Button nativeAdCallToAction = nativeAdView.findViewById(R.id.adglide_native_cta);
 
         if (nativeAdTitle != null)
             nativeAdTitle.setText(ad.getAdvertiserName());

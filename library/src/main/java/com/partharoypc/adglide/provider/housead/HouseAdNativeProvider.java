@@ -28,7 +28,6 @@ public class HouseAdNativeProvider implements NativeProvider {
         // Removed redundant notifyLoadStarted call
         AdGlideConfig adGlideConfig = AdGlide.getConfig();
         if (adGlideConfig == null || !adGlideConfig.isHouseAdEnabled()) {
-            com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("house", "HOUSE_NATIVE");
             listener.onAdFailedToLoad("House Ad disabled or not configured");
             return;
         }
@@ -38,7 +37,6 @@ public class HouseAdNativeProvider implements NativeProvider {
         String iconUrl = adGlideConfig.getHouseAdNativeIcon();
 
         if (mainImageUrl == null || mainImageUrl.isEmpty()) {
-            com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("house", "HOUSE_NATIVE");
             listener.onAdFailedToLoad("House Ad native image is missing");
             return;
         }
@@ -68,7 +66,6 @@ public class HouseAdNativeProvider implements NativeProvider {
 
             @Override
             public void onError(Exception e) {
-                com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordFailure("house", "HOUSE_NATIVE");
                 listener.onAdFailedToLoad("Failed to load main image: " + e.getMessage());
             }
         });
@@ -82,11 +79,11 @@ public class HouseAdNativeProvider implements NativeProvider {
         adView = inflater.inflate(layoutRes, null);
         
         // Populate standard views
-        TextView titleView = adView.findViewById(R.id.primary);
-        TextView bodyView = adView.findViewById(R.id.body);
-        Button ctaButton = adView.findViewById(R.id.cta);
-        ImageView iconView = adView.findViewById(R.id.icon);
-        ViewGroup mediaContainer = adView.findViewById(R.id.media_view);
+        TextView titleView = adView.findViewById(R.id.adglide_native_headline);
+        TextView bodyView = adView.findViewById(R.id.adglide_native_body);
+        Button ctaButton = adView.findViewById(R.id.adglide_native_cta);
+        ImageView iconView = adView.findViewById(R.id.adglide_native_icon);
+        ViewGroup mediaContainer = adView.findViewById(R.id.adglide_native_media);
 
         if (titleView != null) titleView.setText(adGlideConfig.getHouseAdNativeTitle());
         if (bodyView != null) bodyView.setText(adGlideConfig.getHouseAdNativeDescription());
@@ -111,7 +108,6 @@ public class HouseAdNativeProvider implements NativeProvider {
 
         adView.setOnClickListener(v -> handleAdClick(activity, adGlideConfig.getHouseAdNativeClickUrl(), listener));
 
-        com.partharoypc.adglide.util.NetworkHealer.getInstance(activity).recordSuccess("house", "HOUSE_NATIVE");
         listener.onAdLoaded(adView);
         listener.onAdShowed();
     }
