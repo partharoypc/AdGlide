@@ -11,16 +11,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.partharoypc.adglide.format.AdNetwork;
-import com.partharoypc.adglide.format.AppOpenAd;
-import com.partharoypc.adglide.format.InterstitialAd;
-import com.partharoypc.adglide.format.RewardedAd;
-import com.partharoypc.adglide.format.BannerAd;
-import com.partharoypc.adglide.format.NativeAd;
 import com.partharoypc.adglide.util.AdFormat;
 import com.partharoypc.adglide.util.AdGlideCallback;
 import com.partharoypc.adglide.util.AdGlideLog;
 import com.partharoypc.adglide.util.ConsentManager;
 import com.partharoypc.adglide.util.PerformanceLogger;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
@@ -36,19 +35,19 @@ public class AdGlide {
     // Cached Builders
     private static java.lang.ref.WeakReference<BannerAd.Builder> cachedBannerBuilder;
 
-    private static int interstitialClickCounter = 0;
-    private static int rewardedClickCounter = 0;
-    private static int rewardedInterstitialClickCounter = 0;
+    private static final AtomicInteger interstitialClickCounter = new AtomicInteger(0);
+    private static final AtomicInteger rewardedClickCounter = new AtomicInteger(0);
+    private static final AtomicInteger rewardedInterstitialClickCounter = new AtomicInteger(0);
 
     // Time-Gap Protection
-    private static long lastFullAdShowTime = 0;
+    private static final AtomicLong lastFullAdShowTime = new AtomicLong(0);
     private static final long GLOBAL_TIME_GAP_MS = 60000; // 60 seconds
 
-    private static boolean isInitialized = false;
-    private static boolean isAdShowing = false;
+    private static final AtomicBoolean isInitialized = new AtomicBoolean(false);
+    private static final AtomicBoolean isAdShowing = new AtomicBoolean(false);
     private static Application.ActivityLifecycleCallbacks lifecycleCallbacks;
-    private static boolean isAppOpenRegistered = false;
-    private static java.lang.ref.WeakReference<Activity> currentActivityRef = new java.lang.ref.WeakReference<>(null);
+    private static final AtomicBoolean isAppOpenRegistered = new AtomicBoolean(false);
+    private static final AtomicReference<java.lang.ref.WeakReference<Activity>> currentActivityRef = new AtomicReference<>(new java.lang.ref.WeakReference<>(null));
 
     /**
      * Retrieves the global AdGlide configuration.
@@ -67,7 +66,7 @@ public class AdGlide {
      * @param glideConfig The global configuration for AdGlide. Must not be null.
      */
     public static void initialize(@NonNull Application application, @NonNull AdGlideConfig glideConfig) {
-        if (isInitialized) {
+        if (isInitialized.getAndSet(true)) {
             AdGlideLog.w(TAG, "AdGlide is already initialized. Updating config instead.");
             updateConfig(glideConfig);
             return;
@@ -89,7 +88,6 @@ public class AdGlide {
 
         config = glideConfig;
         currentApplication = application;
-        isInitialized = true;
 
         // Initialize SDKs based on the global configuration
         new AdNetwork.Initialize(application)
@@ -97,10 +95,9 @@ public class AdGlide {
                 .build();
 
         if (config.getAdStatus()) {
-            if (config.isAppOpenEnabled() && !isAppOpenRegistered) {
+            if (config.isAppOpenEnabled() && !isAppOpenRegistered.getAndSet(true)) {
                 registerActivityLifecycle(application);
                 registerProcessLifecycle();
-                isAppOpenRegistered = true;
             }
         }
         PerformanceLogger.log("Core", "AdGlide initialized (v" + (config.isDebug() ? "DEBUG" : "RELEASE") + ")");
@@ -123,15 +120,14 @@ public class AdGlide {
      * Completely shuts down the SDK and unregisters all callbacks.
      */
     public static void destroy() {
-        if (!isInitialized || currentApplication == null) return;
+        if (!isInitialized.getAndSet(false) || currentApplication == null) return;
         
         if (lifecycleCallbacks != null) {
             currentApplication.unregisterActivityLifecycleCallbacks(lifecycleCallbacks);
             lifecycleCallbacks = null;
         }
         
-        isAppOpenRegistered = false;
-        isInitialized = false;
+        isAppOpenRegistered.set(false);
         config = null;
         currentApplication = null;
         consentManager = null;
@@ -440,14 +436,17 @@ public class AdGlide {
             return;
         }
 
-        if (++interstitialClickCounter < config.getInterstitialInterval()) {
+        if (interstitialClickCounter.incrementAndGet() < config.getInterstitialInterval()) {
             PerformanceLogger.log("INTERSTITIAL", "Ad skipped — Interval not met ("
-                    + (interstitialClickCounter) + "/" + config.getInterstitialInterval() + ")");
+                    + (interstitialClickCounter.get()) + "/" + config.getInterstitialInterval() + ")");
             if (callback != null) callback.onAdDismissed();
             return;
         }
 
         PerformanceLogger.log("INTERSTITIAL", "Triggering Interstitial Ad");
+
+        // Strict "Only Once" show policy
+        isAdShowing.set(true);
 
         // The unified Builder now manages both 'Loaded' (pooled) and 'LoadAndShow' logic
         InternalCallback internalCallback = new InternalCallback(com.partharoypc.adglide.util.AdFormat.INTERSTITIAL, activity, callback);
@@ -461,12 +460,12 @@ public class AdGlide {
     }
 
     private static boolean isPreCheckOk(@NonNull String tag, @NonNull String format, @Nullable AdGlideCallback callback) {
-        if (!isInitialized || config == null) {
+        if (!isInitialized.get() || config == null) {
             AdGlideLog.e(tag, "AdGlide is not initialized. Call AdGlide.initialize() first before requesting: " + format);
             if (callback != null) callback.onAdDismissed();
             return false;
         }
-        if (isAdShowing()) {
+        if (isAdShowing.get()) {
             AdGlideLog.d(tag, "A full-screen ad is already showing. Ignoring request for [" + format + "] to ensure 'only once' policy.");
             if (callback != null) callback.onAdDismissed();
             return false;
@@ -474,8 +473,8 @@ public class AdGlide {
 
         // TIME-GAP PROTECTION (UX Improvement)
         long currentTime = System.currentTimeMillis();
-        if (currentTime - lastFullAdShowTime < GLOBAL_TIME_GAP_MS) {
-            long remaining = (GLOBAL_TIME_GAP_MS - (currentTime - lastFullAdShowTime)) / 1000;
+        if (currentTime - lastFullAdShowTime.get() < GLOBAL_TIME_GAP_MS) {
+            long remaining = (GLOBAL_TIME_GAP_MS - (currentTime - lastFullAdShowTime.get())) / 1000;
             AdGlideLog.d(tag, "Time-Gap protection active. Skipping [" + format + "] (Backoff: " + remaining + "s)");
             if (callback != null) callback.onAdDismissed();
             return false;
@@ -497,12 +496,14 @@ public class AdGlide {
 
         @Override
         public void onAdShowed() {
+            lastFullAdShowTime.set(System.currentTimeMillis());
             autoPreload();
             if (externalCallback != null) externalCallback.onAdShowed();
         }
 
         @Override
         public void onAdDismissed() {
+            isAdShowing.set(false);
             resetCounter();
             autoPreload();
             if (externalCallback != null) externalCallback.onAdDismissed();
@@ -515,6 +516,7 @@ public class AdGlide {
 
         @Override
         public void onAdFailedToLoad(String error) {
+            isAdShowing.set(false); // Reset if show attempt fails after loading
             if (externalCallback != null) externalCallback.onAdFailedToLoad(error);
         }
 
@@ -525,9 +527,9 @@ public class AdGlide {
 
         private void resetCounter() {
             switch (format) {
-                case INTERSTITIAL: interstitialClickCounter = 0; break;
-                case REWARDED: rewardedClickCounter = 0; break;
-                case REWARDED_INTERSTITIAL: rewardedInterstitialClickCounter = 0; break;
+                case INTERSTITIAL: interstitialClickCounter.set(0); break;
+                case REWARDED: rewardedClickCounter.set(0); break;
+                case REWARDED_INTERSTITIAL: rewardedInterstitialClickCounter.set(0); break;
             }
         }
     }
@@ -547,11 +549,14 @@ public class AdGlide {
             return;
         }
 
-        if (++rewardedClickCounter < config.getRewardedInterval()) {
-            AdGlideLog.d(TAG, "Rewarded Ad interval not met (" + rewardedClickCounter + "/" + config.getRewardedInterval() + ")");
+        if (rewardedClickCounter.incrementAndGet() < config.getRewardedInterval()) {
+            AdGlideLog.d(TAG, "Rewarded Ad interval not met (" + rewardedClickCounter.get() + "/" + config.getRewardedInterval() + ")");
             if (callback != null) callback.onAdDismissed();
             return;
         }
+
+        // Strict "Only Once" show policy
+        isAdShowing.set(true);
 
         InternalCallback internalCallback = new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED, activity, callback);
 
@@ -579,11 +584,14 @@ public class AdGlide {
             return;
         }
 
-        if (++rewardedInterstitialClickCounter < config.getRewardedInterval()) {
-            AdGlideLog.d(TAG, "Rewarded Interstitial Ad interval not met (" + rewardedInterstitialClickCounter + "/" + config.getRewardedInterval() + ")");
+        if (rewardedInterstitialClickCounter.incrementAndGet() < config.getRewardedInterval()) {
+            AdGlideLog.d(TAG, "Rewarded Interstitial Ad interval not met (" + rewardedInterstitialClickCounter.get() + "/" + config.getRewardedInterval() + ")");
             if (callback != null) callback.onAdDismissed();
             return;
         }
+
+        // Strict "Only Once" show policy
+        isAdShowing.set(true);
 
         InternalCallback internalCallback = new InternalCallback(com.partharoypc.adglide.util.AdFormat.REWARDED_INTERSTITIAL, activity, callback);
 
