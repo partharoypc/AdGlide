@@ -36,9 +36,9 @@ public class AdGlide {
     // Cached Builders
     private static java.lang.ref.WeakReference<BannerAd.Builder> cachedBannerBuilder;
 
-    private static int interstitialClickCounter = 1;
-    private static int rewardedClickCounter = 1;
-    private static int rewardedInterstitialClickCounter = 1;
+    private static int interstitialClickCounter = 0;
+    private static int rewardedClickCounter = 0;
+    private static int rewardedInterstitialClickCounter = 0;
 
     // Time-Gap Protection
     private static long lastFullAdShowTime = 0;
