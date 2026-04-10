@@ -90,7 +90,7 @@ Open your **app-level `build.gradle`** and add the AdGlide core plus only the ne
 ```gradle
 dependencies {
     // 🚀 AdGlide Core (Required)
-    implementation 'com.github.partharoypc:adglide:2.1.0'
+    implementation 'com.github.partharoypc:adglide:v2.1.0'
 
     // ─── Choose Your Networks ───────────────────────────────────────
     implementation 'com.google.android.gms:play-services-ads:25.0.0'       // AdMob ✅
